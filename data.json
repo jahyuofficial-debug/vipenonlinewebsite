@@ -1,0 +1,1451 @@
+{
+  "banner": {
+    "topics": [
+      "UUNN→",
+      "VIBE",
+      "PULSE",
+      "FLUX"
+    ],
+    "notes": [
+      "DeepDesign",
+      "Creative Studio",
+      "Digital Art",
+      "New Media"
+    ],
+    "bgType": [
+      "video",
+      "image",
+      "video",
+      "video"
+    ],
+    "bgImage": [
+      "",
+      "banner/disctrack.png",
+      "",
+      ""
+    ],
+    "bgVideoSrc": [
+      "banner/bg_opt.mp4",
+      "banner/bg.mp4",
+      "banner/bg.mp4",
+      "banner/bg.mp4"
+    ],
+    "current": 0,
+    "textSlideIndex": 0
+  },
+  "fresh": {
+    "heroItems": [
+      {
+        "id": 0,
+        "bgImage": "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=1920&q=80",
+        "mainTitle": "SGA",
+        "subTitle": "荣获26年常规赛MVP",
+        "cardTag": "AI TECH",
+        "cardTitle": "苹果将放弃GPT植入siri，正与Gemini或Claude谈合作",
+        "cardDesc": "苹果公司正在与谷歌和Anthropic进行谈判，计划将Gemini或Claude AI模型整合到Siri中。",
+        "newsItems": [
+          {
+            "label": "本周看什么",
+            "text": "最近值得一看的8部作品",
+            "date": "05/19"
+          },
+          {
+            "label": "本周看什么",
+            "text": "最近值得一看的8部作品",
+            "date": "05/19"
+          },
+          {
+            "label": "本周看什么",
+            "text": "最近值得一看的8部作品",
+            "date": "05/19"
+          }
+        ]
+      },
+      {
+        "id": 1,
+        "bgImage": "D:\\设计文档\\Web素材\\轮播\\首页轮播Disctrack.png",
+        "mainTitle": "Disctrack",
+        "subTitle": "全新音乐体验",
+        "cardTag": "MUSIC",
+        "cardTitle": "Disctrack：重新定义数字音乐收藏",
+        "cardDesc": "探索全新的音乐发现与收藏方式，让每一张数字唱片都有独特的视觉与听觉体验。",
+        "newsItems": [
+          {
+            "label": "音乐",
+            "text": "本周不容错过的5张新专辑",
+            "date": "05/26"
+          },
+          {
+            "label": "趋势",
+            "text": "数字音乐收藏的复古回潮",
+            "date": "05/25"
+          },
+          {
+            "label": "推荐",
+            "text": "独立音乐人必听的10首单曲",
+            "date": "05/24"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "bgImage": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1920&q=80",
+        "mainTitle": "AI",
+        "subTitle": "创意工具的模式转移",
+        "cardTag": "TRENDING",
+        "cardTitle": "Generative Design: 从辅助到共创",
+        "cardDesc": "生成式AI正在从效率工具进化为设计思维过程中的创造性合作者。",
+        "newsItems": [
+          {
+            "label": "Design",
+            "text": "顶级工作室如何将AI融入创意流程",
+            "date": "05/18"
+          },
+          {
+            "label": "Tools",
+            "text": "新一代AI辅助设计平台的崛起",
+            "date": "05/17"
+          },
+          {
+            "label": "Ethics",
+            "text": "在AI时代重新思考创作所有权",
+            "date": "05/16"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "bgImage": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1920&q=80",
+        "mainTitle": "SPACE",
+        "subTitle": "留白是最高级的表达",
+        "cardTag": "INSIGHT",
+        "cardTitle": "Whitespace: 视觉呼吸感的科学",
+        "cardDesc": "为什么最顶级的设计作品都在刻意减少信息密度——关于留白美学的深度探讨。",
+        "newsItems": [
+          {
+            "label": "Layout",
+            "text": "非对称排版如何建立独特的视觉节奏",
+            "date": "05/15"
+          },
+          {
+            "label": "Psychology",
+            "text": "低信息密度界面与用户认知负荷的关系",
+            "date": "05/14"
+          },
+          {
+            "label": "Practice",
+            "text": "从杂志封面到数字产品，留白设计的实战法则",
+            "date": "05/13"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "bgImage": "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=1920&q=80",
+        "mainTitle": "DARK",
+        "subTitle": "深色现代主义的兴起",
+        "cardTag": "SPOTLIGHT",
+        "cardTitle": "Dark Modernism: 数字界面的新审美标准",
+        "cardDesc": "从Apple到Tesla，深色现代主义如何成为高端数字产品的默认设计语言。",
+        "newsItems": [
+          {
+            "label": "Aesthetic",
+            "text": "深色UI中的光影关系与视觉层级构建",
+            "date": "05/12"
+          },
+          {
+            "label": "Brand",
+            "text": "为什么奢侈品牌和科技公司都在转向深色设计",
+            "date": "05/11"
+          },
+          {
+            "label": "Future",
+            "text": "深色现代主义的下一阶段：动态光影与自适应对比",
+            "date": "05/10"
+          }
+        ]
+      }
+    ],
+    "categories": [
+      {
+        "key": "all",
+        "label": "All"
+      },
+      {
+        "key": "ai",
+        "label": "AI"
+      },
+      {
+        "key": "hot",
+        "label": "Hot"
+      },
+      {
+        "key": "music",
+        "label": "Music"
+      },
+      {
+        "key": "culture",
+        "label": "Culture"
+      },
+      {
+        "key": "sports",
+        "label": "Sports"
+      }
+    ],
+    "items": [
+      {
+        "id": 0,
+        "cat": "ai",
+        "headline": "从辅助到共创：生成式 AI 如何重塑设计师的角色边界",
+        "summary": "生成式 AI 已从效率工具进化为设计思维中的创造性合作者——顶级工作室如何将 AI 融入创意流程。",
+        "author": "Elena Voss",
+        "authorInitial": "E",
+        "authorBg": "#b2b9ff",
+        "date": "May 15, 2025",
+        "readTime": "6 min",
+        "body": "<p>创意产业正处于一个关键转折点。生成式 AI 已经超越了新奇事物的阶段，进入了全球工作室的核心工作流程。从实验性的图像生成开始，如今已经演变成了一套全面的工具，可以增强设计过程的每个阶段。</p><p>在 Vipen，我们一直在将 AI 辅助概念生成整合到早期构思阶段。结果具有变革性——不是取代人类创造力，而是加速对可能性的探索。如果说设计师以前一天能画十个草稿，那么 AI 辅助的工作流程现在允许在同样的时间内进行数百次迭代。</p><p>然而，真正的突破不在于数量，而在于 AI 能够提供的意想不到的方向。通过在精选的建筑形式、字体排印和抽象构图的训练数据集上训练模型，我们发现了一些可能需要多年才能有机发展的视觉语言。</p>"
+      },
+      {
+        "id": 1,
+        "cat": "ai",
+        "headline": "Beyond ChatGPT：面向设计文档的专用语言模型",
+        "summary": "新一代领域特定 LLM 正在简化设计团队记录、版本管理和跨利益相关者沟通决策的方式。",
+        "author": "Marcus Chen",
+        "authorInitial": "M",
+        "authorBg": "#4dd0e1",
+        "date": "May 12, 2025",
+        "readTime": "4 min",
+        "body": "<p>文档一直是设计工作中不引人注目但至关重要的支柱。每个像素决策、每个字体选择、每个交互模式都需要清晰地传达给开发人员、客户和未来的团队成员。传统的设计文档方法耗时且常常不一致。</p><p>新一代专业语言模型正在改变这一格局。这些模型专门针对设计系统文档、UI 模式库和可访问性指南进行训练，能够从设计文件中生成精确、上下文感知的文档。</p>"
+      },
+      {
+        "id": 2,
+        "cat": "ai",
+        "headline": "神经网络遇见字体排印：智能字体系统的崛起",
+        "summary": "由机器学习驱动的可变字体正在引入响应式排版，能够实时适应上下文、设备和读者偏好。",
+        "author": "Sana Patel",
+        "authorInitial": "S",
+        "authorBg": "#ff6a3d",
+        "date": "May 8, 2025",
+        "readTime": "5 min",
+        "body": "<p>字体排印一直是在美学和可读性之间寻找完美平衡的艺术。但如果字体可以根据环境动态调整自己呢？这就是智能字体系统的承诺——可变字体技术与神经网络优化的融合。</p><p>与在预定义基准之间进行插值的传统可变字体不同，智能字体系统使用强化学习来针对特定上下文优化字形。从 50 米外观看的广告牌标题需要的比例与夜间模式下移动屏幕上深色模式的正文文本不同。</p>"
+      },
+      {
+        "id": 3,
+        "cat": "hot",
+        "headline": "WebGPU 已至：对创意编程和视觉体验意味着什么",
+        "summary": "下一代图形 API 现已在主流浏览器中发布，为浏览器内创意工具和沉浸式网页体验解锁了前所未有的可能性。",
+        "author": "Alex Rivera",
+        "authorInitial": "A",
+        "authorBg": "#ff6b9d",
+        "date": "May 18, 2025",
+        "readTime": "7 min",
+        "body": "<p>经过多年的开发和期待，WebGPU 终于在稳定的浏览器版本中到来了。这标志着自十多年前引入 WebGL 以来网页图形能力的最重大进步。对于创意编程者和数字设计师来说，其影响是深远的。</p><p>WebGPU 提供了对现代 GPU 功能的低级访问，包括计算着色器，这为之前在浏览器中不可能实现的全新类别应用打开了大门。实时视频处理、复杂的粒子模拟和高级渲染技术现在可以以原生级别的性能运行。</p>"
+      },
+      {
+        "id": 4,
+        "cat": "hot",
+        "headline": "流媒体战争进入新阶段：AI 生成内容与交互式叙事",
+        "summary": "主要流媒体平台正在向 AI 生成内容和分支叙事格式投资数十亿，让观众能够塑造故事走向。",
+        "author": "Zoe Kim",
+        "authorInitial": "Z",
+        "authorBg": "#d4a853",
+        "date": "May 16, 2025",
+        "readTime": "5 min",
+        "body": "<p>娱乐产业正在经历自有线电视向流媒体转型以来最剧烈的变革。这一次，颠覆来自内部——流媒体平台自身正在开拓新的内容格式，模糊了被动观看和互动参与之间的界限。</p><p>Netflix 和 Amazon 都宣布了对 AI 辅助内容制作流程的重大投资。这些系统并不取代人类创作者，而是处理制作中计算密集型的方面：自动化调色、多机位设置中的智能镜头选择和数十种语言的实时字幕生成。</p>"
+      },
+      {
+        "id": 5,
+        "cat": "hot",
+        "headline": "超越 Vision Pro 的空间计算：界面设计的下一波浪潮",
+        "summary": "随着空间计算硬件多样化，设计师正在面对全新的范式，思考人类如何在三维空间中与数字信息交互。",
+        "author": "Ravi Mehta",
+        "authorInitial": "R",
+        "authorBg": "#9575cd",
+        "date": "May 10, 2025",
+        "readTime": "6 min",
+        "body": "<p>Apple 的 Vision Pro 可能占据了头条新闻，但它只代表了空间计算的一种方法。整个行业正在涌现多样化的设备生态系统——从轻量级 AR 眼镜到沉浸式 VR 头显，再到无需头显的全息显示器。</p><p>对于界面设计师来说，这种碎片化既带来了挑战也带来了机遇。我们经过数十年为 2D 屏幕完善的设计模式并不能简单地转化到空间环境中。需要全新的范式来处理从基本导航到复杂数据可视化的一切。</p>"
+      },
+      {
+        "id": 6,
+        "cat": "music",
+        "headline": "空间音频走向主流：3D 声音如何改变音乐制作",
+        "summary": "随着 Apple Music 和 TIDAL 拥抱杜比全景声，空间音频不再是利基格式——制作人正在重新思考音乐创作与混音的方式。",
+        "author": "Lena Okafor",
+        "authorInitial": "L",
+        "authorBg": "#4dd0e1",
+        "date": "May 17, 2025",
+        "readTime": "5 min",
+        "body": "<p>从立体声到空间音频的转变代表了自立体声引入以来音乐聆听领域最重大的变化。与传统的环绕声不同，空间音频创造了一个沉浸式的声场，单个元素可以被放置在听者周围的三维空间中的任位置。</p><p>对于制作人和混音工程师来说，这要求在编曲策略上进行根本性的重新思考。在立体声中，声场基本上是两个扬声器之间的一条线。在空间音频中，它变成了一个球体。在立体声中会竞争相同声学空间的乐器现在可以通过将它们放置在不同的高度和深度来分开。</p>"
+      },
+      {
+        "id": 7,
+        "cat": "music",
+        "headline": "黑胶复兴 2.0：精品压制厂与实体音乐的未来",
+        "summary": "新一代独立黑胶压制厂正在满足激增的需求，将传统工艺与现代可持续实践相结合。",
+        "author": "Dara Weiss",
+        "authorInitial": "D",
+        "authorBg": "#ff6a3d",
+        "date": "May 13, 2025",
+        "readTime": "4 min",
+        "body": "<p>黑胶唱片已经完成了从过时格式到高端产品的旅程。全球黑胶销量已连续第三年超过 CD，那些在 90 年代和 2000 年代低迷时期幸存下来的压制厂正难以满足需求。</p><p>一波精品压制业务已经介入这一缺口。这些小型设施将老式压制机械——从退役工厂精心修复而来——与现代质量控制和可持续制造实践相结合。</p>"
+      },
+      {
+        "id": 8,
+        "cat": "music",
+        "headline": "AI 在录音室：从混音助手到创意协作者",
+        "summary": "机器学习工具正在从实用插件进化为音乐制作过程中真正的创意合作伙伴。",
+        "author": "Theo Brandt",
+        "authorInitial": "T",
+        "authorBg": "#d4a853",
+        "date": "May 6, 2025",
+        "readTime": "5 min",
+        "body": "<p>五年前，音乐制作中的 AI 意味着应用预设处理链的自动化母带服务。如今，AI 工具已深度整合到音乐创作的每个阶段——从作曲和声音设计到编曲和混音。</p><p>最复杂的工具现在不再像效果处理器，而是像协作伙伴。它们可以分析粗略混音并建议编曲改进，生成与现有和声结构匹配的互补旋律，甚至根据对所需音色的口头描述创建全新的音色预设。</p>"
+      },
+      {
+        "id": 9,
+        "cat": "culture",
+        "headline": "数字档案：在链接失效时代保护互联网历史",
+        "summary": "随着平台关闭和内容消失，档案工作者和艺术家正在开发新策略来保护我们的数字文化遗产。",
+        "author": "Yuki Tanaka",
+        "authorInitial": "Y",
+        "authorBg": "#b2b9ff",
+        "date": "May 14, 2025",
+        "readTime": "6 min",
+        "body": "<p>每天都有大量的数字文化消失。社交媒体帖子、博客文章、论坛讨论和整个网站在平台关闭、域名过期和内容管理系统更新而未保留其历史时消失。这种现象被称为链接失效，有可能造成数字黑暗时代。</p><p>一个日益壮大的数字档案工作者、艺术家和技术专家运动正在努力应对这一趋势。像互联网档案馆的 Wayback Machine 这样的项目已经保存了数十年的网页内容，但新举措正在采取更具创意的方法来进行数字保存。</p>"
+      },
+      {
+        "id": 10,
+        "cat": "culture",
+        "headline": "微节日的崛起：重塑现场活动的小型策展聚会",
+        "summary": "小型、高度策展的节日作为大规模商业活动的替代方案正日益流行，优先考虑社区和发现而非奇观。",
+        "author": "Priya Nair",
+        "authorInitial": "P",
+        "authorBg": "#ff6b9d",
+        "date": "May 11, 2025",
+        "readTime": "4 min",
+        "body": "<p>在拥有企业赞助和直播协议的十万观众超级节日时代，一个反趋势正在悄然获得动力。微节日——500 到 2,000 名参与者的活动——正在全球范围内蓬勃发展，提供了一种根本不同的现场音乐和艺术体验。</p><p>这些聚会优先考虑策展而非规模。组织者不追求最大的阵容，而是专注于创造连贯的艺术体验，每个表演、装置和食品供应商都为统一的愿景做出贡献。</p>"
+      },
+      {
+        "id": 11,
+        "cat": "culture",
+        "headline": "慢设计：将工艺带回数字创作的运动",
+        "summary": "日益壮大的数字设计师社区正在拒绝快速迭代，而支持受传统工艺启发的深度、沉思式创作过程。",
+        "author": "Nia Osei",
+        "authorInitial": "N",
+        "authorBg": "#4dd0e1",
+        "date": "May 5, 2025",
+        "readTime": "5 min",
+        "body": "<p>在一个疯狂于速度的行业——敏捷冲刺、快速原型、最小可行产品——一场反运动正在扎根。慢设计将慢食和慢生活运动的原则应用于数字创作，强调深度、工艺和意图而非速度。</p><p>慢设计的实践者提倡更长的项目时间线、更深入的用户研究和更多的迭代改进周期。他们不是在交付最小可行产品后基于指标进行迭代，而是大量投资于前期探索和原型设计。</p>"
+      },
+      {
+        "id": 12,
+        "cat": "sports",
+        "headline": "数据驱动的竞技体育：实时分析如何改变职业运动",
+        "summary": "从可穿戴传感器到计算机视觉跟踪，对运动表现量化的精度已达到新水平——利弊并存。",
+        "author": "James Okonkwo",
+        "authorInitial": "J",
+        "authorBg": "#9575cd",
+        "date": "May 19, 2025",
+        "readTime": "6 min",
+        "body": "<p>职业体育一直是一个数字游戏，但现在团队可获得的数据深度和即时性在十年前是无法想象的。每一个动作、每一次心跳、每一次技术的微调现在都被实时捕捉、分析并反馈给教练和运动员。</p><p>计算机视觉系统以亚厘米精度跟踪球员位置。可穿戴传感器监测的生理标记可以在表现明显下降之前预测疲劳。机器学习模型识别出人类分析师可能永远不会注意到的对手行为模式。</p>"
+      },
+      {
+        "id": 13,
+        "cat": "sports",
+        "headline": "电竞建筑：设计数字时代的体育场馆",
+        "summary": "专门建造的电竞场馆正在全球涌现，其设计代表了体育竞技场、广播工作室和剧院的迷人混合体。",
+        "author": "Carla Jimenez",
+        "authorInitial": "C",
+        "authorBg": "#ff6a3d",
+        "date": "May 9, 2025",
+        "readTime": "5 min",
+        "body": "<p>第一代电竞赛事在改装后的篮球场馆和会议中心举行——这些空间是为完全不同的目的而设计的，被笨拙地改造以适应屏幕和游戏设置。第二代正在从零开始专门建造，其结果在建筑上是前所未有的。</p><p>这些新场馆必须解决一系列独特的设计挑战。视线需要同时适用于主屏幕和单个玩家的视角。声学必须处理观众的噪音同时保持玩家游戏内音频的清晰度。</p>"
+      },
+      {
+        "id": 14,
+        "cat": "sports",
+        "headline": "社交媒体时代的粉丝心理",
+        "summary": "新研究揭示了算法驱动的内容消费如何从根本上改变体育迷与球队和彼此建立联系的方式。",
+        "author": "Hana Park",
+        "authorInitial": "H",
+        "authorBg": "#d4a853",
+        "date": "May 4, 2025",
+        "readTime": "4 min",
+        "body": "<p>体育迷曾经主要是一种地方性现象——你支持来自家乡的球队，你的粉丝体验由参加比赛、阅读当地报纸和与分享你地理背景的朋友和家人讨论比赛所塑造。</p><p>社交媒体已经从根本上改变了这种动态。今天的粉丝与地球另一端其他支持者建立联系的可能性与邻居一样大。算法驱动的内容推送创造了个性化的精彩集锦，即使在关注同一支球队的粉丝之间也可能截然不同。</p>"
+      }
+    ]
+  },
+  "design": {
+    "dwItems": [
+      {
+        "title": "Neon City",
+        "cat": "Brand Identity",
+        "gradient": "linear-gradient(135deg,#ff6a3d 0%,#e8431a 30%,#1a0a2e 100%)",
+        "year": "2025",
+        "client": "Nightfall Studio",
+        "tools": "Figma / Blender / AE",
+        "desc": "A bold brand identity system for Nightfall Studio, fusing cyberpunk aesthetics with minimalist design principles. The project encompasses logo design, typography selection, color palette development, and comprehensive brand guidelines that translate seamlessly across digital and print media."
+      },
+      {
+        "title": "Amber Flow",
+        "cat": "Motion Graphics",
+        "gradient": "linear-gradient(135deg,#d4a853 0%,#8b6914 30%,#1a1a0a 100%)",
+        "year": "2025",
+        "client": "Artisan Collective",
+        "tools": "Cinema 4D / Redshift / AE",
+        "desc": "An immersive motion graphics piece exploring the fluid dynamics of amber resin. Through procedural animation and meticulous lighting, the project captures the organic beauty of fossilized time, creating a meditative visual experience for the Artisan Collective gallery installation."
+      },
+      {
+        "title": "Ethereal Wave",
+        "cat": "Web Design",
+        "gradient": "linear-gradient(135deg,#b2b9ff 0%,#5c6bc0 30%,#0a0a1a 100%)",
+        "year": "2025",
+        "client": "Waveform Audio",
+        "tools": "React / Three.js / WebGL",
+        "desc": "A next-generation web experience for Waveform Audio, featuring real-time 3D audio visualization and an immersive browsing interface. The design pushes the boundaries of web technology while maintaining intuitive navigation and accessibility standards across all devices."
+      },
+      {
+        "title": "Scarlet Pulse",
+        "cat": "Editorial Design",
+        "gradient": "linear-gradient(135deg,#ff6b9d 0%,#c2185b 30%,#1a0a14 100%)",
+        "year": "2024",
+        "client": "Vogue Digital",
+        "tools": "InDesign / Photoshop / AI",
+        "desc": "A striking editorial design series for Vogue Digital, combining bold typography with avant-garde photography treatments. Each spread tells a cohesive story through innovative layout structures that challenge traditional magazine conventions."
+      },
+      {
+        "title": "Teal Horizon",
+        "cat": "Product Design",
+        "gradient": "linear-gradient(135deg,#4dd0e1 0%,#00838f 30%,#0a1a1a 100%)",
+        "year": "2024",
+        "client": "Nova Tech",
+        "tools": "Figma / Protopie / Spline",
+        "desc": "A comprehensive product design system for Nova Tech smart home ecosystem. From mobile app interfaces to physical device UI, every touchpoint was crafted with obsessive attention to usability, accessibility, and visual harmony."
+      },
+      {
+        "title": "Obsidian Vault",
+        "cat": "3D Art",
+        "gradient": "linear-gradient(135deg,#9575cd 0%,#4a148c 30%,#0a0a0a 100%)",
+        "year": "2024",
+        "client": "Solo Exhibition",
+        "tools": "Blender / Unreal Engine / PS",
+        "desc": "A personal 3D art series exploring the interplay of light and darkness within crystalline architectures. Each piece in the Obsidian Vault collection represents a unique study in material properties, atmospheric lighting, and geometric abstraction."
+      }
+    ],
+    "dwSuits": [
+      "♠",
+      "♣",
+      "♥",
+      "♦",
+      "♠",
+      "♣"
+    ],
+    "dwRanks": [
+      "A",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ]
+  },
+  "disc": {
+    "nowPlaying": {
+      "title": "酒精",
+      "duration": "0:00",
+      "current": "0:00",
+      "cover": "Disc/MusicAlbum/酒精/ab67616d0000b273d10560f5d73921a997dac1ac.jpg",
+      "audio": "Disc/MusicAlbum/酒精/酒精.mp3"
+    },
+    "tapes": [
+      {
+        "id": 1,
+        "title": "酒精",
+        "time": "0:00",
+        "cover": "Disc/MusicAlbum/酒精/ab67616d0000b273d10560f5d73921a997dac1ac.jpg",
+        "audio": "Disc/MusicAlbum/酒精/酒精.mp3"
+      },
+      {
+        "id": 2,
+        "title": "翱翔",
+        "time": "0:00",
+        "cover": "Disc/MusicAlbum/翱翔/images.jpg",
+        "audio": "Disc/MusicAlbum/翱翔/翱翔.mp3"
+      },
+      {
+        "id": 3,
+        "title": "Young OG",
+        "time": "0:00",
+        "cover": "Disc/MusicAlbum/YoungOG/32b32bd351ba31f737b03e2bc4a6d3a8.jpg",
+        "audio": "Disc/MusicAlbum/YoungOG/soundclouddownloader.io_           Kris Wu Yifan  - Young OG.mp3.mp3"
+      }
+    ],
+    "playMode": "sequence",
+    "currentTapeIndex": 0
+  },
+  "action": [
+    {
+      "id": 0,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80"
+      ],
+      "caption": "Pushing the boundaries of digital art — every creation is a new adventure. Been experimenting with some fresh visual concepts lately, feels like opening a door to a whole new world.",
+      "likes": 1247,
+      "comments": 89,
+      "timeAgo": "2 hours ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Lin Xiaoyu",
+          "text": "Amazing work, can't wait to see more!"
+        },
+        {
+          "user": "Zhang Siyuan",
+          "text": "This style is truly one of a kind"
+        },
+        {
+          "user": "Wang Jiaer",
+          "text": "Saved this for inspiration"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=800&q=80",
+        "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80"
+      ],
+      "caption": "Visited an exhibition this weekend — minimalism isn't about less, it's about just right.",
+      "likes": 892,
+      "comments": 56,
+      "timeAgo": "4 hours ago",
+      "isLiked": true,
+      "commentList": [
+        {
+          "user": "Li Mengqi",
+          "text": "Which exhibition? Any recommendations?"
+        },
+        {
+          "user": "Zhao Zixuan",
+          "text": "Minimalism never goes out of style"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=80",
+        "https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=800&q=80",
+        "https://images.unsplash.com/photo-1633218388467-539651dcf81a?w=800&q=80"
+      ],
+      "caption": "A cyberpunk brand visual system — the interplay of light and shadow creates a futuristic vibe. Three months of work finally approved!",
+      "likes": 2341,
+      "comments": 167,
+      "timeAgo": "5 hours ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Zhou Yuhang",
+          "text": "Three months well spent, totally worth it!"
+        },
+        {
+          "user": "Wu Xinran",
+          "text": "How did you achieve this lighting effect?"
+        },
+        {
+          "user": "Zheng Haoran",
+          "text": "The client must be thrilled"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80",
+        "https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=800&q=80",
+        "https://images.unsplash.com/photo-1600607686527-6fb886090705?w=800&q=80",
+        "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?w=800&q=80"
+      ],
+      "caption": "When traditional craftsmanship meets digital technology, unexpected sparks fly. Sharing a recent portfolio piece.",
+      "likes": 567,
+      "comments": 34,
+      "timeAgo": "7 hours ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Sun Yating",
+          "text": "The blend of tradition and modernity is stunning"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80"
+      ],
+      "caption": "Latest trends in motion graphics — aesthetics in motion. A day in the studio.",
+      "likes": 1890,
+      "comments": 123,
+      "timeAgo": "8 hours ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Lin Xiaoyu",
+          "text": "Your studio looks amazing"
+        },
+        {
+          "user": "Zhang Siyuan",
+          "text": "Motion graphics has always been my weakness, any tutorials?"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80",
+        "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=800&q=80"
+      ],
+      "caption": "Pixels aren't a limitation, they're another form of expression. Retro vibes are back.",
+      "likes": 445,
+      "comments": 28,
+      "timeAgo": "10 hours ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Wang Jiaer",
+          "text": "8-bit style will always be iconic"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=800&q=80",
+        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80",
+        "https://images.unsplash.com/photo-1635322966219-b75ed372eb01?w=800&q=80"
+      ],
+      "caption": "Typography is the voice of design — choosing the right typeface is choosing the right tone. Sharing some font pairing insights.",
+      "likes": 1567,
+      "comments": 98,
+      "timeAgo": "12 hours ago",
+      "isLiked": true,
+      "commentList": [
+        {
+          "user": "Li Mengqi",
+          "text": "Font pairing is truly an art"
+        },
+        {
+          "user": "Zhao Zixuan",
+          "text": "Would love to see your font list"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80"
+      ],
+      "caption": "Visual experiments in 3D space — breaking free from flat boundaries. Fresh 3D renders.",
+      "likes": 2103,
+      "comments": 145,
+      "timeAgo": "14 hours ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Zhou Yuhang",
+          "text": "Blender or C4D?"
+        },
+        {
+          "user": "Wu Xinran",
+          "text": "The texture looks so realistic"
+        },
+        {
+          "user": "Zheng Haoran",
+          "text": "3D rendering is becoming more important than ever"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=80",
+        "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800&q=80",
+        "https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=80",
+        "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800&q=80",
+        "https://images.unsplash.com/photo-1633596683562-4a47eb4983c5?w=800&q=80"
+      ],
+      "caption": "Brand redesign case study — a visual journey from zero to one. Documenting all five stages.",
+      "likes": 678,
+      "comments": 45,
+      "timeAgo": "16 hours ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Sun Yating",
+          "text": "This full documentation is incredibly valuable"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1600132806370-bf17e65e942f?w=800&q=80"
+      ],
+      "caption": "Daily UI inspiration — details make the difference. 20 states for a single button design.",
+      "likes": 3345,
+      "comments": 234,
+      "timeAgo": "18 hours ago",
+      "isLiked": true,
+      "commentList": [
+        {
+          "user": "Lin Xiaoyu",
+          "text": "20 states, that's next-level attention to detail"
+        },
+        {
+          "user": "Zhang Siyuan",
+          "text": "This is what professionalism looks like"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=800&q=80",
+        "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80"
+      ],
+      "caption": "Painting with code — the beauty of generative art. Built a small generative art program.",
+      "likes": 1234,
+      "comments": 87,
+      "timeAgo": "20 hours ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Wang Jiaer",
+          "text": "Code can be this beautiful"
+        },
+        {
+          "user": "Li Mengqi",
+          "text": "Is it open source? Would love to learn"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=800&q=80",
+        "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80",
+        "https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=800&q=80"
+      ],
+      "caption": "New experiments in music visualization — seeing sound. The project with the audio team is finally live!",
+      "likes": 2890,
+      "comments": 198,
+      "timeAgo": "22 hours ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Zhao Zixuan",
+          "text": "The audio-visual experience is incredible"
+        },
+        {
+          "user": "Zhou Yuhang",
+          "text": "Congrats on the launch!"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1633218388467-539651dcf81a?w=800&q=80"
+      ],
+      "caption": "Dark mode design guide — how to stay elegant in the dark. Wrote a long article, would love to hear your thoughts.",
+      "likes": 4456,
+      "comments": 312,
+      "timeAgo": "1 day ago",
+      "isLiked": true,
+      "commentList": [
+        {
+          "user": "Wu Xinran",
+          "text": "Dark mode is harder to nail than it looks"
+        },
+        {
+          "user": "Zheng Haoran",
+          "text": "Where can I read the full article?"
+        },
+        {
+          "user": "Sun Yating",
+          "text": "Learned a lot from this"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80",
+        "https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=800&q=80"
+      ],
+      "caption": "Less is more — the design philosophy of minimal UX. Reading this book lately, truly eye-opening.",
+      "likes": 890,
+      "comments": 67,
+      "timeAgo": "1 day ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Lin Xiaoyu",
+          "text": "A minimalism classic"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1600607686527-6fb886090705?w=800&q=80",
+        "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?w=800&q=80",
+        "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80"
+      ],
+      "caption": "Interface design in the Web3 era — decentralized aesthetics. Some thoughts after the summit.",
+      "likes": 1567,
+      "comments": 134,
+      "timeAgo": "1 day ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Zhang Siyuan",
+          "text": "Web3 design is definitely an exciting new direction"
+        },
+        {
+          "user": "Wang Jiaer",
+          "text": "How was the summit?"
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80",
+        "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=800&q=80",
+        "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=800&q=80",
+        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80"
+      ],
+      "caption": "Annual design review — top 10 design trends to watch in 2025. Compiled my predictions.",
+      "likes": 5678,
+      "comments": 445,
+      "timeAgo": "2 days ago",
+      "isLiked": true,
+      "commentList": [
+        {
+          "user": "Li Mengqi",
+          "text": "All ten trends are spot on"
+        },
+        {
+          "user": "Zhao Zixuan",
+          "text": "Saving this to read slowly"
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1635322966219-b75ed372eb01?w=800&q=80"
+      ],
+      "caption": "Social media visual design — how to stand out in the feed. Sharing some real-world experience.",
+      "likes": 2234,
+      "comments": 189,
+      "timeAgo": "2 days ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Zhou Yuhang",
+          "text": "Rich practical experience"
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80",
+        "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=80"
+      ],
+      "caption": "Neon aesthetics in modern branding. Some night photography tips.",
+      "likes": 1123,
+      "comments": 76,
+      "timeAgo": "2 days ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Wu Xinran",
+          "text": "The night shots are stunning"
+        },
+        {
+          "user": "Zheng Haoran",
+          "text": "How do you create the neon effect?"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800&q=80",
+        "https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=80",
+        "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800&q=80"
+      ],
+      "caption": "Digital rebirth of abstract art — a dialogue between color and form. New series released.",
+      "likes": 3344,
+      "comments": 267,
+      "timeAgo": "3 days ago",
+      "isLiked": true,
+      "commentList": [
+        {
+          "user": "Sun Yating",
+          "text": "The use of color is absolutely stunning"
+        },
+        {
+          "user": "Lin Xiaoyu",
+          "text": "Been waiting for this new series"
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1633596683562-4a47eb4983c5?w=800&q=80"
+      ],
+      "caption": "The art of micro-interactions — bringing interfaces to life. Curated 50 excellent micro-interaction examples.",
+      "likes": 4455,
+      "comments": 389,
+      "timeAgo": "3 days ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Zhang Siyuan",
+          "text": "50 examples will keep me busy for a while"
+        },
+        {
+          "user": "Wang Jiaer",
+          "text": "Micro-interactions really elevate the experience"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1600132806370-bf17e65e942f?w=800&q=80",
+        "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=800&q=80",
+        "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80",
+        "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=800&q=80"
+      ],
+      "caption": "Retro gaming aesthetics revival — modern reinterpretation of 8-bit style. A tribute to the classics.",
+      "likes": 667,
+      "comments": 45,
+      "timeAgo": "3 days ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Li Mengqi",
+          "text": "Childhood memories"
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80"
+      ],
+      "caption": "The infinite possibilities of variable fonts — a new era of responsive typography. A breakthrough in font technology.",
+      "likes": 1789,
+      "comments": 156,
+      "timeAgo": "4 days ago",
+      "isLiked": true,
+      "commentList": [
+        {
+          "user": "Zhao Zixuan",
+          "text": "Variable fonts are the future"
+        },
+        {
+          "user": "Zhou Yuhang",
+          "text": "This tech breakthrough is exciting"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=800&q=80",
+        "https://images.unsplash.com/photo-1633218388467-539651dcf81a?w=800&q=80"
+      ],
+      "caption": "The evolution of glassmorphism — from frosted glass to liquid glass. Documenting the trend shift.",
+      "likes": 2890,
+      "comments": 234,
+      "timeAgo": "4 days ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Wu Xinran",
+          "text": "Liquid glass effect looks so cool"
+        },
+        {
+          "user": "Zheng Haoran",
+          "text": "The evolution is well documented"
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80",
+        "https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=800&q=80",
+        "https://images.unsplash.com/photo-1600607686527-6fb886090705?w=800&q=80"
+      ],
+      "caption": "Brand color psychology — how colors shape user perception. Ran a color experiment.",
+      "likes": 1234,
+      "comments": 98,
+      "timeAgo": "4 days ago",
+      "isLiked": true,
+      "commentList": [
+        {
+          "user": "Sun Yating",
+          "text": "Color psychology is fascinating"
+        },
+        {
+          "user": "Lin Xiaoyu",
+          "text": "What were the experiment results?"
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?w=800&q=80"
+      ],
+      "caption": "Component-based design systems — building scalable UI architecture. Sharing our internal design system.",
+      "likes": 4567,
+      "comments": 345,
+      "timeAgo": "5 days ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Zhang Siyuan",
+          "text": "Design systems are essential for any team"
+        },
+        {
+          "user": "Wang Jiaer",
+          "text": "Scalability is key"
+        }
+      ]
+    },
+    {
+      "id": 25,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80",
+        "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80"
+      ],
+      "caption": "AI-assisted design workflow — a real case of 300% efficiency boost. Sharing my tool stack.",
+      "likes": 2234,
+      "comments": 189,
+      "timeAgo": "5 days ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Li Mengqi",
+          "text": "Any AI tool recommendations?"
+        },
+        {
+          "user": "Zhao Zixuan",
+          "text": "300% boost sounds unreal"
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=800&q=80",
+        "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=800&q=80",
+        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80",
+        "https://images.unsplash.com/photo-1635322966219-b75ed372eb01?w=800&q=80",
+        "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80"
+      ],
+      "caption": "Cross-platform design consistency — best practices for multi-device collaboration. Lessons from five projects.",
+      "likes": 5678,
+      "comments": 445,
+      "timeAgo": "6 days ago",
+      "isLiked": true,
+      "commentList": [
+        {
+          "user": "Zhou Yuhang",
+          "text": "Cross-platform consistency is tough"
+        },
+        {
+          "user": "Wu Xinran",
+          "text": "Five projects worth of experience is gold"
+        }
+      ]
+    },
+    {
+      "id": 27,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=80"
+      ],
+      "caption": "Design system token architecture — complete specs from colors to spacing. Wrote a full documentation set.",
+      "likes": 1123,
+      "comments": 76,
+      "timeAgo": "6 days ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Zheng Haoran",
+          "text": "Token architecture is the core of any design system"
+        },
+        {
+          "user": "Sun Yating",
+          "text": "Can you share the docs?"
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800&q=80",
+        "https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=80"
+      ],
+      "caption": "The psychology of motion design — why some animations just feel right. Three months of research summed up.",
+      "likes": 3344,
+      "comments": 267,
+      "timeAgo": "1 week ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Lin Xiaoyu",
+          "text": "Three months of research paying off"
+        },
+        {
+          "user": "Zhang Siyuan",
+          "text": "Psychology + design, love the cross-disciplinary approach"
+        }
+      ]
+    },
+    {
+      "id": 29,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800&q=80",
+        "https://images.unsplash.com/photo-1633596683562-4a47eb4983c5?w=800&q=80",
+        "https://images.unsplash.com/photo-1600132806370-bf17e65e942f?w=800&q=80"
+      ],
+      "caption": "The aesthetics of data visualization — making numbers tell stories. New data dashboard design.",
+      "likes": 4455,
+      "comments": 389,
+      "timeAgo": "1 week ago",
+      "isLiked": true,
+      "commentList": [
+        {
+          "user": "Wang Jiaer",
+          "text": "Data visualization is more important than ever"
+        },
+        {
+          "user": "Li Mengqi",
+          "text": "Would love to see the dashboard details"
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=800&q=80"
+      ],
+      "caption": "Accessibility design practice — making products serve everyone. Designed for a charity project.",
+      "likes": 667,
+      "comments": 45,
+      "timeAgo": "1 week ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Zhao Zixuan",
+          "text": "Accessibility design means a lot"
+        },
+        {
+          "user": "Zhou Yuhang",
+          "text": "Props for the charity work"
+        }
+      ]
+    },
+    {
+      "id": 31,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80",
+        "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=800&q=80",
+        "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80",
+        "https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=800&q=80"
+      ],
+      "caption": "Exploring illustration styles — evolution from flat to dimensional. Documenting my personal style journey.",
+      "likes": 1789,
+      "comments": 156,
+      "timeAgo": "2 weeks ago",
+      "isLiked": true,
+      "commentList": [
+        {
+          "user": "Wu Xinran",
+          "text": "The style evolution is fascinating"
+        },
+        {
+          "user": "Zheng Haoran",
+          "text": "Dimensional illustrations look even better"
+        }
+      ]
+    },
+    {
+      "id": 32,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1633218388467-539651dcf81a?w=800&q=80",
+        "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80"
+      ],
+      "caption": "Design critique methodology — how to give effective feedback. Some team management insights.",
+      "likes": 2890,
+      "comments": 234,
+      "timeAgo": "2 weeks ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Sun Yating",
+          "text": "Critique methods are so important"
+        },
+        {
+          "user": "Lin Xiaoyu",
+          "text": "Would love to hear your team management tips"
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=800&q=80"
+      ],
+      "caption": "Immersive web design — breaking screen boundaries. Latest experimental project.",
+      "likes": 1234,
+      "comments": 98,
+      "timeAgo": "2 weeks ago",
+      "isLiked": true,
+      "commentList": [
+        {
+          "user": "Zhang Siyuan",
+          "text": "Immersive experiences are the future"
+        },
+        {
+          "user": "Wang Jiaer",
+          "text": "How did the experiment turn out?"
+        }
+      ]
+    },
+    {
+      "id": 34,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1600607686527-6fb886090705?w=800&q=80",
+        "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?w=800&q=80",
+        "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80"
+      ],
+      "caption": "Design ethics — responsibility behind technology. Some recent reflections.",
+      "likes": 4567,
+      "comments": 345,
+      "timeAgo": "3 weeks ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Li Mengqi",
+          "text": "Design ethics matter so much"
+        },
+        {
+          "user": "Zhao Zixuan",
+          "text": "Technology needs human-centered care"
+        }
+      ]
+    },
+    {
+      "id": 35,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80",
+        "https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=800&q=80"
+      ],
+      "caption": "Introduction to sound design — adding warmth to products. Insights from cross-disciplinary learning.",
+      "likes": 2234,
+      "comments": 189,
+      "timeAgo": "3 weeks ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Zhou Yuhang",
+          "text": "Sound design really adds that extra touch"
+        },
+        {
+          "user": "Wu Xinran",
+          "text": "Love the cross-disciplinary mindset"
+        }
+      ]
+    },
+    {
+      "id": 36,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=800&q=80",
+        "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80",
+        "https://images.unsplash.com/photo-1635322966219-b75ed372eb01?w=800&q=80",
+        "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80"
+      ],
+      "caption": "Design tool review — Figma vs Sketch vs Adobe XD. Honest thoughts after three years of use.",
+      "likes": 5678,
+      "comments": 445,
+      "timeAgo": "1 month ago",
+      "isLiked": true,
+      "commentList": [
+        {
+          "user": "Zheng Haoran",
+          "text": "Figma is genuinely great"
+        },
+        {
+          "user": "Sun Yating",
+          "text": "Three years of experience speaks volumes"
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=80"
+      ],
+      "caption": "Design sprint in action — solving a tough problem in five days. Just wrapped up a sprint last week.",
+      "likes": 1123,
+      "comments": 76,
+      "timeAgo": "1 month ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Lin Xiaoyu",
+          "text": "Design sprints are so efficient"
+        },
+        {
+          "user": "Zhang Siyuan",
+          "text": "What can you actually build in five days?"
+        }
+      ]
+    },
+    {
+      "id": 38,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800&q=80",
+        "https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=80",
+        "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800&q=80"
+      ],
+      "caption": "Mood board guide — how to collect inspiration effectively. Opening up my inspiration library.",
+      "likes": 3344,
+      "comments": 267,
+      "timeAgo": "1 month ago",
+      "isLiked": true,
+      "commentList": [
+        {
+          "user": "Wang Jiaer",
+          "text": "Mood boards are the first step of every design"
+        },
+        {
+          "user": "Li Mengqi",
+          "text": "Can you share your inspiration library?"
+        }
+      ]
+    },
+    {
+      "id": 39,
+      "username": "Chen Mobai",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80",
+      "images": [
+        "https://images.unsplash.com/photo-1633596683562-4a47eb4983c5?w=800&q=80"
+      ],
+      "caption": "How to write design docs — making communication more efficient. Wrote a design documentation handbook.",
+      "likes": 4455,
+      "comments": 389,
+      "timeAgo": "2 months ago",
+      "isLiked": false,
+      "commentList": [
+        {
+          "user": "Zhao Zixuan",
+          "text": "Documentation is a skill too"
+        },
+        {
+          "user": "Zhou Yuhang",
+          "text": "Communication efficiency is everything"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>伪3D胶带模型</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="stage">
+    <div class="scene" id="scene">
+      <div class="tape-wrapper" id="tapeWrapper">
+        <div class="tape-model">
+          <div class="tape-top">
+            <div class="tape-ring tape-ring-1"></div>
+            <div class="tape-ring tape-ring-2"></div>
+            <div class="tape-ring tape-ring-3"></div>
+            <div class="tape-ring tape-ring-4"></div>
+            <div class="tape-ring tape-ring-5"></div>
+            <div class="tape-ring tape-ring-6"></div>
+            <div class="tape-ring tape-ring-7"></div>
+            <div class="tape-core"></div>
+            <div class="tape-highlight"></div>
+          </div>
+          <div class="tape-side">
+            <div class="tape-side-texture"></div>
+          </div>
+          <div class="tape-side-thickness thickness-1"></div>
+          <div class="tape-side-thickness thickness-2"></div>
+          <div class="tape-side-thickness thickness-3"></div>
+          <div class="tape-side-thickness thickness-4"></div>
+          <div class="tape-side-thickness thickness-5"></div>
+          <div class="tape-shadow-disk"></div>
+        </div>
+      </div>
+    </div>
+    <div class="ground-shadow"></div>
+  </div>
+  <p class="hint">🖱️ 拖拽鼠标旋转模型</p>
+  <script src="script.js"></script>
+</body>
+</html>

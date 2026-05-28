@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+<title>Profile - Vipen</title>
+<link rel="Shortcut Icon" href="images/favicon.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+*,:after,:before{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',Helvetica,Arial,sans-serif}
+html{font-size:calc(100vw/19.2);scroll-behavior:smooth}
+body{position:relative;background:#000;color:#fff;overflow:hidden;height:100vh;display:flex;flex-direction:column;align-items:center}
+body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:url('images/REGISTERPAGE.png') center/cover no-repeat;opacity:.6;z-index:-1}
+
+.comet-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.comet-particle{position:absolute;border-radius:50%;pointer-events:none;will-change:transform,opacity}
+a{text-decoration:none;color:inherit}
+input,button,select,textarea{outline:none;font-family:inherit}
+::selection{background-color:transparent}
+
+.profile-container{width:100%;max-width:10rem;padding:0 .4rem;display:flex;flex-direction:row;align-items:flex-start;justify-content:center;height:100vh;padding-top:.15rem;padding-bottom:.15rem;overflow-y:auto;gap:.3rem}
+.profile-container::-webkit-scrollbar{width:3px}
+.profile-container::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px}
+
+.back-link{position:fixed;top:.3rem;left:.3rem;width:.36rem;height:.36rem;background:rgba(0,0,0,.75);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 .04rem .12rem rgba(0,0,0,.5);transition:background .2s,box-shadow .2s;z-index:10}
+.back-link:hover{background:rgba(0,0,0,.9);box-shadow:0 .06rem .18rem rgba(0,0,0,.7)}
+.back-link svg{width:.18rem;height:.18rem;color:#fff}
+
+.profile-left{width:3.2rem;display:flex;flex-direction:column;align-items:center;gap:.15rem;flex-shrink:0}
+.profile-right{flex:1;max-width:5rem;display:flex;flex-direction:column;gap:.15rem}
+
+.profile-header{width:100%;display:flex;flex-direction:column;align-items:center;margin-bottom:.05rem;flex-shrink:0;margin-top:.1rem}
+.profile-avatar{position:relative;width:1.2rem;height:1.2rem;margin-bottom:.12rem}
+.profile-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;border:2px solid rgba(255,255,255,.15);box-shadow:0 .04rem .2rem rgba(0,0,0,.5)}
+.profile-avatar-edit{position:absolute;bottom:0;right:0;width:.32rem;height:.32rem;background:#32c864;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 .02rem .08rem rgba(0,0,0,.4);transition:transform .2s,border-color .2s;border:2px solid #000}
+.profile-avatar-edit:hover{transform:scale(1.1)}
+.profile-avatar-edit svg{width:.16rem;height:.16rem;color:#000}
+#avatarInput{display:none}
+
+.profile-name{font-size:.28rem;font-weight:700;color:#fff;text-align:center;letter-spacing:-.004em;margin-bottom:.04rem}
+.profile-handle{font-size:.12rem;color:rgba(255,255,255,.4);text-align:center;font-weight:500}
+
+.profile-tabs{display:none}
+.profile-tab{height:.32rem;padding:0 .16rem;background:transparent;border:none;border-radius:.08rem;color:rgba(255,255,255,.5);font-size:.11rem;font-weight:500;cursor:pointer;transition:all .3s;white-space:nowrap}
+.profile-tab:hover{color:rgba(255,255,255,.8)}
+.profile-tab.active{background:rgba(255,255,255,.12);color:#fff}
+
+.profile-section{width:100%;display:flex;flex-direction:column;gap:.15rem;animation:fadeIn .35s ease}
+.profile-section.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+.section-title{font-size:.13rem;color:rgba(255,255,255,.35);font-weight:600;letter-spacing:.04rem;text-transform:uppercase;margin-bottom:.04rem}
+
+.info-card{width:100%;background:rgba(255,255,255,.06);border-radius:.12rem;padding:.16rem;border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(10px)}
+
+.info-row{display:flex;align-items:center;justify-content:space-between;padding:.12rem 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.info-row:last-child{border-bottom:none;padding-bottom:0}
+.info-row:first-child{padding-top:0}
+.info-label{font-size:.12rem;color:rgba(255,255,255,.4);font-weight:500}
+.info-value-wrapper{display:flex;align-items:center;gap:.08rem}
+.info-value{font-size:.12rem;color:rgba(255,255,255,.8);font-weight:500;text-align:right;background:transparent;border:none;cursor:pointer;transition:color .2s;padding:.04rem .08rem;border-radius:.06rem}
+.info-value:hover{color:#fff;background:rgba(255,255,255,.08)}
+.info-value:disabled{cursor:not-allowed;color:rgba(255,255,255,.3)}
+.info-value:disabled:hover{background:transparent}
+.info-value[readonly]{cursor:default}
+.info-value[readonly]:hover{background:transparent;color:rgba(255,255,255,.8)}
+.info-edit-icon{width:.14rem;height:.14rem;color:rgba(255,255,255,.25);flex-shrink:0}
+.info-row.editable .info-edit-icon{color:rgba(255,255,255,.5)}
+.info-row.editable{cursor:pointer}
+.info-row.editable:hover .info-value{color:#fff}
+.info-row.editable:hover .info-edit-icon{color:rgba(255,255,255,.7)}
+
+.social-row{display:flex;align-items:center;gap:.12rem;padding:.12rem 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.social-row:last-child{border-bottom:none;padding-bottom:0}
+.social-row:first-child{padding-top:0}
+.social-icon{width:.28rem;height:.28rem;border-radius:.06rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(255,255,255,.08)}
+.social-icon svg{width:.16rem;height:.16rem}
+.social-icon.instagram{background:linear-gradient(135deg,#f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%)}
+.social-icon.x{background:#000;border:1px solid rgba(255,255,255,.15)}
+.social-icon.youtube{background:#ff0000}
+.social-icon.tiktok{background:#000;border:1px solid rgba(255,255,255,.15)}
+.social-info{flex:1;min-width:0}
+.social-name{font-size:.12rem;color:#fff;font-weight:600;margin-bottom:.02rem}
+.social-handle{font-size:.1rem;color:rgba(255,255,255,.4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.social-link-btn{height:.28rem;padding:0 .1rem;background:transparent;border:1px solid rgba(255,255,255,.2);border-radius:.06rem;color:rgba(255,255,255,.6);font-size:.1rem;font-weight:500;cursor:pointer;transition:all .3s;white-space:nowrap}
+.social-link-btn:hover{border-color:rgba(255,255,255,.5);color:#fff}
+.social-link-btn.linked{background:#32c864;border-color:#32c864;color:#000}
+.social-link-btn.linked:hover{background:#2db85a;border-color:#2db85a}
+
+.edit-modal{position:fixed;top:0;left:0;width:100%;height:100%;z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.edit-modal.open{opacity:1;pointer-events:auto}
+.edit-modal-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);backdrop-filter:blur(8px)}
+.edit-modal-content{position:relative;width:90%;max-width:3.6rem;background:rgba(20,20,20,.95);border-radius:.16rem;padding:.3rem;border:1px solid rgba(255,255,255,.1);box-shadow:0 .2rem .6rem rgba(0,0,0,.5);transform:scale(.95);transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.edit-modal.open .edit-modal-content{transform:scale(1)}
+.edit-modal-header{font-size:.16rem;font-weight:600;color:#fff;margin-bottom:.16rem;text-align:center}
+.edit-modal-input{width:100%;height:.4rem;background:#333;border:none;border-radius:.08rem;padding:0 .12rem;font-size:.12rem;color:#fff;margin-bottom:.16rem;transition:box-shadow .3s}
+.edit-modal-input::placeholder{color:rgba(255,255,255,.25)}
+.edit-modal-input:focus{box-shadow:0 0 0 2px rgba(50,200,100,.4)}
+.edit-modal-textarea{width:100%;min-height:.8rem;background:#333;border:none;border-radius:.08rem;padding:.1rem .12rem;font-size:.12rem;color:#fff;margin-bottom:.16rem;resize:vertical;transition:box-shadow .3s}
+.edit-modal-textarea::placeholder{color:rgba(255,255,255,.25)}
+.edit-modal-textarea:focus{box-shadow:0 0 0 2px rgba(50,200,100,.4)}
+.edit-modal-actions{display:flex;gap:.1rem}
+.edit-modal-btn{flex:1;height:.4rem;border:none;border-radius:.08rem;font-size:.13rem;font-weight:600;cursor:pointer;transition:all .3s}
+.edit-modal-btn.cancel{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)}
+.edit-modal-btn.cancel:hover{background:rgba(255,255,255,.15);color:#fff}
+.edit-modal-btn.save{background:#32c864;color:#000}
+.edit-modal-btn.save:hover{background:#2db85a}
+
+.gender-options{display:flex;gap:.1rem;margin-bottom:.16rem}
+.gender-option{flex:1;height:.4rem;background:#333;border:2px solid transparent;border-radius:.08rem;display:flex;align-items:center;justify-content:center;gap:.06rem;cursor:pointer;transition:all .3s}
+.gender-option:hover{background:#3a3a3a}
+.gender-option.selected{border-color:#32c864;background:rgba(50,200,100,.1)}
+.gender-option svg{width:.16rem;height:.16rem}
+.gender-option span{font-size:.12rem;color:rgba(255,255,255,.7);font-weight:500}
+.gender-option.selected span{color:#32c864}
+
+.gender-warning{font-size:.1rem;color:rgba(255,180,60,.9);text-align:center;margin-bottom:.12rem;display:none;align-items:center;justify-content:center;gap:.04rem}
+.gender-warning.show{display:flex}
+.gender-warning svg{width:.12rem;height:.12rem}
+
+.toast{position:fixed;top:.5rem;left:50%;transform:translateX(-50%) translateY(-20px);background:rgba(50,200,100,.95);color:#000;padding:.1rem .2rem;border-radius:.08rem;font-size:.12rem;font-weight:600;opacity:0;pointer-events:none;transition:all .3s cubic-bezier(.34,1.56,.64,1);z-index:200;box-shadow:0 .04rem .16rem rgba(0,0,0,.3)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.error{background:rgba(255,80,80,.95);color:#fff}
+
+@media(max-width:768px){
+    html{font-size:calc(100vw/3.75)}
+    .profile-container{max-width:100%;padding:0 .3rem;height:100vh;padding-top:.2rem;padding-bottom:.2rem;flex-direction:column;align-items:center;gap:.2rem}
+    .profile-left{width:100%}
+    .profile-right{width:100%;max-width:100%}
+    .profile-avatar{width:1rem;height:1rem}
+    .profile-name{font-size:.24rem}
+}
+</style>
+</head>
+<body>
+
+<a href="index.html#/" class="back-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+</a>
+
+<div class="comet-canvas" id="cometCanvas"></div>
+
+<div class="profile-container">
+    <div class="profile-left">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80" alt="Avatar" id="profileAvatarImg">
+                <div class="profile-avatar-edit" id="avatarEditBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </div>
+                <input type="file" id="avatarInput" accept="image/*">
+            </div>
+            <h1 class="profile-name" id="displayName">Alex Chen</h1>
+            <p class="profile-handle" id="userHandle">@alexchen</p>
+        </div>
+
+        <div class="profile-section active" id="socialSection">
+            <div class="section-title">Connected Accounts</div>
+            <div class="info-card">
+                <div class="social-row">
+                    <div class="social-icon instagram">
+                        <svg viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    </div>
+                    <div class="social-info">
+                        <div class="social-name">Instagram</div>
+                        <div class="social-handle" id="instagramHandle">Not connected</div>
+                    </div>
+                    <button class="social-link-btn" data-platform="instagram" id="instagramBtn">Link</button>
+                </div>
+                <div class="social-row">
+                    <div class="social-icon x">
+                        <svg viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    </div>
+                    <div class="social-info">
+                        <div class="social-name">X (Twitter)</div>
+                        <div class="social-handle" id="xHandle">Not connected</div>
+                    </div>
+                    <button class="social-link-btn" data-platform="x" id="xBtn">Link</button>
+                </div>
+                <div class="social-row">
+                    <div class="social-icon youtube">
+                        <svg viewBox="0 0 24 24" fill="white"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                    </div>
+                    <div class="social-info">
+                        <div class="social-name">YouTube</div>
+                        <div class="social-handle" id="youtubeHandle">Not connected</div>
+                    </div>
+                    <button class="social-link-btn" data-platform="youtube" id="youtubeBtn">Link</button>
+                </div>
+                <div class="social-row">
+                    <div class="social-icon tiktok">
+                        <svg viewBox="0 0 24 24" fill="white"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+                    </div>
+                    <div class="social-info">
+                        <div class="social-name">TikTok</div>
+                        <div class="social-handle" id="tiktokHandle">Not connected</div>
+                    </div>
+                    <button class="social-link-btn" data-platform="tiktok" id="tiktokBtn">Link</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-right">
+        <div class="profile-section active" id="infoSection">
+            <div class="section-title">Basic Information</div>
+            <div class="info-card">
+                <div class="info-row editable" data-field="displayName" data-label="Display Name">
+                    <span class="info-label">Display Name</span>
+                    <div class="info-value-wrapper">
+                        <span class="info-value" id="infoDisplayName">Alex Chen</span>
+                        <svg class="info-edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
+                </div>
+                <div class="info-row editable" data-field="username" data-label="Username">
+                    <span class="info-label">Username</span>
+                    <div class="info-value-wrapper">
+                        <span class="info-value" id="infoUsername">@alexchen</span>
+                        <svg class="info-edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
+                </div>
+                <div class="info-row editable" data-field="email" data-label="Email">
+                    <span class="info-label">Email</span>
+                    <div class="info-value-wrapper">
+                        <span class="info-value" id="infoEmail">alex@example.com</span>
+                        <svg class="info-edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
+                </div>
+                <div class="info-row editable" data-field="bio" data-label="Bio">
+                    <span class="info-label">Bio</span>
+                    <div class="info-value-wrapper">
+                        <span class="info-value" id="infoBio">Digital creator & designer</span>
+                        <svg class="info-edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
+                </div>
+                <div class="info-row editable" data-field="location" data-label="Location">
+                    <span class="info-label">Location</span>
+                    <div class="info-value-wrapper">
+                        <span class="info-value" id="infoLocation">Shanghai, China</span>
+                        <svg class="info-edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
+                </div>
+                <div class="info-row editable" data-field="gender" data-label="Gender">
+                    <span class="info-label">Gender</span>
+                    <div class="info-value-wrapper">
+                        <span class="info-value" id="infoGender">Not set</span>
+                        <svg class="info-edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            
+        </div>
+    </div>
+</div>
+
+<div class="edit-modal" id="editModal">
+    <div class="edit-modal-overlay" id="editModalOverlay"></div>
+    <div class="edit-modal-content">
+        <div class="edit-modal-header" id="editModalTitle">Edit</div>
+        <div id="editModalBody">
+            <input type="text" class="edit-modal-input" id="editModalInput" placeholder="Enter value...">
+        </div>
+        <div class="edit-modal-actions">
+            <button class="edit-modal-btn cancel" id="editModalCancel">Cancel</button>
+            <button class="edit-modal-btn save" id="editModalSave">Save</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+    var profileData = {
+        displayName: 'Alex Chen',
+        username: '@alexchen',
+        email: 'alex@example.com',
+        bio: 'Digital creator & designer',
+        location: 'Shanghai, China',
+        gender: '',
+        genderChanged: false,
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80',
+        social: {
+            instagram: '',
+            x: '',
+            youtube: '',
+            tiktok: ''
+        }
+    };
+
+    var currentEditField = null;
+    var currentEditPlatform = null;
+
+    var tabs = document.querySelectorAll('.profile-tab');
+    var sections = document.querySelectorAll('.profile-section');
+
+    tabs.forEach(function(tab){
+        tab.addEventListener('click', function(){
+            var target = this.dataset.tab;
+            tabs.forEach(function(t){ t.classList.remove('active'); });
+            sections.forEach(function(s){ s.classList.remove('active'); });
+            this.classList.add('active');
+            document.getElementById(target + 'Section').classList.add('active');
+        });
+    });
+
+    function showToast(msg, isError){
+        var toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.toggle('error', !!isError);
+        toast.classList.add('show');
+        setTimeout(function(){ toast.classList.remove('show'); }, 2500);
+    }
+
+    function openModal(title, value, isTextarea, isGender){
+        var modal = document.getElementById('editModal');
+        var modalTitle = document.getElementById('editModalTitle');
+        var modalBody = document.getElementById('editModalBody');
+        modalTitle.textContent = 'Edit ' + title;
+        modalBody.innerHTML = '';
+
+        if(isGender){
+            var warning = document.createElement('div');
+            warning.className = 'gender-warning' + (profileData.genderChanged ? ' show' : '');
+            warning.id = 'genderWarning';
+            warning.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>Gender can only be changed once. Please choose carefully.</span>';
+            modalBody.appendChild(warning);
+
+            var options = document.createElement('div');
+            options.className = 'gender-options';
+            var genders = [
+                {value: 'male', label: 'Male', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M8 12h8"/></svg>'},
+                {value: 'female', label: 'Female', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>'},
+                {value: 'other', label: 'Other', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>'}
+            ];
+            genders.forEach(function(g){
+                var btn = document.createElement('div');
+                btn.className = 'gender-option' + (profileData.gender === g.value ? ' selected' : '');
+                btn.dataset.value = g.value;
+                btn.innerHTML = g.icon + '<span>' + g.label + '</span>';
+                btn.addEventListener('click', function(){
+                    if(profileData.genderChanged && profileData.gender !== ''){
+                        showToast('Gender can only be changed once', true);
+                        return;
+                    }
+                    options.querySelectorAll('.gender-option').forEach(function(o){ o.classList.remove('selected'); });
+                    this.classList.add('selected');
+                });
+                options.appendChild(btn);
+            });
+            modalBody.appendChild(options);
+        } else if(isTextarea){
+            var ta = document.createElement('textarea');
+            ta.className = 'edit-modal-textarea';
+            ta.id = 'editModalInput';
+            ta.placeholder = 'Enter ' + title.toLowerCase() + '...';
+            ta.value = value || '';
+            modalBody.appendChild(ta);
+        } else {
+            var inp = document.createElement('input');
+            inp.type = 'text';
+            inp.className = 'edit-modal-input';
+            inp.id = 'editModalInput';
+            inp.placeholder = 'Enter ' + title.toLowerCase() + '...';
+            inp.value = value || '';
+            modalBody.appendChild(inp);
+        }
+
+        modal.classList.add('open');
+        setTimeout(function(){
+            var focusEl = document.getElementById('editModalInput');
+            if(focusEl) focusEl.focus();
+        }, 100);
+    }
+
+    function closeModal(){
+        document.getElementById('editModal').classList.remove('open');
+        currentEditField = null;
+        currentEditPlatform = null;
+    }
+
+    document.querySelectorAll('.info-row.editable').forEach(function(row){
+        row.addEventListener('click', function(){
+            var field = this.dataset.field;
+            var label = this.dataset.label;
+            currentEditField = field;
+            var value = profileData[field] || '';
+            var isTextarea = field === 'bio';
+            var isGender = field === 'gender';
+            openModal(label, value, isTextarea, isGender);
+        });
+    });
+
+    document.getElementById('editModalCancel').addEventListener('click', closeModal);
+    document.getElementById('editModalOverlay').addEventListener('click', closeModal);
+
+    document.getElementById('editModalSave').addEventListener('click', function(){
+        if(currentEditField === 'gender'){
+            if(profileData.genderChanged && profileData.gender !== ''){
+                showToast('Gender can only be changed once', true);
+                closeModal();
+                return;
+            }
+            var selected = document.querySelector('.gender-option.selected');
+            if(!selected){
+                showToast('Please select a gender', true);
+                return;
+            }
+            var newGender = selected.dataset.value;
+            if(profileData.gender && profileData.gender !== newGender && profileData.genderChanged){
+                showToast('Gender can only be changed once', true);
+                closeModal();
+                return;
+            }
+            profileData.gender = newGender;
+            profileData.genderChanged = true;
+            updateGenderDisplay();
+            showToast('Gender updated successfully');
+        } else if(currentEditField){
+            var input = document.getElementById('editModalInput');
+            var newValue = input.value.trim();
+            if(!newValue){
+                showToast('Please enter a value', true);
+                return;
+            }
+            profileData[currentEditField] = newValue;
+            updateFieldDisplay(currentEditField, newValue);
+            showToast('Updated successfully');
+        } else if(currentEditPlatform){
+            var input2 = document.getElementById('editModalInput');
+            var newHandle = input2.value.trim();
+            if(!newHandle){
+                showToast('Please enter a handle', true);
+                return;
+            }
+            profileData.social[currentEditPlatform] = newHandle;
+            updateSocialDisplay(currentEditPlatform, newHandle);
+            showToast('Account linked successfully');
+        }
+        closeModal();
+    });
+
+    function updateFieldDisplay(field, value){
+        var el = document.getElementById('info' + field.charAt(0).toUpperCase() + field.slice(1));
+        if(el) el.textContent = value;
+        if(field === 'displayName'){
+            document.getElementById('displayName').textContent = value;
+        }
+        if(field === 'username'){
+            document.getElementById('userHandle').textContent = value;
+        }
+    }
+
+    function updateGenderDisplay(){
+        var genderMap = {male: 'Male', female: 'Female', other: 'Other'};
+        var display = profileData.gender ? genderMap[profileData.gender] : 'Not set';
+        document.getElementById('infoGender').textContent = display;
+    }
+
+    function updateSocialDisplay(platform, handle){
+        var handleEl = document.getElementById(platform + 'Handle');
+        var btn = document.getElementById(platform + 'Btn');
+        if(handle){
+            handleEl.textContent = '@' + handle;
+            btn.textContent = 'Unlink';
+            btn.classList.add('linked');
+        } else {
+            handleEl.textContent = 'Not connected';
+            btn.textContent = 'Link';
+            btn.classList.remove('linked');
+        }
+    }
+
+    document.querySelectorAll('.social-link-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var platform = this.dataset.platform;
+            currentEditPlatform = platform;
+            currentEditField = null;
+            if(this.classList.contains('linked')){
+                profileData.social[platform] = '';
+                updateSocialDisplay(platform, '');
+                showToast('Account unlinked');
+            } else {
+                var platformNames = {instagram: 'Instagram', x: 'X (Twitter)', youtube: 'YouTube', tiktok: 'TikTok'};
+                openModal(platformNames[platform] + ' Handle', '', false, false);
+            }
+        });
+    });
+
+    var avatarInput = document.getElementById('avatarInput');
+    var avatarEditBtn = document.getElementById('avatarEditBtn');
+    var profileAvatarImg = document.getElementById('profileAvatarImg');
+
+    avatarEditBtn.addEventListener('click', function(){
+        avatarInput.click();
+    });
+
+    avatarInput.addEventListener('change', function(e){
+        var file = e.target.files[0];
+        if(file){
+            var reader = new FileReader();
+            reader.onload = function(evt){
+                profileAvatarImg.src = evt.target.result;
+                profileData.avatar = evt.target.result;
+                showToast('Avatar updated');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    document.addEventListener('keydown', function(e){
+        if(e.key === 'Escape'){
+            closeModal();
+        }
+    });
+
+    // ===== Comet Trail Effect =====
+    (function(){
+        var canvas = document.getElementById('cometCanvas');
+        var isOverInteractive = false;
+        var mouseX = -9999, mouseY = -9999;
+        var prevMouseX = -9999, prevMouseY = -9999;
+        var particles = [];
+        var maxParticles = 40;
+        var particleId = 0;
+
+        var interactiveSelectors = '.profile-container, .back-link, .edit-modal-content, .profile-tab';
+
+        function checkInteractiveTarget(e){
+            var target = e.target;
+            while(target && target !== document.body){
+                if(target.matches && target.matches(interactiveSelectors)){
+                    return true;
+                }
+                target = target.parentElement;
+            }
+            return false;
+        }
+
+        document.addEventListener('mousemove', function(e){
+            prevMouseX = mouseX;
+            prevMouseY = mouseY;
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            isOverInteractive = checkInteractiveTarget(e);
+        });
+
+        document.addEventListener('mouseleave', function(){
+            isOverInteractive = true;
+        });
+
+        function createParticle(x, y, speed){
+            var el = document.createElement('div');
+            el.className = 'comet-particle';
+            var size = Math.random() * 3 + 2;
+            el.style.width = size + 'px';
+            el.style.height = size + 'px';
+            el.style.left = '0px';
+            el.style.top = '0px';
+
+            var hue = Math.random() * 40 + 180;
+            var color = 'hsla(' + hue + ', 80%, 70%, 1)';
+            var glow = 'hsla(' + hue + ', 80%, 60%, 0.6)';
+            el.style.background = color;
+            el.style.boxShadow = '0 0 ' + (size * 2) + 'px ' + glow + ', 0 0 ' + (size * 4) + 'px ' + glow;
+
+            canvas.appendChild(el);
+
+            var angle = Math.atan2(mouseY - prevMouseY, mouseX - prevMouseX);
+            var spread = (Math.random() - 0.5) * 0.6;
+            var vx = Math.cos(angle + spread) * speed * 0.3;
+            var vy = Math.sin(angle + spread) * speed * 0.3;
+
+            var p = {
+                id: particleId++,
+                el: el,
+                x: x,
+                y: y,
+                vx: vx,
+                vy: vy,
+                life: 1,
+                decay: Math.random() * 0.015 + 0.012,
+                scale: 1
+            };
+
+            gsap.set(el, { x: x, y: y, scale: 1, opacity: 1 });
+
+            gsap.to(p, {
+                life: 0,
+                scale: 0,
+                duration: 0.8 + Math.random() * 0.4,
+                ease: 'power2.out',
+                onUpdate: function(){
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vx *= 0.96;
+                    p.vy *= 0.96;
+                    gsap.set(el, {
+                        x: p.x,
+                        y: p.y,
+                        opacity: p.life,
+                        scale: p.scale
+                    });
+                },
+                onComplete: function(){
+                    if(el.parentNode) el.parentNode.removeChild(el);
+                    var idx = particles.indexOf(p);
+                    if(idx > -1) particles.splice(idx, 1);
+                }
+            });
+
+            particles.push(p);
+        }
+
+        function spawnHeadGlow(x, y){
+            var el = document.createElement('div');
+            el.className = 'comet-particle';
+            var size = 6;
+            el.style.width = size + 'px';
+            el.style.height = size + 'px';
+            el.style.left = '0px';
+            el.style.top = '0px';
+            el.style.background = 'radial-gradient(circle, rgba(200,230,255,0.9) 0%, rgba(150,200,255,0.4) 40%, transparent 70%)';
+            el.style.boxShadow = '0 0 12px rgba(150,200,255,0.5), 0 0 24px rgba(100,180,255,0.3)';
+            canvas.appendChild(el);
+
+            gsap.set(el, { x: x - size/2, y: y - size/2, scale: 1, opacity: 0.8 });
+
+            gsap.to(el, {
+                opacity: 0,
+                scale: 2,
+                duration: 0.3,
+                ease: 'power2.out',
+                onComplete: function(){
+                    if(el.parentNode) el.parentNode.removeChild(el);
+                }
+            });
+        }
+
+        var lastSpawnTime = 0;
+        var spawnInterval = 16;
+
+        function loop(timestamp){
+            if(!isOverInteractive && mouseX > -9999 && prevMouseX > -9999){
+                var dx = mouseX - prevMouseX;
+                var dy = mouseY - prevMouseY;
+                var dist = Math.sqrt(dx*dx + dy*dy);
+                var speed = Math.min(dist, 30);
+
+                if(dist > 1 && timestamp - lastSpawnTime > spawnInterval){
+                    var count = Math.min(Math.floor(dist / 4), 3);
+                    for(var i = 0; i < count; i++){
+                        var t = i / count;
+                        var px = prevMouseX + dx * t + (Math.random() - 0.5) * 4;
+                        var py = prevMouseY + dy * t + (Math.random() - 0.5) * 4;
+                        createParticle(px, py, speed);
+                    }
+                    spawnHeadGlow(mouseX, mouseY);
+                    lastSpawnTime = timestamp;
+                }
+            }
+
+            while(particles.length > maxParticles){
+                var old = particles.shift();
+                gsap.killTweensOf(old);
+                if(old.el && old.el.parentNode) old.el.parentNode.removeChild(old.el);
+            }
+
+            requestAnimationFrame(loop);
+        }
+
+        requestAnimationFrame(loop);
+    })();
+})();
+</script>
+
+</body>
+</html>

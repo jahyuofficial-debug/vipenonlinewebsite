@@ -1,0 +1,385 @@
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: radial-gradient(ellipse at center, #3a3d4a 0%, #1a1c24 70%);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scene {
+  perspective: 1200px;
+  perspective-origin: 50% 45%;
+  width: 500px;
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tape-wrapper {
+  width: 300px;
+  height: 300px;
+  transform-style: preserve-3d;
+  transform: rotateX(-35deg) rotateY(20deg);
+  will-change: transform;
+  cursor: grab;
+  transition: transform 0.08s ease-out;
+}
+
+.tape-wrapper:active {
+  cursor: grabbing;
+  transition: none;
+}
+
+.tape-wrapper.inertia {
+  transition: transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.tape-model {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+/* ===== 顶面 - 同心圆环 ===== */
+.tape-top {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  transform-style: preserve-3d;
+}
+
+.tape-ring {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.tape-ring-1 {
+  inset: 0;
+  background: radial-gradient(circle,
+    hsla(210, 10%, 85%, 0.38) 0%,
+    hsla(210, 8%, 82%, 0.42) 85%,
+    hsla(210, 8%, 78%, 0.35) 88%,
+    hsla(210, 8%, 74%, 0.22) 92%,
+    hsla(210, 8%, 68%, 0.08) 96%,
+    transparent 98%
+  );
+  box-shadow:
+    0 0 60px hsla(210, 20%, 80%, 0.15) inset,
+    0 0 2px hsla(0, 0%, 100%, 0.25);
+}
+
+.tape-ring-2 {
+  inset: 4px;
+  background: radial-gradient(circle,
+    transparent 0%,
+    hsla(210, 10%, 88%, 0.12) 82%,
+    hsla(210, 10%, 84%, 0.32) 86%,
+    hsla(210, 10%, 80%, 0.38) 89%,
+    hsla(210, 10%, 76%, 0.22) 93%,
+    transparent 97%
+  );
+}
+
+.tape-ring-3 {
+  inset: 10px;
+  background: radial-gradient(circle,
+    hsla(210, 10%, 90%, 0.15) 0%,
+    hsla(210, 10%, 86%, 0.25) 78%,
+    hsla(210, 10%, 82%, 0.36) 84%,
+    hsla(210, 10%, 76%, 0.22) 90%,
+    transparent 95%
+  );
+}
+
+.tape-ring-4 {
+  inset: 16px;
+  background: radial-gradient(circle,
+    transparent 0%,
+    hsla(210, 12%, 90%, 0.18) 75%,
+    hsla(210, 12%, 86%, 0.34) 82%,
+    hsla(210, 12%, 80%, 0.28) 88%,
+    transparent 93%
+  );
+}
+
+.tape-ring-5 {
+  inset: 24px;
+  background: radial-gradient(circle,
+    hsla(210, 12%, 92%, 0.12) 0%,
+    hsla(210, 12%, 88%, 0.22) 72%,
+    hsla(210, 12%, 84%, 0.32) 80%,
+    hsla(210, 12%, 78%, 0.18) 87%,
+    transparent 93%
+  );
+}
+
+.tape-ring-6 {
+  inset: 34px;
+  background: radial-gradient(circle,
+    transparent 0%,
+    hsla(210, 15%, 92%, 0.16) 68%,
+    hsla(210, 15%, 86%, 0.30) 77%,
+    hsla(210, 15%, 80%, 0.22) 84%,
+    transparent 90%
+  );
+}
+
+.tape-ring-7 {
+  inset: 46px;
+  background: radial-gradient(circle,
+    hsla(210, 15%, 94%, 0.12) 0%,
+    hsla(210, 15%, 90%, 0.20) 65%,
+    hsla(210, 15%, 84%, 0.26) 74%,
+    hsla(210, 15%, 78%, 0.16) 81%,
+    transparent 88%
+  );
+}
+
+/* ===== 中心纸筒芯 ===== */
+.tape-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 60px;
+  height: 60px;
+  margin: -30px 0 0 -30px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    #1a1818 0%,
+    #3a322a 30%,
+    #8b7355 55%,
+    #a0845c 70%,
+    #8b7355 82%,
+    #6b5a45 92%,
+    #4a3d30 100%
+  );
+  box-shadow:
+    0 0 0 3px hsla(36, 25%, 55%, 0.4),
+    0 0 0 6px hsla(36, 25%, 35%, 0.25),
+    0 0 20px rgba(0,0,0,0.5) inset,
+    0 0 8px rgba(0,0,0,0.6);
+  transform: translateZ(1px);
+}
+
+/* ===== 顶面高光 ===== */
+.tape-highlight {
+  position: absolute;
+  top: 8%;
+  left: 12%;
+  width: 45%;
+  height: 35%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 30% 30%,
+    hsla(0, 0%, 100%, 0.28) 0%,
+    hsla(0, 0%, 100%, 0.12) 40%,
+    transparent 70%
+  );
+  transform: rotate(-15deg);
+  pointer-events: none;
+  filter: blur(2px);
+}
+
+/* ===== 侧面主体 ===== */
+.tape-side {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(180deg,
+    hsla(210, 8%, 70%, 0.35) 0%,
+    hsla(210, 8%, 62%, 0.45) 15%,
+    hsla(210, 8%, 55%, 0.50) 35%,
+    hsla(210, 8%, 48%, 0.55) 55%,
+    hsla(210, 8%, 42%, 0.45) 75%,
+    hsla(210, 8%, 35%, 0.30) 90%,
+    hsla(210, 8%, 28%, 0.15) 100%
+  );
+  transform: translateZ(-1px);
+}
+
+/* 侧面纹理 - 横向条纹模拟胶带缠绕层 */
+.tape-side-texture {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 1.5px,
+    hsla(210, 10%, 75%, 0.12) 1.5px,
+    hsla(210, 10%, 75%, 0.12) 2px
+  );
+  opacity: 0.7;
+  transform: translateZ(-0.5px);
+}
+
+/* ===== 侧面厚度层（堆叠产生立体感） ===== */
+.tape-side-thickness {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+.thickness-1 {
+  inset: 1px;
+  background: linear-gradient(180deg,
+    hsla(210, 8%, 68%, 0.20) 0%,
+    hsla(210, 8%, 60%, 0.30) 50%,
+    hsla(210, 8%, 52%, 0.15) 100%
+  );
+  transform: translateZ(-5px);
+}
+
+.thickness-2 {
+  inset: 2px;
+  background: linear-gradient(180deg,
+    hsla(210, 8%, 60%, 0.22) 0%,
+    hsla(210, 8%, 52%, 0.32) 50%,
+    hsla(210, 8%, 44%, 0.18) 100%
+  );
+  transform: translateZ(-12px);
+}
+
+.thickness-3 {
+  inset: 3px;
+  background: linear-gradient(180deg,
+    hsla(210, 8%, 52%, 0.25) 0%,
+    hsla(210, 8%, 44%, 0.35) 50%,
+    hsla(210, 8%, 36%, 0.20) 100%
+  );
+  transform: translateZ(-20px);
+}
+
+.thickness-4 {
+  inset: 5px;
+  background: linear-gradient(180deg,
+    hsla(210, 8%, 44%, 0.28) 0%,
+    hsla(210, 8%, 36%, 0.38) 50%,
+    hsla(210, 8%, 28%, 0.22) 100%
+  );
+  transform: translateZ(-30px);
+}
+
+.thickness-5 {
+  inset: 8px;
+  background: linear-gradient(180deg,
+    hsla(210, 6%, 34%, 0.30) 0%,
+    hsla(210, 6%, 26%, 0.42) 50%,
+    hsla(210, 6%, 18%, 0.24) 100%
+  );
+  transform: translateZ(-35px);
+}
+
+/* ===== 底部阴影盘 ===== */
+.tape-shadow-disk {
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 50%,
+    transparent 40%,
+    hsla(0, 0%, 0%, 0.15) 70%,
+    hsla(0, 0%, 0%, 0.35) 85%,
+    hsla(0, 0%, 0%, 0.5) 100%
+  );
+  transform: translateZ(-38px);
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+/* ===== 地面投影 ===== */
+.ground-shadow {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 220px;
+  height: 30px;
+  margin-top: -10px;
+  margin-left: -110px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center,
+    rgba(0,0,0,0.45) 0%,
+    rgba(0,0,0,0.25) 40%,
+    rgba(0,0,0,0.08) 70%,
+    transparent 100%
+  );
+  filter: blur(12px);
+  animation: shadowPulse 3s ease-in-out infinite;
+}
+
+@keyframes shadowPulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.05); opacity: 0.85; }
+}
+
+/* ===== 操作提示 ===== */
+.hint {
+  margin-top: 60px;
+  color: hsla(0, 0%, 100%, 0.45);
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+  animation: hintFade 2s ease-in-out infinite;
+}
+
+@keyframes hintFade {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 600px) {
+  .scene {
+    width: 320px;
+    height: 320px;
+  }
+
+  .tape-wrapper {
+    width: 200px;
+    height: 200px;
+  }
+
+  .tape-core {
+    width: 40px;
+    height: 40px;
+    margin: -20px 0 0 -20px;
+  }
+
+  .thickness-1 { inset: 1px; transform: translateZ(-3px); }
+  .thickness-2 { inset: 1px; transform: translateZ(-8px); }
+  .thickness-3 { inset: 2px; transform: translateZ(-14px); }
+  .thickness-4 { inset: 3px; transform: translateZ(-20px); }
+  .thickness-5 { inset: 5px; transform: translateZ(-24px); }
+  .tape-shadow-disk { transform: translateZ(-26px); }
+
+  .ground-shadow {
+    width: 150px;
+    margin-left: -75px;
+  }
+
+  .hint {
+    margin-top: 40px;
+    font-size: 12px;
+  }
+}
