@@ -170,6 +170,11 @@ function handleSendCode(res, body) {
         sentAt: Date.now()
     };
 
+    var ts = Date.now();
+    var hmac = crypto.createHmac('sha256', AUTH_SECRET);
+    hmac.update(email + '|' + code + '|' + ts);
+    var hash = hmac.digest('hex');
+
     sendEmailViaResend(email, code, function(err, result) {
         if (err) {
             console.error('Resend send error:', err.message);
@@ -177,37 +182,55 @@ function handleSendCode(res, body) {
             return;
         }
         console.log('Verification code sent to', email, '| code:', code, '| id:', result.id);
-        sendJSON(res, 200, { success: true });
+        sendJSON(res, 200, { success: true, hash: hash, ts: ts });
     });
 }
 
 function handleVerifyCode(res, body) {
     var email = body.email;
     var code = body.code;
+    var hash = body.hash;
+    var ts = body.ts;
 
     if (!email || !code) {
         sendJSON(res, 400, { success: false, error: 'Email and code are required' });
         return;
     }
 
-    var record = codeStore[email];
-    if (!record) {
-        sendJSON(res, 400, { success: false, error: 'No verification code found. Please request a new one.' });
-        return;
-    }
+    if (hash && ts) {
+        if (Date.now() - ts > CODE_EXPIRE_MS) {
+            sendJSON(res, 400, { success: false, error: 'Verification code expired. Please request a new one.' });
+            return;
+        }
 
-    if (Date.now() > record.expiresAt) {
+        var hmac = crypto.createHmac('sha256', AUTH_SECRET);
+        hmac.update(email + '|' + code + '|' + ts);
+        var expectedHash = hmac.digest('hex');
+
+        if (expectedHash !== hash) {
+            sendJSON(res, 400, { success: false, error: 'Invalid verification code' });
+            return;
+        }
+    } else {
+        var record = codeStore[email];
+        if (!record) {
+            sendJSON(res, 400, { success: false, error: 'No verification code found. Please request a new one.' });
+            return;
+        }
+
+        if (Date.now() > record.expiresAt) {
+            delete codeStore[email];
+            sendJSON(res, 400, { success: false, error: 'Verification code expired. Please request a new one.' });
+            return;
+        }
+
+        if (record.code !== code) {
+            sendJSON(res, 400, { success: false, error: 'Invalid verification code' });
+            return;
+        }
+
         delete codeStore[email];
-        sendJSON(res, 400, { success: false, error: 'Verification code expired. Please request a new one.' });
-        return;
     }
-
-    if (record.code !== code) {
-        sendJSON(res, 400, { success: false, error: 'Invalid verification code' });
-        return;
-    }
-
-    delete codeStore[email];
 
     var token = generateToken(email);
     var username = email.split('@')[0];

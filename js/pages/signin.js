@@ -9,6 +9,8 @@
     var sendTip = document.getElementById('sendTip');
     var isSending = false;
     var countdownTimer = null;
+    var verifyHash = '';
+    var verifyTs = 0;
 
     function validateEmail(value) {
         if (!value) return false;
@@ -89,14 +91,19 @@
 
         startCountdown();
 
-        fetch('/api/auth/send-code', {
+        fetch(CONFIG.API_BASE + '/auth/send-code', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: emailVal })
         })
         .then(function(r) { return r.json(); })
         .then(function(data) {
-            if (!data.success) {
+            if (data.success) {
+                if (data.hash && data.ts) {
+                    verifyHash = data.hash;
+                    verifyTs = data.ts;
+                }
+            } else {
                 stopCountdown();
                 sendTip.classList.remove('show');
                 alert(data.error || 'Failed to send verification code');
@@ -168,10 +175,10 @@
         signinBtn.disabled = true;
         signinBtn.textContent = 'Verifying...';
 
-        fetch('/api/auth/verify-code', {
+        fetch(CONFIG.API_BASE + '/auth/verify-code', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: emailVal, code: codeVal })
+            body: JSON.stringify({ email: emailVal, code: codeVal, hash: verifyHash, ts: verifyTs })
         })
         .then(function(r) { return r.json(); })
         .then(function(data) {

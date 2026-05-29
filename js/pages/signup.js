@@ -1,4 +1,5 @@
 (function(){
+    'use strict';
     var accountName = document.getElementById('accountName');
     var password = document.getElementById('password');
     var email = document.getElementById('email');
@@ -14,6 +15,9 @@
     var signupForm = document.getElementById('signupForm');
     var accountError = document.getElementById('accountError');
     var sendTip = document.getElementById('sendTip');
+
+    var verifyHash = '';
+    var verifyTs = 0;
 
     var eyeOpenSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
     var eyeClosedSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
@@ -268,14 +272,19 @@
             }
         }, 1000);
 
-        fetch('/api/auth/send-code', {
+        fetch(CONFIG.API_BASE + '/auth/send-code', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: emailVal })
         })
         .then(function(r) { return r.json(); })
         .then(function(data) {
-            if (!data.success) {
+            if (data.success) {
+                if (data.hash && data.ts) {
+                    verifyHash = data.hash;
+                    verifyTs = data.ts;
+                }
+            } else {
                 clearInterval(timer);
                 sendCodeBtn.disabled = false;
                 sendCodeBtn.textContent = 'Send Code';
@@ -296,10 +305,10 @@
         e.preventDefault();
         if(nextBtn.disabled) return;
 
-        fetch('/api/auth/verify-code', {
+        fetch(CONFIG.API_BASE + '/auth/verify-code', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email.value, code: emailCode.value })
+            body: JSON.stringify({ email: email.value, code: emailCode.value, hash: verifyHash, ts: verifyTs })
         })
         .then(function(r) { return r.json(); })
         .then(function(data) {

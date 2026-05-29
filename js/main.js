@@ -554,14 +554,12 @@ function navigateTo(pageName) {
         subPageContainer.innerHTML = pageTemplates[pageName];
         app.appendChild(subPageContainer);
         currentPage = pageName;
-    } else if (pageName === 'signin' || pageName === 'signup') {
-        if (herosTopBg) herosTopBg.classList.remove('hidden');
-        banner.style.display = 'none';
-        header.classList.remove('dimmed');
-        subPageContainer = document.createElement('div');
-        subPageContainer.innerHTML = '<section class="sub-page" style="display:flex;align-items:center;justify-content:center;min-height:100vh;"><div style="text-align:center;"><h2 style="font-size:.6rem;font-weight:700;color:rgba(255,255,255,.08);letter-spacing:.08rem;margin-bottom:.2rem;">' + (pageName === 'signin' ? 'Sign In' : 'Sign Up') + '</h2><p style="font-size:.18rem;color:rgba(255,255,255,.06);letter-spacing:.04rem;">Coming Soon</p></div></section>';
-        app.appendChild(subPageContainer);
-        currentPage = pageName;
+    } else if (pageName === 'signin') {
+        window.location.href = 'signin.html';
+        return;
+    } else if (pageName === 'signup') {
+        window.location.href = 'signup.html';
+        return;
     }
     updateNavCollapseState();
     updateNavActiveState(currentPage);
