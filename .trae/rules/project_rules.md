@@ -11,6 +11,23 @@
 
 ---
 
+## Git 仓库同步
+
+**GitHub 仓库地址：** `https://github.com/jahyuofficial-debug/vipenonlinewebsite.git`
+
+当用户说"同步至仓库"或类似表达时，执行以下操作：
+
+```bash
+git add -A
+git commit -m "sync: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
+git push origin main
+```
+
+- 若远程仓库尚未关联，先执行 `git remote add origin https://github.com/jahyuofficial-debug/vipenonlinewebsite.git`
+- 若推送因冲突失败，先 `git pull origin main --rebase` 再推送
+
+---
+
 ## 一、目录约定（严格遵守）
 
 ```
