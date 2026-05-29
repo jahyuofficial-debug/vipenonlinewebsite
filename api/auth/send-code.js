@@ -1,5 +1,5 @@
-var https = require('https');
 var crypto = require('crypto');
+var https = require('https');
 
 var RESEND_API_KEY = process.env.RESEND_API_KEY || '';
 var RESEND_FROM = process.env.RESEND_FROM || 'Vipen <noreply@vipenonline.com>';
@@ -56,39 +56,52 @@ function sendEmailViaResend(toEmail, code, callback) {
 }
 
 function sendJSON(res, statusCode, data) {
-    res.writeHead(statusCode, {
-        'Content-Type': 'application/json; charset=utf-8',
-        'Access-Control-Allow-Origin': '*'
-    });
+    res.statusCode = statusCode;
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.end(JSON.stringify(data));
+}
+
+function parseBody(req, callback) {
+    var body = '';
+    req.on('data', function(chunk) {
+        body += chunk;
+        if (body.length > 1024) {
+            req.destroy();
+            callback(new Error('Payload too large'));
+        }
+    });
+    req.on('end', function() {
+        try {
+            callback(null, JSON.parse(body));
+        } catch (e) {
+            callback(new Error('Invalid JSON'));
+        }
+    });
 }
 
 module.exports = function(req, res) {
     if (req.method === 'OPTIONS') {
-        res.writeHead(204, {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type'
-        });
+        res.statusCode = 204;
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
         res.end();
         return;
     }
 
-    if (!RESEND_API_KEY) {
-        sendJSON(res, 500, { success: false, error: 'Email service not configured. Set RESEND_API_KEY.' });
+    if (req.method !== 'POST') {
+        sendJSON(res, 405, { success: false, error: 'Method not allowed' });
         return;
     }
 
-    var body = '';
-    req.on('data', function(chunk) { body += chunk; });
-    req.on('end', function() {
-        var data;
-        try { data = JSON.parse(body); } catch (e) {
-            sendJSON(res, 400, { success: false, error: 'Invalid JSON' });
+    parseBody(req, function(err, body) {
+        if (err) {
+            sendJSON(res, 400, { success: false, error: err.message });
             return;
         }
 
-        var email = data.email;
+        var email = body.email;
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             sendJSON(res, 400, { success: false, error: 'Invalid email address' });
             return;
@@ -96,7 +109,6 @@ module.exports = function(req, res) {
 
         var code = generateCode();
         var ts = Date.now();
-
         var hmac = crypto.createHmac('sha256', AUTH_SECRET);
         hmac.update(email + '|' + code + '|' + ts);
         var hash = hmac.digest('hex');

@@ -9,40 +9,63 @@ function generateToken(email) {
 }
 
 function sendJSON(res, statusCode, data) {
-    res.writeHead(statusCode, {
-        'Content-Type': 'application/json; charset=utf-8',
-        'Access-Control-Allow-Origin': '*'
-    });
+    res.statusCode = statusCode;
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.end(JSON.stringify(data));
+}
+
+function parseBody(req, callback) {
+    var body = '';
+    req.on('data', function(chunk) {
+        body += chunk;
+        if (body.length > 1024) {
+            req.destroy();
+            callback(new Error('Payload too large'));
+        }
+    });
+    req.on('end', function() {
+        try {
+            callback(null, JSON.parse(body));
+        } catch (e) {
+            callback(new Error('Invalid JSON'));
+        }
+    });
 }
 
 module.exports = function(req, res) {
     if (req.method === 'OPTIONS') {
-        res.writeHead(204, {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type'
-        });
+        res.statusCode = 204;
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
         res.end();
         return;
     }
 
-    var body = '';
-    req.on('data', function(chunk) { body += chunk; });
-    req.on('end', function() {
-        var data;
-        try { data = JSON.parse(body); } catch (e) {
-            sendJSON(res, 400, { success: false, error: 'Invalid JSON' });
+    if (req.method !== 'POST') {
+        sendJSON(res, 405, { success: false, error: 'Method not allowed' });
+        return;
+    }
+
+    parseBody(req, function(err, body) {
+        if (err) {
+            sendJSON(res, 400, { success: false, error: err.message });
             return;
         }
 
-        var email = data.email;
-        var code = data.code;
-        var hash = data.hash;
-        var ts = data.ts;
+        var email = body.email;
+        var code = body.code;
+        var hash = body.hash;
+        var ts = body.ts;
 
-        if (!email || !code || !hash || !ts) {
-            sendJSON(res, 400, { success: false, error: 'Email, code, hash and ts are required' });
+        if (!email || !code) {
+            sendJSON(res, 400, { success: false, error: 'Email and code are required' });
+            return;
+        }
+
+        if (!hash || !ts) {
+            sendJSON(res, 400, { success: false, error: 'Verification hash and timestamp are required' });
             return;
         }
 
