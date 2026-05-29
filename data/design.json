@@ -1,0 +1,74 @@
+﻿{
+    "dwItems":  [
+                    {
+                        "title":  "Neon City",
+                        "cat":  "Brand Identity",
+                        "gradient":  "linear-gradient(135deg,#ff6a3d 0%,#e8431a 30%,#1a0a2e 100%)",
+                        "year":  "2025",
+                        "client":  "Nightfall Studio",
+                        "tools":  "Figma / Blender / AE",
+                        "desc":  "A bold brand identity system for Nightfall Studio, fusing cyberpunk aesthetics with minimalist design principles. The project encompasses logo design, typography selection, color palette development, and comprehensive brand guidelines that translate seamlessly across digital and print media."
+                    },
+                    {
+                        "title":  "Amber Flow",
+                        "cat":  "Motion Graphics",
+                        "gradient":  "linear-gradient(135deg,#d4a853 0%,#8b6914 30%,#1a1a0a 100%)",
+                        "year":  "2025",
+                        "client":  "Artisan Collective",
+                        "tools":  "Cinema 4D / Redshift / AE",
+                        "desc":  "An immersive motion graphics piece exploring the fluid dynamics of amber resin. Through procedural animation and meticulous lighting, the project captures the organic beauty of fossilized time, creating a meditative visual experience for the Artisan Collective gallery installation."
+                    },
+                    {
+                        "title":  "Ethereal Wave",
+                        "cat":  "Web Design",
+                        "gradient":  "linear-gradient(135deg,#b2b9ff 0%,#5c6bc0 30%,#0a0a1a 100%)",
+                        "year":  "2025",
+                        "client":  "Waveform Audio",
+                        "tools":  "React / Three.js / WebGL",
+                        "desc":  "A next-generation web experience for Waveform Audio, featuring real-time 3D audio visualization and an immersive browsing interface. The design pushes the boundaries of web technology while maintaining intuitive navigation and accessibility standards across all devices."
+                    },
+                    {
+                        "title":  "Scarlet Pulse",
+                        "cat":  "Editorial Design",
+                        "gradient":  "linear-gradient(135deg,#ff6b9d 0%,#c2185b 30%,#1a0a14 100%)",
+                        "year":  "2024",
+                        "client":  "Vogue Digital",
+                        "tools":  "InDesign / Photoshop / AI",
+                        "desc":  "A striking editorial design series for Vogue Digital, combining bold typography with avant-garde photography treatments. Each spread tells a cohesive story through innovative layout structures that challenge traditional magazine conventions."
+                    },
+                    {
+                        "title":  "Teal Horizon",
+                        "cat":  "Product Design",
+                        "gradient":  "linear-gradient(135deg,#4dd0e1 0%,#00838f 30%,#0a1a1a 100%)",
+                        "year":  "2024",
+                        "client":  "Nova Tech",
+                        "tools":  "Figma / Protopie / Spline",
+                        "desc":  "A comprehensive product design system for Nova Tech smart home ecosystem. From mobile app interfaces to physical device UI, every touchpoint was crafted with obsessive attention to usability, accessibility, and visual harmony."
+                    },
+                    {
+                        "title":  "Obsidian Vault",
+                        "cat":  "3D Art",
+                        "gradient":  "linear-gradient(135deg,#9575cd 0%,#4a148c 30%,#0a0a0a 100%)",
+                        "year":  "2024",
+                        "client":  "Solo Exhibition",
+                        "tools":  "Blender / Unreal Engine / PS",
+                        "desc":  "A personal 3D art series exploring the interplay of light and darkness within crystalline architectures. Each piece in the Obsidian Vault collection represents a unique study in material properties, atmospheric lighting, and geometric abstraction."
+                    }
+                ],
+    "dwSuits":  [
+                    "♠",
+                    "♣",
+                    "♥",
+                    "♦",
+                    "♠",
+                    "♣"
+                ],
+    "dwRanks":  [
+                    "A",
+                    "2",
+                    "3",
+                    "4",
+                    "5",
+                    "6"
+                ]
+}

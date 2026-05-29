@@ -6,89 +6,14 @@
 <title>Sign In - Vipen</title>
 <link rel="Shortcut Icon" href="images/favicon.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<style>
-*,:after,:before{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',Helvetica,Arial,sans-serif}
-html{font-size:calc(100vw/19.2);scroll-behavior:smooth}
-body{position:relative;background:#000;color:#fff;overflow:hidden;height:100vh;display:flex;flex-direction:column;align-items:center}
-body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:url('images/REGISTERPAGE.png') center/cover no-repeat;opacity:.6;z-index:-1}
+<script src="js/core/utils.js"></script>
+<script src="js/core/comet-trail.js"></script>
+<link rel="stylesheet" href="css/pages/signin.css">
 
-.comet-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
-.comet-particle{position:absolute;border-radius:50%;pointer-events:none;will-change:transform,opacity}
-a{text-decoration:none;color:inherit}
-input,button{outline:none;font-family:inherit}
-::selection{background-color:transparent}
-
-.signin-container{width:100%;max-width:4.2rem;padding:0 .4rem;display:flex;flex-direction:column;align-items:center;height:100vh;justify-content:center;padding-top:.15rem;padding-bottom:.15rem}
-
-.signin-header{width:100%;display:flex;flex-direction:column;align-items:center;margin-bottom:.1rem;flex-shrink:0}
-.signin-logo{width:3.6rem;height:3.6rem;margin-bottom:0;opacity:.9}
-.signin-logo img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 .02rem .06rem rgba(0,0,0,.45))}
-
-.signin-title{font-size:.48rem;font-weight:900;color:#fff;margin-bottom:0;letter-spacing:-.004em;text-align:center;font-family:'SF Pro Display','Helvetica Neue',Helvetica,Arial,sans-serif;font-style:italic;line-height:1.1;margin-top:-.1rem}
-.signin-subtitle{font-size:.12rem;color:rgba(255,255,255,.4);text-align:center;font-weight:700;font-style:italic;margin-bottom:0;line-height:1.2;margin-top:0}
-
-.signin-title,.signin-subtitle{position:relative;transform:translateY(-80%)}
-.signin-subtitle{transform:translateY(-240%)}
-
-.signin-form{width:100%;display:flex;flex-direction:column;gap:.15rem;margin-top:.06rem;position:relative;transform:translateY(-10%)}
-
-.input-group{position:relative;width:100%;display:flex;align-items:center}
-
-.input-field{width:100%;height:.36rem;background:#333;border:none;border-radius:.08rem;padding:0 .12rem;padding-right:.38rem;font-size:.11rem;color:#fff;transition:border-color .3s,background .3s,box-shadow .3s;-webkit-appearance:none;box-shadow:0 .04rem .12rem rgba(0,0,0,.5)}
-.input-field::placeholder{color:rgba(255,255,255,.25);font-weight:400}
-.input-field:hover{box-shadow:0 .06rem .16rem rgba(0,0,0,.7)}
-.input-field:focus{box-shadow:0 .06rem .2rem rgba(0,0,0,.8);outline:none}
-.input-field.error{border:2px solid rgba(255,80,80,.8)!important;animation:shake .4s ease}
-.input-field.valid{border:2px solid rgba(50,200,100,.5)}
-
-@keyframes shake{
-    0%,100%{transform:translateX(0)}
-    15%{transform:translateX(-6px)}
-    30%{transform:translateX(5px)}
-    45%{transform:translateX(-4px)}
-    60%{transform:translateX(3px)}
-    75%{transform:translateX(-2px)}
-}
-
-.validation-icon{position:absolute;right:.12rem;top:0;transform:translateY(0) scale(0);width:.18rem;height:.36rem;transition:transform .25s cubic-bezier(.34,1.56,.64,1);pointer-events:none;display:flex;align-items:center;justify-content:center}
-.validation-icon.show{transform:translateY(0) scale(1)}
-.validation-icon svg{width:100%;height:100%;display:block}
-
-.password-toggle{position:absolute;right:.08rem;top:0;transform:translateY(0);width:.28rem;height:.36rem;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.35);transition:color .2s;padding:0;z-index:2}
-.password-toggle:hover{color:rgba(255,255,255,.7)}
-.password-toggle svg{width:.2rem;height:.2rem;display:block}
-
-.input-group.has-toggle .input-field{padding-right:.4rem}
-.input-group.has-toggle .validation-icon{right:.36rem}
-
-.forgot-link{display:block;text-align:right;font-size:.09rem;color:rgba(255,255,255,.3);transition:color .2s;margin-top:-.06rem}
-.forgot-link:hover{color:rgba(255,255,255,.6)}
-
-.signin-btn{width:100%;height:.46rem;margin-top:.06rem;background:#32c864;border:none;border-radius:.08rem;color:#000;font-size:.17rem;font-weight:600;cursor:pointer;transition:all .3s;letter-spacing:.01em;box-shadow:0 .04rem .12rem rgba(0,0,0,.5)}
-.signin-btn:hover{box-shadow:0 .06rem .16rem rgba(0,0,0,.7)}
-.signin-btn:disabled{background:#1a6632;box-shadow:0 .02rem .06rem rgba(0,0,0,.3);color:rgba(255,255,255,.25);cursor:not-allowed}
-
-.signup-link{margin-top:.12rem;font-size:.13rem;color:rgba(255,255,255,.3);text-align:center}
-.signup-link a{color:rgba(255,255,255,.55);transition:color .2s}
-.signup-link a:hover{color:#fff}
-
-.copyright{position:fixed;bottom:.1rem;left:.1rem;font-size:.09rem;color:rgba(255,255,255,.25);z-index:10}
-
-.back-link{position:absolute;top:.3rem;left:.3rem;width:.36rem;height:.36rem;background:rgba(0,0,0,.75);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 .04rem .12rem rgba(0,0,0,.5);transition:background .2s,box-shadow .2s}
-.back-link:hover{background:rgba(0,0,0,.9);box-shadow:0 .06rem .18rem rgba(0,0,0,.7)}
-.back-link svg{width:.18rem;height:.18rem;color:#fff}
-
-@media(max-width:768px){
-    html{font-size:calc(100vw/3.75)}
-    .signin-container{max-width:100%;padding:0 .4rem;height:100vh;padding-top:.2rem;padding-bottom:.2rem}
-    .signin-logo{width:3rem;height:3rem}
-    .signin-title{font-size:.4rem}
-}
-</style>
 </head>
 <body>
 
-<a href="index.html#/" class="back-link">
+<a href="index.html#/" class="back-link" id="backLink">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
 </a>
 
@@ -102,7 +27,7 @@ input,button{outline:none;font-family:inherit}
             <img src="images/vipen-logo.png" alt="Vipen">
         </div>
         <h1 class="signin-title">Welcome Back</h1>
-        <p class="signin-subtitle">Sign in to your Vipen account</p>
+        <p class="signin-subtitle">Sign in with email verification</p>
     </div>
 
     <form class="signin-form" id="signinForm" autocomplete="off">
@@ -113,17 +38,12 @@ input,button{outline:none;font-family:inherit}
             </div>
         </div>
 
-        <div class="input-group has-toggle" id="passwordGroup">
-            <input type="password" id="password" class="input-field" placeholder="Password" autocomplete="current-password" maxlength="15">
-            <button type="button" class="password-toggle" id="passwordToggle" tabindex="-1">
-                <svg id="passwordEyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            </button>
-            <div class="validation-icon" id="passwordIcon">
-                <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="#32c864" stroke-width="2"/><path d="M8 12l2.5 2.5L16 9" stroke="#32c864" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
+        <div class="input-group email-code-group" id="emailCodeGroup">
+            <input type="text" id="emailCode" class="input-field" placeholder="Verification Code" autocomplete="off" maxlength="6">
+            <button type="button" class="send-code-btn" id="sendCodeBtn">Send Code</button>
         </div>
 
-        <a href="#" class="forgot-link" id="forgotLink">Forgot password?</a>
+        <div class="send-tip" id="sendTip">Code sent, please check your inbox</div>
 
         <button type="submit" class="signin-btn" id="signinBtn" disabled>Sign In</button>
 
@@ -131,272 +51,9 @@ input,button{outline:none;font-family:inherit}
     </form>
 </div>
 
-<script>
-(function(){
-    var email = document.getElementById('email');
-    var password = document.getElementById('password');
-    var signinBtn = document.getElementById('signinBtn');
-    var passwordToggle = document.getElementById('passwordToggle');
-    var signinForm = document.getElementById('signinForm');
-    var forgotLink = document.getElementById('forgotLink');
+<script src="js/pages/signin.js"></script>
 
-    var eyeOpenSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
-    var eyeClosedSvg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
-
-    function validateEmail(value){
-        if(!value) return false;
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-    }
-
-    function validatePassword(value){
-        if(!value) return false;
-        return value.length >= 8 && value.length <= 15;
-    }
-
-    function setValidationIcon(iconId, isValid){
-        var icon = document.getElementById(iconId);
-        if(isValid){
-            icon.classList.add('show');
-        } else {
-            icon.classList.remove('show');
-        }
-    }
-
-    function clearFieldError(inputEl){
-        inputEl.classList.remove('error');
-    }
-
-    function triggerShake(inputEl){
-        inputEl.classList.remove('error');
-        void inputEl.offsetWidth;
-        inputEl.classList.add('error');
-    }
-
-    function updateSigninButton(){
-        var isEmailValid = validateEmail(email.value);
-        var isPasswordValid = validatePassword(password.value);
-
-        if(isEmailValid && isPasswordValid){
-            signinBtn.disabled = false;
-        } else {
-            signinBtn.disabled = true;
-        }
-    }
-
-    email.addEventListener('input', function(){
-        var isValid = validateEmail(this.value);
-        setValidationIcon('emailIcon', isValid);
-        if(isValid){
-            this.classList.add('valid');
-            clearFieldError(this);
-        } else {
-            this.classList.remove('valid');
-        }
-        updateSigninButton();
-    });
-
-    email.addEventListener('blur', function(){
-        var val = this.value;
-        if(val && !validateEmail(val)){
-            triggerShake(this);
-        }
-    });
-
-    password.addEventListener('input', function(){
-        var isValid = validatePassword(this.value);
-        setValidationIcon('passwordIcon', isValid);
-        if(isValid){
-            this.classList.add('valid');
-            clearFieldError(this);
-        } else {
-            this.classList.remove('valid');
-        }
-        updateSigninButton();
-    });
-
-    password.addEventListener('blur', function(){
-        var val = this.value;
-        if(val && !validatePassword(val)){
-            triggerShake(this);
-        }
-    });
-
-    passwordToggle.addEventListener('click', function(){
-        var isPassword = password.type === 'password';
-        password.type = isPassword ? 'text' : 'password';
-        document.getElementById('passwordEyeIcon').innerHTML = isPassword ? eyeClosedSvg : eyeOpenSvg;
-    });
-
-    forgotLink.addEventListener('click', function(e){
-        e.preventDefault();
-        alert('Please contact support@vipen.com to reset your password.');
-    });
-
-    signinForm.addEventListener('submit', function(e){
-        e.preventDefault();
-        if(signinBtn.disabled) return;
-        window.location.href = 'profile.html';
-    });
-
-    // ===== Comet Trail Effect =====
-    (function(){
-        var canvas = document.getElementById('cometCanvas');
-        var isOverInteractive = false;
-        var mouseX = -9999, mouseY = -9999;
-        var prevMouseX = -9999, prevMouseY = -9999;
-        var particles = [];
-        var maxParticles = 40;
-        var particleId = 0;
-
-        var interactiveSelectors = '.signin-container, .back-link';
-
-        function checkInteractiveTarget(e){
-            var target = e.target;
-            while(target && target !== document.body){
-                if(target.matches && target.matches(interactiveSelectors)){
-                    return true;
-                }
-                target = target.parentElement;
-            }
-            return false;
-        }
-
-        document.addEventListener('mousemove', function(e){
-            prevMouseX = mouseX;
-            prevMouseY = mouseY;
-            mouseX = e.clientX;
-            mouseY = e.clientY;
-            isOverInteractive = checkInteractiveTarget(e);
-        });
-
-        document.addEventListener('mouseleave', function(){
-            isOverInteractive = true;
-        });
-
-        function createParticle(x, y, speed){
-            var el = document.createElement('div');
-            el.className = 'comet-particle';
-            var size = Math.random() * 3 + 2;
-            el.style.width = size + 'px';
-            el.style.height = size + 'px';
-            el.style.left = '0px';
-            el.style.top = '0px';
-
-            var hue = Math.random() * 40 + 180;
-            var color = 'hsla(' + hue + ', 80%, 70%, 1)';
-            var glow = 'hsla(' + hue + ', 80%, 60%, 0.6)';
-            el.style.background = color;
-            el.style.boxShadow = '0 0 ' + (size * 2) + 'px ' + glow + ', 0 0 ' + (size * 4) + 'px ' + glow;
-
-            canvas.appendChild(el);
-
-            var angle = Math.atan2(mouseY - prevMouseY, mouseX - prevMouseX);
-            var spread = (Math.random() - 0.5) * 0.6;
-            var vx = Math.cos(angle + spread) * speed * 0.3;
-            var vy = Math.sin(angle + spread) * speed * 0.3;
-
-            var p = {
-                id: particleId++,
-                el: el,
-                x: x,
-                y: y,
-                vx: vx,
-                vy: vy,
-                life: 1,
-                decay: Math.random() * 0.015 + 0.012,
-                scale: 1
-            };
-
-            gsap.set(el, { x: x, y: y, scale: 1, opacity: 1 });
-
-            gsap.to(p, {
-                life: 0,
-                scale: 0,
-                duration: 0.8 + Math.random() * 0.4,
-                ease: 'power2.out',
-                onUpdate: function(){
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.vx *= 0.96;
-                    p.vy *= 0.96;
-                    gsap.set(el, {
-                        x: p.x,
-                        y: p.y,
-                        opacity: p.life,
-                        scale: p.scale
-                    });
-                },
-                onComplete: function(){
-                    if(el.parentNode) el.parentNode.removeChild(el);
-                    var idx = particles.indexOf(p);
-                    if(idx > -1) particles.splice(idx, 1);
-                }
-            });
-
-            particles.push(p);
-        }
-
-        function spawnHeadGlow(x, y){
-            var el = document.createElement('div');
-            el.className = 'comet-particle';
-            var size = 6;
-            el.style.width = size + 'px';
-            el.style.height = size + 'px';
-            el.style.left = '0px';
-            el.style.top = '0px';
-            el.style.background = 'radial-gradient(circle, rgba(200,230,255,0.9) 0%, rgba(150,200,255,0.4) 40%, transparent 70%)';
-            el.style.boxShadow = '0 0 12px rgba(150,200,255,0.5), 0 0 24px rgba(100,180,255,0.3)';
-            canvas.appendChild(el);
-
-            gsap.set(el, { x: x - size/2, y: y - size/2, scale: 1, opacity: 0.8 });
-
-            gsap.to(el, {
-                opacity: 0,
-                scale: 2,
-                duration: 0.3,
-                ease: 'power2.out',
-                onComplete: function(){
-                    if(el.parentNode) el.parentNode.removeChild(el);
-                }
-            });
-        }
-
-        var lastSpawnTime = 0;
-        var spawnInterval = 16;
-
-        function loop(timestamp){
-            if(!isOverInteractive && mouseX > -9999 && prevMouseX > -9999){
-                var dx = mouseX - prevMouseX;
-                var dy = mouseY - prevMouseY;
-                var dist = Math.sqrt(dx*dx + dy*dy);
-                var speed = Math.min(dist, 30);
-
-                if(dist > 1 && timestamp - lastSpawnTime > spawnInterval){
-                    var count = Math.min(Math.floor(dist / 4), 3);
-                    for(var i = 0; i < count; i++){
-                        var t = i / count;
-                        var px = prevMouseX + dx * t + (Math.random() - 0.5) * 4;
-                        var py = prevMouseY + dy * t + (Math.random() - 0.5) * 4;
-                        createParticle(px, py, speed);
-                    }
-                    spawnHeadGlow(mouseX, mouseY);
-                    lastSpawnTime = timestamp;
-                }
-            }
-
-            while(particles.length > maxParticles){
-                var old = particles.shift();
-                gsap.killTweensOf(old);
-                if(old.el && old.el.parentNode) old.el.parentNode.removeChild(old.el);
-            }
-
-            requestAnimationFrame(loop);
-        }
-
-        requestAnimationFrame(loop);
-    })();
-})();
-</script>
+<script src="anti-scrape.js"></script>
 
 </body>
 </html>

@@ -1,0 +1,34 @@
+﻿{
+    "topics":  [
+                   "UUNN→",
+                   "VIBE",
+                   "PULSE",
+                   "FLUX"
+               ],
+    "notes":  [
+                  "DeepDesign",
+                  "Creative Studio",
+                  "Digital Art",
+                  "New Media"
+              ],
+    "bgType":  [
+                   "video",
+                   "image",
+                   "video",
+                   "video"
+               ],
+    "bgImage":  [
+                    "",
+                    "banner/disctrack.png",
+                    "",
+                    ""
+                ],
+    "bgVideoSrc":  [
+                       "banner/bg_opt.mp4",
+                       "banner/bg.mp4",
+                       "banner/bg.mp4",
+                       "banner/bg.mp4"
+                   ],
+    "current":  0,
+    "textSlideIndex":  0
+}

@@ -1,0 +1,34 @@
+﻿{
+    "nowPlaying":  {
+                       "title":  "酒精",
+                       "duration":  "0:00",
+                       "current":  "0:00",
+                       "cover":  "Disc/MusicAlbum/酒精/ab67616d0000b273d10560f5d73921a997dac1ac.jpg",
+                       "audio":  "Disc/MusicAlbum/酒精/酒精.mp3"
+                   },
+    "tapes":  [
+                  {
+                      "id":  1,
+                      "title":  "酒精",
+                      "time":  "0:00",
+                      "cover":  "Disc/MusicAlbum/酒精/ab67616d0000b273d10560f5d73921a997dac1ac.jpg",
+                      "audio":  "Disc/MusicAlbum/酒精/酒精.mp3"
+                  },
+                  {
+                      "id":  2,
+                      "title":  "翱翔",
+                      "time":  "0:00",
+                      "cover":  "Disc/MusicAlbum/翱翔/images.jpg",
+                      "audio":  "Disc/MusicAlbum/翱翔/翱翔.mp3"
+                  },
+                  {
+                      "id":  3,
+                      "title":  "Young OG",
+                      "time":  "0:00",
+                      "cover":  "Disc/MusicAlbum/YoungOG/32b32bd351ba31f737b03e2bc4a6d3a8.jpg",
+                      "audio":  "Disc/MusicAlbum/YoungOG/soundclouddownloader.io_           Kris Wu Yifan  - Young OG.mp3.mp3"
+                  }
+              ],
+    "playMode":  "sequence",
+    "currentTapeIndex":  0
+}

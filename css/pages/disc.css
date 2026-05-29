@@ -1,0 +1,71 @@
+.disc-page{min-height:100vh;min-height:100dvh;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif}
+
+.disc-bg{position:absolute;inset:0;background-size:cover;background-position:center;transform:scale(1.15);filter:blur(60px) brightness(0.55);z-index:0;transition:background-image .6s ease}
+.disc-bg-overlay{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,0,0,.2) 0%,rgba(0,0,0,.55) 100%);z-index:1;pointer-events:none}
+
+.disc-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;width:100%;padding:1.2rem .4rem 1.5rem}
+
+.disc-album-carousel{position:relative;width:100%;max-width:7rem;height:4.2rem;display:flex;align-items:center;justify-content:center;perspective:12rem}
+
+.disc-album-card{position:absolute;width:2.8rem;height:3.8rem;border-radius:.2rem;overflow:hidden;transition:all .5s cubic-bezier(.25,.46,.45,.94);box-shadow:0 .2rem .6rem rgba(0,0,0,.4);cursor:none;background:#1a1a1a}
+.disc-album-card img{width:100%;height:100%;object-fit:cover;display:block}
+
+.disc-album-card.prev-2{transform:translateX(-3.6rem) scale(0.65) rotateY(25deg);opacity:.35;z-index:1;filter:brightness(0.5)}
+.disc-album-card.prev-1{transform:translateX(-1.8rem) scale(0.82) rotateY(15deg);opacity:.6;z-index:2;filter:brightness(0.7)}
+.disc-album-card.active{transform:translateX(0) scale(1) rotateY(0deg);opacity:1;z-index:5;box-shadow:0 .3rem 1rem rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.1)}
+.disc-album-card.next-1{transform:translateX(1.8rem) scale(0.82) rotateY(-15deg);opacity:.6;z-index:2;filter:brightness(0.7)}
+.disc-album-card.next-2{transform:translateX(3.6rem) scale(0.65) rotateY(-25deg);opacity:.35;z-index:1;filter:brightness(0.5)}
+
+.disc-album-card.hidden{opacity:0;pointer-events:none;transform:translateX(0) scale(0.5)}
+
+.disc-album-info{position:absolute;bottom:-.5rem;left:50%;transform:translateX(-50%);text-align:center;white-space:nowrap;opacity:0;transition:opacity .4s ease;pointer-events:none}
+.disc-album-card.active .disc-album-info{opacity:1}
+.disc-album-title{font-size:.16rem;color:#fff;font-weight:600;letter-spacing:.01rem;margin-bottom:.04rem;text-shadow:0 .02rem .1rem rgba(0,0,0,.6)}
+.disc-album-artist{font-size:.12rem;color:rgba(255,255,255,.55);font-weight:400;text-shadow:0 .01rem .06rem rgba(0,0,0,.5)}
+
+.disc-glass-player{width:100%;max-width:6.4rem;display:flex;align-items:center;gap:.16rem;padding:.14rem .2rem;border-radius:.5rem;background:rgba(255,255,255,.08);backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);border:1px solid rgba(255,255,255,.15);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 .08rem .4rem rgba(0,0,0,.3);transition:all .3s ease}
+
+.disc-glass-controls{display:flex;align-items:center;gap:.12rem;flex-shrink:0}
+.disc-glass-btn{width:.4rem;height:.4rem;background:transparent;border:none;border-radius:50%;cursor:none;display:flex;align-items:center;justify-content:center;transition:all .2s;color:rgba(255,255,255,.5);padding:0;flex-shrink:0}
+.disc-glass-btn:hover{color:rgba(255,255,255,.9);transform:scale(1.1)}
+.disc-glass-btn:active{transform:scale(.95)}
+.disc-glass-btn svg{width:.2rem;height:.2rem;fill:currentColor}
+.disc-glass-btn.play{width:.48rem;height:.48rem;background:rgba(255,255,255,.15);color:#fff}
+.disc-glass-btn.play:hover{background:rgba(255,255,255,.25);transform:scale(1.05)}
+.disc-glass-btn.play svg{width:.24rem;height:.24rem}
+
+.disc-glass-center{flex:1;min-width:0;display:flex;flex-direction:column;gap:.06rem;padding:.1rem .14rem;border-radius:.14rem;background:rgba(0,0,0,.25)}
+.disc-glass-track-info{display:flex;align-items:center;gap:.1rem;overflow:hidden}
+.disc-glass-mini-cover{width:.4rem;height:.4rem;border-radius:.08rem;overflow:hidden;flex-shrink:0;background:#1a1a1a;box-shadow:0 .02rem .08rem rgba(0,0,0,.3)}
+.disc-glass-mini-cover img{width:100%;height:100%;object-fit:cover;display:block}
+.disc-glass-meta{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:.02rem}
+.disc-glass-title{font-size:.12rem;color:#fff;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.disc-glass-subtitle{font-size:.09rem;color:rgba(255,255,255,.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.disc-visualizer{display:flex;align-items:flex-end;gap:.03rem;height:.3rem;flex-shrink:0}
+.disc-visualizer-bar{width:.04rem;background:rgba(255,255,255,.55);border-radius:.02rem;transition:height .08s ease}
+
+.disc-fav-btn{width:.32rem;height:.32rem;border-radius:50%;background:rgba(255,255,255,.12);border:none;cursor:none;display:flex;align-items:center;justify-content:center;transition:all .2s;color:rgba(255,255,255,.5);padding:0;flex-shrink:0;margin-left:.06rem}
+.disc-fav-btn:hover{background:rgba(255,255,255,.2);color:rgba(255,255,255,.8);transform:scale(1.1)}
+.disc-fav-btn.active{color:rgba(255,255,255,.5);background:rgba(255,255,255,.12)}
+.disc-fav-btn.active:hover{background:rgba(255,255,255,.2);color:rgba(255,255,255,.8)}
+.disc-fav-btn svg{width:.16rem;height:.16rem;fill:none;stroke:currentColor;stroke-width:1.5;transition:all .2s}
+.disc-fav-btn.active svg{fill:#4ade80;stroke:#4ade80}
+
+.disc-glass-progress-wrap{display:flex;align-items:center;gap:.08rem}
+.disc-glass-time{font-size:.09rem;color:rgba(255,255,255,.35);font-variant-numeric:tabular-nums;min-width:.36rem;text-align:center;flex-shrink:0}
+.disc-glass-progress-track{flex:1;height:.04rem;background:rgba(255,255,255,.12);border-radius:.02rem;overflow:hidden;position:relative;cursor:none}
+.disc-glass-progress-bar{height:100%;background:rgba(255,255,255,.7);border-radius:.02rem;width:0%;transition:width .1s}
+.disc-glass-progress-track::after{content:'';position:absolute;top:50%;left:0%;transform:translate(-50%,-50%);width:.1rem;height:.1rem;background:#fff;border-radius:50%;opacity:0;transition:opacity .2s}
+.disc-glass-player:hover .disc-glass-progress-track::after{opacity:1}
+
+.disc-glass-extras{display:flex;align-items:center;gap:.08rem;flex-shrink:0}
+.disc-glass-extra-btn{width:.36rem;height:.36rem;background:transparent;border:none;border-radius:50%;cursor:none;display:flex;align-items:center;justify-content:center;transition:all .2s;color:rgba(255,255,255,.4);padding:0}
+.disc-glass-extra-btn:hover{color:rgba(255,255,255,.8);transform:scale(1.1)}
+.disc-glass-extra-btn svg{width:.18rem;height:.18rem;fill:currentColor}
+
+.disc-glass-volume-wrap{display:flex;align-items:center;gap:.06rem;position:relative}
+.disc-glass-volume-track{width:0;height:.04rem;background:rgba(255,255,255,.12);border-radius:.02rem;overflow:hidden;position:relative;cursor:none;transition:width .3s ease,opacity .3s ease;opacity:0}
+.disc-glass-volume-track.active{width:1.2rem;opacity:1}
+.disc-glass-volume-bar{height:100%;background:rgba(255,255,255,.6);border-radius:.02rem;width:70%;transition:width .15s}
+.disc-glass-volume-track::after{content:'';position:absolute;top:50%;left:70%;transform:translate(-50%,-50%);width:.08rem;height:.08rem;background:#fff;border-radius:50%;opacity:0;transition:opacity .2s}
+.disc-glass-volume-wrap:hover .disc-glass-volume-track.active::after{opacity:1}

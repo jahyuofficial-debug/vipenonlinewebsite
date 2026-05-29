@@ -1,0 +1,825 @@
+var dwItems = [];
+var dwSuits = ['&#9824;','&#9827;','&#9829;','&#9830;','&#9824;','&#9827;'];
+var dwRanks = ['A','2','3','4','5','6'];
+var discAudio;
+
+(function(){
+'use strict';
+
+Cursor.init('cursor');
+
+Loading.init(function() {
+    SlideDots.startAutoSlide();
+});
+
+BannerPage.initBgVideo();
+
+(function loadData(){fetch('data.json').then(function(r){return r.json();}).then(function(d){dwItems=d.design.dwItems;dwSuits=d.design.dwSuits;dwRanks=d.design.dwRanks;freshHeroItems=d.fresh.heroItems;freshCategories=d.fresh.categories;freshItems=d.fresh.items;if(typeof FreshPage!=='undefined')FreshPage.setData({heroItems:freshHeroItems,categories:freshCategories,items:freshItems});Object.assign(BannerPage.bannerData, d.banner);window.actionFeed=d.action;window.discData=JSON.parse(JSON.stringify(d.disc));console.log('Data loaded from data.json');}).catch(function(){console.log('Using embedded data');});})();
+
+var freshHeroItems = [];
+
+
+
+var freshCategories = [];
+
+var freshItems = [];
+
+SlideDots.init({
+    dotSelector: '#slideDots .dot',
+    slideDuration: 5000,
+    totalSlides: BannerPage.bannerData.bgType.length,
+    changeSlide: function(idx) {
+        if (idx === 'next') {
+            var bgTotal = BannerPage.bannerData.bgType.length;
+            BannerPage.changeSlide((BannerPage.bannerData.current + 1 + bgTotal) % bgTotal);
+        } else if (typeof idx === 'number') {
+            BannerPage.changeSlide(idx);
+        }
+    }
+});
+
+var header = document.querySelector('header');
+var headerTicking = false;
+var navToggle = document.getElementById('navToggle');
+var mainHeader = document.getElementById('mainHeader');
+var navExpanded = false;
+
+function updateNavCollapseState(){
+    if(currentPage === 'home' && !navExpanded){
+        mainHeader.classList.add('nav-collapsed');
+    } else {
+        mainHeader.classList.remove('nav-collapsed');
+    }
+}
+
+if(navToggle){
+    navToggle.addEventListener('click', function(e){
+        e.stopPropagation();
+        e.preventDefault();
+        navExpanded = true;
+        updateNavCollapseState();
+    });
+}
+
+window.addEventListener('scroll', function(){
+    if(!headerTicking){
+        requestAnimationFrame(function(){
+            if(window.scrollY > 50){
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+            headerTicking = false;
+        });
+        headerTicking = true;
+    }
+});
+
+window.addEventListener('touchmove', function(e){}, {passive:true});
+
+var bgm = document.getElementById('bgm');
+var musicOn = true;
+
+function playBgm(){
+    if(!bgm) return;
+    if(bgm.readyState < 2){
+        bgm.load();
+    }
+    bgm.volume = 0.5;
+    var playPromise = bgm.play();
+    if(playPromise !== undefined){
+        playPromise.then(function(){
+            musicOn = true;
+        }).catch(function(err){
+            musicOn = false;
+        });
+    }
+}
+
+function pauseBgm(){
+    if(!bgm) return;
+    bgm.pause();
+    musicOn = false;
+}
+
+function tryAutoPlay(){
+    if(bgm && bgm.paused && !musicOn){
+        playBgm();
+    }
+}
+
+if(bgm){
+    bgm.addEventListener('canplaythrough', function(){
+        if(!musicOn){
+            playBgm();
+        }
+    });
+}
+
+var settingsDrawer = document.getElementById('settingsDrawer');
+var settingsOverlay = document.getElementById('settingsOverlay');
+var settingsBtn = document.getElementById('settingsBtn');
+var settingsClose = document.getElementById('settingsClose');
+
+function openSettingsDrawer(){
+    if(settingsDrawer) settingsDrawer.classList.add('open');
+    if(settingsOverlay) settingsOverlay.classList.add('open');
+}
+
+function closeSettingsDrawer(){
+    if(settingsDrawer) settingsDrawer.classList.remove('open');
+    if(settingsOverlay) settingsOverlay.classList.remove('open');
+}
+
+if(settingsBtn){
+    settingsBtn.addEventListener('click', function(e){
+        e.stopPropagation();
+        e.preventDefault();
+        openSettingsDrawer();
+    });
+}
+
+if(settingsClose){
+    settingsClose.addEventListener('click', function(e){
+        e.stopPropagation();
+        closeSettingsDrawer();
+    });
+}
+
+if(settingsOverlay){
+    settingsOverlay.addEventListener('click', function(){
+        closeSettingsDrawer();
+    });
+}
+
+var signinBtn = document.getElementById('signinBtn');
+var signupBtn = document.getElementById('signupBtn');
+var profileLink = document.getElementById('profileLink');
+var logoutBtn = document.getElementById('logoutBtn');
+
+function updateAuthUI() {
+    var isLoggedIn = Utils.isLoggedIn();
+    if (isLoggedIn) {
+        if (signinBtn) signinBtn.style.display = 'none';
+        if (signupBtn) signupBtn.style.display = 'none';
+        if (profileLink) profileLink.style.display = '';
+        if (logoutBtn) logoutBtn.style.display = '';
+    } else {
+        if (signinBtn) signinBtn.style.display = '';
+        if (signupBtn) signupBtn.style.display = '';
+        if (profileLink) profileLink.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'none';
+    }
+}
+
+updateAuthUI();
+
+if(signinBtn){
+    signinBtn.addEventListener('click', function(e){
+        e.stopPropagation();
+        e.preventDefault();
+        window.location.href = 'signin.html';
+    });
+}
+
+if(signupBtn){
+    signupBtn.addEventListener('click', function(e){
+        e.stopPropagation();
+        e.preventDefault();
+        window.location.href = 'signup.html';
+    });
+}
+
+if(logoutBtn){
+    logoutBtn.addEventListener('click', function(e){
+        e.stopPropagation();
+        e.preventDefault();
+        Utils.logout();
+        updateAuthUI();
+    });
+}
+
+function updateNavActiveState(pageName){
+    var navMap = {
+        'home': '',
+        'fresh': 'fresh',
+        'design-work': 'design-work',
+        'design-work-list': 'design-work',
+        'disc-library': 'disc-library',
+        'action': 'action',
+        'msg': 'msg',
+        'fresh-detail': 'fresh',
+        'design-work-detail': 'design-work'
+    };
+    var activeKey = navMap[pageName] || '';
+    var pcNavLinks = document.querySelectorAll('.pc-nav .navLink');
+    var mobileNavLinks = document.querySelectorAll('#menuOverlay .items a');
+    pcNavLinks.forEach(function(link){
+        if(link.getAttribute('data-nav') === activeKey){
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+    mobileNavLinks.forEach(function(link){
+        if(link.getAttribute('data-nav') === activeKey){
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+}
+
+var app = document.getElementById('app');
+window.actionFeed = [
+    { id: 0, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80'], caption: '', likes: 1247, comments: 89, timeAgo: '2 hours ago', isLiked: false, commentList: [{user:'Lin Xiaoyu',text:'Amazing work, can\'t wait to see more!'},{user:'Zhang Siyuan',text:'This style is truly one of a kind'},{user:'Wang Jiaer',text:'Saved this for inspiration'}] },
+    { id: 1, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=800&q=80','https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80'], caption: '', likes: 892, comments: 56, timeAgo: '4 hours ago', isLiked: true, commentList: [{user:'Li Mengqi',text:'Which exhibition? Any recommendations?'},{user:'Zhao Zixuan',text:'Minimalism never goes out of style'}] },
+    { id: 2, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=80','https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=800&q=80','https://images.unsplash.com/photo-1633218388467-539651dcf81a?w=800&q=80'], caption: '', likes: 2341, comments: 167, timeAgo: '5 hours ago', isLiked: false, commentList: [{user:'Zhou Yuhang',text:'Three months well spent, totally worth it!'},{user:'Wu Xinran',text:'How did you achieve this lighting effect?'},{user:'Zheng Haoran',text:'The client must be thrilled'}] },
+    { id: 3, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80','https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=800&q=80','https://images.unsplash.com/photo-1600607686527-6fb886090705?w=800&q=80','https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?w=800&q=80'], caption: 'When traditional craftsmanship meets digital technology, unexpected sparks fly. Sharing a recent portfolio piece.', likes: 567, comments: 34, timeAgo: '7 hours ago', isLiked: false, commentList: [{user:'Sun Yating',text:'The blend of tradition and modernity is stunning'}] },
+    { id: 4, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80'], caption: '', likes: 1890, comments: 123, timeAgo: '8 hours ago', isLiked: false, commentList: [{user:'Lin Xiaoyu',text:'Your studio looks amazing'},{user:'Zhang Siyuan',text:'Motion graphics has always been my weakness, any tutorials?'}] },
+    { id: 5, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80','https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=800&q=80'], caption: 'Pixels aren\'t a limitation, they\'re another form of expression. Retro vibes are back.', likes: 445, comments: 28, timeAgo: '10 hours ago', isLiked: false, commentList: [{user:'Wang Jiaer',text:'8-bit style will always be iconic'}] },
+    { id: 6, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=800&q=80','https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80','https://images.unsplash.com/photo-1635322966219-b75ed372eb01?w=800&q=80'], caption: '', likes: 1567, comments: 98, timeAgo: '12 hours ago', isLiked: true, commentList: [{user:'Li Mengqi',text:'Font pairing is truly an art'},{user:'Zhao Zixuan',text:'Would love to see your font list'}] },
+    { id: 7, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80'], caption: '', likes: 2103, comments: 145, timeAgo: '14 hours ago', isLiked: false, commentList: [{user:'Zhou Yuhang',text:'Blender or C4D?'},{user:'Wu Xinran',text:'The texture looks so realistic'},{user:'Zheng Haoran',text:'3D rendering is becoming more important than ever'}] },
+    { id: 8, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=80','https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800&q=80','https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=80','https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800&q=80','https://images.unsplash.com/photo-1633596683562-4a47eb4983c5?w=800&q=80'], caption: '', likes: 678, comments: 45, timeAgo: '16 hours ago', isLiked: false, commentList: [{user:'Sun Yating',text:'This full documentation is incredibly valuable'}] },
+    { id: 9, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1600132806370-bf17e65e942f?w=800&q=80'], caption: '', likes: 3345, comments: 234, timeAgo: '18 hours ago', isLiked: true, commentList: [{user:'Lin Xiaoyu',text:'20 states, that\'s next-level attention to detail'},{user:'Zhang Siyuan',text:'This is what professionalism looks like'}] },
+    { id: 10, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=800&q=80','https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80'], caption: '', likes: 1234, comments: 87, timeAgo: '20 hours ago', isLiked: false, commentList: [{user:'Wang Jiaer',text:'Code can be this beautiful'},{user:'Li Mengqi',text:'Is it open source? Would love to learn'}] },
+    { id: 11, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=800&q=80','https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80','https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=800&q=80'], caption: '', likes: 2890, comments: 198, timeAgo: '22 hours ago', isLiked: false, commentList: [{user:'Zhao Zixuan',text:'The audio-visual experience is incredible'},{user:'Zhou Yuhang',text:'Congrats on the launch!'}] },
+    { id: 12, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1633218388467-539651dcf81a?w=800&q=80'], caption: '', likes: 4456, comments: 312, timeAgo: '1 day ago', isLiked: true, commentList: [{user:'Wu Xinran',text:'Dark mode is harder to nail than it looks'},{user:'Zheng Haoran',text:'Where can I read the full article?'},{user:'Sun Yating',text:'Learned a lot from this'}] },
+    { id: 13, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80','https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=800&q=80'], caption: '', likes: 890, comments: 67, timeAgo: '1 day ago', isLiked: false, commentList: [{user:'Lin Xiaoyu',text:'A minimalism classic'}] },
+    { id: 14, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1600607686527-6fb886090705?w=800&q=80','https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?w=800&q=80','https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80'], caption: '', likes: 1567, comments: 134, timeAgo: '1 day ago', isLiked: false, commentList: [{user:'Zhang Siyuan',text:'Web3 design is definitely an exciting new direction'},{user:'Wang Jiaer',text:'How was the summit?'}] },
+    { id: 15, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80','https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=800&q=80','https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=800&q=80','https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80'], caption: '', likes: 5678, comments: 445, timeAgo: '2 days ago', isLiked: true, commentList: [{user:'Li Mengqi',text:'All ten trends are spot on'},{user:'Zhao Zixuan',text:'Saving this to read slowly'}] },
+    { id: 16, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1635322966219-b75ed372eb01?w=800&q=80'], caption: '', likes: 2234, comments: 189, timeAgo: '2 days ago', isLiked: false, commentList: [{user:'Zhou Yuhang',text:'Rich practical experience'}] },
+    { id: 17, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80','https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=80'], caption: 'Neon aesthetics in modern branding. Some night photography tips.', likes: 1123, comments: 76, timeAgo: '2 days ago', isLiked: false, commentList: [{user:'Wu Xinran',text:'The night shots are stunning'},{user:'Zheng Haoran',text:'How do you create the neon effect?'}] },
+    { id: 18, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800&q=80','https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=80','https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800&q=80'], caption: '', likes: 3344, comments: 267, timeAgo: '3 days ago', isLiked: true, commentList: [{user:'Sun Yating',text:'The use of color is absolutely stunning'},{user:'Lin Xiaoyu',text:'Been waiting for this new series'}] },
+    { id: 19, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1633596683562-4a47eb4983c5?w=800&q=80'], caption: '', likes: 4455, comments: 389, timeAgo: '3 days ago', isLiked: false, commentList: [{user:'Zhang Siyuan',text:'50 examples will keep me busy for a while'},{user:'Wang Jiaer',text:'Micro-interactions really elevate the experience'}] },
+    { id: 20, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1600132806370-bf17e65e942f?w=800&q=80','https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=800&q=80','https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80','https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=800&q=80'], caption: '', likes: 667, comments: 45, timeAgo: '3 days ago', isLiked: false, commentList: [{user:'Li Mengqi',text:'Childhood memories'}] },
+    { id: 21, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80'], caption: '', likes: 1789, comments: 156, timeAgo: '4 days ago', isLiked: true, commentList: [{user:'Zhao Zixuan',text:'Variable fonts are the future'},{user:'Zhou Yuhang',text:'This tech breakthrough is exciting'}] },
+    { id: 22, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=800&q=80','https://images.unsplash.com/photo-1633218388467-539651dcf81a?w=800&q=80'], caption: '', likes: 2890, comments: 234, timeAgo: '4 days ago', isLiked: false, commentList: [{user:'Wu Xinran',text:'Liquid glass effect looks so cool'},{user:'Zheng Haoran',text:'The evolution is well documented'}] },
+    { id: 23, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80','https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=800&q=80','https://images.unsplash.com/photo-1600607686527-6fb886090705?w=800&q=80'], caption: '', likes: 1234, comments: 98, timeAgo: '4 days ago', isLiked: true, commentList: [{user:'Sun Yating',text:'Color psychology is fascinating'},{user:'Lin Xiaoyu',text:'What were the experiment results?'}] },
+    { id: 24, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?w=800&q=80'], caption: '', likes: 4567, comments: 345, timeAgo: '5 days ago', isLiked: false, commentList: [{user:'Zhang Siyuan',text:'Design systems are essential for any team'},{user:'Wang Jiaer',text:'Scalability is key'}] },
+    { id: 25, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80','https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80'], caption: '', likes: 2234, comments: 189, timeAgo: '5 days ago', isLiked: false, commentList: [{user:'Li Mengqi',text:'Any AI tool recommendations?'},{user:'Zhao Zixuan',text:'300% boost sounds unreal'}] },
+    { id: 26, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=800&q=80','https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=800&q=80','https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80','https://images.unsplash.com/photo-1635322966219-b75ed372eb01?w=800&q=80','https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80'], caption: '', likes: 5678, comments: 445, timeAgo: '6 days ago', isLiked: true, commentList: [{user:'Zhou Yuhang',text:'Cross-platform consistency is tough'},{user:'Wu Xinran',text:'Five projects worth of experience is gold'}] },
+    { id: 27, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=80'], caption: '', likes: 1123, comments: 76, timeAgo: '6 days ago', isLiked: false, commentList: [{user:'Zheng Haoran',text:'Token architecture is the core of any design system'},{user:'Sun Yating',text:'Can you share the docs?'}] },
+    { id: 28, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800&q=80','https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=80'], caption: '', likes: 3344, comments: 267, timeAgo: '1 week ago', isLiked: false, commentList: [{user:'Lin Xiaoyu',text:'Three months of research paying off'},{user:'Zhang Siyuan',text:'Psychology + design, love the cross-disciplinary approach'}] },
+    { id: 29, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800&q=80','https://images.unsplash.com/photo-1633596683562-4a47eb4983c5?w=800&q=80','https://images.unsplash.com/photo-1600132806370-bf17e65e942f?w=800&q=80'], caption: '', likes: 4455, comments: 389, timeAgo: '1 week ago', isLiked: true, commentList: [{user:'Wang Jiaer',text:'Data visualization is more important than ever'},{user:'Li Mengqi',text:'Would love to see the dashboard details'}] },
+    { id: 30, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=800&q=80'], caption: '', likes: 667, comments: 45, timeAgo: '1 week ago', isLiked: false, commentList: [{user:'Zhao Zixuan',text:'Accessibility design means a lot'},{user:'Zhou Yuhang',text:'Props for the charity work'}] },
+    { id: 31, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80','https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=800&q=80','https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80','https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=800&q=80'], caption: '', likes: 1789, comments: 156, timeAgo: '2 weeks ago', isLiked: true, commentList: [{user:'Wu Xinran',text:'The style evolution is fascinating'},{user:'Zheng Haoran',text:'Dimensional illustrations look even better'}] },
+    { id: 32, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1633218388467-539651dcf81a?w=800&q=80','https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80'], caption: '', likes: 2890, comments: 234, timeAgo: '2 weeks ago', isLiked: false, commentList: [{user:'Sun Yating',text:'Critique methods are so important'},{user:'Lin Xiaoyu',text:'Would love to hear your team management tips'}] },
+    { id: 33, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1617791160505-6f00504e3519?w=800&q=80'], caption: '', likes: 1234, comments: 98, timeAgo: '2 weeks ago', isLiked: true, commentList: [{user:'Zhang Siyuan',text:'Immersive experiences are the future'},{user:'Wang Jiaer',text:'How did the experiment turn out?'}] },
+    { id: 34, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1600607686527-6fb886090705?w=800&q=80','https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?w=800&q=80','https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80'], caption: '', likes: 4567, comments: 345, timeAgo: '3 weeks ago', isLiked: false, commentList: [{user:'Li Mengqi',text:'Design ethics matter so much'},{user:'Zhao Zixuan',text:'Technology needs human-centered care'}] },
+    { id: 35, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80','https://images.unsplash.com/photo-1513542789411-b6a5d4f31634?w=800&q=80'], caption: '', likes: 2234, comments: 189, timeAgo: '3 weeks ago', isLiked: false, commentList: [{user:'Zhou Yuhang',text:'Sound design really adds that extra touch'},{user:'Wu Xinran',text:'Love the cross-disciplinary mindset'}] },
+    { id: 36, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?w=800&q=80','https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&q=80','https://images.unsplash.com/photo-1635322966219-b75ed372eb01?w=800&q=80','https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80'], caption: '', likes: 5678, comments: 445, timeAgo: '1 month ago', isLiked: true, commentList: [{user:'Zheng Haoran',text:'Figma is genuinely great'},{user:'Sun Yating',text:'Three years of experience speaks volumes'}] },
+    { id: 37, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800&q=80'], caption: '', likes: 1123, comments: 76, timeAgo: '1 month ago', isLiked: false, commentList: [{user:'Lin Xiaoyu',text:'Design sprints are so efficient'},{user:'Zhang Siyuan',text:'What can you actually build in five days?'}] },
+    { id: 38, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=800&q=80','https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=80','https://images.unsplash.com/photo-1626785774573-4b799315345d?w=800&q=80'], caption: '', likes: 3344, comments: 267, timeAgo: '1 month ago', isLiked: true, commentList: [{user:'Wang Jiaer',text:'Mood boards are the first step of every design'},{user:'Li Mengqi',text:'Can you share your inspiration library?'}] },
+    { id: 39, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1633596683562-4a47eb4983c5?w=800&q=80'], caption: '', likes: 4455, comments: 389, timeAgo: '2 months ago', isLiked: false, commentList: [{user:'Zhao Zixuan',text:'Documentation is a skill too'},{user:'Zhou Yuhang',text:'Communication efficiency is everything'}] }
+];
+
+window.discData = {
+    nowPlaying: {
+        title: '酒精',
+        duration: '0:00',
+        current: '0:00',
+        cover: 'Disc/MusicAlbum/酒精/ab67616d0000b273d10560f5d73921a997dac1ac.jpg',
+        audio: 'Disc/MusicAlbum/酒精/酒精.mp3'
+    },
+    tapes: [
+        {
+            id: 1,
+            title: '酒精',
+            time: '0:00',
+            cover: 'Disc/MusicAlbum/酒精/ab67616d0000b273d10560f5d73921a997dac1ac.jpg',
+            audio: 'Disc/MusicAlbum/酒精/酒精.mp3'
+        },
+        {
+            id: 2,
+            title: '翱翔',
+            time: '0:00',
+            cover: 'Disc/MusicAlbum/翱翔/images.jpg',
+            audio: 'Disc/MusicAlbum/翱翔/翱翔.mp3'
+        },
+        {
+            id: 3,
+            title: 'Young OG',
+            time: '0:00',
+            cover: 'Disc/MusicAlbum/YoungOG/32b32bd351ba31f737b03e2bc4a6d3a8.jpg',
+            audio: 'Disc/MusicAlbum/YoungOG/soundclouddownloader.io_           Kris Wu Yifan  - Young OG.mp3.mp3'
+        }
+    ],
+    playMode: 'sequence',
+    currentTapeIndex: 0
+};
+
+var pageTemplates = {};
+
+var msgBoardData = [
+    { id: 0, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', content: '', timeAgo: '2026-05-23', images: [], likes: 12, isLiked: false },
+    { id: 1, username: 'Lin Xiaoyu', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80', content: '', timeAgo: '2026-05-23', images: [], likes: 8, isLiked: true },
+    { id: 2, username: 'Zhang Siyuan', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80', content: '', timeAgo: '2026-05-22', images: [], likes: 15, isLiked: false },
+    { id: 3, username: 'Wang Jiaer', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80', content: '', timeAgo: '2026-05-22', images: [], likes: 6, isLiked: false },
+    { id: 4, username: 'Li Mengqi', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80', content: '', timeAgo: '2026-05-21', images: [], likes: 20, isLiked: true },
+    { id: 5, username: 'Zhao Zixuan', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80', content: '', timeAgo: '2026-05-21', images: [], likes: 11, isLiked: false },
+    { id: 6, username: 'Zhou Yuhang', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80', content: '', timeAgo: '2026-05-20', images: [], likes: 9, isLiked: false },
+    { id: 7, username: 'Wu Xinran', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80', content: '', timeAgo: '2026-05-20', images: [], likes: 14, isLiked: true },
+    { id: 8, username: 'Zheng Haoran', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80', content: '', timeAgo: '2026-05-19', images: [], likes: 7, isLiked: false },
+    { id: 9, username: 'Sun Yating', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&q=80', content: '', timeAgo: '2026-05-19', images: [], likes: 18, isLiked: false }
+];
+
+var msgCurrentUser = { username: 'Guest', avatar: 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=200&q=80' };
+var msgEmojiList = ['\u{1F600}','\u{1F60D}','\u{1F601}','\u{1F389}','\u{1F92F}','\u{1F44D}','\u{1F496}','\u{1F480}','\u{1F4AF}','\u{1F4A1}','\u{1F525}','\u{1F308}','\u{1F31F}','\u{1F3B6}','\u{1F60E}','\u{1F618}','\u{1F92A}','\u{1F44F}','\u{1F4A5}','\u{1F6A8}','\u{2615}','\u{1F37F}','\u{1F3C6}','\u{1F451}','\u{1F98B}','\u{1F31A}','\u{270C}','\u{1F64C}','\u{1F33A}','\u{1F30D}','\u{1F3A8}','\u{1F48E}','\u{1F514}','\u{1F380}','\u{1F31E}','\u{1F4F8}','\u{1F393}','\u{1F91D}','\u{1F680}','\u{1F49D}'];
+var msgNextId = 10;
+var msgTempImages = [];
+
+window.currentPage = null;
+var banner = document.getElementById('banner');
+var subPageContainer = null;
+var freshActiveTab = 'all';
+
+
+
+
+
+
+
+
+
+
+
+function buildMsgImages(images) {
+    if (!images || images.length === 0) return '';
+    var imgClass = images.length === 1 ? 'single' : images.length === 2 ? 'double' : images.length === 4 ? 'four' : 'multi';
+    var imgsHtml = images.map(function(img) {
+        return '<img class="msg-item-img" src="' + img + '" alt="" loading="lazy">';
+    }).join('');
+    return '<div class="msg-item-images ' + imgClass + '">' + imgsHtml + '</div>';
+}
+
+function buildMsgItem(item) {
+    var likeClass = item.isLiked ? ' liked' : '';
+    var heartFill = item.isLiked ? ' fill="#ed4956" stroke="#ed4956"' : ' fill="none" stroke="currentColor"';
+    return '<div class="msg-item" data-msg-id="' + item.id + '">' +
+        '<div class="msg-item-avatar-col">' +
+        '<img class="msg-item-avatar" src="' + item.avatar + '" alt="' + item.username + '">' +
+        '</div>' +
+        '<div class="msg-item-body">' +
+        '<div class="msg-item-header">' +
+        '<span class="msg-item-username">' + item.username + '</span>' +
+        '<span class="msg-item-time">' + item.timeAgo + '</span>' +
+        '</div>' +
+        '<div class="msg-item-content">' + item.content.replace(/\n/g, '<br>') + '</div>' +
+        '</div></div>';
+}
+
+function buildMsgList() {
+    if (msgBoardData.length === 0) {
+        return '<div class="msg-empty"><h3 class="msg-empty-title">No Messages</h3><p class="msg-empty-desc">Be the first to leave a message</p></div>';
+    }
+    return msgBoardData.map(function(item) {
+        return buildMsgItem(item);
+    }).join('');
+}
+
+function buildMsgPage() {
+    var emojiPanelHtml = '<div class="msg-emoji-panel" id="msgEmojiPanel" style="display:none;">' +
+        msgEmojiList.map(function(e) {
+            return '<button class="emoji-btn" data-emoji="' + e + '">' + e + '</button>';
+        }).join('') +
+        '</div>';
+    return '<section id="page-msg" class="msg-page">' +
+        '<div class="msg-container">' +
+        '<div class="msg-input-wrap">' +
+        '<div class="msg-input-area">' +
+        '<textarea class="msg-textarea" id="msgTextarea" placeholder="Share your thoughts..." rows="1"></textarea>' +
+        '<div class="msg-input-actions">' +
+        '<div class="msg-input-tools">' +
+        '</div>' +
+        '</div>' +
+        '</div>' +
+        '<button class="msg-submit-btn" id="msgSubmitBtn">Post</button>' +
+        '</div>' +
+        '<div class="msg-list" id="msgList">' + buildMsgList() + '</div>' +
+        '<div class="msg-load-more" id="msgLoadMore"><span></span><span></span><span></span></div>' +
+        '</div></section>';
+}
+
+function bindMsgInteractions() {
+    var submitBtn = document.getElementById('msgSubmitBtn');
+    var textarea = document.getElementById('msgTextarea');
+
+    if (textarea) {
+        textarea.addEventListener('input', function() {
+            textarea.style.height = 'auto';
+            var newHeight = textarea.scrollHeight;
+            var maxHeight = parseFloat(getComputedStyle(textarea).maxHeight);
+            if (newHeight > maxHeight) {
+                textarea.style.height = maxHeight + 'px';
+            } else {
+                textarea.style.height = newHeight + 'px';
+            }
+        });
+    }
+
+    if (submitBtn && textarea) {
+        submitBtn.addEventListener('click', function() {
+            var content = textarea.value.trim();
+            if (!content) return;
+            var now = new Date();
+            var timeStr = 'Just now';
+            var newMsg = {
+                id: msgNextId++,
+                username: msgCurrentUser.username,
+                avatar: msgCurrentUser.avatar,
+                content: content,
+                timeAgo: timeStr,
+                images: [],
+                likes: 0,
+                isLiked: false
+            };
+            msgBoardData.unshift(newMsg);
+            textarea.value = '';
+            textarea.style.height = 'auto';
+            var msgList = document.getElementById('msgList');
+            if (msgList) {
+                var emptyEl = msgList.querySelector('.msg-empty');
+                if (emptyEl) emptyEl.remove();
+                var tempDiv = document.createElement('div');
+                tempDiv.innerHTML = buildMsgItem(newMsg);
+                var newItem = tempDiv.firstChild;
+                msgList.insertBefore(newItem, msgList.firstChild);
+            }
+
+        });
+    }
+}
+
+function navigateTo(pageName) {
+    if (subPageContainer) {
+        subPageContainer.remove();
+        subPageContainer = null;
+    }
+
+    BannerPage.stopAnimations();
+
+    var herosTopBg = document.getElementById('herosTopBg');
+
+    if (pageName === 'msg' || pageName === 'action' || pageName === 'design-work' || pageName === 'design-work-list') {
+        if (!Utils.isLoggedIn()) {
+            window.location.href = 'signin.html';
+            return;
+        }
+    }
+
+    if (pageName === '' || pageName === 'home') {
+        banner.style.display = 'block';
+        BannerPage.startAnimations();
+        header.classList.add('dimmed');
+        if (herosTopBg) herosTopBg.classList.add('hidden');
+        currentPage = 'home';
+        navExpanded = false;
+    } else if (pageName === 'fresh') {
+        if (herosTopBg) herosTopBg.classList.remove('hidden');
+        banner.style.display = 'none';
+        header.classList.remove('dimmed');
+        subPageContainer = document.createElement('div');
+        subPageContainer.innerHTML = FreshPage.buildPage(freshActiveTab);
+        app.appendChild(subPageContainer);
+        FreshPage.bindAll();
+        currentPage = 'fresh';
+    } else if (pageName === 'design-work') {
+        if (herosTopBg) herosTopBg.classList.remove('hidden');
+        banner.style.display = 'none';
+        header.classList.remove('dimmed');
+        subPageContainer = document.createElement('div');
+        subPageContainer.innerHTML = DesignPage.buildGrid();
+        app.appendChild(subPageContainer);
+        setTimeout(function() {
+            DesignPage.bindGrid();
+        }, 50);
+        currentPage = 'design-work';
+    } else if (pageName === 'design-work-list') {
+        if (herosTopBg) herosTopBg.classList.remove('hidden');
+        banner.style.display = 'none';
+        header.classList.remove('dimmed');
+        subPageContainer = document.createElement('div');
+        subPageContainer.innerHTML = DesignPage.buildList();
+        app.appendChild(subPageContainer);
+        DesignPage.bindList();
+        var back2CardBtn = document.getElementById('dwBack2CardBtn');
+        if (back2CardBtn) {
+            back2CardBtn.addEventListener('click', function() {
+                window.location.hash = '#/design-work';
+            });
+        }
+        currentPage = 'design-work-list';
+    } else if (pageName === 'disc-library') {
+        if (herosTopBg) herosTopBg.classList.remove('hidden');
+        banner.style.display = 'none';
+        header.classList.remove('dimmed');
+        subPageContainer = document.createElement('div');
+        subPageContainer.innerHTML = DiscPage.buildPage();
+        app.appendChild(subPageContainer);
+        setTimeout(function() {
+            DiscPage.bindAll();
+            DiscPage.syncUIWithAudioState();
+            MiniPlayer.updateState(currentPage, DiscPage.getDiscIsPlaying(), discVisited);
+            if (!discAutoPlayed) {
+                discAutoPlayed = true;
+                discAudio.play().catch(function(){});
+            }
+        }, 100);
+        discVisited = true;
+        currentPage = 'disc-library';
+    } else if (pageName === 'action') {
+        if (herosTopBg) herosTopBg.classList.remove('hidden');
+        banner.style.display = 'none';
+        header.classList.remove('dimmed');
+        subPageContainer = document.createElement('div');
+        subPageContainer.innerHTML = ActionPage.buildPage();
+        app.appendChild(subPageContainer);
+        ActionPage.bindAll();
+        currentPage = 'action';
+    } else if (pageName === 'msg') {
+        if (herosTopBg) herosTopBg.classList.remove('hidden');
+        banner.style.display = 'none';
+        header.classList.remove('dimmed');
+        subPageContainer = document.createElement('div');
+        subPageContainer.innerHTML = buildMsgPage();
+        app.appendChild(subPageContainer);
+        bindMsgInteractions();
+        currentPage = 'msg';
+    } else if (pageTemplates[pageName]) {
+        if (herosTopBg) herosTopBg.classList.remove('hidden');
+        banner.style.display = 'none';
+        header.classList.remove('dimmed');
+        subPageContainer = document.createElement('div');
+        subPageContainer.innerHTML = pageTemplates[pageName];
+        app.appendChild(subPageContainer);
+        currentPage = pageName;
+    } else if (pageName === 'signin' || pageName === 'signup') {
+        if (herosTopBg) herosTopBg.classList.remove('hidden');
+        banner.style.display = 'none';
+        header.classList.remove('dimmed');
+        subPageContainer = document.createElement('div');
+        subPageContainer.innerHTML = '<section class="sub-page" style="display:flex;align-items:center;justify-content:center;min-height:100vh;"><div style="text-align:center;"><h2 style="font-size:.6rem;font-weight:700;color:rgba(255,255,255,.08);letter-spacing:.08rem;margin-bottom:.2rem;">' + (pageName === 'signin' ? 'Sign In' : 'Sign Up') + '</h2><p style="font-size:.18rem;color:rgba(255,255,255,.06);letter-spacing:.04rem;">Coming Soon</p></div></section>';
+        app.appendChild(subPageContainer);
+        currentPage = pageName;
+    }
+    updateNavCollapseState();
+    updateNavActiveState(currentPage);
+    MiniPlayer.updateState(currentPage, DiscPage.getDiscIsPlaying(), discVisited);
+}
+
+function showFreshAuthPopup() {
+    var existing = document.getElementById('freshDetailAuthPopup');
+    if (existing) existing.remove();
+    var popup = document.createElement('div');
+    popup.className = 'fresh-detail-auth-popup';
+    popup.id = 'freshDetailAuthPopup';
+    popup.innerHTML = '<div class="fresh-detail-auth-box">' +
+        '<p>This feature is only available to members.<br>Would you like to sign in?</p>' +
+        '<div class="fresh-detail-auth-btns">' +
+        '<button class="btn-signin" id="freshDetailAuthSignin">Sign In</button>' +
+        '<button class="btn-notnow" id="freshDetailAuthNotnow">Not now</button>' +
+        '</div></div>';
+    document.body.appendChild(popup);
+    document.getElementById('freshDetailAuthSignin').addEventListener('click', function() {
+        popup.remove();
+        window.location.href = 'signin.html';
+    });
+    document.getElementById('freshDetailAuthNotnow').addEventListener('click', function() {
+        popup.remove();
+    });
+    popup.addEventListener('click', function(e) {
+        if (e.target === popup) popup.remove();
+    });
+}
+
+function navigateToFreshDetail(id) {
+    if (subPageContainer) {
+        subPageContainer.remove();
+        subPageContainer = null;
+    }
+    banner.style.display = 'none';
+    header.classList.remove('dimmed');
+    subPageContainer = document.createElement('div');
+    subPageContainer.innerHTML = FreshPage.buildDetail(id);
+    app.appendChild(subPageContainer);
+    currentPage = 'fresh-detail';
+    updateNavActiveState(currentPage);
+
+    var backBtn = document.getElementById('freshDetailBack');
+    if (backBtn) {
+        backBtn.addEventListener('click', function() {
+            window.location.hash = '#/fresh';
+        });
+    }
+
+    var likeBtn = document.getElementById('freshDetailLikeBtn');
+    if (likeBtn) {
+        likeBtn.addEventListener('click', function() {
+            if (!Utils.isLoggedIn()) {
+                showFreshAuthPopup();
+                return;
+            }
+            var item = freshItems[id];
+            if (!item) return;
+            item.isLiked = !item.isLiked;
+            item.likeCount = (item.likeCount || 0) + (item.isLiked ? 1 : -1);
+            this.classList.toggle('liked');
+            var svg = this.querySelector('svg');
+            var countEl = document.getElementById('freshDetailLikeCount');
+            if (item.isLiked) {
+                svg.setAttribute('fill', '#ed4956');
+                svg.setAttribute('stroke', '#ed4956');
+            } else {
+                svg.setAttribute('fill', 'none');
+                svg.setAttribute('stroke', 'currentColor');
+            }
+            if (countEl) countEl.textContent = item.likeCount;
+        });
+    }
+
+    var commentBtn = document.getElementById('freshDetailCommentBtn');
+    if (commentBtn) {
+        commentBtn.addEventListener('click', function() {
+            if (!Utils.isLoggedIn()) {
+                showFreshAuthPopup();
+                return;
+            }
+            var commentsArea = document.getElementById('freshDetailComments');
+            if (commentsArea) {
+                commentsArea.style.display = commentsArea.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+    }
+
+    var commentSubmit = document.getElementById('freshDetailCommentSubmit');
+    var commentInput = document.getElementById('freshDetailCommentInput');
+    if (commentSubmit && commentInput) {
+        commentSubmit.addEventListener('click', function() {
+            var text = commentInput.value.trim();
+            if (!text) return;
+            var item = freshItems[id];
+            if (!item) return;
+            if (!item.comments) item.comments = [];
+            var auth = Utils.getAuth();
+            var username = auth && auth.username ? auth.username : 'Guest';
+            item.comments.push({ user: username, text: text });
+            item.commentCount = (item.commentCount || 0) + 1;
+            var countEl = document.getElementById('freshDetailCommentCount');
+            if (countEl) countEl.textContent = item.commentCount;
+            var listEl = document.getElementById('freshDetailCommentList');
+            if (listEl) {
+                var newItem = document.createElement('div');
+                newItem.className = 'fresh-detail-comment-item';
+                newItem.innerHTML = '<div class="fresh-detail-comment-avatar" style="background:#6366f1">' + username.charAt(0) + '</div>' +
+                    '<div class="fresh-detail-comment-main">' +
+                    '<div class="fresh-detail-comment-user">' + username + '</div>' +
+                    '<div class="fresh-detail-comment-text">' + text + '</div>' +
+                    '</div>';
+                listEl.appendChild(newItem);
+            }
+            commentInput.value = '';
+        });
+        commentInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                commentSubmit.click();
+            }
+        });
+    }
+}
+
+function navigateToDesignWorkDetail(id) {
+    if (subPageContainer) {
+        subPageContainer.remove();
+        subPageContainer = null;
+    }
+    banner.style.display = 'none';
+    header.classList.remove('dimmed');
+    subPageContainer = document.createElement('div');
+    subPageContainer.innerHTML = DesignPage.buildDetail(id);
+    app.appendChild(subPageContainer);
+    currentPage = 'design-work-detail';
+    updateNavActiveState(currentPage);
+
+    var backBtn = document.getElementById('dwDetailBack');
+    if (backBtn) {
+        backBtn.addEventListener('click', function() {
+            window.location.hash = '#/design-work';
+        });
+    }
+}
+
+
+
+discAudio = new Audio();
+discAudio.src = window.discData.nowPlaying.audio;
+discAudio.load();
+
+
+
+
+
+
+
+
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && currentPage === 'design-work-detail') {
+        window.location.hash = '#/design-work';
+    }
+});
+
+function handleRoute() {
+    var hash = window.location.hash.replace('#/', '');
+    if (!hash) {
+        navigateTo('home');
+    } else if (hash.indexOf('fresh/detail/') === 0) {
+        var id = parseInt(hash.replace('fresh/detail/', ''), 10);
+        if (!isNaN(id) && freshItems[id]) {
+            navigateToFreshDetail(id);
+        } else {
+            navigateTo('fresh');
+        }
+    } else if (hash.indexOf('design-work/detail/') === 0) {
+        var id = parseInt(hash.replace('design-work/detail/', ''), 10);
+        if (!isNaN(id) && dwItems[id]) {
+            navigateToDesignWorkDetail(id);
+        } else {
+            navigateTo('design-work');
+        }
+    } else if (hash === 'design-work-list') {
+        navigateTo('design-work-list');
+    } else if (hash === 'signin' || hash === 'signup') {
+        navigateTo(hash);
+    } else {
+        navigateTo(hash);
+    }
+}
+
+window.discVisited = false;
+var discAutoPlayed = false;
+window.miniPlayerWasPlaying = false;
+
+MiniPlayer.init({
+    callbacks: {
+        prevTrack: function() {
+            var idx = DiscPage.getPrevTrackIndex();
+            DiscPage.loadTrack(idx);
+            MiniPlayer.syncWithDisc();
+            if (!DiscPage.getDiscIsPlaying()) {
+                discAudio.play().catch(function(){});
+            }
+        },
+        nextTrack: function() {
+            var idx = DiscPage.getNextTrackIndex();
+            DiscPage.loadTrack(idx);
+            MiniPlayer.syncWithDisc();
+            if (!DiscPage.getDiscIsPlaying()) {
+                discAudio.play().catch(function(){});
+            }
+        },
+        goToDiscPage: function() {
+            window.location.hash = '#/disc-library';
+        },
+        onProgressChange: function() {
+            if (typeof DiscPage.updateProgress === 'function') DiscPage.updateProgress();
+        },
+        getCurrentPage: function() {
+            return currentPage;
+        }
+    }
+});
+
+window.addEventListener('mousemove', function(e) {
+    MiniPlayer.handleMouseMove(e);
+});
+
+window.addEventListener('touchmove', function(e) {
+    MiniPlayer.handleTouchMove(e);
+}, { passive: false });
+
+window.addEventListener('mouseup', function() {
+    MiniPlayer.handleMouseUp();
+});
+
+window.addEventListener('touchend', function() {
+    MiniPlayer.handleMouseUp();
+});
+
+var originalNavigateTo = navigateTo;
+navigateTo = function(pageName) {
+    var wasDiscPage = currentPage === 'disc-library';
+    originalNavigateTo(pageName);
+    if (pageName !== 'disc-library' && discAudio && discAudio.src) {
+        MiniPlayer.show();
+    }
+    setTimeout(function() {
+        MiniPlayer.updateState(currentPage, DiscPage.getDiscIsPlaying(), discVisited);
+    }, 50);
+};
+
+window.addEventListener('hashchange', handleRoute);
+handleRoute();
+
+})();

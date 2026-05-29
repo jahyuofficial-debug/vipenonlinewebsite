@@ -1,0 +1,25 @@
+.fw-600{font-weight:600}
+.wc{color:#fff}
+.mc{color:#b2b9ff}
+.gray{color:rgba(255,255,255,.5)}
+.f-12{font-size:.12rem}
+.f-13{font-size:.13rem}
+.f-14{font-size:.14rem}
+.f-16{font-size:.16rem}
+.f-18{font-size:.18rem}
+.f-20{font-size:.2rem}
+.f-22{font-size:.22rem}
+.f-24{font-size:.24rem}
+.f-28{font-size:.28rem}
+.f-30{font-size:.3rem}
+.f-32{font-size:.32rem}
+.f-34{font-size:.34rem}
+.f-36{font-size:.36rem}
+.f-40{font-size:.4rem}
+.f-42{font-size:.42rem}
+.f-60{font-size:.6rem}
+.f-70{font-size:.7rem}
+
+.max-wid{max-width:14rem;margin:0 auto;padding:0 .5rem}
+.wid-50{width:50%}
+.wid-100{width:100%}
