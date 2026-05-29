@@ -5,13 +5,34 @@ var path = require('path');
 var url = require('url');
 var crypto = require('crypto');
 
-var PORT = 3001;
+var PORT = 3000;
 var ROOT = __dirname;
 
 var RESEND_API_KEY = process.env.RESEND_API_KEY || '';
+var RESEND_KEY_PATH = 'D:\\设计文档\\Web素材\\APIkeys\\ResendAPI.txt';
 var RESEND_FROM = process.env.RESEND_FROM || 'Vipen <noreply@vipenonline.com>';
 var CODE_EXPIRE_MS = 5 * 60 * 1000;
 var AUTH_SECRET = process.env.AUTH_SECRET || 'vipen-auth-secret-v2-2026';
+
+if (!RESEND_API_KEY) {
+    try {
+        RESEND_API_KEY = fs.readFileSync(RESEND_KEY_PATH, 'utf8').trim();
+    } catch (e) {}
+}
+
+if (!RESEND_API_KEY) {
+    try {
+        RESEND_API_KEY = fs.readFileSync(path.join(ROOT, 'resend-key.txt'), 'utf8').trim();
+    } catch (e) {}
+}
+
+if (!RESEND_API_KEY) {
+    console.warn('[WARNING] RESEND_API_KEY is not set. Email sending will fail.');
+    console.warn('[WARNING] Key file path: ' + RESEND_KEY_PATH);
+    console.warn('[WARNING] Get your API key at https://resend.com/api-keys');
+} else {
+    console.log('[OK] RESEND_API_KEY loaded (length=' + RESEND_API_KEY.length + ')');
+}
 
 var codeStore = {};
 
