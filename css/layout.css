@@ -1,7 +1,7 @@
 body{overflow-x:hidden;cursor:none}
 a{cursor:none}
 
-#cursor{position:fixed;pointer-events:none;z-index:9998;width:32px;height:32px;transform:translate(-50%,-50%);transition:none;will-change:left,top}
+#cursor{position:fixed;pointer-events:none;z-index:9998;width:32px;height:32px;transition:none;will-change:transform;opacity:0}
 #cursor .inner{position:absolute;top:50%;left:50%;width:8px;height:8px;border-radius:50%;background:#fff;transform:translate(-50%,-50%)}
 
 header{position:fixed;top:.2rem;left:50%;transform:translateX(-50%);width:auto;min-width:12rem;z-index:100;padding:.2rem .4rem;transition:all .4s}
@@ -25,6 +25,9 @@ header .headerActions .authBtn.signin{background:transparent;border:1px solid rg
 header .headerActions .authBtn.signin:hover{border-color:rgba(255,255,255,.6);color:#fff}
 header .headerActions .authBtn.signup{background:#fff;border:1px solid #fff;color:#000}
 header .headerActions .authBtn.signup:hover{background:rgba(255,255,255,.9)}
+header .headerActions .profile-link{background:transparent;border:none;color:rgba(255,255,255,.5);padding:.04rem;transition:color .35s}
+header .headerActions .profile-link:hover{color:#fff}
+header .headerActions .profile-link svg{width:.22rem;height:.22rem}
 
 header.dimmed .navItems{opacity:.25;transition:opacity .45s}
 header.dimmed .headerActions{opacity:.25;transition:opacity .45s}

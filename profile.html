@@ -5,151 +5,194 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
 <title>Profile - Vipen</title>
 <link rel="Shortcut Icon" href="images/favicon.png">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="js/core/comet-trail.js"></script>
+<link rel="stylesheet" href="css/reset.css">
+<link rel="stylesheet" href="css/utilities.css">
 <link rel="stylesheet" href="css/pages/profile.css">
-
 </head>
 <body>
 
-<a href="index.html#/" class="back-link">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-</a>
+<section id="page-profile" class="profile-page">
+    <a href="index.html#/" class="back-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
 
-<div class="comet-canvas" id="cometCanvas"></div>
-
-<div class="profile-container">
-    <div class="profile-left">
-        <div class="profile-header">
-            <div class="profile-avatar">
-                <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80" alt="Avatar" id="profileAvatarImg">
-                <div class="profile-avatar-edit" id="avatarEditBtn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    <div class="profile-main">
+        <div class="profile-left">
+            <div class="profile-avatar-wrap">
+                <div class="profile-avatar">
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80" alt="Avatar" id="profileAvatarImg">
+                    <div class="profile-avatar-edit" id="profileAvatarEditBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </div>
+                    <input type="file" id="profileAvatarInput" accept="image/*">
                 </div>
-                <input type="file" id="avatarInput" accept="image/*">
             </div>
-            <h1 class="profile-name" id="displayName">Alex Chen</h1>
-            <p class="profile-handle" id="userHandle">@alexchen</p>
+            <h1 class="profile-name" id="profileDisplayName">Jah 72</h1>
+            <p class="profile-email" id="profileEmail">jahyuofficial@gmail.com</p>
+            <div class="profile-social-icons">
+                <a href="#" class="social-icon-link facebook" aria-label="Facebook">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                </a>
+                <a href="#" class="social-icon-link instagram" aria-label="Instagram">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                </a>
+                <a href="#" class="social-icon-link x" aria-label="X">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                </a>
+                <a href="#" class="social-icon-link wechat" aria-label="WeChat">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.01-.27-.027-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"/></svg>
+                </a>
+            </div>
+            <div class="profile-badge" id="profileBadge">Social Public</div>
         </div>
 
-        <div class="profile-section active" id="socialSection">
-            <div class="section-title">Connected Accounts</div>
-            <div class="info-card">
-                <div class="social-row">
-                    <div class="social-icon instagram">
-                        <svg viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        <div class="profile-right">
+            <div class="profile-card card-yo" id="cardYo">
+                <div class="card-content">
+                    <div class="card-main-text">Yo</div>
+                    <div class="card-icon-col">
+                        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        <div class="card-label">POST</div>
                     </div>
-                    <div class="social-info">
-                        <div class="social-name">Instagram</div>
-                        <div class="social-handle" id="instagramHandle">Not connected</div>
-                    </div>
-                    <button class="social-link-btn" data-platform="instagram" id="instagramBtn">Link</button>
                 </div>
-                <div class="social-row">
-                    <div class="social-icon x">
-                        <svg viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-                    </div>
-                    <div class="social-info">
-                        <div class="social-name">X (Twitter)</div>
-                        <div class="social-handle" id="xHandle">Not connected</div>
-                    </div>
-                    <button class="social-link-btn" data-platform="x" id="xBtn">Link</button>
+                <div class="card-sub">
+                    <span class="card-sub-left">What's Up</span>
+                    <span class="card-sub-right">Idea or Lifestyle</span>
                 </div>
-                <div class="social-row">
-                    <div class="social-icon youtube">
-                        <svg viewBox="0 0 24 24" fill="white"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-                    </div>
-                    <div class="social-info">
-                        <div class="social-name">YouTube</div>
-                        <div class="social-handle" id="youtubeHandle">Not connected</div>
-                    </div>
-                    <button class="social-link-btn" data-platform="youtube" id="youtubeBtn">Link</button>
+                <div class="card-progress">
+                    <div class="card-progress-bar"></div>
                 </div>
-                <div class="social-row">
-                    <div class="social-icon tiktok">
-                        <svg viewBox="0 0 24 24" fill="white"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+            </div>
+
+            <div class="profile-card card-hi" id="cardHi">
+                <div class="card-content">
+                    <div class="card-icon-col">
+                        <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                        <div class="card-label">Hang</div>
                     </div>
-                    <div class="social-info">
-                        <div class="social-name">TikTok</div>
-                        <div class="social-handle" id="tiktokHandle">Not connected</div>
-                    </div>
-                    <button class="social-link-btn" data-platform="tiktok" id="tiktokBtn">Link</button>
+                    <div class="card-main-text">Hi</div>
+                </div>
+                <div class="card-sub">
+                    <span class="card-sub-left">what's going up</span>
+                    <span class="card-sub-right">Hang around</span>
+                </div>
+                <div class="card-progress">
+                    <div class="card-progress-bar"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="profile-right">
-        <div class="profile-section active" id="infoSection">
-            <div class="section-title">Basic Information</div>
-            <div class="info-card">
-                <div class="info-row editable" data-field="displayName" data-label="Display Name">
-                    <span class="info-label">Display Name</span>
-                    <div class="info-value-wrapper">
-                        <span class="info-value" id="infoDisplayName">Alex Chen</span>
-                        <svg class="info-edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </div>
-                </div>
-                <div class="info-row editable" data-field="username" data-label="Username">
-                    <span class="info-label">Username</span>
-                    <div class="info-value-wrapper">
-                        <span class="info-value" id="infoUsername">@alexchen</span>
-                        <svg class="info-edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </div>
-                </div>
-                <div class="info-row editable" data-field="email" data-label="Email">
-                    <span class="info-label">Email</span>
-                    <div class="info-value-wrapper">
-                        <span class="info-value" id="infoEmail">alex@example.com</span>
-                        <svg class="info-edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </div>
-                </div>
-                <div class="info-row editable" data-field="bio" data-label="Bio">
-                    <span class="info-label">Bio</span>
-                    <div class="info-value-wrapper">
-                        <span class="info-value" id="infoBio">Digital creator & designer</span>
-                        <svg class="info-edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </div>
-                </div>
-                <div class="info-row editable" data-field="location" data-label="Location">
-                    <span class="info-label">Location</span>
-                    <div class="info-value-wrapper">
-                        <span class="info-value" id="infoLocation">Shanghai, China</span>
-                        <svg class="info-edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </div>
-                </div>
-                <div class="info-row editable" data-field="gender" data-label="Gender">
-                    <span class="info-label">Gender</span>
-                    <div class="info-value-wrapper">
-                        <span class="info-value" id="infoGender">Not set</span>
-                        <svg class="info-edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </div>
-                </div>
+    <div class="yo-menu-modal" id="yoMenuModal">
+        <div class="yo-menu-overlay" id="yoMenuOverlay"></div>
+        <div class="yo-menu-content">
+            <button class="yo-menu-item" id="yoMenuFresh">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                <span>Fresh Article</span>
+            </button>
+            <button class="yo-menu-item" id="yoMenuAction">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                <span>Action Update</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="fresh-editor-modal" id="freshEditorModal">
+        <div class="fresh-editor-overlay" id="freshEditorOverlay"></div>
+        <div class="fresh-editor-content">
+            <div class="fresh-editor-header">
+                <span class="fresh-editor-title">Fresh Article</span>
+                <button class="fresh-editor-close" id="freshEditorClose">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
             </div>
-
-            
+            <div class="fresh-editor-body">
+                <input type="text" class="fresh-editor-title-input" id="freshEditorTitleInput" placeholder="Enter article title...">
+                <div class="fresh-editor-toolbar">
+                    <button class="fresh-editor-tool" data-cmd="bold" title="Bold">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"/></svg>
+                    </button>
+                    <button class="fresh-editor-tool" data-cmd="italic" title="Italic">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="4" x2="10" y2="4"/><line x1="14" y1="20" x2="5" y2="20"/><line x1="15" y1="4" x2="9" y2="20"/></svg>
+                    </button>
+                    <button class="fresh-editor-tool" data-cmd="insertUnorderedList" title="Bullet List">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                    </button>
+                    <button class="fresh-editor-tool" data-cmd="insertOrderedList" title="Numbered List">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></svg>
+                    </button>
+                    <button class="fresh-editor-tool" data-cmd="formatBlock" data-val="H2" title="Heading">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"/><path d="M4 18V6"/><path d="M12 18V6"/><path d="M17 12h3"/><path d="M17 18V6"/></svg>
+                    </button>
+                    <button class="fresh-editor-tool" id="freshEditorImageBtn" title="Insert Image">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    </button>
+                </div>
+                <div class="fresh-editor-textarea" id="freshEditorBody" contenteditable="true" placeholder="Start writing your article..."></div>
+                <div class="fresh-editor-image-area" id="freshEditorImageArea"></div>
+                <input type="file" id="freshEditorImageInput" accept="image/*" multiple style="display:none">
+            </div>
+            <div class="fresh-editor-actions">
+                <button class="fresh-editor-btn draft" id="freshEditorDraft">Save Draft</button>
+                <button class="fresh-editor-btn publish" id="freshEditorPublish">Publish Now</button>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="edit-modal" id="editModal">
-    <div class="edit-modal-overlay" id="editModalOverlay"></div>
-    <div class="edit-modal-content">
-        <div class="edit-modal-header" id="editModalTitle">Edit</div>
-        <div id="editModalBody">
-            <input type="text" class="edit-modal-input" id="editModalInput" placeholder="Enter value...">
-        </div>
-        <div class="edit-modal-actions">
-            <button class="edit-modal-btn cancel" id="editModalCancel">Cancel</button>
-            <button class="edit-modal-btn save" id="editModalSave">Save</button>
+    <div class="action-editor-modal" id="actionEditorModal">
+        <div class="action-editor-overlay" id="actionEditorOverlay"></div>
+        <div class="action-editor-content">
+            <div class="action-editor-header">
+                <span class="action-editor-title">Action Update</span>
+                <button class="action-editor-close" id="actionEditorClose">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="action-editor-body">
+                <div class="action-editor-user-row">
+                    <img class="action-editor-avatar" id="actionEditorAvatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80" alt="Avatar">
+                    <span class="action-editor-username" id="actionEditorUsername">Jah 72</span>
+                </div>
+                <textarea class="action-editor-textarea" id="actionEditorTextarea" placeholder="What's on your mind?"></textarea>
+                <div class="action-editor-image-grid" id="actionEditorImageGrid"></div>
+                <div class="action-editor-tools">
+                    <button class="action-editor-tool" id="actionEditorImageBtn" title="Add Photo">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <span>Photo</span>
+                    </button>
+                    <button class="action-editor-tool" id="actionEditorEmojiBtn" title="Emoji">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                        <span>Feeling</span>
+                    </button>
+                </div>
+                <input type="file" id="actionEditorImageInput" accept="image/*" multiple style="display:none">
+            </div>
+            <div class="action-editor-actions">
+                <button class="action-editor-btn draft" id="actionEditorDraft">Save Draft</button>
+                <button class="action-editor-btn publish" id="actionEditorPublish">Post Now</button>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="toast" id="toast"></div>
+    <div class="edit-modal" id="profileEditModal">
+        <div class="edit-modal-overlay" id="profileEditModalOverlay"></div>
+        <div class="edit-modal-content">
+            <div class="edit-modal-header" id="profileEditModalTitle">Edit</div>
+            <div id="profileEditModalBody">
+                <input type="text" class="edit-modal-input" id="profileEditModalInput" placeholder="Enter value...">
+            </div>
+            <div class="edit-modal-actions" id="profileEditModalActions">
+                <button class="edit-modal-btn cancel" id="profileEditModalCancel">Cancel</button>
+                <button class="edit-modal-btn save" id="profileEditModalSave">Save</button>
+            </div>
+        </div>
+    </div>
 
+    <div class="toast" id="profileToast"></div>
+</section>
+
+<script src="js/core/utils.js"></script>
 <script src="js/pages/profile.js"></script>
-
 <script src="anti-scrape.js"></script>
 
 </body>

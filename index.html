@@ -15,6 +15,15 @@
 <meta name="copyright" content="Vipen">
 <meta name="keywords" content="Vipen, digital design, creative studio, web design, 3D creative, new media">
 <meta name="description" content="Vipen is a premier digital creative studio specializing in interactive web design, 3D experiences, and brand digital transformation.">
+<meta property="og:title" content="Vipen">
+<meta property="og:description" content="Vipen is a premier digital creative studio specializing in interactive web design, 3D experiences, and brand digital transformation.">
+<meta property="og:image" content="https://vipenonline.com/images/og-default.png">
+<meta property="og:url" content="https://vipenonline.com">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Vipen">
+<meta name="twitter:description" content="Vipen is a premier digital creative studio specializing in interactive web design, 3D experiences, and brand digital transformation.">
+<meta name="twitter:image" content="https://vipenonline.com/images/og-default.png">
 <link rel="Shortcut Icon" href="images/favicon.png">
 <title>Vipen</title>
 <link rel="stylesheet" href="css/reset.css">
@@ -28,6 +37,9 @@
 <link rel="stylesheet" href="css/pages/action.css">
 <link rel="stylesheet" href="css/pages/msg.css">
 <link rel="stylesheet" href="css/pages/design.css">
+<link rel="stylesheet" href="css/pages/signin.css">
+<link rel="stylesheet" href="css/pages/signup.css">
+<link rel="stylesheet" href="css/pages/profile.css">
 <link rel="stylesheet" href="css/pages/responsive.css">
 
 </head>
@@ -102,8 +114,9 @@
             </button>
             <button id="signinBtn" class="authBtn signin">Sign in</button>
             <button id="signupBtn" class="authBtn signup">Sign up</button>
-            <a href="profile.html" id="profileLink" class="authBtn profile" style="display:none;">Profile</a>
-            <button id="logoutBtn" class="authBtn logout" style="display:none;">Log out</button>
+            <a href="#/profile" id="profileLink" class="authBtn profile-link" style="display:none;" title="Profile">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+            </a>
         </div>
     </nav>
 </header>
@@ -175,6 +188,9 @@
 <script src="js/pages/action.js"></script>
 <script src="js/pages/banner.js"></script>
 <script src="js/pages/disc.js"></script>
+<script src="js/pages/signin.js"></script>
+<script src="js/pages/signup.js"></script>
+<script src="js/pages/profile.js"></script>
 <script src="js/main.js"></script>
 <script src="anti-scrape.js"></script>
 

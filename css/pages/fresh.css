@@ -51,6 +51,9 @@
 .fresh-detail-back{position:fixed;top:.3rem;left:.5rem;z-index:160;display:flex;align-items:center;gap:.08rem;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:.13rem;padding:.08rem .2rem;border-radius:.2rem;cursor:pointer;transition:all .35s;font-family:Georgia,'Times New Roman',serif}
 .fresh-detail-back:hover{background:rgba(0,0,0,.85);border-color:rgba(255,255,255,.3)}
 .fresh-detail-back svg{width:.16rem;height:.16rem;fill:none;stroke:currentColor;stroke-width:2}
+.fresh-detail-share{position:fixed;top:.3rem;right:.5rem;z-index:160;display:flex;align-items:center;justify-content:center;width:.42rem;height:.42rem;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:50%;cursor:pointer;transition:all .35s}
+.fresh-detail-share:hover{background:rgba(0,0,0,.85);border-color:rgba(255,255,255,.3);color:#fff;transform:scale(1.08)}
+.fresh-detail-share svg{width:.18rem;height:.18rem;fill:none;stroke:currentColor;stroke-width:2}
 .fresh-detail-inner{max-width:10rem;margin:0 auto;padding:1.6rem .5rem 1.2rem}
 .fresh-detail-header{margin-bottom:.6rem}
 .fresh-detail-brand{font-size:.1rem;color:rgba(255,255,255,.3);letter-spacing:.08rem;text-transform:uppercase;margin-bottom:.32rem;font-family:Georgia,'Times New Roman',serif}
@@ -100,6 +103,22 @@
 .fresh-detail-auth-btns .btn-signin:hover{background:#16a34a}
 .fresh-detail-auth-btns .btn-notnow{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:.2rem;padding:.1rem .24rem;color:rgba(255,255,255,.5);font-size:.13rem;font-weight:500;cursor:pointer;transition:all .35s}
 .fresh-detail-auth-btns .btn-notnow:hover{background:rgba(255,255,255,.12);color:rgba(255,255,255,.7)}
+
+.fresh-detail-share-popup{position:fixed;top:0;left:0;width:100%;height:100%;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);animation:freshShareFadeIn .25s ease}
+@keyframes freshShareFadeIn{from{opacity:0}to{opacity:1}}
+.fresh-detail-share-box{background:#111;border:1px solid rgba(255,255,255,.12);border-radius:.2rem;padding:.32rem .28rem;max-width:4rem;width:90%;box-shadow:0 .2rem .6rem rgba(0,0,0,.5);animation:freshShareSlideUp .3s cubic-bezier(.25,.46,.45,.94)}
+@keyframes freshShareSlideUp{from{transform:translateY(.3rem);opacity:0}to{transform:translateY(0);opacity:1}}
+.fresh-detail-share-heading{font-size:.16rem;font-weight:600;color:#fff;text-align:center;margin-bottom:.28rem;font-family:Georgia,'Times New Roman',serif}
+.fresh-detail-share-grid{display:grid;grid-template-columns:1fr 1fr;gap:.12rem;margin-bottom:.24rem}
+.fresh-detail-share-option{display:flex;flex-direction:column;align-items:center;gap:.1rem;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:.14rem;padding:.2rem .12rem;cursor:pointer;transition:all .3s;color:rgba(255,255,255,.6);font-size:.12rem;font-family:Georgia,'Times New Roman',serif}
+.fresh-detail-share-option:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff;transform:translateY(-.02rem)}
+.fresh-detail-share-icon{width:.44rem;height:.44rem;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff}
+.fresh-detail-share-icon svg{width:.22rem;height:.22rem}
+.fresh-detail-share-cancel{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:.2rem;padding:.12rem;color:rgba(255,255,255,.4);font-size:.13rem;cursor:pointer;transition:all .3s;font-family:Georgia,'Times New Roman',serif}
+.fresh-detail-share-cancel:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.6)}
+
+.fresh-detail-share-toast{position:fixed;bottom:.6rem;left:50%;transform:translateX(-50%) translateY(.2rem);z-index:300;background:#22c55e;color:#fff;padding:.12rem .28rem;border-radius:.24rem;font-size:.14rem;font-weight:500;opacity:0;transition:all .4s cubic-bezier(.25,.46,.45,.94);pointer-events:none;font-family:Georgia,'Times New Roman',serif;box-shadow:0 .08rem .24rem rgba(34,197,94,.3)}
+.fresh-detail-share-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
 .fresh-empty{text-align:center;padding:.8rem 0}
 .fresh-empty-title{font-size:.2rem;color:rgba(255,255,255,.15);font-weight:600}

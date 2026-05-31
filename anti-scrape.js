@@ -120,5 +120,5 @@
             applyProtectionStyles();
         }
     });
-    observer.observe(document.documentElement, { childList: true, subtree: true });
+    observer.observe(document.head, { childList: true, subtree: false });
 })();

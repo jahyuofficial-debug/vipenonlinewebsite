@@ -223,3 +223,21 @@ fetch('data/xxx.json')
     .then(function(d) { XxxPage.setData(d); })
     .catch(function() { console.log('Using fallback data'); });
 ```
+
+---
+
+## 七、UI 资源选型
+
+### 7.1 Icon 图标
+
+**所有图标统一从 Lucide 选取：** `https://lucide.dev?utm_source=chatgpt.com`
+
+- 需要图标时，直接去 Lucide 搜索对应的图标名称，使用其 SVG 或图标名称引用。
+- 禁止从其他图标库（如 Font Awesome、Material Icons）混入图标。
+
+### 7.2 组件
+
+**所有 UI 组件统一从 shadcn/ui 选取：** `https://ui.shadcn.com/`
+
+- 设计新功能或新页面时，先查看 shadcn/ui 中是否有合适的组件。
+- 组件风格、交互模式参考 shadcn/ui 的设计语言。

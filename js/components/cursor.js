@@ -4,14 +4,19 @@ var Cursor = (function() {
     var cursorEl = null;
     var mouseX = 0, mouseY = 0;
     var cursorX = 0, cursorY = 0;
+    var halfSize = 16;
+    var initialized = false;
     var animating = false;
 
     function animateCursor() {
-        cursorX += (mouseX - cursorX) * 0.35;
-        cursorY += (mouseY - cursorY) * 0.35;
+        var dx = mouseX - cursorX;
+        var dy = mouseY - cursorY;
+        var dist = Math.sqrt(dx * dx + dy * dy);
+        var factor = dist < 3 ? 0.7 : (dist < 30 ? 0.55 : 0.65);
+        cursorX += dx * factor;
+        cursorY += dy * factor;
         if (cursorEl) {
-            cursorEl.style.left = cursorX + 'px';
-            cursorEl.style.top = cursorY + 'px';
+            cursorEl.style.transform = 'translate3d(' + (cursorX - halfSize) + 'px,' + (cursorY - halfSize) + 'px,0)';
         }
         requestAnimationFrame(animateCursor);
     }
@@ -24,7 +29,13 @@ var Cursor = (function() {
             document.addEventListener('mousemove', function(e) {
                 mouseX = e.clientX;
                 mouseY = e.clientY;
-            });
+                if (!initialized) {
+                    initialized = true;
+                    cursorX = e.clientX;
+                    cursorY = e.clientY;
+                    cursorEl.style.opacity = '1';
+                }
+            }, { passive: true });
 
             if (!animating) {
                 animating = true;

@@ -75,8 +75,6 @@ window.addEventListener('scroll', function(){
     }
 });
 
-window.addEventListener('touchmove', function(e){}, {passive:true});
-
 var bgm = document.getElementById('bgm');
 var musicOn = true;
 
@@ -153,9 +151,17 @@ if(settingsOverlay){
 }
 
 var signinBtn = document.getElementById('signinBtn');
-var signupBtn = document.getElementById('signupBtn');
-var profileLink = document.getElementById('profileLink');
-var logoutBtn = document.getElementById('logoutBtn');
+    var signupBtn = document.getElementById('signupBtn');
+    var profileLink = document.getElementById('profileLink');
+
+    function goToSignin(e) {
+        if (e) { e.stopPropagation(); e.preventDefault(); }
+        window.location.hash = '#/signin';
+    }
+    function goToSignup(e) {
+        if (e) { e.stopPropagation(); e.preventDefault(); }
+        window.location.hash = '#/signup';
+    }
 
 function updateAuthUI() {
     var isLoggedIn = Utils.isLoggedIn();
@@ -163,40 +169,21 @@ function updateAuthUI() {
         if (signinBtn) signinBtn.style.display = 'none';
         if (signupBtn) signupBtn.style.display = 'none';
         if (profileLink) profileLink.style.display = '';
-        if (logoutBtn) logoutBtn.style.display = '';
     } else {
         if (signinBtn) signinBtn.style.display = '';
         if (signupBtn) signupBtn.style.display = '';
         if (profileLink) profileLink.style.display = 'none';
-        if (logoutBtn) logoutBtn.style.display = 'none';
     }
 }
 
 updateAuthUI();
 
 if(signinBtn){
-    signinBtn.addEventListener('click', function(e){
-        e.stopPropagation();
-        e.preventDefault();
-        window.location.href = 'signin.html';
-    });
+    signinBtn.addEventListener('click', goToSignin);
 }
 
 if(signupBtn){
-    signupBtn.addEventListener('click', function(e){
-        e.stopPropagation();
-        e.preventDefault();
-        window.location.href = 'signup.html';
-    });
-}
-
-if(logoutBtn){
-    logoutBtn.addEventListener('click', function(e){
-        e.stopPropagation();
-        e.preventDefault();
-        Utils.logout();
-        updateAuthUI();
-    });
+    signupBtn.addEventListener('click', goToSignup);
 }
 
 function updateNavActiveState(pageName){
@@ -461,9 +448,9 @@ function navigateTo(pageName) {
 
     var herosTopBg = document.getElementById('herosTopBg');
 
-    if (pageName === 'msg' || pageName === 'action' || pageName === 'design-work' || pageName === 'design-work-list') {
+    if (pageName === 'msg' || pageName === 'action' || pageName === 'design-work' || pageName === 'design-work-list' || pageName === 'profile') {
         if (!Utils.isLoggedIn()) {
-            window.location.href = 'signin.html';
+            window.location.hash = '#/signin';
             return;
         }
     }
@@ -555,15 +542,180 @@ function navigateTo(pageName) {
         app.appendChild(subPageContainer);
         currentPage = pageName;
     } else if (pageName === 'signin') {
-        window.location.href = 'signin.html';
-        return;
+        if (herosTopBg) herosTopBg.classList.remove('hidden');
+        banner.style.display = 'none';
+        header.classList.remove('dimmed');
+        subPageContainer = document.createElement('div');
+        subPageContainer.innerHTML = SigninPage.buildPage();
+        app.appendChild(subPageContainer);
+        SigninPage.bindAll();
+        currentPage = 'signin';
     } else if (pageName === 'signup') {
-        window.location.href = 'signup.html';
-        return;
+        if (herosTopBg) herosTopBg.classList.remove('hidden');
+        banner.style.display = 'none';
+        header.classList.remove('dimmed');
+        subPageContainer = document.createElement('div');
+        subPageContainer.innerHTML = SignupPage.buildPage();
+        app.appendChild(subPageContainer);
+        SignupPage.bindAll();
+        currentPage = 'signup';
+    } else if (pageName === 'profile') {
+        if (herosTopBg) herosTopBg.classList.remove('hidden');
+        banner.style.display = 'none';
+        header.classList.remove('dimmed');
+        subPageContainer = document.createElement('div');
+        subPageContainer.innerHTML = ProfilePage.buildPage();
+        app.appendChild(subPageContainer);
+        ProfilePage.bindAll();
+        currentPage = 'profile';
     }
     updateNavCollapseState();
     updateNavActiveState(currentPage);
     MiniPlayer.updateState(currentPage, DiscPage.getDiscIsPlaying(), discVisited);
+}
+
+function updateFreshMetaTags(id) {
+    var item = freshItems[id];
+    if (!item) return;
+    var baseUrl = window.location.origin + window.location.pathname.replace(/\/$/, '');
+    var pageUrl = baseUrl + '/#/fresh/detail/' + id;
+    var ogImage = item.image ? baseUrl + '/' + item.image : baseUrl + '/api/og?title=' + encodeURIComponent(item.headline) + '&author=' + encodeURIComponent(item.author);
+    var metaMap = {
+        'og:title': item.headline,
+        'og:description': item.summary,
+        'og:image': ogImage,
+        'og:url': pageUrl,
+        'og:type': 'article',
+        'twitter:card': 'summary_large_image',
+        'twitter:title': item.headline,
+        'twitter:description': item.summary,
+        'twitter:image': ogImage
+    };
+    Object.keys(metaMap).forEach(function(key) {
+        var selector = 'meta[property="' + key + '"],meta[name="' + key + '"]',
+            existing = document.querySelector(selector);
+        if (existing) {
+            existing.setAttribute(key.indexOf('og:') === 0 ? 'property' : 'name', key);
+            existing.setAttribute('content', metaMap[key]);
+        } else {
+            var meta = document.createElement('meta');
+            if (key.indexOf('og:') === 0) {
+                meta.setAttribute('property', key);
+            } else {
+                meta.setAttribute('name', key);
+            }
+            meta.setAttribute('content', metaMap[key]);
+            document.head.appendChild(meta);
+        }
+    });
+    var titleEl = document.querySelector('title');
+    if (titleEl) titleEl.textContent = item.headline + ' | Vipen';
+}
+
+function showFreshSharePopup(item) {
+    var existing = document.getElementById('freshDetailSharePopup');
+    if (existing) existing.remove();
+
+    var shareUrl = window.location.href;
+    var encodedUrl = encodeURIComponent(shareUrl);
+    var encodedTitle = encodeURIComponent(item.headline);
+    var encodedSummary = encodeURIComponent(item.summary);
+
+    var popup = document.createElement('div');
+    popup.className = 'fresh-detail-share-popup';
+    popup.id = 'freshDetailSharePopup';
+    popup.innerHTML =
+        '<div class="fresh-detail-share-box">' +
+        '<h3 class="fresh-detail-share-heading">Share this article</h3>' +
+        '<div class="fresh-detail-share-grid">' +
+        '<button class="fresh-detail-share-option" data-share="copy">' +
+        '<div class="fresh-detail-share-icon" style="background:#3b82f6;">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
+        '</div><span>Copy Link</span></button>' +
+        '<button class="fresh-detail-share-option" data-share="twitter">' +
+        '<div class="fresh-detail-share-icon" style="background:#1da1f2;">' +
+        '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>' +
+        '</div><span>Twitter / X</span></button>' +
+        '<button class="fresh-detail-share-option" data-share="facebook">' +
+        '<div class="fresh-detail-share-icon" style="background:#1877f2;">' +
+        '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>' +
+        '</div><span>Facebook</span></button>' +
+        '<button class="fresh-detail-share-option" data-share="native">' +
+        '<div class="fresh-detail-share-icon" style="background:#6366f1;">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>' +
+        '</div><span>More...</span></button>' +
+        '</div>' +
+        '<button class="fresh-detail-share-cancel">Cancel</button>' +
+        '</div>';
+
+    document.body.appendChild(popup);
+
+    popup.addEventListener('click', function(e) {
+        if (e.target === popup) popup.remove();
+    });
+
+    var cancelBtn = popup.querySelector('.fresh-detail-share-cancel');
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', function() { popup.remove(); });
+    }
+
+    var options = popup.querySelectorAll('.fresh-detail-share-option');
+    options.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var action = this.getAttribute('data-share');
+            if (action === 'copy') {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(shareUrl).then(function() {
+                        showFreshShareToast('Link copied!');
+                    }).catch(function() {
+                        fallbackCopy(shareUrl);
+                    });
+                } else {
+                    fallbackCopy(shareUrl);
+                }
+                popup.remove();
+            } else if (action === 'twitter') {
+                window.open('https://twitter.com/intent/tweet?url=' + encodedUrl + '&text=' + encodedTitle, '_blank', 'width=600,height=400');
+                popup.remove();
+            } else if (action === 'facebook') {
+                window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodedUrl + '&quote=' + encodedSummary, '_blank', 'width=600,height=400');
+                popup.remove();
+            } else if (action === 'native') {
+                if (navigator.share) {
+                    navigator.share({ title: item.headline, text: item.summary, url: shareUrl }).catch(function() {});
+                } else {
+                    fallbackCopy(shareUrl);
+                }
+                popup.remove();
+            }
+        });
+    });
+}
+
+function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); showFreshShareToast('Link copied!'); } catch (e) {}
+    document.body.removeChild(ta);
+}
+
+function showFreshShareToast(msg) {
+    var existing = document.getElementById('freshDetailShareToast');
+    if (existing) existing.remove();
+    var toast = document.createElement('div');
+    toast.className = 'fresh-detail-share-toast';
+    toast.id = 'freshDetailShareToast';
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.classList.add('show'); }, 10);
+    setTimeout(function() {
+        toast.classList.remove('show');
+        setTimeout(function() { toast.remove(); }, 400);
+    }, 2000);
 }
 
 function showFreshAuthPopup() {
@@ -610,6 +762,17 @@ function navigateToFreshDetail(id) {
             window.location.hash = '#/fresh';
         });
     }
+
+    var shareBtn = document.getElementById('freshDetailShare');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', function() {
+            var item = freshItems[id];
+            if (!item) return;
+            showFreshSharePopup(item);
+        });
+    }
+
+    updateFreshMetaTags(id);
 
     var likeBtn = document.getElementById('freshDetailLikeBtn');
     if (likeBtn) {
@@ -736,6 +899,17 @@ function handleRoute() {
         var id = parseInt(hash.replace('fresh/detail/', ''), 10);
         if (!isNaN(id) && freshItems[id]) {
             navigateToFreshDetail(id);
+        } else if (!isNaN(id) && freshItems.length === 0) {
+            var checkData = setInterval(function() {
+                if (freshItems.length > 0 && freshItems[id]) {
+                    clearInterval(checkData);
+                    navigateToFreshDetail(id);
+                } else if (freshItems.length > 0) {
+                    clearInterval(checkData);
+                    navigateTo('fresh');
+                }
+            }, 100);
+            setTimeout(function() { clearInterval(checkData); }, 5000);
         } else {
             navigateTo('fresh');
         }
@@ -809,6 +983,7 @@ var originalNavigateTo = navigateTo;
 navigateTo = function(pageName) {
     var wasDiscPage = currentPage === 'disc-library';
     originalNavigateTo(pageName);
+    updateAuthUI();
     if (pageName !== 'disc-library' && discAudio && discAudio.src) {
         MiniPlayer.show();
     }

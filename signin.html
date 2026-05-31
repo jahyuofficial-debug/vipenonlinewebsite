@@ -9,10 +9,11 @@
 <script src="js/core/config.js"></script>
 <script src="js/core/utils.js"></script>
 <script src="js/core/comet-trail.js"></script>
+<style>html{font-size:calc(100vw/19.2);scroll-behavior:smooth}*,:after,:before{box-sizing:border-box;margin:0;padding:0}body{background:#000;color:#fff;overflow-x:hidden}a{text-decoration:none;color:inherit}::-webkit-scrollbar{width:5px;background-color:transparent}::-webkit-scrollbar-thumb{width:3px;background-color:#b2b9ff;border:1px solid transparent;border-radius:4px}::selection{background-color:transparent}</style>
 <link rel="stylesheet" href="css/pages/signin.css">
 
 </head>
-<body>
+<body class="signin-page">
 
 <a href="index.html#/" class="back-link" id="backLink">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -28,7 +29,11 @@
             <img src="images/vipen-logo.png" alt="Vipen">
         </div>
         <h1 class="signin-title">Welcome Back</h1>
-        <p class="signin-subtitle">Sign in with email verification</p>
+        <p class="signin-subtitle" id="signinSubtitle">Sign in with email verification</p>
+        <div class="signin-tabs">
+            <button type="button" class="signin-tab active" data-mode="code" id="tabCode">Verification Code</button>
+            <button type="button" class="signin-tab" data-mode="password" id="tabPassword">Password</button>
+        </div>
     </div>
 
     <form class="signin-form" id="signinForm" autocomplete="off">
@@ -42,6 +47,13 @@
         <div class="input-group email-code-group" id="emailCodeGroup">
             <input type="text" id="emailCode" class="input-field" placeholder="Verification Code" autocomplete="off" maxlength="6">
             <button type="button" class="send-code-btn" id="sendCodeBtn">Send Code</button>
+        </div>
+
+        <div class="input-group has-toggle" id="passwordGroup" style="display:none">
+            <input type="password" id="password" class="input-field" placeholder="Password" autocomplete="off">
+            <button type="button" class="password-toggle" id="passwordToggle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
         </div>
 
         <div class="send-tip" id="sendTip">Code sent, please check your inbox</div>

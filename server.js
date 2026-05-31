@@ -4,6 +4,8 @@ var fs = require('fs');
 var path = require('path');
 var url = require('url');
 var crypto = require('crypto');
+var canvas;
+try { canvas = require('canvas'); } catch (e) { canvas = null; }
 
 var PORT = 3000;
 var ROOT = __dirname;
@@ -35,6 +37,13 @@ if (!RESEND_API_KEY) {
 }
 
 var codeStore = {};
+
+var TEST_ACCOUNTS = {
+    'jahyuofficial@gmail.com': {
+        password: 'jjz889527',
+        username: 'jahyuofficial'
+    }
+};
 
 function generateCode() {
     return String(Math.floor(100000 + Math.random() * 900000));
@@ -118,14 +127,108 @@ function sendJSON(res, statusCode, data) {
     res.end(json);
 }
 
+function generateOGImage(title, author, callback) {
+    if (!canvas) {
+        callback(new Error('Canvas not available'));
+        return;
+    }
+    var createCanvas = canvas.createCanvas;
+    var registerFont = canvas.registerFont;
+    var WIDTH = 1200;
+    var HEIGHT = 630;
+    var c = createCanvas(WIDTH, HEIGHT);
+    var ctx = c.getContext('2d');
+
+    var gradient = ctx.createLinearGradient(0, 0, WIDTH, HEIGHT);
+    gradient.addColorStop(0, '#0a0a0f');
+    gradient.addColorStop(0.5, '#111118');
+    gradient.addColorStop(1, '#1a1a2e');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+    var accentGradient = ctx.createLinearGradient(0, 0, WIDTH, 0);
+    accentGradient.addColorStop(0, '#6366f1');
+    accentGradient.addColorStop(0.5, '#8b5cf6');
+    accentGradient.addColorStop(1, '#a855f7');
+    ctx.fillStyle = accentGradient;
+    ctx.fillRect(60, 60, 80, 6);
+
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 48px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+
+    var maxWidth = WIDTH - 120;
+    var lineHeight = 64;
+    var words = (title || 'Vipen Article').split('');
+    var lines = [];
+    var currentLine = '';
+    for (var i = 0; i < words.length; i++) {
+        var testLine = currentLine + words[i];
+        var metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && currentLine.length > 0) {
+            lines.push(currentLine);
+            currentLine = words[i];
+        } else {
+            currentLine = testLine;
+        }
+    }
+    lines.push(currentLine);
+    if (lines.length > 3) {
+        lines = lines.slice(0, 3);
+        lines[2] = lines[2].slice(0, -3) + '...';
+    }
+    var startY = 280 - ((lines.length - 1) * lineHeight) / 2;
+    lines.forEach(function(line, idx) {
+        ctx.fillText(line, 60, startY + idx * lineHeight);
+    });
+
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.font = '24px sans-serif';
+    ctx.fillText('By ' + (author || 'Vipen'), 60, startY + lines.length * lineHeight + 24);
+
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.font = 'bold 120px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('Vipen', WIDTH - 60, HEIGHT - 140);
+
+    var buf = c.toBuffer('image/png');
+    callback(null, buf);
+}
+
+function handleOGImage(req, res, query) {
+    var q = query || {};
+    var title = decodeURIComponent(q.title || 'Vipen Article');
+    var author = decodeURIComponent(q.author || 'Vipen');
+    generateOGImage(title, author, function(err, buf) {
+        if (err) {
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.end('OG generation failed');
+            return;
+        }
+        res.writeHead(200, {
+            'Content-Type': 'image/png',
+            'Content-Length': buf.length,
+            'Cache-Control': 'public, max-age=3600'
+        });
+        res.end(buf);
+    });
+}
+
 function handleAPIRoute(req, res, apiPath) {
     if (req.method === 'OPTIONS') {
         res.writeHead(204, {
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type'
         });
         res.end();
+        return;
+    }
+
+    if (apiPath === '/api/og') {
+        var parsed = url.parse(req.url, true);
+        handleOGImage(req, res, parsed.query);
         return;
     }
 
@@ -144,6 +247,8 @@ function handleAPIRoute(req, res, apiPath) {
             handleSendCode(res, body);
         } else if (apiPath === '/api/auth/verify-code') {
             handleVerifyCode(res, body);
+        } else if (apiPath === '/api/auth/login') {
+            handleLogin(res, body);
         } else {
             sendJSON(res, 404, { success: false, error: 'Unknown API endpoint' });
         }
@@ -183,6 +288,35 @@ function handleSendCode(res, body) {
         }
         console.log('Verification code sent to', email, '| code:', code, '| id:', result.id);
         sendJSON(res, 200, { success: true, hash: hash, ts: ts });
+    });
+}
+
+function handleLogin(res, body) {
+    var email = (body.email || '').toLowerCase().trim();
+    var password = body.password || '';
+
+    if (!email || !password) {
+        sendJSON(res, 400, { success: false, error: 'Email and password are required' });
+        return;
+    }
+
+    var account = TEST_ACCOUNTS[email];
+    if (!account) {
+        sendJSON(res, 401, { success: false, error: 'Invalid email or password' });
+        return;
+    }
+
+    if (account.password !== password) {
+        sendJSON(res, 401, { success: false, error: 'Invalid email or password' });
+        return;
+    }
+
+    var token = generateToken(email);
+    sendJSON(res, 200, {
+        success: true,
+        token: token,
+        username: account.username,
+        email: email
     });
 }
 

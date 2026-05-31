@@ -1,38 +1,37 @@
-*,:after,:before{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',Helvetica,Arial,sans-serif}
-html{font-size:calc(100vw/19.2);scroll-behavior:smooth}
-body{position:relative;background:#000;color:#fff;overflow:hidden;height:100vh;display:flex;flex-direction:column;align-items:center}
-body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:url('../../images/REGISTERPAGE.png') center/cover no-repeat;opacity:.6;z-index:-1}
+.signup-page *,.signup-page :after,.signup-page :before{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',Helvetica,Arial,sans-serif}
+.signup-page{position:relative;background:#000 url('../../images/REGISTERPAGE.png') center/cover no-repeat;color:#fff;overflow:hidden;height:100vh;display:flex;flex-direction:column;align-items:center}
+.signup-page::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);z-index:0}
 
-.comet-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
-.comet-particle{position:absolute;border-radius:50%;pointer-events:none;will-change:transform,opacity}
-a{text-decoration:none;color:inherit}
-input,button{outline:none;font-family:inherit}
-::selection{background-color:transparent}
+.signup-page .comet-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.signup-page .comet-particle{position:absolute;border-radius:50%;pointer-events:none;will-change:transform,opacity}
+.signup-page a{text-decoration:none;color:inherit}
+.signup-page input,.signup-page button{outline:none;font-family:inherit}
+.signup-page ::selection{background-color:transparent}
 
-.signup-container{width:100%;max-width:4.2rem;padding:0 .4rem;display:flex;flex-direction:column;align-items:center;height:100vh;justify-content:flex-start;padding-top:.15rem;padding-bottom:.15rem}
+.signup-page .signup-container{position:relative;z-index:1;width:100%;max-width:4.2rem;padding:0 .4rem;display:flex;flex-direction:column;align-items:center;height:100vh;justify-content:flex-start;padding-top:.85rem;padding-bottom:.15rem}
 
-.signup-header{width:100%;display:flex;flex-direction:column;align-items:center;margin-bottom:.1rem;flex-shrink:0}
-.signup-logo{width:3.6rem;height:3.6rem;margin-bottom:0;opacity:.9}
-.signup-logo img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 .02rem .06rem rgba(0,0,0,.45))}
+.signup-page .signup-header{width:100%;display:flex;flex-direction:column;align-items:center;margin-bottom:.1rem;flex-shrink:0}
+.signup-page .signup-logo{width:3.6rem;height:3.6rem;margin-bottom:0;opacity:.9}
+.signup-page .signup-logo img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 .02rem .06rem rgba(0,0,0,.45))}
 
-.signup-title{font-size:.48rem;font-weight:900;color:#fff;margin-bottom:0;letter-spacing:-.004em;text-align:center;font-family:'SF Pro Display','Helvetica Neue',Helvetica,Arial,sans-serif;font-style:italic;line-height:1.1;margin-top:-.1rem}
-.signup-subtitle{font-size:.12rem;color:rgba(255,255,255,.4);text-align:center;font-weight:700;font-style:italic;margin-bottom:0;line-height:1.2;margin-top:0}
+.signup-page .signup-title{font-size:.48rem;font-weight:900;color:#fff;margin-bottom:0;letter-spacing:-.004em;text-align:center;font-family:'SF Pro Display','Helvetica Neue',Helvetica,Arial,sans-serif;font-style:italic;line-height:1.1;margin-top:-.1rem}
+.signup-page .signup-subtitle{font-size:.12rem;color:rgba(255,255,255,.4);text-align:center;font-weight:700;font-style:italic;margin-bottom:0;line-height:1.2;margin-top:0}
 
-.signup-title,.signup-subtitle{position:relative;transform:translateY(-80%)}
-.signup-subtitle{transform:translateY(-240%)}
+.signup-page .signup-title,.signup-page .signup-subtitle{position:relative;transform:translateY(-20%)}
+.signup-page .signup-subtitle{transform:translateY(-60%)}
 
-.signup-form{width:100%;display:flex;flex-direction:column;gap:.15rem;margin-top:.06rem;position:relative;transform:translateY(-10%)}
+.signup-page .signup-form{width:100%;display:flex;flex-direction:column;gap:.15rem;margin-top:.06rem;position:relative;transform:translateY(0)}
 
-.input-group{position:relative;width:100%;display:flex;align-items:center}
+.signup-page .input-group{position:relative;width:100%;display:flex;align-items:center}
 
-.input-field{width:100%;height:.36rem;background:#333;border:none;border-radius:.08rem;padding:0 .12rem;padding-right:.38rem;font-size:.11rem;color:#fff;transition:border-color .3s,background .3s,box-shadow .3s;-webkit-appearance:none;box-shadow:0 .04rem .12rem rgba(0,0,0,.5)}
-.input-field::placeholder{color:rgba(255,255,255,.25);font-weight:400}
-.input-field:hover{box-shadow:0 .06rem .16rem rgba(0,0,0,.7)}
-.input-field:focus{box-shadow:0 .06rem .2rem rgba(0,0,0,.8);outline:none}
-.input-field.error{border:2px solid rgba(255,80,80,.8)!important;animation:shake .4s ease}
-.input-field.valid{border:2px solid rgba(50,200,100,.5)}
+.signup-page .input-field{width:100%;height:.36rem;background:#333;border:none;border-radius:.08rem;padding:0 .12rem;padding-right:.38rem;font-size:.11rem;color:#fff;transition:border-color .3s,background .3s,box-shadow .3s;-webkit-appearance:none;box-shadow:0 .04rem .12rem rgba(0,0,0,.5)}
+.signup-page .input-field::placeholder{color:rgba(255,255,255,.25);font-weight:400}
+.signup-page .input-field:hover{box-shadow:0 .06rem .16rem rgba(0,0,0,.7)}
+.signup-page .input-field:focus{box-shadow:0 .06rem .2rem rgba(0,0,0,.8);outline:none}
+.signup-page .input-field.error{border:2px solid rgba(255,80,80,.8)!important;animation:signupShake .4s ease}
+.signup-page .input-field.valid{border:2px solid rgba(50,200,100,.5)}
 
-@keyframes shake{
+@keyframes signupShake{
     0%,100%{transform:translateX(0)}
     15%{transform:translateX(-6px)}
     30%{transform:translateX(5px)}
@@ -41,64 +40,63 @@ input,button{outline:none;font-family:inherit}
     75%{transform:translateX(-2px)}
 }
 
-.validation-icon{position:absolute;right:.12rem;top:0;transform:translateY(0) scale(0);width:.18rem;height:.36rem;transition:transform .25s cubic-bezier(.34,1.56,.64,1);pointer-events:none;display:flex;align-items:center;justify-content:center}
-.validation-icon.show{transform:translateY(0) scale(1)}
-.validation-icon svg{width:100%;height:100%;display:block}
+.signup-page .validation-icon{position:absolute;right:.12rem;top:0;transform:translateY(0) scale(0);width:.18rem;height:.36rem;transition:transform .25s cubic-bezier(.34,1.56,.64,1);pointer-events:none;display:flex;align-items:center;justify-content:center}
+.signup-page .validation-icon.show{transform:translateY(0) scale(1)}
+.signup-page .validation-icon svg{width:100%;height:100%;display:block}
 
-.password-toggle{position:absolute;right:.08rem;top:0;transform:translateY(0);width:.28rem;height:.36rem;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.35);transition:color .2s;padding:0;z-index:2}
-.password-toggle:hover{color:rgba(255,255,255,.7)}
-.password-toggle svg{width:.2rem;height:.2rem;display:block}
+.signup-page .password-toggle{position:absolute;right:.08rem;top:0;transform:translateY(0);width:.28rem;height:.36rem;background:none;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.35);transition:color .2s;padding:0;z-index:2}
+.signup-page .password-toggle:hover{color:rgba(255,255,255,.7)}
+.signup-page .password-toggle svg{width:.2rem;height:.2rem;display:block}
 
-.input-group.has-toggle .input-field{padding-right:.4rem}
-.input-group.has-toggle .validation-icon{right:.36rem}
+.signup-page .input-group.has-toggle .input-field{padding-right:.4rem}
+.signup-page .input-group.has-toggle .validation-icon{right:.36rem}
 
-.error-text{position:absolute;right:-.04rem;top:0;transform:translateY(0) translateX(100%);font-size:.09rem;color:rgba(255,80,80,.9);white-space:nowrap;opacity:0;transition:opacity .25s;padding-left:.08rem;pointer-events:none;height:.36rem;display:flex;align-items:center}
-.error-text.show{opacity:1}
+.signup-page .error-text{position:absolute;right:-.04rem;top:0;transform:translateY(0) translateX(100%);font-size:.09rem;color:rgba(255,80,80,.9);white-space:nowrap;opacity:0;transition:opacity .25s;padding-left:.08rem;pointer-events:none;height:.36rem;display:flex;align-items:center}
+.signup-page .error-text.show{opacity:1}
 
-.email-code-group{display:flex;gap:.15rem;align-items:center}
-.email-code-group .input-field{flex:1}
-.send-code-btn{height:.36rem;padding:0 .12rem;background:#000;border:none;border-radius:.08rem;color:rgba(255,255,255,.7);font-size:.1rem;font-weight:500;cursor:pointer;transition:all .3s;white-space:nowrap;flex-shrink:0;box-shadow:0 .04rem .12rem rgba(0,0,0,.5)}
-.send-code-btn:hover{box-shadow:0 .06rem .16rem rgba(0,0,0,.7);color:#fff}
-.send-code-btn:disabled{background:#000;box-shadow:0 .02rem .06rem rgba(0,0,0,.3);color:rgba(255,255,255,.2);cursor:not-allowed}
-.send-code-btn.active{background:#32c864;color:#000}
-.send-code-btn.active:hover{box-shadow:0 .06rem .16rem rgba(0,0,0,.7)}
-.send-code-btn.active:disabled{background:#1a6632;color:rgba(255,255,255,.25)}
+.signup-page .email-code-group{display:flex;gap:.15rem;align-items:center}
+.signup-page .email-code-group .input-field{flex:1}
+.signup-page .send-code-btn{height:.36rem;padding:0 .12rem;background:#000;border:none;border-radius:.08rem;color:rgba(255,255,255,.7);font-size:.1rem;font-weight:500;cursor:pointer;transition:all .3s;white-space:nowrap;flex-shrink:0;box-shadow:0 .04rem .12rem rgba(0,0,0,.5)}
+.signup-page .send-code-btn:hover{box-shadow:0 .06rem .16rem rgba(0,0,0,.7);color:#fff}
+.signup-page .send-code-btn:disabled{background:#000;box-shadow:0 .02rem .06rem rgba(0,0,0,.3);color:rgba(255,255,255,.2);cursor:not-allowed}
+.signup-page .send-code-btn.active{background:#32c864;color:#000}
+.signup-page .send-code-btn.active:hover{box-shadow:0 .06rem .16rem rgba(0,0,0,.7)}
+.signup-page .send-code-btn.active:disabled{background:#1a6632;color:rgba(255,255,255,.25)}
 
-.confirm-password-wrapper{display:none;overflow:hidden}
-.confirm-password-wrapper.expanded{display:block}
-.confirm-password-wrapper .input-group{opacity:0;transform:translateY(-6px);transition:opacity .35s ease,transform .35s ease}
-.confirm-password-wrapper.expanded .input-group{opacity:1;transform:translateY(0)}
+.signup-page .confirm-password-wrapper{display:none;overflow:hidden}
+.signup-page .confirm-password-wrapper.expanded{display:block}
+.signup-page .confirm-password-wrapper .input-group{opacity:0;transform:translateY(-6px);transition:opacity .35s ease,transform .35s ease}
+.signup-page .confirm-password-wrapper.expanded .input-group{opacity:1;transform:translateY(0)}
 
-.send-tip{font-size:.1rem;color:rgba(50,200,100,.85);text-align:center;margin-top:.04rem;opacity:0;transition:opacity .3s;pointer-events:none}
-.send-tip.show{opacity:1}
+.signup-page .send-tip{font-size:.1rem;color:rgba(50,200,100,.85);text-align:center;margin-top:.04rem;opacity:0;transition:opacity .3s;pointer-events:none}
+.signup-page .send-tip.show{opacity:1}
 
-.bottom-section{display:flex;flex-direction:column;align-items:center;width:100%;gap:.14rem;margin-top:.15rem;transform:translateY(-15%)}
-.agreement-section{display:flex;align-items:center;gap:.08rem;width:100%;margin-top:0;justify-content:center}
-.agreement-section .radio-btn{width:.09rem;height:.09rem;border:1.5px solid rgba(255,255,255,.35);border-radius:50%;cursor:pointer;flex-shrink:0;transition:all .2s;display:flex;align-items:center;justify-content:center;background:transparent;position:relative}
-.agreement-section .radio-btn.checked{background:#32c864;border-color:#32c864}
-.agreement-section .radio-btn.checked::after{content:'';width:.04rem;height:.04rem;background:#fff;border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
-.agreement-section label{font-size:.09rem;color:rgba(255,255,255,.35);line-height:1.5;cursor:pointer;user-select:none;font-style:italic;white-space:nowrap;font-weight:700}
-.agreement-section label a{color:rgba(255,255,255,.55);text-decoration:underline;transition:color .2s}
-.agreement-section label a:hover{color:#fff}
+.signup-page .bottom-section{display:flex;flex-direction:column;align-items:center;width:100%;gap:.14rem;margin-top:.15rem;transform:translateY(0)}
+.signup-page .agreement-section{display:flex;align-items:center;gap:.08rem;width:100%;margin-top:0;justify-content:center}
+.signup-page .agreement-section .radio-btn{width:.09rem;height:.09rem;border:1.5px solid rgba(255,255,255,.35);border-radius:50%;cursor:pointer;flex-shrink:0;transition:all .2s;display:flex;align-items:center;justify-content:center;background:transparent;position:relative}
+.signup-page .agreement-section .radio-btn.checked{background:#32c864;border-color:#32c864}
+.signup-page .agreement-section .radio-btn.checked::after{content:'';width:.04rem;height:.04rem;background:#fff;border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+.signup-page .agreement-section label{font-size:.09rem;color:rgba(255,255,255,.35);line-height:1.5;cursor:pointer;user-select:none;font-style:italic;white-space:nowrap;font-weight:700}
+.signup-page .agreement-section label a{color:rgba(255,255,255,.55);text-decoration:underline;transition:color .2s}
+.signup-page .agreement-section label a:hover{color:#fff}
 
-.next-btn{width:100%;height:.46rem;margin-top:.06rem;background:#32c864;border:none;border-radius:.08rem;color:#000;font-size:.17rem;font-weight:600;cursor:pointer;transition:all .3s;letter-spacing:.01em;box-shadow:0 .04rem .12rem rgba(0,0,0,.5)}
-.next-btn:hover{box-shadow:0 .06rem .16rem rgba(0,0,0,.7)}
-.next-btn:disabled{background:#1a6632;box-shadow:0 .02rem .06rem rgba(0,0,0,.3);color:rgba(255,255,255,.25);cursor:not-allowed}
+.signup-page .next-btn{width:100%;height:.46rem;margin-top:.06rem;background:#32c864;border:none;border-radius:.08rem;color:#000;font-size:.17rem;font-weight:600;cursor:pointer;transition:all .3s;letter-spacing:.01em;box-shadow:0 .04rem .12rem rgba(0,0,0,.5)}
+.signup-page .next-btn:hover{box-shadow:0 .06rem .16rem rgba(0,0,0,.7)}
+.signup-page .next-btn:disabled{background:#1a6632;box-shadow:0 .02rem .06rem rgba(0,0,0,.3);color:rgba(255,255,255,.25);cursor:not-allowed}
 
-.signin-link{margin-top:0;font-size:.13rem;color:rgba(255,255,255,.3);text-align:center}
-.signin-link a{color:rgba(255,255,255,.55);transition:color .2s}
-.signin-link a:hover{color:#fff}
+.signup-page .signin-link{margin-top:0;font-size:.13rem;color:rgba(255,255,255,.3);text-align:center}
+.signup-page .signin-link a{color:rgba(255,255,255,.55);transition:color .2s}
+.signup-page .signin-link a:hover{color:#fff}
 
-.copyright{position:fixed;bottom:.1rem;left:.1rem;font-size:.09rem;color:rgba(255,255,255,.25);z-index:10}
+.signup-page .copyright{position:fixed;bottom:.1rem;left:.1rem;font-size:.09rem;color:rgba(255,255,255,.25);z-index:10}
 
-.back-link{position:absolute;top:.3rem;left:.3rem;width:.36rem;height:.36rem;background:rgba(0,0,0,.75);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 .04rem .12rem rgba(0,0,0,.5);transition:background .2s,box-shadow .2s}
-.back-link:hover{background:rgba(0,0,0,.9);box-shadow:0 .06rem .18rem rgba(0,0,0,.7)}
-.back-link svg{width:.18rem;height:.18rem;color:#fff}
+.signup-page .back-link{position:absolute;top:.3rem;left:.3rem;width:.36rem;height:.36rem;background:rgba(0,0,0,.75);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 .04rem .12rem rgba(0,0,0,.5);transition:background .2s,box-shadow .2s;z-index:2}
+.signup-page .back-link:hover{background:rgba(0,0,0,.9);box-shadow:0 .06rem .18rem rgba(0,0,0,.7)}
+.signup-page .back-link svg{width:.18rem;height:.18rem;color:#fff}
 
 @media(max-width:768px){
-    html{font-size:calc(100vw/3.75)}
-    .signup-container{max-width:100%;padding:0 .4rem;height:100vh;padding-top:.2rem;padding-bottom:.2rem}
-    .signup-logo{width:3rem;height:3rem}
-    .signup-title{font-size:.4rem}
-    .error-text{position:static;transform:none;padding-left:0;margin-top:.04rem;text-align:right;height:auto}
+    .signup-page .signup-container{max-width:100%;padding:0 .4rem;height:100vh;padding-top:.2rem;padding-bottom:.2rem}
+    .signup-page .signup-logo{width:3rem;height:3rem}
+    .signup-page .signup-title{font-size:.4rem}
+    .signup-page .error-text{position:static;transform:none;padding-left:0;margin-top:.04rem;text-align:right;height:auto}
 }

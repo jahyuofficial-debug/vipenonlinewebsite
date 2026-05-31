@@ -12,6 +12,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "canvas": "^3.2.3",
     "xlsx": "^0.18.5"
   }
 }
