@@ -353,6 +353,7 @@ var signinBtn = document.getElementById('signinBtn');
     var signupBtn = document.getElementById('signupBtn');
     var profileLink = document.getElementById('profileLink');
     var managerGoLink = document.getElementById('managerGoLink');
+    var mobileManagerGoLink = document.getElementById('mobileManagerGoLink');
 
     function goToSignin(e) {
         if (e) { e.stopPropagation(); e.preventDefault(); }
@@ -374,12 +375,14 @@ function updateAuthUI() {
         var auth = Utils.getAuth();
         var role = (userData && userData.role) || (auth && auth.role) || '';
         if (managerGoLink) managerGoLink.style.display = (role === 'ManagerGo') ? '' : 'none';
+        if (mobileManagerGoLink) mobileManagerGoLink.style.display = (role === 'ManagerGo') ? '' : 'none';
         NotificationCenter.show();
     } else {
         if (signinBtn) signinBtn.style.display = '';
         if (signupBtn) signupBtn.style.display = '';
         if (profileLink) profileLink.style.display = 'none';
         if (managerGoLink) managerGoLink.style.display = 'none';
+        if (mobileManagerGoLink) mobileManagerGoLink.style.display = 'none';
         NotificationCenter.hide();
     }
 }

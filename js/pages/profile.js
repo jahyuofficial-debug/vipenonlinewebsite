@@ -142,7 +142,7 @@ var ProfilePage = (function() {
     function renderBadge() {
         var badge = document.getElementById('profileBadge');
         if (!badge) return;
-        badge.textContent = profileData.badge;
+        badge.textContent = profileData.badge || (profileData.socialPublic ? 'Public' : 'Private');
         badge.classList.toggle('public', profileData.socialPublic);
         badge.classList.toggle('private', !profileData.socialPublic);
     }
