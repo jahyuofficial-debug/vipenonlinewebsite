@@ -19,12 +19,8 @@ var RESEND_API_KEY = process.env.RESEND_API_KEY || '';
 var RESEND_KEY_PATH = 'D:\\设计文档\\Web素材\\APIkeys\\ResendAPI.txt';
 var RESEND_FROM = process.env.RESEND_FROM || 'Vipen <noreply@vipenonline.com>';
 var CODE_EXPIRE_MS = 5 * 60 * 1000;
-var AUTH_SECRET = process.env.AUTH_SECRET || '';
-
-if (!AUTH_SECRET) {
-    console.warn('[WARNING] AUTH_SECRET is not set. Using empty secret — auth tokens will be insecure.');
-    console.warn('[WARNING] Set the AUTH_SECRET environment variable in production.');
-}
+var getAuthSecret = require('./api/auth/secret').getAuthSecret;
+var getOldAuthSecret = require('./api/auth/secret').getOldAuthSecret;
 
 if (!RESEND_API_KEY) {
     try {
@@ -285,7 +281,7 @@ function handleSendCode(res, body) {
     };
 
     var ts = Date.now();
-    var hmac = crypto.createHmac('sha256', AUTH_SECRET);
+    var hmac = crypto.createHmac('sha256', getAuthSecret());
     hmac.update(email + '|' + code + '|' + ts);
     var hash = hmac.digest('hex');
 
@@ -309,18 +305,28 @@ function handleLogin(res, body) {
         return;
     }
 
-    var hmacPwd = crypto.createHmac('sha256', AUTH_SECRET);
-    hmacPwd.update(email + '|' + password);
-    var inputHash = hmacPwd.digest('hex');
+    var newHash = crypto.createHmac('sha256', getAuthSecret()).update(email + '|' + password).digest('hex');
+    var oldSecret = getOldAuthSecret();
 
     readManagerJSON('users.json', function(err, users) {
         if (err) users = [];
 
         var matchedUser = null;
+        var needsMigration = false;
         for (var i = 0; i < users.length; i++) {
-            if (users[i].email.toLowerCase() === email && users[i].passwordHash === inputHash) {
+            if (users[i].email.toLowerCase() !== email) continue;
+            if (users[i].passwordHash === newHash) {
                 matchedUser = users[i];
                 break;
+            }
+            if (oldSecret) {
+                var oldHash = crypto.createHmac('sha256', oldSecret).update(email + '|' + password).digest('hex');
+                if (users[i].passwordHash === oldHash) {
+                    matchedUser = users[i];
+                    matchedUser.passwordHash = newHash;
+                    needsMigration = true;
+                    break;
+                }
             }
         }
 
@@ -360,7 +366,7 @@ function handleVerifyCode(res, body) {
             return;
         }
 
-        var hmac = crypto.createHmac('sha256', AUTH_SECRET);
+        var hmac = crypto.createHmac('sha256', getAuthSecret());
         hmac.update(email + '|' + code + '|' + ts);
         var expectedHash = hmac.digest('hex');
 
@@ -393,7 +399,7 @@ function handleVerifyCode(res, body) {
     var password = body.password || '';
 
     if (password) {
-        var hmacPwd = crypto.createHmac('sha256', AUTH_SECRET);
+        var hmacPwd = crypto.createHmac('sha256', getAuthSecret());
         hmacPwd.update(email + '|' + password);
         var passwordHash = hmacPwd.digest('hex');
 
@@ -557,7 +563,7 @@ function handleManagerAPI(req, res, apiPath, body) {
 }
 
 function hashPIN(pin) {
-    var hmac = crypto.createHmac('sha256', AUTH_SECRET);
+    var hmac = crypto.createHmac('sha256', getAuthSecret());
     hmac.update('manager_pin_' + pin);
     return hmac.digest('hex');
 }
@@ -576,7 +582,9 @@ function handleManagerVerifyPin(res, body) {
         return;
     }
 
-    var inputHash = hashPIN(pin);
+    var newHash = hashPIN(pin);
+    var oldSecret = getOldAuthSecret();
+    var oldHash = oldSecret ? crypto.createHmac('sha256', oldSecret).update('manager_pin_' + pin).digest('hex') : null;
 
     readManagerJSON('pins.json', function(err, pins) {
         if (err) {
@@ -625,12 +633,19 @@ function handleManagerVerifyPin(res, body) {
                 return;
             }
 
-            if (pinRecord.pin_hash !== inputHash) {
-                sendJSON(res, 401, { success: false, error: 'Invalid PIN' });
+            if (pinRecord.pin_hash === newHash) {
+                createAndSendSession(res, user);
                 return;
             }
 
-            createAndSendSession(res, user);
+            if (oldHash && pinRecord.pin_hash === oldHash) {
+                pinRecord.pin_hash = newHash;
+                writeManagerJSON('pins.json', pins, function() {});
+                createAndSendSession(res, user);
+                return;
+            }
+
+            sendJSON(res, 401, { success: false, error: 'Invalid PIN' });
         });
     });
 }
@@ -689,8 +704,20 @@ function handleManagerSetPin(res, body) {
                 }
             }
 
-            if (pinRecord && hashPIN(oldPin) !== pinRecord.pin_hash) {
-                sendJSON(res, 401, { success: false, error: 'Current PIN is incorrect' });
+            var newPinHash = hashPIN(oldPin);
+            var oldSecret = getOldAuthSecret();
+            var oldPinHash = oldSecret ? crypto.createHmac('sha256', oldSecret).update('manager_pin_' + oldPin).digest('hex') : null;
+            var pinValid = (pinRecord && pinRecord.pin_hash === newPinHash);
+            if (!pinValid && oldPinHash && pinRecord && pinRecord.pin_hash === oldPinHash) {
+                pinValid = true;
+            }
+
+            if (!pinValid) {
+                if (pinRecord) {
+                    sendJSON(res, 401, { success: false, error: 'Current PIN is incorrect' });
+                } else {
+                    sendJSON(res, 400, { success: false, error: 'PIN not set up' });
+                }
                 return;
             }
 

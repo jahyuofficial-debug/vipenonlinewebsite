@@ -2,15 +2,7 @@ var crypto = require('crypto');
 var fs = require('fs');
 var path = require('path');
 
-var AUTH_SECRET = process.env.AUTH_SECRET;
-var USING_FALLBACK = false;
-if (!AUTH_SECRET) {
-    AUTH_SECRET = 'vipen-auth-secret-v2-2026';
-    USING_FALLBACK = true;
-    if (typeof console !== 'undefined') {
-        console.warn('[SECURITY] AUTH_SECRET env var not set, using fallback key. Set AUTH_SECRET in production!');
-    }
-}
+var getAuthSecret = require('./secret').getAuthSecret;
 var CODE_EXPIRE_MS = 5 * 60 * 1000;
 
 function generateToken(email) {
@@ -99,7 +91,7 @@ module.exports = function(req, res) {
             return;
         }
 
-        var hmac = crypto.createHmac('sha256', AUTH_SECRET);
+        var hmac = crypto.createHmac('sha256', getAuthSecret());
         hmac.update(email + '|' + code + '|' + ts);
         var expectedHash = hmac.digest('hex');
 

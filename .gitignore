@@ -1,5 +1,7 @@
 resend-key.txt
 node_modules/
+.auth_secret
+.old_auth_secret
 
 # 敏感用户数据 - 包含真实邮箱和密码哈希
 data/manager/users.json

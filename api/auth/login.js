@@ -2,15 +2,8 @@ var crypto = require('crypto');
 var fs = require('fs');
 var path = require('path');
 
-var AUTH_SECRET = process.env.AUTH_SECRET;
-var USING_FALLBACK = false;
-if (!AUTH_SECRET) {
-    AUTH_SECRET = 'vipen-auth-secret-v2-2026';
-    USING_FALLBACK = true;
-    if (typeof console !== 'undefined') {
-        console.warn('[SECURITY] AUTH_SECRET env var not set, using fallback key. Set AUTH_SECRET in production!');
-    }
-}
+var getAuthSecret = require('./secret').getAuthSecret;
+var getOldAuthSecret = require('./secret').getOldAuthSecret;
 
 function generateToken(email) {
     var payload = email + '|' + Date.now();
@@ -86,9 +79,8 @@ module.exports = function(req, res) {
             return;
         }
 
-        var hmacPwd = crypto.createHmac('sha256', AUTH_SECRET);
-        hmacPwd.update(email + '|' + password);
-        var inputHash = hmacPwd.digest('hex');
+        var newHash = crypto.createHmac('sha256', getAuthSecret()).update(email + '|' + password).digest('hex');
+        var oldSecret = getOldAuthSecret();
 
         readUsers(function(readErr, users) {
             if (readErr) {
@@ -98,9 +90,17 @@ module.exports = function(req, res) {
 
             var matchedUser = null;
             for (var i = 0; i < users.length; i++) {
-                if (users[i].email.toLowerCase() === email && users[i].passwordHash === inputHash) {
+                if (users[i].email.toLowerCase() !== email) continue;
+                if (users[i].passwordHash === newHash) {
                     matchedUser = users[i];
                     break;
+                }
+                if (oldSecret) {
+                    var oldHash = crypto.createHmac('sha256', oldSecret).update(email + '|' + password).digest('hex');
+                    if (users[i].passwordHash === oldHash) {
+                        matchedUser = users[i];
+                        break;
+                    }
                 }
             }
 

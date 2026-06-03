@@ -3,7 +3,7 @@ var https = require('https');
 
 var RESEND_API_KEY = process.env.RESEND_API_KEY || '';
 var RESEND_FROM = process.env.RESEND_FROM || 'Vipen <noreply@vipenonline.com>';
-var AUTH_SECRET = process.env.AUTH_SECRET || 'vipen-auth-secret-v2-2026';
+var getAuthSecret = require('./secret').getAuthSecret;
 var CODE_EXPIRE_MS = 5 * 60 * 1000;
 
 function generateCode() {
@@ -109,7 +109,7 @@ module.exports = function(req, res) {
 
         var code = generateCode();
         var ts = Date.now();
-        var hmac = crypto.createHmac('sha256', AUTH_SECRET);
+        var hmac = crypto.createHmac('sha256', getAuthSecret());
         hmac.update(email + '|' + code + '|' + ts);
         var hash = hmac.digest('hex');
 
