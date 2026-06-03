@@ -1,9 +1,8 @@
 var crypto = require('crypto');
-var fs = require('fs');
-var path = require('path');
 
 var getAuthSecret = require('./secret').getAuthSecret;
 var getOldAuthSecret = require('./secret').getOldAuthSecret;
+var readUsers = require('./storage').readUsers;
 
 function generateToken(email) {
     var payload = email + '|' + Date.now();
@@ -31,21 +30,6 @@ function parseBody(req, callback) {
             callback(null, JSON.parse(body));
         } catch (e) {
             callback(new Error('Invalid JSON'));
-        }
-    });
-}
-
-function readUsers(callback) {
-    var fp = path.join(process.cwd(), 'data', 'manager', 'users.json');
-    fs.readFile(fp, 'utf8', function(err, raw) {
-        if (err) {
-            callback(null, []);
-            return;
-        }
-        try {
-            callback(null, JSON.parse(raw));
-        } catch (e) {
-            callback(null, []);
         }
     });
 }

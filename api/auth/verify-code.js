@@ -1,8 +1,9 @@
 var crypto = require('crypto');
-var fs = require('fs');
-var path = require('path');
 
 var getAuthSecret = require('./secret').getAuthSecret;
+var storage = require('./storage');
+var readUsers = storage.readUsers;
+var writeUsers = storage.writeUsers;
 var CODE_EXPIRE_MS = 5 * 60 * 1000;
 
 function generateToken(email) {
@@ -31,21 +32,6 @@ function parseBody(req, callback) {
             callback(null, JSON.parse(body));
         } catch (e) {
             callback(new Error('Invalid JSON'));
-        }
-    });
-}
-
-function readUsers(callback) {
-    var fp = path.join(process.cwd(), 'data', 'manager', 'users.json');
-    fs.readFile(fp, 'utf8', function(err, raw) {
-        if (err) {
-            callback(null, []);
-            return;
-        }
-        try {
-            callback(null, JSON.parse(raw));
-        } catch (e) {
-            callback(null, []);
         }
     });
 }
@@ -102,27 +88,60 @@ module.exports = function(req, res) {
 
         var username = body.username || email.split('@')[0];
         var password = body.password || '';
-        var token = generateToken(email);
 
-        readUsers(function(readErr, users) {
-            var existingUser = null;
-            for (var i = 0; i < users.length; i++) {
-                if (users[i].email.toLowerCase() === email.toLowerCase()) {
-                    existingUser = users[i];
-                    break;
+        if (password) {
+            var hmacPwd = crypto.createHmac('sha256', getAuthSecret());
+            hmacPwd.update(email + '|' + password);
+            var passwordHash = hmacPwd.digest('hex');
+
+            readUsers(function(readErr, users) {
+                if (readErr) users = [];
+
+                var existingIdx = -1;
+                for (var i = 0; i < users.length; i++) {
+                    if (users[i].email.toLowerCase() === email.toLowerCase()) {
+                        existingIdx = i;
+                        break;
+                    }
                 }
-            }
 
-            var role = existingUser ? (existingUser.role || 'Viper') : 'Viper';
-            var displayName = existingUser ? (existingUser.username || username) : username;
+                if (existingIdx >= 0) {
+                    users[existingIdx].passwordHash = passwordHash;
+                    if (body.username) users[existingIdx].username = body.username;
+                    users[existingIdx].lastLogin = new Date().toISOString();
+                } else {
+                    users.push({
+                        id: 'u' + String(users.length + 1).padStart(3, '0'),
+                        username: username,
+                        email: email,
+                        role: 'Viper',
+                        passwordHash: passwordHash,
+                        status: 'active',
+                        createdAt: new Date().toISOString(),
+                        lastLogin: new Date().toISOString()
+                    });
+                }
 
+                writeUsers(users, function() {
+                    var token = generateToken(email);
+                    var role = existingIdx >= 0 ? users[existingIdx].role : 'Viper';
+                    sendJSON(res, 200, {
+                        success: true,
+                        token: token,
+                        username: username,
+                        email: email,
+                        role: role
+                    });
+                });
+            });
+        } else {
+            var token = generateToken(email);
             sendJSON(res, 200, {
                 success: true,
                 token: token,
-                username: displayName,
-                email: email,
-                role: role
+                username: username,
+                email: email
             });
-        });
+        }
     });
 };

@@ -383,12 +383,11 @@ var SigninPage = (function() {
                     alert('Network error. Please try again.');
                 });
             } else {
-                var usernameVal = email.value;
                 var passwordVal = password.value;
                 fetch(CONFIG.API_BASE + '/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username: usernameVal, password: passwordVal })
+                    body: JSON.stringify({ email: emailVal, password: passwordVal })
                 })
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
