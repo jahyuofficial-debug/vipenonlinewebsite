@@ -4,8 +4,6 @@ var fs = require('fs');
 var path = require('path');
 var url = require('url');
 var crypto = require('crypto');
-var React = require('react');
-var { renderEmail } = require('./lib/email/renderEmail');
 var VerificationEmail = require('./emails/VerificationEmail');
 var canvas;
 try { canvas = require('canvas'); } catch (e) { canvas = null; }
@@ -243,10 +241,7 @@ function handleAPIRoute(req, res, apiPath) {
         }
 
         if (apiPath === '/api/auth/send-code') {
-            handleSendCode(res, body).catch(function(err) {
-                console.error('Send code error:', err);
-                sendJSON(res, 500, { success: false, error: 'Internal server error' });
-            });
+            handleSendCode(res, body);
         } else if (apiPath === '/api/auth/verify-code') {
             handleVerifyCode(res, body);
         } else if (apiPath === '/api/auth/login') {
@@ -261,7 +256,7 @@ function handleAPIRoute(req, res, apiPath) {
     });
 }
 
-async function handleSendCode(res, body) {
+function handleSendCode(res, body) {
     var email = body.email;
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         sendJSON(res, 400, { success: false, error: 'Invalid email address' });
@@ -286,8 +281,7 @@ async function handleSendCode(res, body) {
     hmac.update(email + '|' + code + '|' + ts);
     var hash = hmac.digest('hex');
 
-    var element = React.createElement(VerificationEmail, { code: code });
-    var html = await renderEmail(element);
+    var html = VerificationEmail({ code: code });
 
     sendEmailViaResend(email, html, function(err, result) {
         if (err) {
