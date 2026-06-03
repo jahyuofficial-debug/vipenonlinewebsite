@@ -1,0 +1,21 @@
+{
+  "contact": "contact@vipenonline.com",
+  "title": "Design By Jah72",
+  "rights": "©2026 Vipen All rights reserved",
+  "siteName": "VipenOnline",
+  "siteLogo": "images/vipen-logo.png",
+  "homeBanner": "banner/bg_opt.mp4",
+  "footerContent": "© 2026 Vipen. All rights reserved. Design by Jah72.",
+  "contactEmail": "contact@vipenonline.com",
+  "contactInfo": "Vipen Creative Studio, Digital Design Agency",
+  "siteAnnouncement": "",
+  "socials": {
+    "instagram": "https://instagram.com/vipen",
+    "x": "https://x.com/vipen",
+    "facebook": "https://facebook.com/vipen"
+  },
+  "extraBarFontStyle": "normal",
+  "extraBarItalic": false,
+  "footerBackground": "#ffffff",
+  "footerTextColor": "#000000"
+}

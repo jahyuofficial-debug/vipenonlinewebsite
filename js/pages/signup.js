@@ -1,6 +1,24 @@
 var SignupPage = (function() {
     'use strict';
 
+    (function loadSiteSettings() {
+        fetch('data/manager/settings.json').then(function(r) { return r.json(); }).then(function(s) {
+            if (s.siteName) {
+                document.title = 'Sign Up - ' + s.siteName;
+                var metaOgTitle = document.querySelector('meta[property="og:title"]');
+                if (metaOgTitle) metaOgTitle.setAttribute('content', 'Sign Up - ' + s.siteName);
+            }
+            if (s.siteLogo) {
+                var logoImg = document.querySelector('header .logo img');
+                if (logoImg) logoImg.src = s.siteLogo;
+            }
+            if (s.contactInfo) {
+                var metaDesc = document.querySelector('meta[name="description"]');
+                if (metaDesc) metaDesc.setAttribute('content', s.contactInfo);
+            }
+        }).catch(function() {});
+    })();
+
     var accountName;
     var password;
     var email;
@@ -396,7 +414,14 @@ var SignupPage = (function() {
             fetch(CONFIG.API_BASE + '/auth/verify-code', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email.value, code: emailCode.value, hash: verifyHash, ts: verifyTs })
+                body: JSON.stringify({
+                    email: email.value,
+                    code: emailCode.value,
+                    hash: verifyHash,
+                    ts: verifyTs,
+                    username: accountName.value,
+                    password: password.value
+                })
             })
             .then(function(r) { return r.json(); })
             .then(function(data) {
@@ -404,7 +429,8 @@ var SignupPage = (function() {
                     Utils.setAuth({
                         username: data.username || accountName.value,
                         email: data.email || email.value,
-                        token: data.token
+                        token: data.token,
+                        role: data.role || ''
                     });
                     if (window.location.pathname.toLowerCase().indexOf('signup.html') > -1) {
                         window.location.href = 'index.html#/profile';

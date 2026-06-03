@@ -1,4 +1,4 @@
-.msg-page{background:#0a0a0a;min-height:100vh;padding-top:1.5rem;padding-bottom:2rem}
+﻿.msg-page{background:#0a0a0a;min-height:100vh;padding-top:1.5rem;padding-bottom:2rem}
 .msg-container{max-width:8rem;margin:0 auto;padding:0 .4rem}
 .msg-header{display:flex;align-items:center;justify-content:space-between;padding:.24rem 0;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:.24rem}
 .msg-header-title{font-size:.2rem;color:#fff;font-weight:600;letter-spacing:.02rem}
@@ -40,11 +40,11 @@
 .msg-empty{text-align:center;padding:1rem 0}
 .msg-empty-title{font-size:.2rem;color:rgba(255,255,255,.15);font-weight:600;margin-bottom:.08rem}
 .msg-empty-desc{font-size:.12rem;color:rgba(255,255,255,.08)}
-.msg-emoji-panel{position:absolute;bottom:100%;left:0;background:rgba(20,20,20,.95);border:1px solid rgba(255,255,255,.1);border-radius:.08rem;padding:.12rem;display:grid;grid-template-columns:repeat(8,1fr);gap:.06rem;z-index:10;margin-bottom:.06rem;backdrop-filter:blur(10px)}
-.msg-emoji-panel .emoji-btn{width:.28rem;height:.28rem;display:flex;align-items:center;justify-content:center;font-size:.16rem;cursor:pointer;border-radius:.04rem;transition:background .2s;background:transparent;border:none}
-.msg-emoji-panel .emoji-btn:hover{background:rgba(255,255,255,.1)}
-.msg-input-wrapper{position:relative}
+.msg-emoji-row{display:flex;flex-wrap:wrap;gap:.06rem;justify-content:center;margin-bottom:.2rem;padding:0}
+.msg-emoji-btn{width:.32rem;height:.32rem;display:flex;align-items:center;justify-content:center;font-size:.18rem;cursor:pointer;border-radius:.06rem;transition:background .2s;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);font-family:'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif;line-height:1}
+.msg-emoji-btn:hover{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.15)}
 .msg-load-more{display:flex;align-items:center;justify-content:center;padding:.3rem 0;gap:.08rem}
 .msg-load-more span{width:.06rem;height:.06rem;border-radius:50%;background:rgba(255,255,255,.3);animation:actionLoadPulse 1.4s ease-in-out infinite}
 .msg-load-more span:nth-child(2){animation-delay:.2s}
 .msg-load-more span:nth-child(3){animation-delay:.4s}
+

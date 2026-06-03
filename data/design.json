@@ -1,4 +1,4 @@
-﻿{
+{
     "dwItems":  [
                     {
                         "title":  "Neon City",
@@ -7,7 +7,13 @@
                         "year":  "2025",
                         "client":  "Nightfall Studio",
                         "tools":  "Figma / Blender / AE",
-                        "desc":  "A bold brand identity system for Nightfall Studio, fusing cyberpunk aesthetics with minimalist design principles. The project encompasses logo design, typography selection, color palette development, and comprehensive brand guidelines that translate seamlessly across digital and print media."
+                        "desc":  "A bold brand identity system for Nightfall Studio, fusing cyberpunk aesthetics with minimalist design principles. The project encompasses logo design, typography selection, color palette development, and comprehensive brand guidelines that translate seamlessly across digital and print media.",
+                        "coverImage": "",
+                        "fanCardImage": "",
+                        "listThumbImage": "",
+                        "content": "",
+                        "tags": [],
+                        "likeCount": 0
                     },
                     {
                         "title":  "Amber Flow",
@@ -16,7 +22,13 @@
                         "year":  "2025",
                         "client":  "Artisan Collective",
                         "tools":  "Cinema 4D / Redshift / AE",
-                        "desc":  "An immersive motion graphics piece exploring the fluid dynamics of amber resin. Through procedural animation and meticulous lighting, the project captures the organic beauty of fossilized time, creating a meditative visual experience for the Artisan Collective gallery installation."
+                        "desc":  "An immersive motion graphics piece exploring the fluid dynamics of amber resin. Through procedural animation and meticulous lighting, the project captures the organic beauty of fossilized time, creating a meditative visual experience for the Artisan Collective gallery installation.",
+                        "coverImage": "",
+                        "fanCardImage": "",
+                        "listThumbImage": "",
+                        "content": "",
+                        "tags": [],
+                        "likeCount": 0
                     },
                     {
                         "title":  "Ethereal Wave",
@@ -25,7 +37,13 @@
                         "year":  "2025",
                         "client":  "Waveform Audio",
                         "tools":  "React / Three.js / WebGL",
-                        "desc":  "A next-generation web experience for Waveform Audio, featuring real-time 3D audio visualization and an immersive browsing interface. The design pushes the boundaries of web technology while maintaining intuitive navigation and accessibility standards across all devices."
+                        "desc":  "A next-generation web experience for Waveform Audio, featuring real-time 3D audio visualization and an immersive browsing interface. The design pushes the boundaries of web technology while maintaining intuitive navigation and accessibility standards across all devices.",
+                        "coverImage": "",
+                        "fanCardImage": "",
+                        "listThumbImage": "",
+                        "content": "",
+                        "tags": [],
+                        "likeCount": 0
                     },
                     {
                         "title":  "Scarlet Pulse",
@@ -34,7 +52,13 @@
                         "year":  "2024",
                         "client":  "Vogue Digital",
                         "tools":  "InDesign / Photoshop / AI",
-                        "desc":  "A striking editorial design series for Vogue Digital, combining bold typography with avant-garde photography treatments. Each spread tells a cohesive story through innovative layout structures that challenge traditional magazine conventions."
+                        "desc":  "A striking editorial design series for Vogue Digital, combining bold typography with avant-garde photography treatments. Each spread tells a cohesive story through innovative layout structures that challenge traditional magazine conventions.",
+                        "coverImage": "",
+                        "fanCardImage": "",
+                        "listThumbImage": "",
+                        "content": "",
+                        "tags": [],
+                        "likeCount": 0
                     },
                     {
                         "title":  "Teal Horizon",
@@ -43,7 +67,13 @@
                         "year":  "2024",
                         "client":  "Nova Tech",
                         "tools":  "Figma / Protopie / Spline",
-                        "desc":  "A comprehensive product design system for Nova Tech smart home ecosystem. From mobile app interfaces to physical device UI, every touchpoint was crafted with obsessive attention to usability, accessibility, and visual harmony."
+                        "desc":  "A comprehensive product design system for Nova Tech smart home ecosystem. From mobile app interfaces to physical device UI, every touchpoint was crafted with obsessive attention to usability, accessibility, and visual harmony.",
+                        "coverImage": "",
+                        "fanCardImage": "",
+                        "listThumbImage": "",
+                        "content": "",
+                        "tags": [],
+                        "likeCount": 0
                     },
                     {
                         "title":  "Obsidian Vault",
@@ -52,7 +82,13 @@
                         "year":  "2024",
                         "client":  "Solo Exhibition",
                         "tools":  "Blender / Unreal Engine / PS",
-                        "desc":  "A personal 3D art series exploring the interplay of light and darkness within crystalline architectures. Each piece in the Obsidian Vault collection represents a unique study in material properties, atmospheric lighting, and geometric abstraction."
+                        "desc":  "A personal 3D art series exploring the interplay of light and darkness within crystalline architectures. Each piece in the Obsidian Vault collection represents a unique study in material properties, atmospheric lighting, and geometric abstraction.",
+                        "coverImage": "",
+                        "fanCardImage": "",
+                        "listThumbImage": "",
+                        "content": "",
+                        "tags": [],
+                        "likeCount": 0
                     }
                 ],
     "dwSuits":  [

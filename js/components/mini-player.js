@@ -50,9 +50,12 @@ var MiniPlayer = (function() {
 
     function syncWithDisc() {
         if (typeof discData === 'undefined') return;
-        if (miniPlayerVinylLabel) miniPlayerVinylLabel.style.backgroundImage = 'url(' + discData.nowPlaying.cover + ')';
-        if (miniPlayerCoverImg) miniPlayerCoverImg.src = discData.nowPlaying.cover;
-        if (miniPlayerTitle) miniPlayerTitle.textContent = discData.nowPlaying.title;
+        var tapes = discData.tapes || [];
+        var currentIndex = discData.currentTapeIndex || 0;
+        var currentTape = tapes[currentIndex] || {};
+        if (miniPlayerVinylLabel) miniPlayerVinylLabel.style.backgroundImage = 'url(' + (currentTape.cover || '') + ')';
+        if (miniPlayerCoverImg) miniPlayerCoverImg.src = currentTape.cover || '';
+        if (miniPlayerTitle) miniPlayerTitle.textContent = currentTape.title || 'Unknown Track';
         updateProgress();
         updatePlayIcon();
     }

@@ -262,3 +262,126 @@ fetch('data/xxx.json')
 
 - 设计新功能或新页面时，先查看 shadcn/ui 中是否有合适的组件。
 - 组件风格、交互模式参考 shadcn/ui 的设计语言。
+
+---
+
+## 八、用户行为数据规范
+
+**触发条件：** 当用户说"此为用户行为"或"用户行为数据"时，按以下规则处理。
+
+### 8.1 核心原则
+
+1. **数据归属用户**：所有用户行为数据必须通过 `userId` 隔离，禁止全局共享。
+2. **持久化优先**：用户创作的内容、偏好、互动记录必须写入 `localStorage`，刷新不丢失。
+3. **最小化原则**：只记录必要的个人数据，UI 临时状态不记录。
+4. **安全性**：密码、Token 等敏感数据绝不写入 `localStorage`（Token 仅存 `sessionStorage`）。
+
+### 8.2 用户行为数据分类
+
+#### ✅ 必须记录到用户个人数据的行为
+
+| 类别 | 行为 | 数据字段 | 存储位置 |
+|------|------|----------|----------|
+| 身份 | 登录凭证 | `token` | `sessionStorage` → `vipen_auth` |
+| 身份 | 用户基本信息 | `userId, username, email, avatar, role` | `localStorage` → `vipen_user_{userId}` |
+| 资料 | 显示名称 | `displayName` | `localStorage` → `vipen_user_{userId}` |
+| 资料 | 头像 | `avatar` | `localStorage` → `vipen_user_{userId}` |
+| 资料 | 社交公开状态 | `socialPublic` | `localStorage` → `vipen_user_{userId}` |
+| 资料 | Badge 文本 | `badge` | `localStorage` → `vipen_user_{userId}` |
+| 资料 | 社交账号绑定 | `socials.{platform}.username` | `localStorage` → `vipen_user_{userId}` |
+| 内容 | 已发布文章 | `posts[]` | `localStorage` → `vipen_posts_{userId}` |
+| 内容 | 文章草稿 | `drafts[]` | `localStorage` → `vipen_drafts_{userId}` |
+| 内容 | 已发布 Action | `actionPosts[]` | `localStorage` → `vipen_actions_{userId}` |
+| 内容 | Action 草稿 | `actionDrafts[]` | `localStorage` → `vipen_actionDrafts_{userId}` |
+| 互动 | 点赞的文章 | `likedArticles[]` | `localStorage` → `vipen_likes_{userId}` |
+| 互动 | 点赞的 Disc | `likedDisc[]` | `localStorage` → `vipen_likes_{userId}` |
+| 互动 | 发表的评论 | `comments[]` | `localStorage` → `vipen_comments_{userId}` |
+| 通知 | 通知列表 | `notifications[]` | `localStorage` → `vipen_notifications_{userId}` |
+| 消息 | 聊天记录 | `chatMessages{}` | `localStorage` → `vipen_chat_{userId}` |
+
+#### ❌ 禁止记录到用户个人数据的行为
+
+| 行为 | 理由 |
+|------|------|
+| 密码 | 安全红线，永远不存客户端 |
+| 验证码 | 临时凭证，过期即失效 |
+| 表单临时输入 | UI 状态，无持久化价值 |
+| 登录方式偏好（验证码/密码） | 纯 UI 切换，无需记录 |
+| 确认密码 | 仅用于前端校验，不存储 |
+| 条款同意状态 | 注册时一次性，无需记录 |
+| 预览临时数据 | 仅 UI 预览，无持久化价值 |
+| 发送邮件目标地址 | 临时操作参数，不记录 |
+| 主题偏好（暗色/亮色） | 全局偏好，不属于个人数据，存 `localStorage` → `vipen_theme`（不按用户隔离） |
+
+### 8.3 统一用户数据模型
+
+```json
+{
+  "userId": "u001",
+  "username": "jahyuofficial",
+  "email": "jahyuofficial@gmail.com",
+  "role": "ManagerGo",
+  "profile": {
+    "displayName": "Jah 72",
+    "avatar": "https://...",
+    "badge": "Social Public",
+    "socialPublic": true,
+    "socials": {
+      "facebook": { "username": null },
+      "instagram": { "username": null },
+      "x": { "username": null },
+      "wechat": { "username": null }
+    }
+  },
+  "stats": {
+    "createdAt": "2026-01-15T08:00:00Z",
+    "lastLogin": "2026-05-30T12:00:00Z"
+  }
+}
+```
+
+### 8.4 localStorage Key 命名规范
+
+所有用户数据 key 必须包含 `userId` 以隔离不同用户：
+
+```
+vipen_user_{userId}           → 用户资料
+vipen_posts_{userId}          → 已发布文章
+vipen_drafts_{userId}         → 文章草稿
+vipen_actions_{userId}        → 已发布 Action
+vipen_actionDrafts_{userId}   → Action 草稿
+vipen_likes_{userId}          → 点赞记录（文章 + Disc 合并）
+vipen_notifications_{userId}  → 通知列表
+vipen_chat_{userId}           → 聊天记录
+```
+
+### 8.5 数据读写工具函数
+
+在 `js/core/utils.js` 中提供统一入口：
+
+```js
+getUserData: function(key) {
+    var auth = this.getAuth();
+    if (!auth) return null;
+    var userId = auth.username || auth.email;
+    var raw = localStorage.getItem('vipen_' + key + '_' + userId);
+    try { return JSON.parse(raw); } catch(e) { return null; }
+},
+setUserData: function(key, data) {
+    var auth = this.getAuth();
+    if (!auth) return;
+    var userId = auth.username || auth.email;
+    localStorage.setItem('vipen_' + key + '_' + userId, JSON.stringify(data));
+}
+```
+
+### 8.6 新功能开发检查清单
+
+当开发涉及用户行为的新功能时，必须逐项确认：
+
+1. 该行为是否属于用户个人数据？（对照 8.2 节分类）
+2. 若是，使用了哪个 localStorage key？是否带 `userId` 后缀？
+3. 是否通过 `Utils.getUserData()` / `Utils.setUserData()` 读写？
+4. 登出时是否保留用户数据？（只清除 sessionStorage，不清除 localStorage）
+5. 切换账号时是否正确加载新用户数据？
+6. 是否添加了旧数据迁移逻辑（如从旧 key 格式迁移）？

@@ -1,9 +1,18 @@
 var DiscPage = (function() {
+'use strict';
 
 var discProgressInterval = null;
 var discIsPlaying = false;
 var discVisualizerInterval = null;
 var discVisualizerBars = 12;
+var discVisualizerAnimId = null;
+var discAudioCtx = null;
+var discAnalyser = null;
+var discFreqData = null;
+var discBgCurrentBrightness = 0.55;
+var discBgBaseBrightness = 0.55;
+var discAudioEventsInited = false;
+var discLoadedTrackIndex = -1;
 var userBehavior = { likedTracks: [] };
 
 function buildVisualizerBars() {
@@ -53,8 +62,6 @@ function getAlbumCardClass(index, activeIndex, total) {
     if (diff === 0) return 'active';
     if (diff === -1 || (activeIndex === 0 && index === total - 1)) return 'prev-1';
     if (diff === 1 || (activeIndex === total - 1 && index === 0)) return 'next-1';
-    if (diff === -2 || (activeIndex <= 1 && index >= total - 2 + activeIndex)) return 'prev-2';
-    if (diff === 2 || (activeIndex >= total - 2 && index <= 1 - (total - 1 - activeIndex))) return 'next-2';
     return 'hidden';
 }
 
@@ -67,7 +74,7 @@ function buildAlbumCarousel() {
         var cls = getAlbumCardClass(i, activeIndex, tapes.length);
         var artist = tape.artist || 'Vipen Music';
         cards += '<div class="disc-album-card ' + cls + '" data-disc-id="' + tape.id + '">' +
-            '<img src="' + (tape.cover || '') + '" alt="' + (tape.title || '') + '">' +
+            '<img src="' + (tape.cover || '') + '" alt="' + (tape.title || '') + '" onerror="this.style.display=\'none\';this.parentNode.style.background=\'linear-gradient(135deg,#1a1a2e,#16213e)\'">' +
             '<div class="disc-album-info">' +
             '<div class="disc-album-title">' + (tape.title || 'Unknown') + '</div>' +
             '<div class="disc-album-artist">' + artist + '</div>' +
@@ -77,7 +84,22 @@ function buildAlbumCarousel() {
 }
 
 function buildDiscPage() {
-    var np = window.discData.nowPlaying;
+    var tapes = window.discData.tapes || [];
+    var currentIndex = window.discData.currentTapeIndex || 0;
+    var currentTape = tapes[currentIndex] || {};
+    window.discData.nowPlaying = {
+        title: currentTape.title || 'Unknown Track',
+        artist: currentTape.artist || 'Vipen Music',
+        duration: currentTape.time || '0:00',
+        current: '0:00',
+        cover: currentTape.cover || '',
+        fav: false
+    };
+    if (currentTape.audio && discLoadedTrackIndex !== currentIndex) {
+        discAudio.src = currentTape.audio;
+        discAudio.load();
+        discLoadedTrackIndex = currentIndex;
+    }
     var progressPercent = 0;
     if (discAudio.duration) {
         progressPercent = (discAudio.currentTime / discAudio.duration) * 100;
@@ -90,11 +112,11 @@ function buildDiscPage() {
         '<svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4zm-4-6H9v2h4v-2z"/></svg>' :
         '<svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>';
 
-    var coverUrl = np.cover || '';
-    var trackTitle = np.title || 'Unknown Track';
-    var artist = np.artist || 'Vipen Music';
+    var coverUrl = currentTape.cover || '';
+    var trackTitle = currentTape.title || 'Unknown Track';
+    var artist = currentTape.artist || 'Vipen Music';
 
-    var currentTapeId = window.discData.tapes[window.discData.currentTapeIndex].id;
+    var currentTapeId = currentTape.id;
     var isFav = userBehavior.likedTracks.indexOf(currentTapeId) !== -1;
     var favClass = isFav ? ' active' : '';
 
@@ -123,7 +145,7 @@ function buildDiscPage() {
         '<div class="disc-glass-center">' +
         '<div class="disc-glass-track-info">' +
         '<div class="disc-glass-mini-cover">' +
-        '<img src="' + coverUrl + '" alt="' + trackTitle + '" id="discGlassMiniCover">' +
+        '<img src="' + coverUrl + '" alt="' + trackTitle + '" id="discGlassMiniCover" onerror="this.style.display=\'none\'">' +
         '</div>' +
         '<div class="disc-glass-meta">' +
         '<div class="disc-glass-title" id="discGlassTitle">' + trackTitle + '</div>' +
@@ -135,11 +157,11 @@ function buildDiscPage() {
         '</button>' +
         '</div>' +
         '<div class="disc-glass-progress-wrap">' +
-        '<span class="disc-glass-time" id="discCurrentTime">' + np.current + '</span>' +
+        '<span class="disc-glass-time" id="discCurrentTime">0:00</span>' +
         '<div class="disc-glass-progress-track" id="discProgressTrack">' +
         '<div class="disc-glass-progress-bar" id="discProgressBar" style="width:' + progressPercent + '%"></div>' +
         '</div>' +
-        '<span class="disc-glass-time" id="discDuration">' + np.duration + '</span>' +
+        '<span class="disc-glass-time" id="discDuration">' + (currentTape.time || '0:00') + '</span>' +
         '</div>' +
         '</div>' +
 
@@ -178,10 +200,14 @@ function syncDiscUIWithAudioState() {
     var bar = document.getElementById('discProgressBar');
     var cur = document.getElementById('discCurrentTime');
 
-    if (titleEl) titleEl.textContent = window.discData.nowPlaying.title;
-    if (subtitleEl) subtitleEl.textContent = window.discData.nowPlaying.artist || 'Vipen Music';
-    if (bgEl) bgEl.style.backgroundImage = 'url(' + window.discData.nowPlaying.cover + ')';
-    if (miniCoverEl) miniCoverEl.src = window.discData.nowPlaying.cover;
+    var tapes = window.discData.tapes || [];
+    var currentIndex = window.discData.currentTapeIndex || 0;
+    var currentTape = tapes[currentIndex] || {};
+
+    if (titleEl) titleEl.textContent = currentTape.title || 'Unknown Track';
+    if (subtitleEl) subtitleEl.textContent = currentTape.artist || 'Vipen Music';
+    if (bgEl) bgEl.style.backgroundImage = 'url(' + (currentTape.cover || '') + ')';
+    if (miniCoverEl) miniCoverEl.src = currentTape.cover || '';
     if (dur && discAudio.duration) dur.textContent = formatDiscTime(discAudio.duration);
     if (bar && discAudio.duration) bar.style.width = (discAudio.currentTime / discAudio.duration * 100) + '%';
     if (cur) cur.textContent = formatDiscTime(discAudio.currentTime);
@@ -216,12 +242,21 @@ function syncDiscPlayPauseUI() {
         if (playIcon) playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
         if (discProgressInterval) clearInterval(discProgressInterval);
         discProgressInterval = setInterval(updateDiscProgress, 500);
-        startVisualizer();
+        if (window.currentPage === 'disc-library') startVisualizer();
     } else {
         if (playIcon) playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
         if (discProgressInterval) clearInterval(discProgressInterval);
         stopVisualizer();
     }
+}
+
+function showDiscToast(msg) {
+    var toast = document.createElement('div');
+    toast.className = 'disc-toast';
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.classList.add('show'); }, 10);
+    setTimeout(function() { toast.classList.remove('show'); setTimeout(function() { toast.remove(); }, 300); }, 2500);
 }
 
 function loadDiscTrack(index) {
@@ -231,6 +266,7 @@ function loadDiscTrack(index) {
     var tape = window.discData.tapes[index];
     if (!tape || !tape.audio) {
         console.warn('Disc track data missing at index', index);
+        showDiscToast('Track data not available');
         return;
     }
     window.discData.nowPlaying = {
@@ -238,27 +274,33 @@ function loadDiscTrack(index) {
         artist: tape.artist || 'Vipen Music',
         duration: tape.time || '0:00',
         current: '0:00',
-        cover: tape.cover || ''
+        cover: tape.cover || '',
+        audio: tape.audio || ''
     };
 
-    var titleEl = document.getElementById('discGlassTitle');
-    var subtitleEl = document.getElementById('discGlassSubtitle');
-    var bgEl = document.getElementById('discBg');
-    var miniCoverEl = document.getElementById('discGlassMiniCover');
-    var favBtn = document.getElementById('discFavBtn');
-    if (titleEl) titleEl.textContent = window.discData.nowPlaying.title;
-    if (subtitleEl) subtitleEl.textContent = window.discData.nowPlaying.artist;
-    if (bgEl) bgEl.style.backgroundImage = 'url(' + window.discData.nowPlaying.cover + ')';
-    if (miniCoverEl) miniCoverEl.src = window.discData.nowPlaying.cover;
-    if (favBtn) {
-        var tid = window.discData.tapes[window.discData.currentTapeIndex].id;
-        var liked = userBehavior.likedTracks.indexOf(tid) !== -1;
-        favBtn.classList.toggle('active', liked);
+    if (window.currentPage === 'disc-library') {
+        var titleEl = document.getElementById('discGlassTitle');
+        var subtitleEl = document.getElementById('discGlassSubtitle');
+        var bgEl = document.getElementById('discBg');
+        var miniCoverEl = document.getElementById('discGlassMiniCover');
+        var favBtn = document.getElementById('discFavBtn');
+        if (titleEl) titleEl.textContent = tape.title || 'Unknown Track';
+        if (subtitleEl) subtitleEl.textContent = tape.artist || 'Vipen Music';
+        if (bgEl) bgEl.style.backgroundImage = 'url(' + (tape.cover || '') + ')';
+        if (miniCoverEl) miniCoverEl.src = tape.cover || '';
+        if (favBtn) {
+            var tapes = window.discData.tapes;
+            var currentIdx = window.discData.currentTapeIndex;
+            if (currentIdx < 0 || currentIdx >= tapes.length) return;
+            var tid = tapes[currentIdx].id;
+            var liked = userBehavior.likedTracks.indexOf(tid) !== -1;
+            favBtn.classList.toggle('active', liked);
+        }
+        updateCarousel();
     }
 
-    updateCarousel();
-
     var wasPlaying = discIsPlaying;
+    discLoadedTrackIndex = index;
     discAudio.src = tape.audio;
     discAudio.load();
     if (wasPlaying) {
@@ -290,7 +332,17 @@ function getPrevTrackIndex() {
     return prevIndex;
 }
 
+function cleanup() {
+    if (discProgressInterval) {
+        clearInterval(discProgressInterval);
+        discProgressInterval = null;
+    }
+    stopVisualizer();
+}
+
 function initDiscAudioEvents() {
+    if (discAudioEventsInited) return;
+    discAudioEventsInited = true;
     discAudio.addEventListener('ended', function() {
         if (window.discData.playMode === 'repeat-one') {
             discAudio.currentTime = 0;
@@ -359,7 +411,10 @@ function bindDiscPlayerInteractions() {
     if (favBtn) {
         favBtn.addEventListener('click', function() {
             var np = window.discData.nowPlaying;
-            var tapeId = window.discData.tapes[window.discData.currentTapeIndex].id;
+            var tapes = window.discData.tapes;
+            var currentIdx = window.discData.currentTapeIndex;
+            if (currentIdx < 0 || currentIdx >= tapes.length) return;
+            var tapeId = tapes[currentIdx].id;
             np.fav = !np.fav;
             favBtn.classList.toggle('active', np.fav);
             var idx = userBehavior.likedTracks.indexOf(tapeId);
@@ -547,6 +602,7 @@ return {
     getNextTrackIndex: getNextTrackIndex,
     getPrevTrackIndex: getPrevTrackIndex,
     syncUIWithAudioState: syncDiscUIWithAudioState,
+    cleanup: cleanup,
     setDiscData: function(data) { window.discData = data; },
     getDiscData: function() { return window.discData; },
     getDiscIsPlaying: function() { return discIsPlaying; },

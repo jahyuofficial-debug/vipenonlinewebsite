@@ -25,6 +25,7 @@
 <meta name="twitter:description" content="Vipen is a premier digital creative studio specializing in interactive web design, 3D experiences, and brand digital transformation.">
 <meta name="twitter:image" content="https://vipenonline.com/images/og-default.png">
 <link rel="Shortcut Icon" href="images/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
 <title>Vipen</title>
 <link rel="stylesheet" href="css/reset.css">
 <link rel="stylesheet" href="css/utilities.css">
@@ -40,6 +41,8 @@
 <link rel="stylesheet" href="css/pages/signin.css">
 <link rel="stylesheet" href="css/pages/signup.css">
 <link rel="stylesheet" href="css/pages/profile.css">
+<link rel="stylesheet" href="css/components/notification.css">
+<link rel="stylesheet" href="css/components/cookie-consent.css">
 <link rel="stylesheet" href="css/pages/responsive.css">
 
 </head>
@@ -109,11 +112,9 @@
             </ul>
         </div>
         <div class="headerActions">
-            <button id="settingsBtn" class="settingsBtn" title="Settings">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" fill="none"/><circle cx="12" cy="12" r="1.5" fill="none"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
-            </button>
             <button id="signinBtn" class="authBtn signin">Sign in</button>
             <button id="signupBtn" class="authBtn signup">Sign up</button>
+            <a href="/manager" id="managerGoLink" class="authBtn manager-go-link" style="display:none;">ManagerGo</a>
             <a href="#/profile" id="profileLink" class="authBtn profile-link" style="display:none;" title="Profile">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
             </a>
@@ -132,19 +133,7 @@
 </div>
 <button id="menuClose">&#10005;</button>
 
-<div id="settingsOverlay"></div>
-<div id="settingsDrawer">
-    <div class="sd-header">
-        <span class="sd-title">Settings</span>
-        <button class="sd-close" id="settingsClose">&#10005;</button>
-    </div>
-    <div class="sd-body">
-        <div class="sd-item"><span class="sd-label">Theme</span><span class="sd-value">Dark</span></div>
-        <div class="sd-item"><span class="sd-label">Sound</span><span class="sd-value">On</span></div>
-        <div class="sd-item"><span class="sd-label">Language</span><span class="sd-value">EN</span></div>
-        <div class="sd-item"><span class="sd-label">Version</span><span class="sd-value">2.0</span></div>
-    </div>
-</div>
+
 
 <div id="app" class="loadActive" style="background:#000">
 <div id="herosTopBg" class="heros-top-bg hidden"></div>
@@ -174,10 +163,16 @@
     </div>
 </section>
 
+<div id="extraInfoBar" class="extra-info-bar">
+    <div class="extra-info-bar-inner" id="extraInfoBarInner"></div>
+</div>
+
 </div>
 
 <script src="js/core/config.js"></script>
 <script src="js/core/utils.js"></script>
+<script src="js/components/notification.js"></script>
+<script src="js/components/cookie-consent.js"></script>
 <script src="js/core/comet-trail.js"></script>
 <script src="js/components/cursor.js"></script>
 <script src="js/components/loading.js"></script>

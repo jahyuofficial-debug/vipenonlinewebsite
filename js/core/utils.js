@@ -46,6 +46,7 @@ var Utils = {
             username: user.username,
             email: user.email,
             token: user.token || '',
+            role: user.role || '',
             loggedAt: Date.now()
         }));
     },
@@ -59,5 +60,85 @@ var Utils = {
     },
     logout: function() {
         sessionStorage.removeItem('vipen_auth');
+    },
+    getUserData: function(key) {
+        var auth = this.getAuth();
+        if (!auth) return null;
+        var userId = auth.username || auth.email;
+        var raw = localStorage.getItem('vipen_' + key + '_' + userId);
+        try { return JSON.parse(raw); } catch(e) { return null; }
+    },
+    setUserData: function(key, data) {
+        var auth = this.getAuth();
+        if (!auth) return;
+        var userId = auth.username || auth.email;
+        localStorage.setItem('vipen_' + key + '_' + userId, JSON.stringify(data));
+    },
+    migrateUserData: function() {
+        var auth = this.getAuth();
+        if (!auth) return;
+        var userId = auth.username || auth.email;
+        var email = auth.email;
+        var migrated = localStorage.getItem('vipen_migrated_' + userId);
+        if (migrated) return;
+
+        var oldKeys = ['vipenPosts', 'vipenDrafts', 'vipenActionPosts', 'vipenActionDrafts'];
+        var newKeys = ['posts', 'drafts', 'actions', 'actionDrafts'];
+        oldKeys.forEach(function(oldKey, i) {
+            var newKey = 'vipen_' + newKeys[i] + '_' + userId;
+            if (localStorage.getItem(newKey)) return;
+            var raw = localStorage.getItem(oldKey);
+            if (raw) {
+                try {
+                    localStorage.setItem(newKey, raw);
+                    localStorage.removeItem(oldKey);
+                } catch(e) {}
+            }
+        });
+
+        var newLikesKey = 'vipen_likes_' + userId;
+        if (!localStorage.getItem(newLikesKey)) {
+            var likedArticlesRaw = localStorage.getItem('vipenLikedArticles');
+            var likedDiscRaw = localStorage.getItem('vipenLikedDisc');
+            if (likedArticlesRaw || likedDiscRaw) {
+                var likes = {};
+                try { likes.likedArticles = likedArticlesRaw ? JSON.parse(likedArticlesRaw) : []; } catch(e) { likes.likedArticles = []; }
+                try { likes.likedDisc = likedDiscRaw ? JSON.parse(likedDiscRaw) : []; } catch(e) { likes.likedDisc = []; }
+                try {
+                    localStorage.setItem(newLikesKey, JSON.stringify(likes));
+                    localStorage.removeItem('vipenLikedArticles');
+                    localStorage.removeItem('vipenLikedDisc');
+                } catch(e) {}
+            }
+        }
+
+        if (email) {
+            var newNotifKey = 'vipen_notifications_' + userId;
+            var oldNotifKey = 'vipen_notifications_' + email;
+            if (!localStorage.getItem(newNotifKey)) {
+                var rawNotif = localStorage.getItem(oldNotifKey);
+                if (rawNotif) {
+                    try {
+                        localStorage.setItem(newNotifKey, rawNotif);
+                        localStorage.removeItem(oldNotifKey);
+                    } catch(e) {}
+                }
+            }
+            var newChatKey = 'vipen_chat_' + userId;
+            var oldChatKey = 'vipen_chat_' + email;
+            if (!localStorage.getItem(newChatKey)) {
+                var rawChat = localStorage.getItem(oldChatKey);
+                if (rawChat) {
+                    try {
+                        localStorage.setItem(newChatKey, rawChat);
+                        localStorage.removeItem(oldChatKey);
+                    } catch(e) {}
+                }
+            }
+        }
+
+        try {
+            localStorage.setItem('vipen_migrated_' + userId, '1');
+        } catch(e) {}
     }
 };

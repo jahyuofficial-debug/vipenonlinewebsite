@@ -1,0 +1,105 @@
+.cookie-consent {
+    position: fixed;
+    bottom: .24rem;
+    right: .24rem;
+    z-index: 9997;
+    opacity: 0;
+    transform: translateY(.12rem);
+    transition: opacity .35s ease, transform .35s ease;
+}
+
+.cookie-consent-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.cookie-consent-hidden {
+    opacity: 0;
+    transform: translateY(.12rem);
+    pointer-events: none;
+}
+
+.cookie-consent-card {
+    background: rgba(0, 0, 0, .92);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-radius: .12rem;
+    padding: .2rem .24rem .18rem;
+    max-width: 3.2rem;
+    box-shadow: 0 .08rem .4rem rgba(0, 0, 0, .5), 0 0 0 1px rgba(255, 255, 255, .08);
+    position: relative;
+}
+
+.cookie-consent-close {
+    position: absolute;
+    top: .08rem;
+    right: .08rem;
+    width: .28rem;
+    height: .28rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, .3);
+    cursor: pointer;
+    padding: 0;
+    border-radius: .04rem;
+    transition: color .2s;
+}
+
+.cookie-consent-close:hover {
+    color: rgba(255, 255, 255, .7);
+}
+
+.cookie-consent-close svg {
+    width: .16rem;
+    height: .16rem;
+}
+
+.cookie-consent-text {
+    font-size: .13rem;
+    color: rgba(255, 255, 255, .7);
+    line-height: 1.6;
+    margin: 0 0 .16rem 0;
+    padding-right: .2rem;
+}
+
+.cookie-consent-actions {
+    display: flex;
+    gap: .1rem;
+}
+
+.cookie-consent-btn {
+    flex: 1;
+    font-size: .12rem;
+    font-weight: 600;
+    padding: .08rem 0;
+    border-radius: .08rem;
+    border: none;
+    cursor: pointer;
+    transition: opacity .2s, transform .15s;
+    font-family: inherit;
+}
+
+.cookie-consent-btn:active {
+    transform: scale(.97);
+}
+
+.cookie-consent-accept {
+    background: #22c55e;
+    color: #fff;
+}
+
+.cookie-consent-accept:hover {
+    opacity: .9;
+}
+
+.cookie-consent-essential {
+    background: rgba(255, 255, 255, .1);
+    color: rgba(255, 255, 255, .55);
+}
+
+.cookie-consent-essential:hover {
+    background: rgba(255, 255, 255, .18);
+}

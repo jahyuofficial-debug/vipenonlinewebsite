@@ -1,6 +1,24 @@
 var SigninPage = (function() {
     'use strict';
 
+    (function loadSiteSettings() {
+        fetch('data/manager/settings.json').then(function(r) { return r.json(); }).then(function(s) {
+            if (s.siteName) {
+                document.title = 'Sign In - ' + s.siteName;
+                var metaOgTitle = document.querySelector('meta[property="og:title"]');
+                if (metaOgTitle) metaOgTitle.setAttribute('content', 'Sign In - ' + s.siteName);
+            }
+            if (s.siteLogo) {
+                var logoImg = document.querySelector('header .logo img');
+                if (logoImg) logoImg.src = s.siteLogo;
+            }
+            if (s.contactInfo) {
+                var metaDesc = document.querySelector('meta[name="description"]');
+                if (metaDesc) metaDesc.setAttribute('content', s.contactInfo);
+            }
+        }).catch(function() {});
+    })();
+
     var email;
     var emailCode;
     var sendCodeBtn;
@@ -316,8 +334,10 @@ var SigninPage = (function() {
                         Utils.setAuth({
                             username: data.username,
                             email: data.email,
-                            token: data.token
+                            token: data.token,
+                            role: data.role || ''
                         });
+                        Utils.migrateUserData();
                         if (window.location.pathname.toLowerCase().indexOf('signin.html') > -1) {
                             window.location.href = 'index.html#/profile';
                         } else {
@@ -348,8 +368,10 @@ var SigninPage = (function() {
                         Utils.setAuth({
                             username: data.username,
                             email: data.email,
-                            token: data.token
+                            token: data.token,
+                            role: data.role || ''
                         });
+                        Utils.migrateUserData();
                         if (window.location.pathname.toLowerCase().indexOf('signin.html') > -1) {
                             window.location.href = 'index.html#/profile';
                         } else {

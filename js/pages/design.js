@@ -10,8 +10,9 @@ function buildDesignWorkGrid() {
     var cards = dwItems.map(function(item, i) {
         var suit = dwSuits[i];
         var rank = dwRanks[i];
+        var cardBg = item.fanCardImage || item.coverImage || item.gradient;
         return '<div class="dw-card" data-dw-id="' + i + '" id="dwCard' + i + '">' +
-            '<div class="dw-card-img" style="background:' + item.gradient + '"></div>' +
+            '<div class="dw-card-img" style="background:' + cardBg + '"></div>' +
             '<div class="dw-card-mask"></div>' +
             '<span class="dw-card-corner">' + rank + suit + '</span>' +
             '<span class="dw-card-corner-bottom">' + rank + suit + '</span>' +
@@ -44,23 +45,48 @@ function buildDesignWorkGrid() {
 
 function buildDesignWorkDetail(id) {
     var item = dwItems[id];
+    var heroBg = item.coverImage ? item.coverImage : item.gradient;
+    var toolsStr = Array.isArray(item.tools) ? item.tools.join(' / ') : item.tools;
+
+    var tagsHtml = '';
+    var tagsArr = item.tags || [];
+    if (tagsArr.length > 0) {
+        tagsHtml = '<div class="dw-detail-tags">';
+        for (var ti = 0; ti < tagsArr.length; ti++) {
+            tagsHtml += '<span class="dw-detail-tag">' + tagsArr[ti] + '</span>';
+        }
+        tagsHtml += '</div>';
+    }
+
+    var likeCount = item.likeCount || 0;
+    var likeHtml = '<div class="dw-detail-like-wrap">' +
+        '<button class="dw-detail-like-btn" id="dwDetailLikeBtn" data-dw-like-id="' + id + '">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' +
+        '<span class="dw-detail-like-count">' + likeCount + '</span>' +
+        '</button></div>';
+
+    var contentHtml = item.content ? '<div class="dw-detail-content">' + item.content + '</div>' : '';
+
     return '<div class="dw-detail" id="dwDetail">' +
         '<button class="dw-detail-back" id="dwDetailBack">' +
         '<svg viewBox="0 0 24 24"><path d="M19 12H5m7-7l-7 7 7 7"/></svg> Back' +
         '</button>' +
         '<div class="dw-detail-hero">' +
-        '<div class="dw-detail-hero-bg" style="background:' + item.gradient + '"></div>' +
+        '<div class="dw-detail-hero-bg" style="background:' + heroBg + '"></div>' +
         '<div class="dw-detail-hero-mask"></div>' +
         '<div class="dw-detail-hero-content">' +
         '<h2 class="dw-detail-hero-title">' + item.title + '</h2>' +
         '<p class="dw-detail-hero-cat">' + item.cat + '</p>' +
         '</div></div>' +
         '<div class="dw-detail-body">' +
+        contentHtml +
         '<p class="dw-detail-desc">' + item.desc + '</p>' +
+        tagsHtml +
+        likeHtml +
         '<div class="dw-detail-meta">' +
         '<div class="dw-detail-meta-item"><p class="dw-detail-meta-label">Client</p><p class="dw-detail-meta-value">' + item.client + '</p></div>' +
-        '<div class="dw-detail-meta-item"><p class="dw-detail-meta-label">Year</p><p class="dw-detail-meta-value">' + item.year + '</p></div>' +
-        '<div class="dw-detail-meta-item"><p class="dw-detail-meta-label">Tools</p><p class="dw-detail-meta-value">' + item.tools + '</p></div>' +
+        '<div class="dw-detail-meta-item"><p class="dw-detail-meta-label">Published</p><p class="dw-detail-meta-value">' + item.year + '</p></div>' +
+        '<div class="dw-detail-meta-item"><p class="dw-detail-meta-label">Tools</p><p class="dw-detail-meta-value">' + toolsStr + '</p></div>' +
         '</div></div></div>';
 }
 
@@ -70,8 +96,9 @@ function buildDesignWorkListCards(page) {
     var pageItems = dwItems.slice(start, end);
     return pageItems.map(function(item, i) {
         var realIndex = start + i;
+        var thumbBg = item.listThumbImage || item.coverImage || item.gradient;
         return '<div class="dw-list-card" data-dw-id="' + realIndex + '">' +
-            '<div class="dw-list-card-thumb" style="background:' + item.gradient + '"></div>' +
+            '<div class="dw-list-card-thumb" style="background:' + thumbBg + '"></div>' +
             '<div class="dw-list-card-body">' +
             '<p class="dw-list-card-cat">' + item.cat + '</p>' +
             '<h3 class="dw-list-card-title">' + item.title + '</h3>' +
@@ -290,6 +317,134 @@ function resetFanCards() {
     if (overlay) overlay.classList.remove('active');
 }
 
+var designGuardStep = 1;
+var designGuardPin = '';
+var designGuardCreatorName = '';
+var designGuardCompany = '';
+
+function shakeInput(el) {
+    el.classList.add('dw-guard-shake');
+    el.classList.add('dw-guard-error-border');
+    setTimeout(function() {
+        el.classList.remove('dw-guard-shake');
+    }, 500);
+    setTimeout(function() {
+        el.classList.remove('dw-guard-error-border');
+    }, 2000);
+}
+
+function renderDesignGuard() {
+    var html = '<div class="dw-guard-overlay" id="dwGuardOverlay" style="background:url(\'images/PIN验证.png\') center/cover no-repeat">' +
+        '<button class="dw-guard-back" id="dwGuardBack">' +
+        '<svg viewBox="0 0 24 24"><path d="M19 12H5m7-7l-7 7 7 7"/></svg> Back' +
+        '</button>' +
+        '<div class="dw-guard-input-wrap">' +
+        '<input type="password" class="dw-guard-input" id="dwGuardInput" placeholder="Enter PIN" maxlength="6" inputmode="numeric" autocomplete="off">' +
+        '</div></div>';
+    return html;
+}
+
+function bindDesignGuard() {
+    designGuardStep = 1;
+    designGuardPin = '';
+    designGuardCreatorName = '';
+    designGuardCompany = '';
+
+    var backBtn = document.getElementById('dwGuardBack');
+    if (backBtn) {
+        backBtn.addEventListener('click', function() {
+            window.history.back();
+        });
+    }
+
+    var input = document.getElementById('dwGuardInput');
+    if (!input) return;
+
+    function updatePlaceholder() {
+        if (designGuardStep === 1) {
+            input.placeholder = 'Enter PIN';
+            input.type = 'password';
+            input.maxLength = 6;
+            input.inputMode = 'numeric';
+            input.value = '';
+        } else if (designGuardStep === 2) {
+            input.placeholder = 'Creator Name';
+            input.type = 'text';
+            input.maxLength = 20;
+            input.inputMode = '';
+            input.value = '';
+        } else if (designGuardStep === 3) {
+            input.placeholder = 'Company';
+            input.type = 'text';
+            input.maxLength = 20;
+            input.inputMode = '';
+            input.value = '';
+        }
+    }
+
+    function checkStep() {
+        var val = input.value.trim();
+        if (designGuardStep === 1) {
+            if (val.length !== 6) {
+                shakeInput(input);
+                return;
+            }
+            var auth = Utils.getAuth();
+            var email = auth ? (auth.email || '') : '';
+            fetch('/api/manager/verify-pin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pin: val, email: email })
+            }).then(function(r) { return r.json(); }).then(function(res) {
+                if (res.success) {
+                    designGuardPin = val;
+                    designGuardStep = 2;
+                    updatePlaceholder();
+                } else {
+                    shakeInput(input);
+                }
+            }).catch(function() {
+                shakeInput(input);
+            });
+        } else if (designGuardStep === 2) {
+            if (val !== '贾江洲') {
+                shakeInput(input);
+                return;
+            }
+            designGuardCreatorName = val;
+            designGuardStep = 3;
+            updatePlaceholder();
+        } else if (designGuardStep === 3) {
+            if (!val) {
+                shakeInput(input);
+                return;
+            }
+            var fullName = val + '公司';
+            var expectedCompanies = ['Vipen公司', 'VIPEN公司'];
+            if (expectedCompanies.indexOf(fullName) === -1) {
+                shakeInput(input);
+                return;
+            }
+            designGuardCompany = fullName;
+            sessionStorage.setItem('design_verified', 'true');
+            var overlay = document.getElementById('dwGuardOverlay');
+            if (overlay) overlay.remove();
+            window.dispatchEvent(new Event('hashchange'));
+        }
+    }
+
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            checkStep();
+        }
+    });
+}
+
+function isDesignVerified() {
+    return sessionStorage.getItem('design_verified') === 'true';
+}
+
 return {
     buildGrid: function() { return buildDesignWorkGrid(); },
     buildDetail: function(id) { return buildDesignWorkDetail(id); },
@@ -302,7 +457,10 @@ return {
         bindDesignWorkListClicks();
         bindDesignWorkListPagination();
     },
-    resetCards: function() { resetFanCards(); }
+    resetCards: function() { resetFanCards(); },
+    renderGuard: function() { return renderDesignGuard(); },
+    bindGuard: function() { bindDesignGuard(); },
+    isVerified: function() { return isDesignVerified(); }
 };
 
 })();
