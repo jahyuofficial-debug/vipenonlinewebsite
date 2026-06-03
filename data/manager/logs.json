@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "id": "log1780528736216",
+    "action": "admin_login",
+    "admin": "riverjia9527",
+    "detail": "ManagerGo admin logged in via PIN",
+    "timestamp": "2026-06-03T23:18:56.216Z"
+  }
+]

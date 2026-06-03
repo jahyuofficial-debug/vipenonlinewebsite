@@ -491,7 +491,10 @@ function handleSaveProfile(res, body) {
 function readManagerJSON(filename, callback) {
     var fp = path.join(MANAGER_DATA_DIR, filename);
     fs.readFile(fp, 'utf8', function(err, raw) {
-        if (err) { callback(err); return; }
+        if (err) {
+            if (err.code === 'ENOENT') { callback(null, []); return; }
+            callback(err); return;
+        }
         try { callback(null, JSON.parse(raw)); } catch (e) { callback(e); }
     });
 }
@@ -605,6 +608,11 @@ function handleManagerVerifyPin(res, body) {
         return;
     }
 
+    if (!email) {
+        sendJSON(res, 400, { success: false, error: 'Email is required' });
+        return;
+    }
+
     var newHash = hashPIN(pin);
     var oldSecret = getOldAuthSecret();
     var oldHash = oldSecret ? crypto.createHmac('sha256', oldSecret).update('manager_pin_' + pin).digest('hex') : null;
@@ -618,11 +626,6 @@ function handleManagerVerifyPin(res, body) {
         readManagerJSON('users.json', function(err2, users) {
             if (err2) {
                 sendJSON(res, 500, { success: false, error: 'Server error' });
-                return;
-            }
-
-            if (!email) {
-                sendJSON(res, 400, { success: false, error: 'Email is required' });
                 return;
             }
 
