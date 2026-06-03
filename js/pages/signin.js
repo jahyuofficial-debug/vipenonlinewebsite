@@ -103,7 +103,7 @@ var SigninPage = (function() {
             tabCode.classList.remove('active');
             signinSubtitle.textContent = 'Sign in with password';
             email.setAttribute('type', 'text');
-            email.placeholder = 'Email/Username';
+            email.placeholder = 'Username';
             emailCodeGroup.style.display = 'none';
             passwordGroup.style.display = 'flex';
             sendTip.style.display = 'none';
@@ -387,7 +387,7 @@ var SigninPage = (function() {
                 fetch(CONFIG.API_BASE + '/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: emailVal, password: passwordVal })
+                    body: JSON.stringify({ username: emailVal, password: passwordVal })
                 })
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
