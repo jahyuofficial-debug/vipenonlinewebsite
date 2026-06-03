@@ -297,34 +297,40 @@ function handleSendCode(res, body) {
 }
 
 function handleLogin(res, body) {
-    var email = (body.email || '').toLowerCase().trim();
+    var loginField = (body.email || '').trim();
     var password = body.password || '';
 
-    if (!email || !password) {
-        sendJSON(res, 400, { success: false, error: 'Email and password are required' });
+    if (!loginField || !password) {
+        sendJSON(res, 400, { success: false, error: 'Email/Username and password are required' });
         return;
     }
-
-    var newHash = crypto.createHmac('sha256', getAuthSecret()).update(email + '|' + password).digest('hex');
-    var oldSecret = getOldAuthSecret();
 
     readManagerJSON('users.json', function(err, users) {
         if (err) users = [];
 
-        var matchedUser = null;
-        var needsMigration = false;
-        for (var i = 0; i < users.length; i++) {
-            if (users[i].email.toLowerCase() !== email) continue;
-            if (users[i].passwordHash === newHash) {
-                matchedUser = users[i];
-                break;
+        function tryMatch(email) {
+            var newHash = crypto.createHmac('sha256', getAuthSecret()).update(email.toLowerCase() + '|' + password).digest('hex');
+            var oldSecret = getOldAuthSecret();
+            for (var i = 0; i < users.length; i++) {
+                if (users[i].email.toLowerCase() !== email.toLowerCase()) continue;
+                if (users[i].passwordHash === newHash) return users[i];
+                if (oldSecret) {
+                    var oldHash = crypto.createHmac('sha256', oldSecret).update(email.toLowerCase() + '|' + password).digest('hex');
+                    if (users[i].passwordHash === oldHash) {
+                        users[i].passwordHash = newHash;
+                        return users[i];
+                    }
+                }
             }
-            if (oldSecret) {
-                var oldHash = crypto.createHmac('sha256', oldSecret).update(email + '|' + password).digest('hex');
-                if (users[i].passwordHash === oldHash) {
-                    matchedUser = users[i];
-                    matchedUser.passwordHash = newHash;
-                    needsMigration = true;
+            return null;
+        }
+
+        var matchedUser = tryMatch(loginField);
+
+        if (!matchedUser) {
+            for (var i = 0; i < users.length; i++) {
+                if (users[i].username.toLowerCase() === loginField.toLowerCase()) {
+                    matchedUser = tryMatch(users[i].email);
                     break;
                 }
             }
@@ -334,18 +340,18 @@ function handleLogin(res, body) {
             matchedUser.lastLogin = new Date().toISOString();
             writeManagerJSON('users.json', users, function() {});
 
-            var token = generateToken(email);
+            var token = generateToken(matchedUser.email);
             sendJSON(res, 200, {
                 success: true,
                 token: token,
                 username: matchedUser.username,
-                email: email,
+                email: matchedUser.email,
                 role: matchedUser.role || ''
             });
             return;
         }
 
-        sendJSON(res, 401, { success: false, error: 'Invalid email or password' });
+        sendJSON(res, 401, { success: false, error: 'Invalid email/username or password' });
     });
 }
 
@@ -443,12 +449,27 @@ function handleVerifyCode(res, body) {
             });
         });
     } else {
-        var token = generateToken(email);
-        sendJSON(res, 200, {
-            success: true,
-            token: token,
-            username: username,
-            email: email
+        readManagerJSON('users.json', function(err, users) {
+            if (err) users = [];
+            var existingUser = null;
+            for (var i = 0; i < users.length; i++) {
+                if (users[i].email.toLowerCase() === email.toLowerCase()) {
+                    existingUser = users[i];
+                    break;
+                }
+            }
+            if (existingUser) {
+                existingUser.lastLogin = new Date().toISOString();
+                writeManagerJSON('users.json', users, function() {});
+            }
+            var token = generateToken(email);
+            sendJSON(res, 200, {
+                success: true,
+                token: token,
+                username: existingUser ? existingUser.username : username,
+                email: email,
+                role: existingUser ? existingUser.role : 'Viper'
+            });
         });
     }
 }

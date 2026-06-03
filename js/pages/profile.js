@@ -1141,10 +1141,10 @@ var ProfilePage = (function() {
         if (auth) {
             var savedUser = Utils.getUserData('user');
             if (savedUser && savedUser.profile) {
-                profileData.displayName = savedUser.profile.displayName || profileData.displayName;
-                profileData.email = savedUser.profile.email || profileData.email;
-                profileData.avatar = savedUser.profile.avatar || profileData.avatar;
-                profileData.badge = savedUser.profile.badge || profileData.badge;
+                if (savedUser.profile.displayName) profileData.displayName = savedUser.profile.displayName;
+                if (savedUser.profile.email) profileData.email = savedUser.profile.email;
+                if (savedUser.profile.avatar) profileData.avatar = savedUser.profile.avatar;
+                if (savedUser.profile.badge) profileData.badge = savedUser.profile.badge;
                 if (savedUser.profile.socialPublic !== undefined) profileData.socialPublic = savedUser.profile.socialPublic;
                 if (savedUser.profile.socials) {
                     for (var sk in savedUser.profile.socials) {
@@ -1154,15 +1154,11 @@ var ProfilePage = (function() {
                     }
                 }
             }
-            if (auth.username) {
+            if (!profileData.displayName && auth.username) {
                 profileData.displayName = auth.username;
-                var dn = document.getElementById('profileDisplayName');
-                if (dn) dn.textContent = auth.username;
             }
-            if (auth.email) {
+            if (!profileData.email && auth.email) {
                 profileData.email = auth.email;
-                var em = document.getElementById('profileEmail');
-                if (em) em.textContent = auth.email;
             }
         }
 
@@ -1218,6 +1214,10 @@ var ProfilePage = (function() {
         for (var key in dom) {
             cachedDom[key] = dom[key];
         }
+
+        if (dom.profileAvatarImg && profileData.avatar) dom.profileAvatarImg.src = profileData.avatar;
+        if (dom.displayNameEl) dom.displayNameEl.textContent = profileData.displayName;
+        if (dom.emailEl) dom.emailEl.textContent = profileData.email;
 
         if (dom.cancelBtn) dom.cancelBtn.addEventListener('click', closeModal);
         if (dom.overlay) dom.overlay.addEventListener('click', closeModal);
