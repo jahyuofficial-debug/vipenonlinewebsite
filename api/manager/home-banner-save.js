@@ -1,4 +1,4 @@
-var helpers = require('./helpers');
+var helpers = require('../../lib/manager-helpers');
 
 module.exports = function(req, res) {
     if (req.method === 'OPTIONS') {

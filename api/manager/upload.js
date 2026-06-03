@@ -1,4 +1,4 @@
-var helpers = require('./helpers');
+var helpers = require('../../lib/manager-helpers');
 var fs = require('fs');
 var path = require('path');
 

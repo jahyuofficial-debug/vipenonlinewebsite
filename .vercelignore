@@ -1,3 +1,7 @@
 server.js
 resend-key.txt
 .trae/
+api/auth/storage.js
+api/auth/secret.js
+api/manager/storage.js
+api/manager/helpers.js

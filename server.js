@@ -21,8 +21,8 @@ var RESEND_KEY_PATH = 'D:\\设计文档\\Web素材\\APIkeys\\ResendAPI.txt';
 var RESEND_FROM = process.env.RESEND_FROM || 'Vipen <noreply@vipenonline.com>';
 var CODE_EXPIRE_MS = 5 * 60 * 1000;
 var MANAGERGO_EMAILS = ['riverjia9527@gmail.com'];
-var getAuthSecret = require('./api/auth/secret').getAuthSecret;
-var getOldAuthSecret = require('./api/auth/secret').getOldAuthSecret;
+var getAuthSecret = require('./lib/secret').getAuthSecret;
+var getOldAuthSecret = require('./lib/secret').getOldAuthSecret;
 
 if (!RESEND_API_KEY) {
     try {

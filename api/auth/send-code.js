@@ -3,7 +3,7 @@ var https = require('https');
 
 var RESEND_API_KEY = process.env.RESEND_API_KEY || '';
 var RESEND_FROM = process.env.RESEND_FROM || 'Vipen <noreply@vipenonline.com>';
-var getAuthSecret = require('./secret').getAuthSecret;
+var getAuthSecret = require('../../lib/secret').getAuthSecret;
 var CODE_EXPIRE_MS = 5 * 60 * 1000;
 
 function generateCode() {

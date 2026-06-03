@@ -1,5 +1,5 @@
-var storage = require('./storage');
-var helpers = require('./helpers');
+var storage = require('../../lib/manager-storage');
+var helpers = require('../../lib/manager-helpers');
 
 module.exports = function(req, res) {
     if (req.method === 'OPTIONS') {

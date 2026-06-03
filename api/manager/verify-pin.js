@@ -1,9 +1,9 @@
 var crypto = require('crypto');
 
-var getAuthSecret = require('../auth/secret').getAuthSecret;
-var getOldAuthSecret = require('../auth/secret').getOldAuthSecret;
-var storage = require('./storage');
-var helpers = require('./helpers');
+var getAuthSecret = require('../../lib/secret').getAuthSecret;
+var getOldAuthSecret = require('../../lib/secret').getOldAuthSecret;
+var storage = require('../../lib/manager-storage');
+var helpers = require('../../lib/manager-helpers');
 
 module.exports = function(req, res) {
     if (req.method === 'OPTIONS') {

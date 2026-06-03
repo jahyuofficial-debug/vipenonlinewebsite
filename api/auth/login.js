@@ -1,8 +1,8 @@
 var crypto = require('crypto');
 
-var getAuthSecret = require('./secret').getAuthSecret;
-var getOldAuthSecret = require('./secret').getOldAuthSecret;
-var readUsers = require('./storage').readUsers;
+var getAuthSecret = require('../../lib/secret').getAuthSecret;
+var getOldAuthSecret = require('../../lib/secret').getOldAuthSecret;
+var readUsers = require('../../lib/auth-storage').readUsers;
 
 function generateToken(email) {
     var payload = email + '|' + Date.now();

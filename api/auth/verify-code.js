@@ -1,7 +1,7 @@
 var crypto = require('crypto');
 
-var getAuthSecret = require('./secret').getAuthSecret;
-var storage = require('./storage');
+var getAuthSecret = require('../../lib/secret').getAuthSecret;
+var storage = require('../../lib/auth-storage');
 var readUsers = storage.readUsers;
 var writeUsers = storage.writeUsers;
 var CODE_EXPIRE_MS = 5 * 60 * 1000;
