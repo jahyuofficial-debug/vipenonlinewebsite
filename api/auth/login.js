@@ -11,7 +11,6 @@ if (!AUTH_SECRET) {
         console.warn('[SECURITY] AUTH_SECRET env var not set, using fallback key. Set AUTH_SECRET in production!');
     }
 }
-var CODE_EXPIRE_MS = 5 * 60 * 1000;
 
 function generateToken(email) {
     var payload = email + '|' + Date.now();
@@ -79,58 +78,45 @@ module.exports = function(req, res) {
             return;
         }
 
-        var email = body.email;
-        var code = body.code;
-        var hash = body.hash;
-        var ts = body.ts;
-
-        if (!email || !code) {
-            sendJSON(res, 400, { success: false, error: 'Email and code are required' });
-            return;
-        }
-
-        if (!hash || !ts) {
-            sendJSON(res, 400, { success: false, error: 'Verification hash and timestamp are required' });
-            return;
-        }
-
-        if (Date.now() - ts > CODE_EXPIRE_MS) {
-            sendJSON(res, 400, { success: false, error: 'Verification code expired. Please request a new one.' });
-            return;
-        }
-
-        var hmac = crypto.createHmac('sha256', AUTH_SECRET);
-        hmac.update(email + '|' + code + '|' + ts);
-        var expectedHash = hmac.digest('hex');
-
-        if (expectedHash !== hash) {
-            sendJSON(res, 400, { success: false, error: 'Invalid verification code' });
-            return;
-        }
-
-        var username = body.username || email.split('@')[0];
+        var email = (body.email || '').toLowerCase().trim();
         var password = body.password || '';
-        var token = generateToken(email);
+
+        if (!email || !password) {
+            sendJSON(res, 400, { success: false, error: 'Email and password are required' });
+            return;
+        }
+
+        var hmacPwd = crypto.createHmac('sha256', AUTH_SECRET);
+        hmacPwd.update(email + '|' + password);
+        var inputHash = hmacPwd.digest('hex');
 
         readUsers(function(readErr, users) {
-            var existingUser = null;
+            if (readErr) {
+                sendJSON(res, 500, { success: false, error: 'Server error' });
+                return;
+            }
+
+            var matchedUser = null;
             for (var i = 0; i < users.length; i++) {
-                if (users[i].email.toLowerCase() === email.toLowerCase()) {
-                    existingUser = users[i];
+                if (users[i].email.toLowerCase() === email && users[i].passwordHash === inputHash) {
+                    matchedUser = users[i];
                     break;
                 }
             }
 
-            var role = existingUser ? (existingUser.role || 'Viper') : 'Viper';
-            var displayName = existingUser ? (existingUser.username || username) : username;
+            if (matchedUser) {
+                var token = generateToken(email);
+                sendJSON(res, 200, {
+                    success: true,
+                    token: token,
+                    username: matchedUser.username,
+                    email: email,
+                    role: matchedUser.role || ''
+                });
+                return;
+            }
 
-            sendJSON(res, 200, {
-                success: true,
-                token: token,
-                username: displayName,
-                email: email,
-                role: role
-            });
+            sendJSON(res, 401, { success: false, error: 'Invalid email or password' });
         });
     });
 };

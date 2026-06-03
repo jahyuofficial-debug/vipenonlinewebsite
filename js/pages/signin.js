@@ -43,6 +43,10 @@ var SigninPage = (function() {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
     }
 
+    function validateUsername(value) {
+        return value && value.trim().length >= 2;
+    }
+
     function validateEmailCode(value) {
         return value && value.length === 6 && /^[0-9]+$/.test(value);
     }
@@ -72,13 +76,14 @@ var SigninPage = (function() {
     }
 
     function updateSigninButton() {
-        var isEmailValid = validateEmail(email.value);
         if (currentMode === 'code') {
+            var isEmailValid = validateEmail(email.value);
             var isCodeValid = validateEmailCode(emailCode.value);
             signinBtn.disabled = !(isEmailValid && isCodeValid);
         } else {
+            var isUsernameValid = validateUsername(email.value);
             var isPasswordValid = validatePassword(password.value);
-            signinBtn.disabled = !(isEmailValid && isPasswordValid);
+            signinBtn.disabled = !(isUsernameValid && isPasswordValid);
         }
     }
 
@@ -88,6 +93,8 @@ var SigninPage = (function() {
             tabCode.classList.add('active');
             tabPassword.classList.remove('active');
             signinSubtitle.textContent = 'Sign in with email verification';
+            email.setAttribute('type', 'email');
+            email.placeholder = 'Email';
             emailCodeGroup.style.display = 'flex';
             passwordGroup.style.display = 'none';
             sendTip.style.display = 'block';
@@ -95,6 +102,8 @@ var SigninPage = (function() {
             tabPassword.classList.add('active');
             tabCode.classList.remove('active');
             signinSubtitle.textContent = 'Sign in with password';
+            email.setAttribute('type', 'text');
+            email.placeholder = 'Username';
             emailCodeGroup.style.display = 'none';
             passwordGroup.style.display = 'flex';
             sendTip.style.display = 'none';
@@ -238,16 +247,28 @@ var SigninPage = (function() {
         });
 
         email.addEventListener('input', function() {
-            var isValid = validateEmail(this.value);
-            setValidationIcon('emailIcon', isValid);
-            if (isValid) {
-                this.classList.add('valid');
-                clearFieldError(this);
-                if (!isSending && currentMode === 'code') {
-                    sendCodeBtn.classList.add('active');
+            if (currentMode === 'code') {
+                var isValid = validateEmail(this.value);
+                setValidationIcon('emailIcon', isValid);
+                if (isValid) {
+                    this.classList.add('valid');
+                    clearFieldError(this);
+                    if (!isSending) {
+                        sendCodeBtn.classList.add('active');
+                    }
+                } else {
+                    this.classList.remove('valid');
+                    sendCodeBtn.classList.remove('active');
                 }
             } else {
-                this.classList.remove('valid');
+                var isValid = validateUsername(this.value);
+                setValidationIcon('emailIcon', isValid);
+                if (isValid) {
+                    this.classList.add('valid');
+                    clearFieldError(this);
+                } else {
+                    this.classList.remove('valid');
+                }
                 sendCodeBtn.classList.remove('active');
             }
             if (sendTip.classList.contains('show')) {
@@ -258,8 +279,14 @@ var SigninPage = (function() {
 
         email.addEventListener('blur', function() {
             var val = this.value;
-            if (val && !validateEmail(val)) {
-                triggerShake(this);
+            if (currentMode === 'code') {
+                if (val && !validateEmail(val)) {
+                    triggerShake(this);
+                }
+            } else {
+                if (val && !validateUsername(val)) {
+                    triggerShake(this);
+                }
             }
         });
 
@@ -356,11 +383,12 @@ var SigninPage = (function() {
                     alert('Network error. Please try again.');
                 });
             } else {
+                var usernameVal = email.value;
                 var passwordVal = password.value;
                 fetch(CONFIG.API_BASE + '/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: emailVal, password: passwordVal })
+                    body: JSON.stringify({ username: usernameVal, password: passwordVal })
                 })
                 .then(function(r) { return r.json(); })
                 .then(function(data) {
