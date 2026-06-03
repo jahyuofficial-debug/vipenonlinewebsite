@@ -4,6 +4,9 @@ var fs = require('fs');
 var path = require('path');
 var url = require('url');
 var crypto = require('crypto');
+var React = require('react');
+var { renderEmail } = require('./lib/email/renderEmail');
+var VerificationEmail = require('./emails/VerificationEmail');
 var canvas;
 try { canvas = require('canvas'); } catch (e) { canvas = null; }
 
@@ -19,6 +22,7 @@ var RESEND_API_KEY = process.env.RESEND_API_KEY || '';
 var RESEND_KEY_PATH = 'D:\\设计文档\\Web素材\\APIkeys\\ResendAPI.txt';
 var RESEND_FROM = process.env.RESEND_FROM || 'Vipen <noreply@vipenonline.com>';
 var CODE_EXPIRE_MS = 5 * 60 * 1000;
+var MANAGERGO_EMAILS = ['riverjia9527@gmail.com'];
 var getAuthSecret = require('./api/auth/secret').getAuthSecret;
 var getOldAuthSecret = require('./api/auth/secret').getOldAuthSecret;
 
@@ -55,18 +59,12 @@ function generateToken(email) {
     return Buffer.from(payload).toString('base64');
 }
 
-function sendEmailViaResend(toEmail, code, callback) {
+function sendEmailViaResend(toEmail, html, callback) {
     var postData = JSON.stringify({
         from: RESEND_FROM,
         to: toEmail,
         subject: 'Vipen Verification Code',
-        html: '<div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:40px 20px;background:#111;color:#fff;border-radius:12px;text-align:center;">' +
-            '<h1 style="color:#32c864;font-size:24px;margin-bottom:8px;">Vipen</h1>' +
-            '<p style="font-size:16px;color:rgba(255,255,255,.7);margin-bottom:24px;">Your verification code</p>' +
-            '<div style="font-size:36px;font-weight:900;letter-spacing:8px;color:#32c864;padding:16px 24px;background:#1a1a1a;border-radius:8px;display:inline-block;margin-bottom:24px;">' + code + '</div>' +
-            '<p style="font-size:13px;color:rgba(255,255,255,.35);">This code expires in 5 minutes.</p>' +
-            '<p style="font-size:13px;color:rgba(255,255,255,.35);">If you didn\'t request this, please ignore this email.</p>' +
-            '</div>'
+        html: html
     });
 
     var options = {
@@ -245,7 +243,10 @@ function handleAPIRoute(req, res, apiPath) {
         }
 
         if (apiPath === '/api/auth/send-code') {
-            handleSendCode(res, body);
+            handleSendCode(res, body).catch(function(err) {
+                console.error('Send code error:', err);
+                sendJSON(res, 500, { success: false, error: 'Internal server error' });
+            });
         } else if (apiPath === '/api/auth/verify-code') {
             handleVerifyCode(res, body);
         } else if (apiPath === '/api/auth/login') {
@@ -260,7 +261,7 @@ function handleAPIRoute(req, res, apiPath) {
     });
 }
 
-function handleSendCode(res, body) {
+async function handleSendCode(res, body) {
     var email = body.email;
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         sendJSON(res, 400, { success: false, error: 'Invalid email address' });
@@ -285,7 +286,10 @@ function handleSendCode(res, body) {
     hmac.update(email + '|' + code + '|' + ts);
     var hash = hmac.digest('hex');
 
-    sendEmailViaResend(email, code, function(err, result) {
+    var element = React.createElement(VerificationEmail, { code: code });
+    var html = await renderEmail(element);
+
+    sendEmailViaResend(email, html, function(err, result) {
         if (err) {
             console.error('Resend send error:', err.message);
             sendJSON(res, 500, { success: false, error: 'Failed to send email. Please try again.' });
@@ -294,6 +298,10 @@ function handleSendCode(res, body) {
         console.log('Verification code sent to', email, '| code:', code, '| id:', result.id);
         sendJSON(res, 200, { success: true, hash: hash, ts: ts });
     });
+}
+
+function isManagerGoEmail(email) {
+    return MANAGERGO_EMAILS.indexOf((email || '').toLowerCase().trim()) !== -1;
 }
 
 function handleLogin(res, body) {
@@ -346,7 +354,7 @@ function handleLogin(res, body) {
                 token: token,
                 username: matchedUser.username,
                 email: matchedUser.email,
-                role: matchedUser.role || ''
+                role: isManagerGoEmail(matchedUser.email) ? 'ManagerGo' : (matchedUser.role || '')
             });
             return;
         }
@@ -429,7 +437,7 @@ function handleVerifyCode(res, body) {
                     id: 'u' + String(users.length + 1).padStart(3, '0'),
                     username: username,
                     email: email,
-                    role: 'Viper',
+                    role: isManagerGoEmail(email) ? 'ManagerGo' : 'Viper',
                     passwordHash: passwordHash,
                     status: 'active',
                     createdAt: new Date().toISOString(),
@@ -444,7 +452,7 @@ function handleVerifyCode(res, body) {
                     token: token,
                     username: username,
                     email: email,
-                    role: existingIdx >= 0 ? users[existingIdx].role : 'Viper'
+                    role: isManagerGoEmail(email) ? 'ManagerGo' : (existingIdx >= 0 ? users[existingIdx].role : 'Viper')
                 });
             });
         });
@@ -468,7 +476,7 @@ function handleVerifyCode(res, body) {
                 token: token,
                 username: existingUser ? existingUser.username : username,
                 email: email,
-                role: existingUser ? existingUser.role : 'Viper'
+                role: isManagerGoEmail(email) ? 'ManagerGo' : (existingUser ? existingUser.role : 'Viper')
             });
         });
     }
@@ -619,25 +627,21 @@ function handleManagerVerifyPin(res, body) {
                 return;
             }
 
+            if (!email) {
+                sendJSON(res, 400, { success: false, error: 'Email is required' });
+                return;
+            }
+
             var user = null;
-            if (email) {
-                for (var i = 0; i < users.length; i++) {
-                    if (users[i].email.toLowerCase() === email && users[i].role === 'ManagerGo') {
-                        user = users[i];
-                        break;
-                    }
-                }
-            } else {
-                for (var i = 0; i < users.length; i++) {
-                    if (users[i].role === 'ManagerGo') {
-                        user = users[i];
-                        break;
-                    }
+            for (var i = 0; i < users.length; i++) {
+                if (users[i].email.toLowerCase() === email) {
+                    user = users[i];
+                    break;
                 }
             }
 
             if (!user) {
-                sendJSON(res, 403, { success: false, error: 'Access denied. No ManagerGo user found.' });
+                sendJSON(res, 404, { success: false, error: 'User not found' });
                 return;
             }
 

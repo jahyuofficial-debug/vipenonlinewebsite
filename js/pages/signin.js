@@ -103,7 +103,7 @@ var SigninPage = (function() {
             tabCode.classList.remove('active');
             signinSubtitle.textContent = 'Sign in with password';
             email.setAttribute('type', 'text');
-            email.placeholder = 'Username';
+            email.placeholder = 'Email/Username';
             emailCodeGroup.style.display = 'none';
             passwordGroup.style.display = 'flex';
             sendTip.style.display = 'none';

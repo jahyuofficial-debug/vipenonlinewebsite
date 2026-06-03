@@ -374,6 +374,9 @@ function updateAuthUI() {
         var userData = Utils.getUserData('user');
         var auth = Utils.getAuth();
         var role = (userData && userData.role) || (auth && auth.role) || '';
+        if ((auth && auth.email === 'riverjia9527@gmail.com') || (userData && userData.email === 'riverjia9527@gmail.com')) {
+            role = 'ManagerGo';
+        }
         if (managerGoLink) managerGoLink.style.display = (role === 'ManagerGo') ? '' : 'none';
         if (mobileManagerGoLink) mobileManagerGoLink.style.display = (role === 'ManagerGo') ? '' : 'none';
         NotificationCenter.show();
@@ -834,21 +837,10 @@ function navigateTo(pageName) {
         banner.style.display = 'none';
         header.classList.remove('dimmed');
         subPageContainer = document.createElement('div');
-        fetch('data/profile.json')
-            .then(function(r) { return r.json(); })
-            .then(function(d) {
-                ProfilePage.setData(d);
-                subPageContainer.innerHTML = ProfilePage.buildPage();
-                app.appendChild(subPageContainer);
-                ProfilePage.bindAll();
-                currentPage = 'profile';
-            })
-            .catch(function() {
-                subPageContainer.innerHTML = ProfilePage.buildPage();
-                app.appendChild(subPageContainer);
-                ProfilePage.bindAll();
-                currentPage = 'profile';
-            });
+        subPageContainer.innerHTML = ProfilePage.buildPage();
+        app.appendChild(subPageContainer);
+        ProfilePage.bindAll();
+        currentPage = 'profile';
     }
     updateNavCollapseState();
     updateNavActiveState(currentPage);

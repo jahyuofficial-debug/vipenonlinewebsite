@@ -347,6 +347,15 @@
     box-shadow: 0 .08rem .24rem rgba(59,130,246,.1);
 }
 
+.profile-page .card-manager::before {
+    background: linear-gradient(135deg, rgba(245,158,11,.08), rgba(245,158,11,.02));
+}
+
+.profile-page .card-manager:hover {
+    border-color: rgba(245,158,11,.3);
+    box-shadow: 0 .08rem .24rem rgba(245,158,11,.1);
+}
+
 .profile-page .quick-action-icon {
     width: .42rem;
     height: .42rem;
@@ -366,6 +375,11 @@
 .profile-page .card-hi .quick-action-icon {
     background: linear-gradient(135deg, rgba(59,130,246,.2), rgba(59,130,246,.05));
     color: #3b82f6;
+}
+
+.profile-page .card-manager .quick-action-icon {
+    background: linear-gradient(135deg, rgba(245,158,11,.2), rgba(245,158,11,.05));
+    color: #f59e0b;
 }
 
 .profile-page .quick-action-card:hover .quick-action-icon {

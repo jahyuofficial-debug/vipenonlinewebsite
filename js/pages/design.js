@@ -419,17 +419,19 @@ function bindDesignGuard() {
                 shakeInput(input);
                 return;
             }
-            var fullName = val + '公司';
-            var expectedCompanies = ['Vipen公司', 'VIPEN公司'];
-            if (expectedCompanies.indexOf(fullName) === -1) {
-                shakeInput(input);
-                return;
-            }
-            designGuardCompany = fullName;
+            designGuardCompany = val + '公司';
             sessionStorage.setItem('design_verified', 'true');
             var overlay = document.getElementById('dwGuardOverlay');
-            if (overlay) overlay.remove();
-            window.dispatchEvent(new Event('hashchange'));
+            if (overlay && overlay.parentNode) {
+                overlay.parentNode.remove();
+            }
+            var currentHash = window.location.hash;
+            if (currentHash) {
+                window.location.hash = '';
+                setTimeout(function() {
+                    window.location.hash = currentHash;
+                }, 0);
+            }
         }
     }
 
