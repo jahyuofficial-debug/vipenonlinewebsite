@@ -1398,4 +1398,34 @@ navigateTo = function(pageName) {
 window.addEventListener('hashchange', handleRoute);
 handleRoute();
 
+window.addEventListener('storage', function(e) {
+    if (!e.key) return;
+    if (e.key === 'vipen_mgr_design_dwItems' && e.newValue) {
+        try { dwItems = JSON.parse(e.newValue); } catch (ex) {}
+    }
+    if (e.key === 'vipen_mgr_fresh_heroItems' && e.newValue) {
+        try { freshHeroItems = JSON.parse(e.newValue); } catch (ex) {}
+        if (currentPage === 'fresh' && typeof FreshPage !== 'undefined') {
+            FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
+        }
+    }
+    if (e.key === 'vipen_mgr_disc_tapes' && e.newValue) {
+        try { window.discData.tapes = JSON.parse(e.newValue); } catch (ex) {}
+        if (currentPage === 'disc-library' && typeof DiscPage !== 'undefined') {
+            DiscPage.setDiscData(window.discData);
+        }
+    }
+    if (e.key === 'vipen_mgr_home_banner' && e.newValue) {
+        try {
+            var parsed = JSON.parse(e.newValue);
+            if (parsed && parsed.groups) {
+                BannerPage.bannerData.homeGroups = parsed.groups;
+                if (currentPage === 'home') {
+                    BannerPage.changeSlide(0);
+                }
+            }
+        } catch (ex) {}
+    }
+});
+
 })();

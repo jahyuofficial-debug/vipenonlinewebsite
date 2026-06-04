@@ -1321,6 +1321,14 @@ function serveStatic(req, res, filePath) {
 
         var ext = path.extname(filePath).toLowerCase();
         var contentType = MIME[ext] || 'application/octet-stream';
+        var etag = '"' + stats.mtime.getTime().toString(16) + '-' + stats.size.toString(16) + '"';
+        var isJson = ext === '.json';
+
+        if (req.headers['if-none-match'] === etag) {
+            res.writeHead(304);
+            res.end();
+            return;
+        }
 
         if (req.headers.range) {
             var range = req.headers.range;
@@ -1333,18 +1341,21 @@ function serveStatic(req, res, filePath) {
                 'Content-Range': 'bytes ' + start + '-' + end + '/' + stats.size,
                 'Accept-Ranges': 'bytes',
                 'Content-Length': chunkSize,
-                'Content-Type': contentType
+                'Content-Type': contentType,
+                'ETag': etag
             });
 
             var stream = fs.createReadStream(filePath, { start: start, end: end });
             stream.pipe(res);
         } else {
-            res.writeHead(200, {
+            var headers = {
                 'Content-Length': stats.size,
                 'Content-Type': contentType,
                 'Accept-Ranges': 'bytes',
-                'Cache-Control': 'no-cache, must-revalidate'
-            });
+                'ETag': etag,
+                'Cache-Control': isJson ? 'no-store' : 'no-cache, must-revalidate'
+            };
+            res.writeHead(200, headers);
             fs.createReadStream(filePath).pipe(res);
         }
     });
