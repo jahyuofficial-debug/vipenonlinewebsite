@@ -385,3 +385,39 @@ setUserData: function(key, data) {
 4. 登出时是否保留用户数据？（只清除 sessionStorage，不清除 localStorage）
 5. 切换账号时是否正确加载新用户数据？
 6. 是否添加了旧数据迁移逻辑（如从旧 key 格式迁移）？
+
+---
+
+## 九、Vercel 部署规范
+
+**核心原则：一切以网站上线为主。部署目标平台为 Vercel。**
+
+### 9.1 项目即站点
+
+- 本项目根目录即为 Vercel 部署的站点根目录，所有入口 HTML 文件（`index.html`、`signin.html` 等）必须位于项目根目录。
+- 静态资源（`css/`、`js/`、`images/` 等目录）保持现有层级，**不要移动到 `/public` 或其他子目录**。
+- 新增的页面 HTML 文件直接放在项目根目录，与现有页面保持一致。
+
+### 9.2 vercel.json 配置
+
+项目根目录下的 [vercel.json](file:///d:/设计文档/TareProcess/Vipen2.0/vercel.json) 为 Vercel 部署配置文件，包含路由重写和 CORS 头设置。新增路由时同步更新该文件。
+
+### 9.3 上线前检查清单
+
+每次修改代码后，必须确保网站可正常上线：
+
+1. **纯静态资源**：本项目的所有资源（HTML、CSS、JS、图片、JSON）必须是纯静态文件，不依赖任何服务端运行时（`server.js` 仅用于本地开发预览，不上线）。
+2. **无外部框架依赖**：所有页面必须保持纯 Vanilla JS，不引入任何第三方前端框架/库。
+3. **路径兼容**：所有 `fetch()`、`<img src>`、`<link href>`、`<script src>` 的路径使用相对路径（不以 `/` 开头），确保在 Vercel 任意域名下正常工作。
+4. **大小写敏感**：Vercel 部署环境（Linux）区分文件名大小写，所有文件引用路径必须与实际文件名大小写完全一致。
+5. **禁止本地绝对路径**：代码中不得出现 `D:\`、`C:\`、`localhost:3000` 等仅本地有效的路径。
+
+### 9.4 vercel.json 软路由规则
+
+Vercel 支持通过 `rewrites` 实现 SPA 风格的 URL 美化（无需 HTML 文件扩展名）：
+
+```
+/manager  →  /manager.html
+```
+
+新增需要美化 URL 的页面时，在 [vercel.json](file:///d:/设计文档/TareProcess/Vipen2.0/vercel.json) 的 `rewrites` 中添加对应规则。
