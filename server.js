@@ -4,7 +4,7 @@ var fs = require('fs');
 var path = require('path');
 var url = require('url');
 var crypto = require('crypto');
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcryptjs');
 var VerificationEmail = require('./emails/VerificationEmail');
 var canvas;
 try { canvas = require('canvas'); } catch (e) { canvas = null; }

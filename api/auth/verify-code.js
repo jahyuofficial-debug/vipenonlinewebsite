@@ -1,4 +1,4 @@
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcryptjs');
 
 var helpers = require('../../lib/auth-helpers');
 var generateToken = require('../../lib/secret').generateToken;

@@ -1,5 +1,5 @@
 var crypto = require('crypto');
-var bcrypt = require('bcrypt');
+var bcrypt = require('bcryptjs');
 
 var helpers = require('../../lib/auth-helpers');
 var getAuthSecret = require('../../lib/secret').getAuthSecret;

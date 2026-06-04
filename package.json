@@ -12,8 +12,10 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "bcrypt": "^6.0.0",
-    "canvas": "^3.2.3",
+    "bcryptjs": "^3.0.2",
     "xlsx": "^0.18.5"
+  },
+  "optionalDependencies": {
+    "canvas": "^3.2.3"
   }
 }
