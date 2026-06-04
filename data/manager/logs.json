@@ -1,5 +1,12 @@
 [
   {
+    "id": "log1780531937099",
+    "action": "admin_login",
+    "admin": "Jah72",
+    "detail": "ManagerGo admin logged in via PIN",
+    "timestamp": "2026-06-04T00:12:17.099Z"
+  },
+  {
     "id": "log1780528736216",
     "action": "admin_login",
     "admin": "riverjia9527",

@@ -4,6 +4,7 @@ var fs = require('fs');
 var path = require('path');
 var url = require('url');
 var crypto = require('crypto');
+var bcrypt = require('bcrypt');
 var VerificationEmail = require('./emails/VerificationEmail');
 var canvas;
 try { canvas = require('canvas'); } catch (e) { canvas = null; }
@@ -15,6 +16,7 @@ var MANAGER_DATA_DIR = path.join(ROOT, 'data', 'manager');
 var MANAGER_SESSIONS = {};
 var MANAGER_SESSION_TTL = 30 * 60 * 1000;
 
+var BCRYPT_ROUNDS = 12;
 
 var RESEND_API_KEY = process.env.RESEND_API_KEY || '';
 var RESEND_KEY_PATH = 'D:\\设计文档\\Web素材\\APIkeys\\ResendAPI.txt';
@@ -23,6 +25,8 @@ var CODE_EXPIRE_MS = 5 * 60 * 1000;
 var MANAGERGO_EMAILS = ['riverjia9527@gmail.com'];
 var getAuthSecret = require('./lib/secret').getAuthSecret;
 var getOldAuthSecret = require('./lib/secret').getOldAuthSecret;
+var generateToken = require('./lib/secret').generateToken;
+var verifyToken = require('./lib/secret').verifyToken;
 
 if (!RESEND_API_KEY) {
     try {
@@ -46,15 +50,22 @@ if (!RESEND_API_KEY) {
 
 var codeStore = {};
 
+var loginAttempts = {};
 
+function checkRateLimit(key) {
+    var now = Date.now();
+    var entry = loginAttempts[key];
+    if (!entry || now - entry.windowStart > 60000) {
+        loginAttempts[key] = { count: 1, windowStart: now };
+        return true;
+    }
+    if (entry.count >= 10) return false;
+    entry.count++;
+    return true;
+}
 
 function generateCode() {
     return String(Math.floor(100000 + Math.random() * 900000));
-}
-
-function generateToken(email) {
-    var payload = email + '|' + Date.now();
-    return Buffer.from(payload).toString('base64');
 }
 
 function sendEmailViaResend(toEmail, html, callback) {
@@ -217,7 +228,7 @@ function handleAPIRoute(req, res, apiPath) {
         res.writeHead(204, {
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type'
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
         });
         res.end();
         return;
@@ -247,6 +258,7 @@ function handleAPIRoute(req, res, apiPath) {
         } else if (apiPath === '/api/auth/login') {
             handleLogin(res, body);
         } else if (apiPath === '/api/profile/save') {
+            if (!verifyAuth(req, res)) return;
             handleSaveProfile(res, body);
         } else if (apiPath.indexOf('/api/manager/') === 0) {
             handleManagerAPI(req, res, apiPath, body);
@@ -254,6 +266,18 @@ function handleAPIRoute(req, res, apiPath) {
             sendJSON(res, 404, { success: false, error: 'Unknown API endpoint' });
         }
     });
+}
+
+function verifyAuth(req, res) {
+    var authHeader = req.headers['authorization'] || '';
+    var token = authHeader.indexOf('Bearer ') === 0 ? authHeader.slice(7) : '';
+    var payload = verifyToken(token);
+    if (!payload) {
+        sendJSON(res, 401, { success: false, error: 'Unauthorized' });
+        return false;
+    }
+    req.auth = payload;
+    return true;
 }
 
 function handleSendCode(res, body) {
@@ -307,53 +331,99 @@ function handleLogin(res, body) {
         return;
     }
 
+    if (!checkRateLimit('login_' + loginField.toLowerCase())) {
+        sendJSON(res, 429, { success: false, error: 'Too many attempts. Please try again later.' });
+        return;
+    }
+
     readManagerJSON('users.json', function(err, users) {
         if (err) users = [];
 
-        function tryMatch(email) {
-            var newHash = crypto.createHmac('sha256', getAuthSecret()).update(email.toLowerCase() + '|' + password).digest('hex');
+        function verifyPassword(storedHash, callback) {
+            if (storedHash.indexOf('$2') === 0) {
+                bcrypt.compare(password, storedHash, callback);
+                return;
+            }
+            var newHash = crypto.createHmac('sha256', getAuthSecret()).update(loginField.toLowerCase() + '|' + password).digest('hex');
             var oldSecret = getOldAuthSecret();
-            for (var i = 0; i < users.length; i++) {
-                if (users[i].email.toLowerCase() !== email.toLowerCase()) continue;
-                if (users[i].passwordHash === newHash) return users[i];
-                if (oldSecret) {
-                    var oldHash = crypto.createHmac('sha256', oldSecret).update(email.toLowerCase() + '|' + password).digest('hex');
-                    if (users[i].passwordHash === oldHash) {
-                        users[i].passwordHash = newHash;
-                        return users[i];
-                    }
+            if (storedHash === newHash) {
+                callback(null, true);
+                return;
+            }
+            if (oldSecret) {
+                var oldHash = crypto.createHmac('sha256', oldSecret).update(loginField.toLowerCase() + '|' + password).digest('hex');
+                if (storedHash === oldHash) {
+                    callback(null, true);
+                    return;
                 }
             }
-            return null;
+            callback(null, false);
         }
 
-        var matchedUser = tryMatch(loginField);
-
-        if (!matchedUser) {
+        function findAndVerify(email, callback) {
+            var user = null;
             for (var i = 0; i < users.length; i++) {
-                if (users[i].username.toLowerCase() === loginField.toLowerCase()) {
-                    matchedUser = tryMatch(users[i].email);
+                if (users[i].email.toLowerCase() === email.toLowerCase()) {
+                    user = users[i];
                     break;
                 }
             }
-        }
-
-        if (matchedUser) {
-            matchedUser.lastLogin = new Date().toISOString();
-            writeManagerJSON('users.json', users, function() {});
-
-            var token = generateToken(matchedUser.email);
-            sendJSON(res, 200, {
-                success: true,
-                token: token,
-                username: matchedUser.username,
-                email: matchedUser.email,
-                role: isManagerGoEmail(matchedUser.email) ? 'ManagerGo' : (matchedUser.role || '')
+            if (!user) { callback(null); return; }
+            verifyPassword(user.passwordHash, function(err, match) {
+                if (match) {
+                    if (user.passwordHash.indexOf('$2') !== 0) {
+                        bcrypt.hash(password, BCRYPT_ROUNDS, function(err2, bcryptHash) {
+                            if (!err2) user.passwordHash = bcryptHash;
+                            callback(user);
+                        });
+                        return;
+                    }
+                    callback(user);
+                } else {
+                    callback(null);
+                }
             });
-            return;
         }
 
-        sendJSON(res, 401, { success: false, error: 'Invalid email/username or password' });
+        findAndVerify(loginField, function(matchedUser) {
+            if (matchedUser) {
+                matchedUser.lastLogin = new Date().toISOString();
+                writeManagerJSON('users.json', users, function() {});
+                var token = generateToken(matchedUser.email, matchedUser.username, matchedUser.role);
+                sendJSON(res, 200, {
+                    success: true,
+                    token: token,
+                    username: matchedUser.username,
+                    email: matchedUser.email,
+                    role: isManagerGoEmail(matchedUser.email) ? 'ManagerGo' : (matchedUser.role || '')
+                });
+                return;
+            }
+
+            for (var i = 0; i < users.length; i++) {
+                if (users[i].username.toLowerCase() === loginField.toLowerCase()) {
+                    findAndVerify(users[i].email, function(userByUsername) {
+                        if (userByUsername) {
+                            userByUsername.lastLogin = new Date().toISOString();
+                            writeManagerJSON('users.json', users, function() {});
+                            var token = generateToken(userByUsername.email, userByUsername.username, userByUsername.role);
+                            sendJSON(res, 200, {
+                                success: true,
+                                token: token,
+                                username: userByUsername.username,
+                                email: userByUsername.email,
+                                role: isManagerGoEmail(userByUsername.email) ? 'ManagerGo' : (userByUsername.role || '')
+                            });
+                        } else {
+                            sendJSON(res, 401, { success: false, error: 'Invalid email/username or password' });
+                        }
+                    });
+                    return;
+                }
+            }
+
+            sendJSON(res, 401, { success: false, error: 'Invalid email/username or password' });
+        });
     });
 }
 
@@ -407,46 +477,51 @@ function handleVerifyCode(res, body) {
     var password = body.password || '';
 
     if (password) {
-        var hmacPwd = crypto.createHmac('sha256', getAuthSecret());
-        hmacPwd.update(email + '|' + password);
-        var passwordHash = hmacPwd.digest('hex');
+        bcrypt.hash(password, BCRYPT_ROUNDS, function(err, passwordHash) {
+            if (err) {
+                sendJSON(res, 500, { success: false, error: 'Server error' });
+                return;
+            }
 
-        readManagerJSON('users.json', function(err, users) {
-            if (err) users = [];
+            readManagerJSON('users.json', function(readErr, users) {
+                if (readErr) users = [];
 
-            var existingIdx = -1;
-            for (var i = 0; i < users.length; i++) {
-                if (users[i].email.toLowerCase() === email.toLowerCase()) {
-                    existingIdx = i;
-                    break;
+                var existingIdx = -1;
+                for (var i = 0; i < users.length; i++) {
+                    if (users[i].email.toLowerCase() === email.toLowerCase()) {
+                        existingIdx = i;
+                        break;
+                    }
                 }
-            }
 
-            if (existingIdx >= 0) {
-                users[existingIdx].passwordHash = passwordHash;
-                if (body.username) users[existingIdx].username = body.username;
-                users[existingIdx].lastLogin = new Date().toISOString();
-            } else {
-                users.push({
-                    id: 'u' + String(users.length + 1).padStart(3, '0'),
-                    username: username,
-                    email: email,
-                    role: isManagerGoEmail(email) ? 'ManagerGo' : 'Viper',
-                    passwordHash: passwordHash,
-                    status: 'active',
-                    createdAt: new Date().toISOString(),
-                    lastLogin: new Date().toISOString()
-                });
-            }
+                if (existingIdx >= 0) {
+                    users[existingIdx].passwordHash = passwordHash;
+                    if (body.username) users[existingIdx].username = body.username;
+                    users[existingIdx].lastLogin = new Date().toISOString();
+                } else {
+                    users.push({
+                        id: 'u' + String(users.length + 1).padStart(3, '0'),
+                        username: username,
+                        email: email,
+                        role: isManagerGoEmail(email) ? 'ManagerGo' : 'Viper',
+                        passwordHash: passwordHash,
+                        status: 'active',
+                        createdAt: new Date().toISOString(),
+                        lastLogin: new Date().toISOString()
+                    });
+                }
 
-            writeManagerJSON('users.json', users, function() {
-                var token = generateToken(email);
-                sendJSON(res, 200, {
-                    success: true,
-                    token: token,
-                    username: username,
-                    email: email,
-                    role: isManagerGoEmail(email) ? 'ManagerGo' : (existingIdx >= 0 ? users[existingIdx].role : 'Viper')
+                writeManagerJSON('users.json', users, function() {
+                    var existing = existingIdx >= 0 ? users[existingIdx] : null;
+                    var role = existing ? existing.role : (isManagerGoEmail(email) ? 'ManagerGo' : 'Viper');
+                    var token = generateToken(email, username, role);
+                    sendJSON(res, 200, {
+                        success: true,
+                        token: token,
+                        username: username,
+                        email: email,
+                        role: role
+                    });
                 });
             });
         });
@@ -464,7 +539,7 @@ function handleVerifyCode(res, body) {
                 existingUser.lastLogin = new Date().toISOString();
                 writeManagerJSON('users.json', users, function() {});
             }
-            var token = generateToken(email);
+            var token = generateToken(email, existingUser ? existingUser.username : username, existingUser ? existingUser.role : 'Viper');
             sendJSON(res, 200, {
                 success: true,
                 token: token,
@@ -542,6 +617,10 @@ function verifyManagerSession(body, callback) {
 function handleManagerAPI(req, res, apiPath, body) {
     if (apiPath === '/api/manager/verify-pin') {
         handleManagerVerifyPin(res, body);
+        return;
+    }
+    if (apiPath === '/api/manager/verify-design-pin') {
+        handleManagerVerifyDesignPin(res, body);
         return;
     }
     if (apiPath === '/api/manager/set-pin') {
@@ -687,6 +766,35 @@ function createAndSendSession(res, user) {
         sessionToken: sessionToken,
         username: user.username,
         email: user.email
+    });
+}
+
+function handleManagerVerifyDesignPin(res, body) {
+    var pin = body.pin || '';
+
+    if (!pin) {
+        sendJSON(res, 400, { success: false, error: 'PIN is required' });
+        return;
+    }
+
+    if (pin.length !== 6 || !/^\d{6}$/.test(pin)) {
+        sendJSON(res, 400, { success: false, error: 'PIN must be 6 digits' });
+        return;
+    }
+
+    var newHash = hashPIN(pin);
+
+    readManagerJSON('design-pin.json', function(err, designPin) {
+        if (err || !designPin) {
+            sendJSON(res, 500, { success: false, error: 'Server error' });
+            return;
+        }
+
+        if (designPin.pin_hash === newHash) {
+            sendJSON(res, 200, { success: true });
+        } else {
+            sendJSON(res, 401, { success: false, error: 'Invalid PIN' });
+        }
     });
 }
 

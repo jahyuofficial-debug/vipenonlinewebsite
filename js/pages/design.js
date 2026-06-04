@@ -389,12 +389,10 @@ function bindDesignGuard() {
                 shakeInput(input);
                 return;
             }
-            var auth = Utils.getAuth();
-            var email = auth ? (auth.email || '') : '';
-            fetch('/api/manager/verify-pin', {
+            fetch('/api/manager/verify-design-pin', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pin: val, email: email })
+                body: JSON.stringify({ pin: val })
             }).then(function(r) { return r.json(); }).then(function(res) {
                 if (res.success) {
                     designGuardPin = val;

@@ -41,6 +41,15 @@ var Utils = {
     selectAll: function(sel, parent) {
         return (parent || document).querySelectorAll(sel);
     },
+    authFetch: function(url, options) {
+        var auth = this.getAuth();
+        var opts = options || {};
+        opts.headers = opts.headers || {};
+        if (auth && auth.token) {
+            opts.headers['Authorization'] = 'Bearer ' + auth.token;
+        }
+        return fetch(url, opts);
+    },
     setAuth: function(user) {
         sessionStorage.setItem('vipen_auth', JSON.stringify({
             username: user.username,

@@ -6,3 +6,4 @@ node_modules/
 # 敏感用户数据 - 包含真实邮箱和密码哈希
 data/manager/users.json
 data/manager/pins.json
+.trae/documents/
