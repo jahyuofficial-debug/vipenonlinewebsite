@@ -2461,6 +2461,8 @@ var ManagerGo = (function() {
             audio: ''
         };
 
+        var currentAudio = tape.audio || '';
+
         var overlay = document.createElement('div');
         overlay.className = 'manager-modal-overlay';
         overlay.innerHTML =
@@ -2476,6 +2478,16 @@ var ManagerGo = (function() {
             '<input type="text" class="manager-form-input" id="discArtist" value="' + tape.artist + '">' +
             '</div>' +
             createImageUploadField('disc', tape.cover, 'Cover Image', 'discCover') +
+            '<div class="manager-form-group">' +
+            '<label class="manager-form-label">Audio File</label>' +
+            '<div class="manager-design-cover-zone" id="discAudioZone" style="height:1rem;border-style:dashed;">' +
+            '<input type="file" class="manager-design-file-input" id="discAudioInput" accept="audio/*">' +
+            '<div class="manager-design-cover-placeholder">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>' +
+            '<span id="discAudioLabel">' + (currentAudio ? 'Audio file selected' : 'Click to upload audio') + '</span>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
             '<div class="manager-modal-actions">' +
             '<button class="manager-btn manager-btn-outline" id="modalCancelBtn">Cancel</button>' +
             '<button class="manager-btn manager-btn-primary" id="modalSaveBtn">Save</button>' +
@@ -2485,6 +2497,36 @@ var ManagerGo = (function() {
         document.body.appendChild(overlay);
 
         bindImageUploadField(overlay, 'discCover');
+
+        var audioZone = overlay.querySelector('#discAudioZone');
+        var audioInput = overlay.querySelector('#discAudioInput');
+        var audioLabel = overlay.querySelector('#discAudioLabel');
+        if (audioZone && audioInput) {
+            audioZone.addEventListener('click', function() { audioInput.click(); });
+            audioZone.addEventListener('dragover', function(e) { e.preventDefault(); audioZone.classList.add('dragover'); });
+            audioZone.addEventListener('dragleave', function() { audioZone.classList.remove('dragover'); });
+            audioZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                audioZone.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) handleDiscAudioFile(e.dataTransfer.files[0]);
+            });
+            audioInput.addEventListener('change', function() {
+                if (this.files.length > 0) handleDiscAudioFile(this.files[0]);
+            });
+        }
+
+        function handleDiscAudioFile(file) {
+            if (!file.type.startsWith('audio/')) {
+                showToast('Only audio files are supported', true);
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                currentAudio = e.target.result;
+                if (audioLabel) audioLabel.textContent = file.name;
+            };
+            reader.readAsDataURL(file);
+        }
 
         function closeModal() { overlay.remove(); }
         overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
@@ -2497,7 +2539,7 @@ var ManagerGo = (function() {
                 artist: overlay.querySelector('#discArtist').value.trim() || 'Vipen Music',
                 time: '0:00',
                 cover: getImageUploadValue(overlay, 'discCover'),
-                audio: ''
+                audio: currentAudio
             };
             if (isEdit) {
                 discData.tapes[editIndex] = updated;
