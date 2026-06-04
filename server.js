@@ -323,7 +323,7 @@ function isManagerGoEmail(email) {
 }
 
 function handleLogin(res, body) {
-    var loginField = (body.email || '').trim();
+    var loginField = (body.email || body.username || '').trim();
     var password = body.password || '';
 
     if (!loginField || !password) {
@@ -340,6 +340,10 @@ function handleLogin(res, body) {
         if (err) users = [];
 
         function verifyPassword(storedHash, callback) {
+            if (!storedHash) {
+                callback(null, false);
+                return;
+            }
             if (storedHash.indexOf('$2') === 0) {
                 bcrypt.compare(password, storedHash, callback);
                 return;
