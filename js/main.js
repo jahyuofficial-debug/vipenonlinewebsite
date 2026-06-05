@@ -61,6 +61,19 @@ BannerPage.initBgVideo();
 
         if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
 
+        var mgrDisc = localStorage.getItem('vipen_mgr_disc_tapes');
+        if (mgrDisc) { try { discData.tapes = JSON.parse(mgrDisc); } catch (e) {} }
+
+        var mgrBanner = localStorage.getItem('vipen_mgr_home_banner');
+        if (mgrBanner) {
+            try {
+                var parsedBanner = JSON.parse(mgrBanner);
+                if (parsedBanner && parsedBanner.groups) {
+                    bannerData.homeGroups = parsedBanner.groups;
+                }
+            } catch (e) {}
+        }
+
         Object.assign(BannerPage.bannerData, bannerData);
         window.actionFeed = actionData;
         window.discData = JSON.parse(JSON.stringify(discData));
@@ -82,6 +95,20 @@ BannerPage.initBgVideo();
             var mgrFresh = localStorage.getItem('vipen_mgr_fresh_heroItems');
             if (mgrFresh) { try { freshHeroItems = JSON.parse(mgrFresh); } catch (e) {} }
             if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
+
+            var mgrDiscFallback = localStorage.getItem('vipen_mgr_disc_tapes');
+            if (mgrDiscFallback) { try { d.disc.tapes = JSON.parse(mgrDiscFallback); } catch (e) {} }
+
+            var mgrBannerFallback = localStorage.getItem('vipen_mgr_home_banner');
+            if (mgrBannerFallback) {
+                try {
+                    var parsedBannerFallback = JSON.parse(mgrBannerFallback);
+                    if (parsedBannerFallback && parsedBannerFallback.groups) {
+                        d.banner.homeGroups = parsedBannerFallback.groups;
+                    }
+                } catch (e) {}
+            }
+
             Object.assign(BannerPage.bannerData, d.banner);
             window.actionFeed = d.action;
             window.discData = JSON.parse(JSON.stringify(d.disc));

@@ -2348,6 +2348,8 @@ var ManagerGo = (function() {
     }
 
     function saveDiscToServer(callback) {
+        var payload = { tapes: discData.tapes, playMode: 'sequence', currentTapeIndex: 0 };
+        saveToLocalStorage(STORAGE_KEYS.discTapes, discData.tapes);
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/api/manager/disc-save', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
@@ -2356,7 +2358,7 @@ var ManagerGo = (function() {
             catch(e) { callback('Parse error'); }
         };
         xhr.onerror = function() { callback('Network error'); };
-        xhr.send(JSON.stringify({ data: { tapes: discData.tapes, playMode: 'sequence', currentTapeIndex: 0 }, sessionToken: sessionToken }));
+        xhr.send(JSON.stringify({ data: payload, sessionToken: sessionToken }));
     }
 
     function renderDiscManager(container) {
@@ -2371,20 +2373,27 @@ var ManagerGo = (function() {
             '</div>' +
             '<div id="discManagerContent"><div style="text-align:center;padding:.6rem;color:rgba(255,255,255,.25);">Loading...</div></div>';
 
-        fetch('data/disc.json')
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                var dc = document.getElementById('discManagerContent');
-                if (!dc) return;
-                discData.tapes = data.tapes || [];
-                renderDiscTracks(dc);
-            })
-            .catch(function() {
-                var dc = document.getElementById('discManagerContent');
-                if (!dc) return;
-                discData.tapes = [];
-                renderDiscTracks(dc);
-            });
+        var savedDiscTapes = loadFromLocalStorage(STORAGE_KEYS.discTapes);
+        if (savedDiscTapes) {
+            discData.tapes = savedDiscTapes;
+            var dc = document.getElementById('discManagerContent');
+            if (dc) renderDiscTracks(dc);
+        } else {
+            fetch('data/disc.json')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    var dc = document.getElementById('discManagerContent');
+                    if (!dc) return;
+                    discData.tapes = data.tapes || [];
+                    renderDiscTracks(dc);
+                })
+                .catch(function() {
+                    var dc = document.getElementById('discManagerContent');
+                    if (!dc) return;
+                    discData.tapes = [];
+                    renderDiscTracks(dc);
+                });
+        }
 
         document.getElementById('discAddBtn').addEventListener('click', function() {
             openDiscTrackModal(null);
