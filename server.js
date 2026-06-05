@@ -1236,22 +1236,11 @@ function parseMultipartUpload(req, callback) {
     }
     boundary = '--' + match[1];
 
-    var totalSize = 0;
-    var MAX_SIZE = 150 * 1024 * 1024;
     var chunks = [];
     req.on('data', function(chunk) {
-        totalSize += chunk.length;
-        if (totalSize > MAX_SIZE) {
-            req.destroy();
-            return;
-        }
         chunks.push(chunk);
     });
     req.on('end', function() {
-        if (totalSize > MAX_SIZE) {
-            callback(new Error('File too large (max 150MB)'));
-            return;
-        }
         var buffer = Buffer.concat(chunks);
         var str = buffer.toString('binary');
         var parts = str.split(boundary);
