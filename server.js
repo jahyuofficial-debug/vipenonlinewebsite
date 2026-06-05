@@ -245,6 +245,14 @@ function handleAPIRoute(req, res, apiPath) {
         return;
     }
 
+    var contentType = req.headers['content-type'] || '';
+    var isMultipart = contentType.indexOf('multipart/form-data') !== -1;
+
+    if (isMultipart && apiPath.indexOf('/api/manager/') === 0) {
+        handleManagerAPI(req, res, apiPath, null);
+        return;
+    }
+
     parseBody(req, function(err, body) {
         if (err) {
             sendJSON(res, 400, { success: false, error: err.message });
