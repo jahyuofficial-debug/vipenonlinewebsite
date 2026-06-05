@@ -2543,16 +2543,24 @@ var ManagerGo = (function() {
                 showToast('Only audio files are supported', true);
                 return;
             }
+            if (file.size > CONFIG.DISC_AUDIO_MAX_SIZE) {
+                showToast('Audio too large (max 50MB)', true);
+                return;
+            }
             currentAudioFile = file;
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                currentAudio = e.target.result;
-                if (audioLabel) audioLabel.textContent = file.name;
-            };
-            reader.readAsDataURL(file);
+            if (currentAudio && currentAudio.indexOf('blob:') === 0) {
+                URL.revokeObjectURL(currentAudio);
+            }
+            currentAudio = URL.createObjectURL(file);
+            if (audioLabel) audioLabel.textContent = file.name;
         }
 
-        function closeModal() { overlay.remove(); }
+        function closeModal() {
+            if (currentAudio && currentAudio.indexOf('blob:') === 0) {
+                URL.revokeObjectURL(currentAudio);
+            }
+            overlay.remove();
+        }
         overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
         overlay.querySelector('#modalCloseBtn').addEventListener('click', closeModal);
         overlay.querySelector('#modalCancelBtn').addEventListener('click', closeModal);
@@ -2787,6 +2795,9 @@ var ManagerGo = (function() {
         function closeDetail() {
             detailAudio.pause();
             if (detailProgressInterval) clearInterval(detailProgressInterval);
+            if (currentAudio && currentAudio.indexOf('blob:') === 0) {
+                URL.revokeObjectURL(currentAudio);
+            }
             overlay.remove();
         }
 
@@ -2915,17 +2926,19 @@ var ManagerGo = (function() {
                 showToast('Only audio files are supported', true);
                 return;
             }
+            if (file.size > CONFIG.DISC_AUDIO_MAX_SIZE) {
+                showToast('Audio too large (max 50MB)', true);
+                return;
+            }
             currentAudioFile = file;
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var dataUrl = e.target.result;
-                currentAudio = dataUrl;
-                detailAudio.src = dataUrl;
-                detailAudio.load();
-                isPlaying = false;
-                syncDetailPlayUI();
-            };
-            reader.readAsDataURL(file);
+            if (currentAudio && currentAudio.indexOf('blob:') === 0) {
+                URL.revokeObjectURL(currentAudio);
+            }
+            currentAudio = URL.createObjectURL(file);
+            detailAudio.src = currentAudio;
+            detailAudio.load();
+            isPlaying = false;
+            syncDetailPlayUI();
         }
 
         overlay.querySelector('#detailSave').addEventListener('click', function() {

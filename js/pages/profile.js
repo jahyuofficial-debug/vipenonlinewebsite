@@ -393,6 +393,10 @@ var ProfilePage = (function() {
         }
 
         function saveFreshDraft() {
+            if (!Utils.isLoggedIn()) {
+                showToast('Please sign in first', true);
+                return;
+            }
             var title = freshEditorTitleInput ? freshEditorTitleInput.value.trim() : '';
             var body = freshEditorBody ? freshEditorBody.innerHTML.trim() : '';
             if (!title && !body) {
@@ -414,6 +418,10 @@ var ProfilePage = (function() {
         }
 
         function publishFresh() {
+            if (!Utils.isLoggedIn()) {
+                showToast('Please sign in first', true);
+                return;
+            }
             var title = freshEditorTitleInput ? freshEditorTitleInput.value.trim() : '';
             var body = freshEditorBody ? freshEditorBody.innerHTML.trim() : '';
             if (!title && !body) {
@@ -587,6 +595,10 @@ var ProfilePage = (function() {
         }
 
         function saveActionDraft() {
+            if (!Utils.isLoggedIn()) {
+                showToast('Please sign in first', true);
+                return;
+            }
             var text = actionEditorTextarea ? actionEditorTextarea.value.trim() : '';
             if (!text) {
                 showToast('Cannot save empty draft', true);
@@ -606,6 +618,10 @@ var ProfilePage = (function() {
         }
 
         function publishAction() {
+            if (!Utils.isLoggedIn()) {
+                showToast('Please sign in first', true);
+                return;
+            }
             var text = actionEditorTextarea ? actionEditorTextarea.value.trim() : '';
             if (!text) {
                 showToast('Please enter content', true);
@@ -890,6 +906,10 @@ var ProfilePage = (function() {
             var newPublish = publishBtn.cloneNode(true);
             publishBtn.parentNode.replaceChild(newPublish, publishBtn);
             newPublish.addEventListener('click', function() {
+                if (!Utils.isLoggedIn()) {
+                    showToast('Please sign in first', true);
+                    return;
+                }
                 var title = titleInput ? titleInput.value.trim() : '';
                 var content = body ? body.innerHTML.trim() : '';
                 if (!title && !content) {
@@ -1684,6 +1704,10 @@ var ProfilePage = (function() {
 document.addEventListener('DOMContentLoaded', function() {
     var profileSection = document.getElementById('page-profile');
     if (!profileSection) return;
+    if (!Utils.isLoggedIn()) {
+        window.location.href = 'signin.html';
+        return;
+    }
     if (typeof ProfilePage !== 'undefined' && ProfilePage.bindAll) {
         fetch('data/profile.json')
             .then(function(r) { return r.json(); })
