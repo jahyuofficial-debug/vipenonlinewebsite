@@ -643,6 +643,14 @@ function handleManagerAPI(req, res, apiPath, body) {
         handleManagerCheckSession(res, body);
         return;
     }
+    if (apiPath === '/api/manager/upload') {
+        handleManagerUpload(req, res, body);
+        return;
+    }
+    if (apiPath === '/api/manager/disc-upload') {
+        handleManagerDiscUpload(req, res, body);
+        return;
+    }
 
     verifyManagerSession(body, function(err, session) {
         if (err) {
@@ -669,14 +677,10 @@ function handleManagerAPI(req, res, apiPath, body) {
             handleManagerSettings(res, body, session);
         } else if (apiPath === '/api/manager/logs') {
             handleManagerLogs(res, session);
-        } else if (apiPath === '/api/manager/upload') {
-            handleManagerUpload(req, res, session);
         } else if (apiPath === '/api/manager/home-banner-save') {
             handleManagerHomeBannerSave(res, body, session);
         } else if (apiPath === '/api/manager/disc-save') {
             handleManagerDiscSave(res, body, session);
-        } else if (apiPath === '/api/manager/disc-upload') {
-            handleManagerDiscUpload(req, res, session);
         } else {
             sendJSON(res, 404, { success: false, error: 'Unknown manager endpoint' });
         }
@@ -1220,12 +1224,12 @@ function handleManagerLogs(res, session) {
     });
 }
 
-function handleManagerUpload(req, res, session) {
+function parseMultipartUpload(req, callback) {
     var boundary = '';
     var contentType = req.headers['content-type'] || '';
     var match = contentType.match(/boundary=(.+)$/);
     if (!match) {
-        sendJSON(res, 400, { success: false, error: 'No boundary found' });
+        callback(new Error('No boundary found'));
         return;
     }
     boundary = '--' + match[1];
@@ -1243,14 +1247,14 @@ function handleManagerUpload(req, res, session) {
     });
     req.on('end', function() {
         if (totalSize > MAX_SIZE) {
-            sendJSON(res, 413, { success: false, error: 'File too large (max 150MB)' });
+            callback(new Error('File too large (max 150MB)'));
             return;
         }
         var buffer = Buffer.concat(chunks);
         var str = buffer.toString('binary');
         var parts = str.split(boundary);
-        var uploadedFiles = [];
-        var dest = 'images/uploads';
+        var fields = {};
+        var files = [];
 
         for (var i = 0; i < parts.length; i++) {
             var part = parts[i];
@@ -1270,31 +1274,56 @@ function handleManagerUpload(req, res, session) {
             var bodyStr = part.substring(bodyStart, bodyEnd);
 
             if (filenameMatch) {
-                var filename = filenameMatch[1].replace(/[\\/:*?"<>|]/g, '_');
-                var destDir = path.join(ROOT, dest);
-                fs.mkdirSync(destDir, { recursive: true });
-                var uniqueName = Date.now() + '_' + filename;
-                var destPath = path.join(destDir, uniqueName);
-                fs.writeFileSync(destPath, Buffer.from(bodyStr, 'binary'), 'binary');
-                var relPath = path.relative(ROOT, destPath).replace(/\\/g, '/');
-                uploadedFiles.push({ name: filename, path: relPath });
+                files.push({
+                    name: nameMatch[1],
+                    filename: filenameMatch[1].replace(/[\\/:*?"<>|]/g, '_'),
+                    body: bodyStr
+                });
             } else {
-                var value = bodyStr.trim();
-                if (nameMatch[1] === 'dest') {
-                    var safeDest = value.replace(/\.\./g, '').replace(/\\/g, '/').replace(/^\/+/, '');
-                    if (safeDest && safeDest.indexOf('/') === -1) {
-                        dest = safeDest;
-                    } else {
-                        dest = 'images/uploads';
-                    }
-                }
+                fields[nameMatch[1]] = bodyStr.trim();
             }
         }
 
-        if (uploadedFiles.length > 0) {
-            addManagerLog('media_upload', session.username, 'Uploaded ' + uploadedFiles.length + ' file(s)');
+        callback(null, fields, files);
+    });
+}
+
+function handleManagerUpload(req, res, body) {
+    parseMultipartUpload(req, function(err, fields, files) {
+        if (err) {
+            sendJSON(res, 400, { success: false, error: err.message });
+            return;
         }
-        sendJSON(res, 200, { success: true, files: uploadedFiles });
+
+        verifyManagerSession(fields, function(sessErr, session) {
+            if (sessErr) {
+                sendJSON(res, 401, { success: false, error: sessErr });
+                return;
+            }
+
+            var uploadedFiles = [];
+            var dest = fields.dest || 'images/uploads';
+            var safeDest = dest.replace(/\.\./g, '').replace(/\\/g, '/').replace(/^\/+/, '');
+            if (!safeDest || safeDest.indexOf('/') !== -1) {
+                safeDest = 'images/uploads';
+            }
+
+            for (var i = 0; i < files.length; i++) {
+                var f = files[i];
+                var destDir = path.join(ROOT, safeDest);
+                fs.mkdirSync(destDir, { recursive: true });
+                var uniqueName = Date.now() + '_' + f.filename;
+                var destPath = path.join(destDir, uniqueName);
+                fs.writeFileSync(destPath, Buffer.from(f.body, 'binary'), 'binary');
+                var relPath = path.relative(ROOT, destPath).replace(/\\/g, '/');
+                uploadedFiles.push({ name: f.filename, path: relPath });
+            }
+
+            if (uploadedFiles.length > 0) {
+                addManagerLog('media_upload', session.username, 'Uploaded ' + uploadedFiles.length + ' file(s)');
+            }
+            sendJSON(res, 200, { success: true, files: uploadedFiles });
+        });
     });
 }
 
@@ -1315,75 +1344,38 @@ function handleManagerDiscSave(res, body, session) {
     });
 }
 
-function handleManagerDiscUpload(req, res, session) {
-    var boundary = '';
-    var contentType = req.headers['content-type'] || '';
-    var match = contentType.match(/boundary=(.+)$/);
-    if (!match) {
-        sendJSON(res, 400, { success: false, error: 'No boundary found' });
-        return;
-    }
-    boundary = '--' + match[1];
-
-    var totalSize = 0;
-    var MAX_SIZE = 60 * 1024 * 1024;
-    var chunks = [];
-    req.on('data', function(chunk) {
-        totalSize += chunk.length;
-        if (totalSize > MAX_SIZE) {
-            req.destroy();
+function handleManagerDiscUpload(req, res, body) {
+    parseMultipartUpload(req, function(err, fields, files) {
+        if (err) {
+            sendJSON(res, 400, { success: false, error: err.message });
             return;
         }
-        chunks.push(chunk);
-    });
-    req.on('end', function() {
-        if (totalSize > MAX_SIZE) {
-            sendJSON(res, 413, { success: false, error: 'File too large (max 60MB)' });
-            return;
-        }
-        var buffer = Buffer.concat(chunks);
-        var str = buffer.toString('binary');
-        var parts = str.split(boundary);
-        var uploadedFiles = [];
-        var albumDir = '';
 
-        for (var i = 0; i < parts.length; i++) {
-            var part = parts[i];
-            if (part.indexOf('Content-Disposition') === -1) continue;
+        verifyManagerSession(fields, function(sessErr, session) {
+            if (sessErr) {
+                sendJSON(res, 401, { success: false, error: sessErr });
+                return;
+            }
 
-            var headerEnd = part.indexOf('\r\n\r\n');
-            if (headerEnd === -1) continue;
-            var header = part.substring(0, headerEnd);
+            var uploadedFiles = [];
+            var albumDir = sanitizeFilename(fields.albumDir || '');
 
-            var nameMatch = header.match(/name="([^"]+)"/);
-            var filenameMatch = header.match(/filename="([^"]+)"/);
-            if (!nameMatch) continue;
-
-            var bodyStart = headerEnd + 4;
-            var bodyEnd = part.lastIndexOf('\r\n');
-            if (bodyEnd === -1) bodyEnd = part.length;
-            var bodyStr = part.substring(bodyStart, bodyEnd);
-
-            if (filenameMatch) {
-                var filename = filenameMatch[1].replace(/[\\/:*?"<>|]/g, '_');
+            for (var i = 0; i < files.length; i++) {
+                var f = files[i];
+                var filename = f.filename;
                 var destDir = path.join(ROOT, 'Disc', 'MusicAlbum', albumDir || 'Unknown');
                 fs.mkdirSync(destDir, { recursive: true });
                 var destPath = path.join(destDir, filename);
-                fs.writeFileSync(destPath, Buffer.from(bodyStr, 'binary'), 'binary');
+                fs.writeFileSync(destPath, Buffer.from(f.body, 'binary'), 'binary');
                 var relPath = path.relative(ROOT, destPath).replace(/\\/g, '/');
                 uploadedFiles.push({ name: filename, path: relPath });
-            } else {
-                var value = bodyStr.trim();
-                if (nameMatch[1] === 'albumDir') {
-                    albumDir = sanitizeFilename(value);
-                }
             }
-        }
 
-        if (uploadedFiles.length > 0) {
-            addManagerLog('disc_upload', session.username, 'Uploaded ' + uploadedFiles.length + ' disc file(s)');
-        }
-        sendJSON(res, 200, { success: true, files: uploadedFiles });
+            if (uploadedFiles.length > 0) {
+                addManagerLog('disc_upload', session.username, 'Uploaded ' + uploadedFiles.length + ' disc file(s)');
+            }
+            sendJSON(res, 200, { success: true, files: uploadedFiles });
+        });
     });
 }
 

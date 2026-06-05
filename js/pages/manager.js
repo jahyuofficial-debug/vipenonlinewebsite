@@ -2336,6 +2336,7 @@ var ManagerGo = (function() {
         var formData = new FormData();
         formData.append('file', file);
         formData.append('albumDir', albumDir);
+        formData.append('sessionToken', sessionToken || '');
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/api/manager/disc-upload', true);
         xhr.onload = function() {
