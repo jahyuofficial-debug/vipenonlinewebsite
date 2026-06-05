@@ -27,6 +27,8 @@ var getAuthSecret = require('./lib/secret').getAuthSecret;
 var getOldAuthSecret = require('./lib/secret').getOldAuthSecret;
 var generateToken = require('./lib/secret').generateToken;
 var verifyToken = require('./lib/secret').verifyToken;
+var blobPut = null;
+try { blobPut = require('@vercel/blob').put; } catch (e) { blobPut = null; }
 
 if (!RESEND_API_KEY) {
     try {
@@ -1301,28 +1303,58 @@ function handleManagerUpload(req, res, body) {
                 return;
             }
 
-            var uploadedFiles = [];
             var dest = fields.dest || 'images/uploads';
             var safeDest = dest.replace(/\.\./g, '').replace(/\\/g, '/').replace(/^\/+/, '');
-            if (!safeDest || safeDest.indexOf('/') !== -1) {
-                safeDest = 'images/uploads';
+            if (!safeDest || safeDest.indexOf('/') === -1) {
+                safeDest = 'uploads/' + safeDest;
             }
 
-            for (var i = 0; i < files.length; i++) {
-                var f = files[i];
-                var destDir = path.join(ROOT, safeDest);
-                fs.mkdirSync(destDir, { recursive: true });
-                var uniqueName = Date.now() + '_' + f.filename;
-                var destPath = path.join(destDir, uniqueName);
-                fs.writeFileSync(destPath, Buffer.from(f.body, 'binary'), 'binary');
-                var relPath = path.relative(ROOT, destPath).replace(/\\/g, '/');
-                uploadedFiles.push({ name: f.filename, path: relPath });
+            var uploadedFiles = [];
+            var pending = files.length;
+
+            if (pending === 0) {
+                sendJSON(res, 400, { success: false, error: 'No files uploaded' });
+                return;
             }
 
-            if (uploadedFiles.length > 0) {
-                addManagerLog('media_upload', session.username, 'Uploaded ' + uploadedFiles.length + ' file(s)');
+            function done() {
+                if (uploadedFiles.length > 0) {
+                    addManagerLog('media_upload', session.username, 'Uploaded ' + uploadedFiles.length + ' file(s)');
+                }
+                sendJSON(res, 200, { success: true, files: uploadedFiles });
             }
-            sendJSON(res, 200, { success: true, files: uploadedFiles });
+
+            if (blobPut) {
+                for (var i = 0; i < files.length; i++) {
+                    (function(f) {
+                        var blobPath = safeDest + '/' + Date.now() + '_' + f.filename;
+                        var buffer = Buffer.from(f.body, 'binary');
+                        blobPut(blobPath, buffer, {
+                            access: 'public',
+                            contentType: getUploadContentType(f.filename)
+                        }).then(function(blob) {
+                            uploadedFiles.push({ name: f.filename, path: blob.url });
+                            pending--;
+                            if (pending === 0) done();
+                        }).catch(function() {
+                            pending--;
+                            if (pending === 0) done();
+                        });
+                    })(files[i]);
+                }
+            } else {
+                for (var j = 0; j < files.length; j++) {
+                    var f = files[j];
+                    var destDir = path.join(ROOT, safeDest);
+                    fs.mkdirSync(destDir, { recursive: true });
+                    var uniqueName = Date.now() + '_' + f.filename;
+                    var destPath = path.join(destDir, uniqueName);
+                    fs.writeFileSync(destPath, Buffer.from(f.body, 'binary'), 'binary');
+                    var relPath = path.relative(ROOT, destPath).replace(/\\/g, '/');
+                    uploadedFiles.push({ name: f.filename, path: relPath });
+                }
+                done();
+            }
         });
     });
 }
@@ -1359,22 +1391,51 @@ function handleManagerDiscUpload(req, res, body) {
 
             var uploadedFiles = [];
             var albumDir = sanitizeFilename(fields.albumDir || '');
+            var pending = files.length;
 
-            for (var i = 0; i < files.length; i++) {
-                var f = files[i];
-                var filename = f.filename;
-                var destDir = path.join(ROOT, 'Disc', 'MusicAlbum', albumDir || 'Unknown');
-                fs.mkdirSync(destDir, { recursive: true });
-                var destPath = path.join(destDir, filename);
-                fs.writeFileSync(destPath, Buffer.from(f.body, 'binary'), 'binary');
-                var relPath = path.relative(ROOT, destPath).replace(/\\/g, '/');
-                uploadedFiles.push({ name: filename, path: relPath });
+            if (pending === 0) {
+                sendJSON(res, 400, { success: false, error: 'No files uploaded' });
+                return;
             }
 
-            if (uploadedFiles.length > 0) {
-                addManagerLog('disc_upload', session.username, 'Uploaded ' + uploadedFiles.length + ' disc file(s)');
+            function done() {
+                if (uploadedFiles.length > 0) {
+                    addManagerLog('disc_upload', session.username, 'Uploaded ' + uploadedFiles.length + ' disc file(s)');
+                }
+                sendJSON(res, 200, { success: true, files: uploadedFiles });
             }
-            sendJSON(res, 200, { success: true, files: uploadedFiles });
+
+            if (blobPut) {
+                for (var i = 0; i < files.length; i++) {
+                    (function(f) {
+                        var blobPath = 'disc/' + (albumDir || 'Unknown') + '/' + Date.now() + '_' + f.filename;
+                        var buffer = Buffer.from(f.body, 'binary');
+                        blobPut(blobPath, buffer, {
+                            access: 'public',
+                            contentType: getUploadContentType(f.filename)
+                        }).then(function(blob) {
+                            uploadedFiles.push({ name: f.filename, path: blob.url });
+                            pending--;
+                            if (pending === 0) done();
+                        }).catch(function() {
+                            pending--;
+                            if (pending === 0) done();
+                        });
+                    })(files[i]);
+                }
+            } else {
+                for (var j = 0; j < files.length; j++) {
+                    var f = files[j];
+                    var filename = f.filename;
+                    var destDir = path.join(ROOT, 'Disc', 'MusicAlbum', albumDir || 'Unknown');
+                    fs.mkdirSync(destDir, { recursive: true });
+                    var destPath = path.join(destDir, filename);
+                    fs.writeFileSync(destPath, Buffer.from(f.body, 'binary'), 'binary');
+                    var relPath = path.relative(ROOT, destPath).replace(/\\/g, '/');
+                    uploadedFiles.push({ name: filename, path: relPath });
+                }
+                done();
+            }
         });
     });
 }
@@ -1452,6 +1513,28 @@ function serveStatic(req, res, filePath) {
             fs.createReadStream(filePath).pipe(res);
         }
     });
+}
+
+function getUploadContentType(filename) {
+    var ext = filename.split('.').pop().toLowerCase();
+    var map = {
+        mp4: 'video/mp4',
+        webm: 'video/webm',
+        mov: 'video/quicktime',
+        avi: 'video/x-msvideo',
+        mkv: 'video/x-matroska',
+        mp3: 'audio/mpeg',
+        wav: 'audio/wav',
+        ogg: 'audio/ogg',
+        flac: 'audio/flac',
+        m4a: 'audio/mp4',
+        jpg: 'image/jpeg',
+        jpeg: 'image/jpeg',
+        png: 'image/png',
+        webp: 'image/webp',
+        gif: 'image/gif'
+    };
+    return map[ext] || 'application/octet-stream';
 }
 
 var MIME = {
