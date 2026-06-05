@@ -2340,8 +2340,27 @@ var ManagerGo = (function() {
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/api/manager/disc-upload', true);
         xhr.onload = function() {
-            try { var res = JSON.parse(xhr.responseText); callback(res.success ? null : (res.error || 'Upload failed'), res.files && res.files[0] ? res.files[0].path : ''); }
-            catch(e) { callback('Parse error', ''); }
+            if (xhr.status === 401) {
+                try {
+                    var res = JSON.parse(xhr.responseText);
+                    if (res.error && res.error.indexOf('session') !== -1) {
+                        sessionToken = null;
+                        sessionStorage.removeItem('manager_session');
+                        callback('Session expired, please re-enter PIN', '');
+                        return;
+                    }
+                } catch(e) {}
+                callback('Unauthorized', '');
+                return;
+            }
+            if (xhr.status !== 200) {
+                callback('Server error: HTTP ' + xhr.status, '');
+                return;
+            }
+            try {
+                var res = JSON.parse(xhr.responseText);
+                callback(res.success ? null : (res.error || 'Upload failed'), res.files && res.files[0] ? res.files[0].path : '');
+            } catch(e) { callback('Parse error', ''); }
         };
         xhr.onerror = function() { callback('Network error', ''); };
         xhr.send(formData);
@@ -2354,8 +2373,27 @@ var ManagerGo = (function() {
         xhr.open('POST', '/api/manager/disc-save', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onload = function() {
-            try { var res = JSON.parse(xhr.responseText); callback(res.success ? null : (res.error || 'Save failed')); }
-            catch(e) { callback('Parse error'); }
+            if (xhr.status === 401) {
+                try {
+                    var res = JSON.parse(xhr.responseText);
+                    if (res.error && res.error.indexOf('session') !== -1) {
+                        sessionToken = null;
+                        sessionStorage.removeItem('manager_session');
+                        callback('Session expired, please re-enter PIN');
+                        return;
+                    }
+                } catch(e) {}
+                callback('Unauthorized');
+                return;
+            }
+            if (xhr.status !== 200) {
+                callback('Server error: HTTP ' + xhr.status);
+                return;
+            }
+            try {
+                var res = JSON.parse(xhr.responseText);
+                callback(res.success ? null : (res.error || 'Save failed'));
+            } catch(e) { callback('Parse error'); }
         };
         xhr.onerror = function() { callback('Network error'); };
         xhr.send(JSON.stringify({ data: payload, sessionToken: sessionToken }));
@@ -2482,7 +2520,9 @@ var ManagerGo = (function() {
                 var moved = discData.tapes.splice(dragSrcIndex, 1)[0];
                 discData.tapes.splice(targetIndex, 0, moved);
                 saveDiscToServer(function(err) {
-                    if (err) showToast('Reorder save failed: ' + err, true);
+                    if (err) {
+                        showToast('Reorder saved locally, but server sync failed: ' + err, true);
+                    }
                 });
 
                 var dc = document.getElementById('discManagerContent');
@@ -2621,13 +2661,13 @@ var ManagerGo = (function() {
                     discData.tapes.push(metaOnly);
                 }
                 saveDiscToServer(function(err) {
-                    if (err) {
-                        showToast('Save failed: ' + err, true);
-                        return;
-                    }
                     var dc = document.getElementById('discManagerContent');
                     if (dc) renderDiscTracks(dc);
-                    showToast(isEdit ? 'Track updated' : 'Track added');
+                    if (err) {
+                        showToast('Saved locally, but server sync failed: ' + err, true);
+                    } else {
+                        showToast(isEdit ? 'Track updated' : 'Track added');
+                    }
                     closeModal();
                 });
             }
@@ -2641,8 +2681,13 @@ var ManagerGo = (function() {
             if (currentAudioFile) {
                 pending++;
                 uploadDiscFile(currentAudioFile, albumDir, function(err, path) {
-                    if (err) showToast('Audio upload failed: ' + err, true);
-                    if (path) metaOnly.audio = path;
+                    if (err) {
+                        showToast('Audio upload failed: ' + err, true);
+                    } else if (path) {
+                        metaOnly.audio = path;
+                    } else {
+                        showToast('Audio upload returned empty path', true);
+                    }
                     tryFinish();
                 });
             }
@@ -2651,8 +2696,13 @@ var ManagerGo = (function() {
                 if (coverBlob) {
                     pending++;
                     uploadDiscFile(coverBlob, albumDir, function(err, path) {
-                        if (err) showToast('Cover upload failed: ' + err, true);
-                        if (path) metaOnly.cover = path;
+                        if (err) {
+                            showToast('Cover upload failed: ' + err, true);
+                        } else if (path) {
+                            metaOnly.cover = path;
+                        } else {
+                            showToast('Cover upload returned empty path', true);
+                        }
                         tryFinish();
                     });
                 }
@@ -3008,13 +3058,13 @@ var ManagerGo = (function() {
             function finishSave() {
                 discData.tapes[editIndex] = metaOnly;
                 saveDiscToServer(function(err) {
-                    if (err) {
-                        showToast('Save failed: ' + err, true);
-                        return;
-                    }
                     var dc = document.getElementById('discManagerContent');
                     if (dc) renderDiscTracks(dc);
-                    showToast('Track updated');
+                    if (err) {
+                        showToast('Saved locally, but server sync failed: ' + err, true);
+                    } else {
+                        showToast('Track updated');
+                    }
                     closeDetail();
                 });
             }
@@ -3028,8 +3078,13 @@ var ManagerGo = (function() {
             if (currentAudioFile) {
                 pending++;
                 uploadDiscFile(currentAudioFile, albumDir, function(err, path) {
-                    if (err) showToast('Audio upload failed: ' + err, true);
-                    if (path) metaOnly.audio = path;
+                    if (err) {
+                        showToast('Audio upload failed: ' + err, true);
+                    } else if (path) {
+                        metaOnly.audio = path;
+                    } else {
+                        showToast('Audio upload returned empty path', true);
+                    }
                     tryFinish();
                 });
             } else if (currentAudio && currentAudio.indexOf('data:') === 0) {
@@ -3037,8 +3092,13 @@ var ManagerGo = (function() {
                 if (audioBlob) {
                     pending++;
                     uploadDiscFile(audioBlob, albumDir, function(err, path) {
-                        if (err) showToast('Audio upload failed: ' + err, true);
-                        if (path) metaOnly.audio = path;
+                        if (err) {
+                            showToast('Audio upload failed: ' + err, true);
+                        } else if (path) {
+                            metaOnly.audio = path;
+                        } else {
+                            showToast('Audio upload returned empty path', true);
+                        }
                         tryFinish();
                     });
                 }
@@ -3046,8 +3106,13 @@ var ManagerGo = (function() {
             if (currentCoverFile) {
                 pending++;
                 uploadDiscFile(currentCoverFile, albumDir, function(err, path) {
-                    if (err) showToast('Cover upload failed: ' + err, true);
-                    if (path) metaOnly.cover = path;
+                    if (err) {
+                        showToast('Cover upload failed: ' + err, true);
+                    } else if (path) {
+                        metaOnly.cover = path;
+                    } else {
+                        showToast('Cover upload returned empty path', true);
+                    }
                     tryFinish();
                 });
             } else if (currentCover && currentCover.indexOf('data:') === 0) {
@@ -3055,8 +3120,13 @@ var ManagerGo = (function() {
                 if (coverBlob) {
                     pending++;
                     uploadDiscFile(coverBlob, albumDir, function(err, path) {
-                        if (err) showToast('Cover upload failed: ' + err, true);
-                        if (path) metaOnly.cover = path;
+                        if (err) {
+                            showToast('Cover upload failed: ' + err, true);
+                        } else if (path) {
+                            metaOnly.cover = path;
+                        } else {
+                            showToast('Cover upload returned empty path', true);
+                        }
                         tryFinish();
                     });
                 }
@@ -3077,10 +3147,13 @@ var ManagerGo = (function() {
                     saveToTrash('disc_track', JSON.parse(JSON.stringify(track)), STORAGE_KEYS.discTapes);
                     discData.tapes.splice(editIndex, 1);
                     saveDiscToServer(function(err) {
-                        if (err) showToast('Delete save failed: ' + err, true);
                         var dc = document.getElementById('discManagerContent');
                         if (dc) renderDiscTracks(dc);
-                        showToast('Track moved to Trash');
+                        if (err) {
+                            showToast('Deleted locally, but server sync failed: ' + err, true);
+                        } else {
+                            showToast('Track moved to Trash');
+                        }
                         closeDetail();
                     });
                 }

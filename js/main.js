@@ -35,13 +35,34 @@ BannerPage.initBgVideo();
     var loadAction = loadJSON('data/action.json');
     var loadBanner = loadJSON('data/banner.json');
 
-    Promise.all([loadSettings, loadFresh, loadDesign, loadDisc, loadAction, loadBanner]).then(function(results) {
+    var loadDiscOnline = fetch('/api/data/disc').then(function(r) {
+        if (r.ok) return r.json();
+        throw new Error('API not available');
+    }).catch(function() { return null; });
+
+    var loadBannerOnline = fetch('/api/data/home-banner').then(function(r) {
+        if (r.ok) return r.json();
+        throw new Error('API not available');
+    }).catch(function() { return null; });
+
+    Promise.all([loadSettings, loadFresh, loadDesign, loadDisc, loadAction, loadBanner, loadDiscOnline, loadBannerOnline]).then(function(results) {
         var settings = results[0];
         var freshData = results[1];
         var designData = results[2];
         var discData = results[3];
         var actionData = results[4];
         var bannerData = results[5];
+        var discOnline = results[6];
+        var bannerOnline = results[7];
+
+        if (discOnline && discOnline.tapes) {
+            discData.tapes = discOnline.tapes;
+            discData.playMode = discOnline.playMode || discData.playMode;
+            discData.currentTapeIndex = discOnline.currentTapeIndex || 0;
+        }
+        if (bannerOnline && bannerOnline.groups) {
+            bannerData.homeGroups = bannerOnline.groups;
+        }
 
         applySiteSettings(settings);
 
@@ -60,19 +81,6 @@ BannerPage.initBgVideo();
         if (mgrFresh) { try { freshHeroItems = JSON.parse(mgrFresh); } catch (e) {} }
 
         if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
-
-        var mgrDisc = localStorage.getItem('vipen_mgr_disc_tapes');
-        if (mgrDisc) { try { discData.tapes = JSON.parse(mgrDisc); } catch (e) {} }
-
-        var mgrBanner = localStorage.getItem('vipen_mgr_home_banner');
-        if (mgrBanner) {
-            try {
-                var parsedBanner = JSON.parse(mgrBanner);
-                if (parsedBanner && parsedBanner.groups) {
-                    bannerData.homeGroups = parsedBanner.groups;
-                }
-            } catch (e) {}
-        }
 
         Object.assign(BannerPage.bannerData, bannerData);
         window.actionFeed = actionData;
@@ -108,6 +116,13 @@ BannerPage.initBgVideo();
                     }
                 } catch (e) {}
             }
+
+            fetch('/api/data/disc').then(function(r) { if (r.ok) return r.json(); throw new Error(''); }).then(function(od) {
+                if (od && od.tapes) { d.disc.tapes = od.tapes; d.disc.playMode = od.playMode || d.disc.playMode; d.disc.currentTapeIndex = od.currentTapeIndex || 0; }
+            }).catch(function() {});
+            fetch('/api/data/home-banner').then(function(r) { if (r.ok) return r.json(); throw new Error(''); }).then(function(ob) {
+                if (ob && ob.groups) { d.banner.homeGroups = ob.groups; }
+            }).catch(function() {});
 
             Object.assign(BannerPage.bannerData, d.banner);
             window.actionFeed = d.action;

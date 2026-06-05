@@ -242,6 +242,19 @@ function handleAPIRoute(req, res, apiPath) {
         return;
     }
 
+    if (req.method === 'GET') {
+        if (apiPath === '/api/data/disc') {
+            serveStatic(req, res, path.join(ROOT, 'data', 'disc.json'));
+            return;
+        }
+        if (apiPath === '/api/data/home-banner') {
+            serveStatic(req, res, path.join(ROOT, 'data', 'home-banner.json'));
+            return;
+        }
+        sendJSON(res, 405, { success: false, error: 'Method not allowed' });
+        return;
+    }
+
     if (req.method !== 'POST') {
         sendJSON(res, 405, { success: false, error: 'Method not allowed' });
         return;

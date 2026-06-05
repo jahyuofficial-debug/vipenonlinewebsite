@@ -1,4 +1,5 @@
 var helpers = require('../../lib/manager-helpers');
+var { put } = require('@vercel/blob');
 
 module.exports = function(req, res) {
     if (req.method === 'OPTIONS') {
@@ -33,17 +34,16 @@ module.exports = function(req, res) {
                 return;
             }
 
-            var fs = require('fs');
-            var path = require('path');
-            var fp = path.join('/tmp', 'home-banner.json');
             var json = JSON.stringify(data, null, 2);
-            fs.writeFile(fp, json, 'utf8', function(writeErr) {
-                if (writeErr) {
-                    helpers.sendJSON(res, 500, { success: false, error: 'Failed to save' });
-                    return;
-                }
+            put('data/home-banner.json', json, {
+                access: 'public',
+                contentType: 'application/json',
+                addRandomSuffix: false
+            }).then(function(blob) {
                 helpers.addLog('home_banner_save', session.username, 'Updated HOME banner data');
-                helpers.sendJSON(res, 200, { success: true });
+                helpers.sendJSON(res, 200, { success: true, url: blob.url });
+            }).catch(function(putErr) {
+                helpers.sendJSON(res, 500, { success: false, error: 'Failed to save: ' + putErr.message });
             });
         });
     });
