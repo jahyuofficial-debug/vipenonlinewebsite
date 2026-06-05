@@ -2575,8 +2575,8 @@ var ManagerGo = (function() {
                 title: title,
                 artist: artist,
                 time: '0:00',
-                cover: coverDataUrl && coverDataUrl.indexOf('data:') === 0 ? DiscDB.makeRef(trackId) : coverDataUrl,
-                audio: currentAudioFile ? DiscDB.makeRef(trackId) : (currentAudio && currentAudio.indexOf('data:') === 0 ? '' : currentAudio)
+                cover: coverDataUrl && coverDataUrl.indexOf('data:') === 0 ? DiscDB.makeRef(trackId) : (coverDataUrl && coverDataUrl.indexOf('indexeddb:') === 0 ? coverDataUrl : (coverDataUrl && coverDataUrl.indexOf('blob:') === 0 ? '' : coverDataUrl)),
+                audio: currentAudioFile ? DiscDB.makeRef(trackId) : (currentAudio && currentAudio.indexOf('indexeddb:') === 0 ? currentAudio : (currentAudio && currentAudio.indexOf('blob:') === 0 ? '' : currentAudio))
             };
 
             function finishSave() {
@@ -2951,8 +2951,8 @@ var ManagerGo = (function() {
                 title: title,
                 artist: artist,
                 time: '0:00',
-                cover: currentCoverFile ? DiscDB.makeRef(trackId) : (currentCover && currentCover.indexOf('data:') === 0 ? DiscDB.makeRef(trackId) : currentCover),
-                audio: currentAudioFile ? DiscDB.makeRef(trackId) : (currentAudio && currentAudio.indexOf('data:') === 0 ? '' : currentAudio)
+                cover: currentCoverFile ? DiscDB.makeRef(trackId) : (currentCover && currentCover.indexOf('data:') === 0 ? DiscDB.makeRef(trackId) : (currentCover && currentCover.indexOf('indexeddb:') === 0 ? currentCover : (currentCover && currentCover.indexOf('blob:') === 0 ? '' : currentCover))),
+                audio: currentAudioFile ? DiscDB.makeRef(trackId) : (currentAudio && currentAudio.indexOf('data:') === 0 ? '' : (currentAudio && currentAudio.indexOf('indexeddb:') === 0 ? currentAudio : (currentAudio && currentAudio.indexOf('blob:') === 0 ? '' : currentAudio)))
             };
 
             function finishSave() {

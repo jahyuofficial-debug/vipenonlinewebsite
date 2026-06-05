@@ -84,6 +84,12 @@ function buildAlbumCarousel() {
     return cards;
 }
 
+function syncCarousel() {
+    var carousel = document.getElementById('discAlbumCarousel');
+    if (!carousel) return;
+    carousel.innerHTML = buildAlbumCarousel();
+}
+
 function buildDiscPage() {
     var tapes = window.discData.tapes || [];
     var currentIndex = window.discData.currentTapeIndex || 0;
@@ -637,8 +643,18 @@ return {
     getNextTrackIndex: getNextTrackIndex,
     getPrevTrackIndex: getPrevTrackIndex,
     syncUIWithAudioState: syncDiscUIWithAudioState,
+    syncCarousel: syncCarousel,
     cleanup: cleanup,
-    setDiscData: function(data) { window.discData = data; },
+    setDiscData: function(data) {
+        window.discData = data;
+        if (typeof data === 'object' && data !== null) {
+            Object.assign(window.discData, data);
+        }
+        if (window.currentPage === 'disc-library') {
+            this.syncUIWithAudioState();
+            this.syncCarousel();
+        }
+    },
     getDiscData: function() { return window.discData; },
     getDiscIsPlaying: function() { return discIsPlaying; },
     setDiscIsPlaying: function(v) { discIsPlaying = v; }

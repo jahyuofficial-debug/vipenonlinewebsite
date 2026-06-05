@@ -3,7 +3,7 @@
 .dw-fan{position:relative;width:0;height:0;display:flex;align-items:center;justify-content:center}
 .dw-card{position:absolute;width:2.6rem;height:3.6rem;border-radius:.16rem;overflow:hidden;cursor:pointer;transition:transform .5s cubic-bezier(.25,.46,.45,.94),box-shadow .45s,border-color .35s;border:1px solid rgba(255,255,255,.12);box-shadow:0 .1rem .4rem rgba(0,0,0,.5);transform-origin:center bottom;will-change:transform;z-index:1}
 .dw-card:hover{z-index:100;border-color:rgba(255,255,255,.35);box-shadow:0 .3rem .8rem rgba(0,0,0,.8)}
-.dw-card-img{position:absolute;inset:0;z-index:0}
+.dw-card-img{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center}
 .dw-card-mask{position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,rgba(0,0,0,.75) 100%);z-index:1}
 .dw-card-content{display:none}
 .dw-card-corner{position:absolute;top:.1rem;left:.1rem;font-size:.28rem;color:rgba(255,255,255,.15);z-index:2;font-family:Georgia,serif;line-height:1}

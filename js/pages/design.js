@@ -67,6 +67,21 @@ function buildDesignWorkDetail(id) {
 
     var contentHtml = item.content ? '<div class="dw-detail-content">' + item.content + '</div>' : '';
 
+    var mediaHtml = '';
+    var mediaArr = item.media || [];
+    if (mediaArr.length > 0) {
+        mediaHtml = '<div class="dw-detail-media">';
+        for (var mi = 0; mi < mediaArr.length; mi++) {
+            var src = mediaArr[mi];
+            if (src.indexOf('data:video') === 0 || src.match(/\.(mp4|webm|ogg)($|\?)/i)) {
+                mediaHtml += '<div class="dw-detail-media-item"><video src="' + src + '" controls></video></div>';
+            } else {
+                mediaHtml += '<div class="dw-detail-media-item"><img src="' + src + '" alt=""></div>';
+            }
+        }
+        mediaHtml += '</div>';
+    }
+
     return '<div class="dw-detail" id="dwDetail">' +
         '<button class="dw-detail-back" id="dwDetailBack">' +
         '<svg viewBox="0 0 24 24"><path d="M19 12H5m7-7l-7 7 7 7"/></svg> Back' +
@@ -80,6 +95,7 @@ function buildDesignWorkDetail(id) {
         '</div></div>' +
         '<div class="dw-detail-body">' +
         contentHtml +
+        mediaHtml +
         '<p class="dw-detail-desc">' + item.desc + '</p>' +
         tagsHtml +
         likeHtml +

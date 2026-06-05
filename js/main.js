@@ -1438,6 +1438,7 @@ window.addEventListener('storage', function(e) {
         }).then(function() {
             if (currentPage === 'disc-library' && typeof DiscPage !== 'undefined') {
                 DiscPage.setDiscData(window.discData);
+                DiscPage.syncCarousel();
             }
         });
     }
