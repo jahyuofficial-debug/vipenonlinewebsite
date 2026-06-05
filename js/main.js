@@ -20,20 +20,12 @@ BannerPage.initBgVideo();
     };
 
     function resolveDiscTapes() {
-        DiscDB.init().then(function() {
-            return DiscDB.migrateAllTapes(window.discData.tapes);
-        }).then(function() {
-            var updated = JSON.stringify(window.discData.tapes);
-            localStorage.setItem('vipen_mgr_disc_tapes', updated);
-            return DiscDB.resolveAllTapes(window.discData.tapes);
-        }).then(function() {
-            var tapes = window.discData.tapes || [];
-            var idx = window.discData.currentTapeIndex || 0;
-            if (tapes[idx] && tapes[idx].audio) {
-                discAudio.src = tapes[idx].audio;
-                discAudio.load();
-            }
-        });
+        var tapes = window.discData.tapes || [];
+        var idx = window.discData.currentTapeIndex || 0;
+        if (tapes[idx] && tapes[idx].audio) {
+            discAudio.src = tapes[idx].audio;
+            discAudio.load();
+        }
     }
 
     var loadSettings = loadJSON('data/manager/settings.json');
@@ -73,13 +65,6 @@ BannerPage.initBgVideo();
         window.actionFeed = actionData;
         window.discData = JSON.parse(JSON.stringify(discData));
 
-        var mgrDisc = localStorage.getItem('vipen_mgr_disc_tapes');
-        if (mgrDisc) {
-            try { window.discData.tapes = JSON.parse(mgrDisc); } catch (e) {}
-        } else {
-            localStorage.setItem('vipen_mgr_disc_tapes', JSON.stringify(window.discData.tapes));
-        }
-
         resolveDiscTapes();
 
         console.log('Data loaded from ManagerGo data files');
@@ -100,12 +85,6 @@ BannerPage.initBgVideo();
             Object.assign(BannerPage.bannerData, d.banner);
             window.actionFeed = d.action;
             window.discData = JSON.parse(JSON.stringify(d.disc));
-            var mgrDisc = localStorage.getItem('vipen_mgr_disc_tapes');
-            if (mgrDisc) {
-                try { window.discData.tapes = JSON.parse(mgrDisc); } catch (e) {}
-            } else {
-                localStorage.setItem('vipen_mgr_disc_tapes', JSON.stringify(window.discData.tapes));
-            }
             resolveDiscTapes();
             console.log('Data loaded from data.json fallback');
         }).catch(function() { console.log('Using embedded data'); });
@@ -1431,16 +1410,10 @@ window.addEventListener('storage', function(e) {
     }
     if (e.key === 'vipen_mgr_disc_tapes' && e.newValue) {
         try { window.discData.tapes = JSON.parse(e.newValue); } catch (ex) {}
-        DiscDB.migrateAllTapes(window.discData.tapes).then(function() {
-            var updated = JSON.stringify(window.discData.tapes);
-            localStorage.setItem('vipen_mgr_disc_tapes', updated);
-            return DiscDB.resolveAllTapes(window.discData.tapes);
-        }).then(function() {
-            if (currentPage === 'disc-library' && typeof DiscPage !== 'undefined') {
-                DiscPage.setDiscData(window.discData);
-                DiscPage.syncCarousel();
-            }
-        });
+        if (currentPage === 'disc-library' && typeof DiscPage !== 'undefined') {
+            DiscPage.setDiscData(window.discData);
+            DiscPage.syncCarousel();
+        }
     }
     if (e.key === 'vipen_mgr_home_banner' && e.newValue) {
         try {

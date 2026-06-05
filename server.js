@@ -665,6 +665,10 @@ function handleManagerAPI(req, res, apiPath, body) {
             handleManagerUpload(req, res, session);
         } else if (apiPath === '/api/manager/home-banner-save') {
             handleManagerHomeBannerSave(res, body, session);
+        } else if (apiPath === '/api/manager/disc-save') {
+            handleManagerDiscSave(res, body, session);
+        } else if (apiPath === '/api/manager/disc-upload') {
+            handleManagerDiscUpload(req, res, session);
         } else {
             sendJSON(res, 404, { success: false, error: 'Unknown manager endpoint' });
         }
@@ -1281,6 +1285,95 @@ function handleManagerUpload(req, res, session) {
 
         if (uploadedFiles.length > 0) {
             addManagerLog('media_upload', session.username, 'Uploaded ' + uploadedFiles.length + ' file(s)');
+        }
+        sendJSON(res, 200, { success: true, files: uploadedFiles });
+    });
+}
+
+function sanitizeFilename(name) {
+    return name.replace(/[\\/:*?"<>|]/g, '_').trim();
+}
+
+function handleManagerDiscSave(res, body, session) {
+    var discPath = path.join(ROOT, 'data', 'disc.json');
+    var json = JSON.stringify(body.data, null, 2);
+    fs.writeFile(discPath, json, 'utf8', function(err) {
+        if (err) {
+            sendJSON(res, 500, { success: false, error: 'Failed to save disc data' });
+            return;
+        }
+        addManagerLog('disc_save', session.username, 'Updated disc track data');
+        sendJSON(res, 200, { success: true });
+    });
+}
+
+function handleManagerDiscUpload(req, res, session) {
+    var boundary = '';
+    var contentType = req.headers['content-type'] || '';
+    var match = contentType.match(/boundary=(.+)$/);
+    if (!match) {
+        sendJSON(res, 400, { success: false, error: 'No boundary found' });
+        return;
+    }
+    boundary = '--' + match[1];
+
+    var totalSize = 0;
+    var MAX_SIZE = 60 * 1024 * 1024;
+    var chunks = [];
+    req.on('data', function(chunk) {
+        totalSize += chunk.length;
+        if (totalSize > MAX_SIZE) {
+            req.destroy();
+            return;
+        }
+        chunks.push(chunk);
+    });
+    req.on('end', function() {
+        if (totalSize > MAX_SIZE) {
+            sendJSON(res, 413, { success: false, error: 'File too large (max 60MB)' });
+            return;
+        }
+        var buffer = Buffer.concat(chunks);
+        var str = buffer.toString('binary');
+        var parts = str.split(boundary);
+        var uploadedFiles = [];
+        var albumDir = '';
+
+        for (var i = 0; i < parts.length; i++) {
+            var part = parts[i];
+            if (part.indexOf('Content-Disposition') === -1) continue;
+
+            var headerEnd = part.indexOf('\r\n\r\n');
+            if (headerEnd === -1) continue;
+            var header = part.substring(0, headerEnd);
+
+            var nameMatch = header.match(/name="([^"]+)"/);
+            var filenameMatch = header.match(/filename="([^"]+)"/);
+            if (!nameMatch) continue;
+
+            var bodyStart = headerEnd + 4;
+            var bodyEnd = part.lastIndexOf('\r\n');
+            if (bodyEnd === -1) bodyEnd = part.length;
+            var bodyStr = part.substring(bodyStart, bodyEnd);
+
+            if (filenameMatch) {
+                var filename = filenameMatch[1].replace(/[\\/:*?"<>|]/g, '_');
+                var destDir = path.join(ROOT, 'Disc', 'MusicAlbum', albumDir || 'Unknown');
+                fs.mkdirSync(destDir, { recursive: true });
+                var destPath = path.join(destDir, filename);
+                fs.writeFileSync(destPath, Buffer.from(bodyStr, 'binary'), 'binary');
+                var relPath = path.relative(ROOT, destPath).replace(/\\/g, '/');
+                uploadedFiles.push({ name: filename, path: relPath });
+            } else {
+                var value = bodyStr.trim();
+                if (nameMatch[1] === 'albumDir') {
+                    albumDir = sanitizeFilename(value);
+                }
+            }
+        }
+
+        if (uploadedFiles.length > 0) {
+            addManagerLog('disc_upload', session.username, 'Uploaded ' + uploadedFiles.length + ' disc file(s)');
         }
         sendJSON(res, 200, { success: true, files: uploadedFiles });
     });
