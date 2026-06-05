@@ -1,6 +1,5 @@
 var helpers = require('../../lib/manager-helpers');
-var fs = require('fs');
-var path = require('path');
+var { put } = require('@vercel/blob');
 
 function parseMultipart(req, callback) {
     var contentType = req.headers['content-type'] || '';
@@ -67,10 +66,6 @@ function parseMultipart(req, callback) {
     });
 }
 
-function sanitizeFilename(name) {
-    return name.replace(/[\\/:*?"<>|]/g, '_').trim();
-}
-
 module.exports = function(req, res) {
     if (req.method === 'OPTIONS') {
         res.statusCode = 204;
@@ -99,22 +94,55 @@ module.exports = function(req, res) {
             }
 
             var uploadedFiles = [];
-            var albumDir = sanitizeFilename(fields.albumDir || '');
-            var destRoot = path.join('/tmp', 'Disc', 'MusicAlbum');
+            var albumDir = (fields.albumDir || 'Unknown').replace(/[\\/:*?"<>|]/g, '_').trim();
+            var pending = files.length;
+
+            if (pending === 0) {
+                helpers.sendJSON(res, 400, { success: false, error: 'No files uploaded' });
+                return;
+            }
+
+            function done() {
+                if (uploadedFiles.length > 0) {
+                    helpers.addLog('disc_upload', session.username, 'Uploaded ' + uploadedFiles.length + ' disc file(s) to Blob');
+                }
+                helpers.sendJSON(res, 200, { success: true, files: uploadedFiles });
+            }
 
             for (var i = 0; i < files.length; i++) {
-                var f = files[i];
-                var destDir = path.join(destRoot, albumDir || 'Unknown');
-                fs.mkdirSync(destDir, { recursive: true });
-                var destPath = path.join(destDir, f.filename);
-                fs.writeFileSync(destPath, Buffer.from(f.body, 'binary'), 'binary');
-                uploadedFiles.push({ name: f.filename, path: f.filename });
+                (function(f) {
+                    var blobPath = 'disc/' + albumDir + '/' + Date.now() + '_' + f.filename;
+                    var buffer = Buffer.from(f.body, 'binary');
+                    put(blobPath, buffer, {
+                        access: 'public',
+                        contentType: getContentType(f.filename)
+                    }).then(function(blob) {
+                        uploadedFiles.push({ name: f.filename, path: blob.url });
+                        pending--;
+                        if (pending === 0) done();
+                    }).catch(function(e) {
+                        pending--;
+                        if (pending === 0) done();
+                    });
+                })(files[i]);
             }
-
-            if (uploadedFiles.length > 0) {
-                helpers.addLog('disc_upload', session.username, 'Uploaded ' + uploadedFiles.length + ' disc file(s)');
-            }
-            helpers.sendJSON(res, 200, { success: true, files: uploadedFiles });
         });
     });
 };
+
+function getContentType(filename) {
+    var ext = filename.split('.').pop().toLowerCase();
+    var map = {
+        mp3: 'audio/mpeg',
+        wav: 'audio/wav',
+        ogg: 'audio/ogg',
+        flac: 'audio/flac',
+        m4a: 'audio/mp4',
+        jpg: 'image/jpeg',
+        jpeg: 'image/jpeg',
+        png: 'image/png',
+        webp: 'image/webp',
+        gif: 'image/gif'
+    };
+    return map[ext] || 'application/octet-stream';
+}
