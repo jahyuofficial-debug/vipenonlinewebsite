@@ -19,6 +19,23 @@ BannerPage.initBgVideo();
         return fetch(url).then(function(r) { return r.json(); });
     };
 
+    function resolveDiscTapes() {
+        DiscDB.init().then(function() {
+            return DiscDB.migrateAllTapes(window.discData.tapes);
+        }).then(function() {
+            var updated = JSON.stringify(window.discData.tapes);
+            localStorage.setItem('vipen_mgr_disc_tapes', updated);
+            return DiscDB.resolveAllTapes(window.discData.tapes);
+        }).then(function() {
+            var tapes = window.discData.tapes || [];
+            var idx = window.discData.currentTapeIndex || 0;
+            if (tapes[idx] && tapes[idx].audio) {
+                discAudio.src = tapes[idx].audio;
+                discAudio.load();
+            }
+        });
+    }
+
     var loadSettings = loadJSON('data/manager/settings.json');
     var loadFresh = loadJSON('data/fresh.json');
     var loadDesign = loadJSON('data/design.json');
@@ -63,6 +80,8 @@ BannerPage.initBgVideo();
             localStorage.setItem('vipen_mgr_disc_tapes', JSON.stringify(window.discData.tapes));
         }
 
+        resolveDiscTapes();
+
         console.log('Data loaded from ManagerGo data files');
     }).catch(function() {
         console.log('Falling back to data.json');
@@ -87,6 +106,7 @@ BannerPage.initBgVideo();
             } else {
                 localStorage.setItem('vipen_mgr_disc_tapes', JSON.stringify(window.discData.tapes));
             }
+            resolveDiscTapes();
             console.log('Data loaded from data.json fallback');
         }).catch(function() { console.log('Using embedded data'); });
     });
@@ -1411,9 +1431,15 @@ window.addEventListener('storage', function(e) {
     }
     if (e.key === 'vipen_mgr_disc_tapes' && e.newValue) {
         try { window.discData.tapes = JSON.parse(e.newValue); } catch (ex) {}
-        if (currentPage === 'disc-library' && typeof DiscPage !== 'undefined') {
-            DiscPage.setDiscData(window.discData);
-        }
+        DiscDB.migrateAllTapes(window.discData.tapes).then(function() {
+            var updated = JSON.stringify(window.discData.tapes);
+            localStorage.setItem('vipen_mgr_disc_tapes', updated);
+            return DiscDB.resolveAllTapes(window.discData.tapes);
+        }).then(function() {
+            if (currentPage === 'disc-library' && typeof DiscPage !== 'undefined') {
+                DiscPage.setDiscData(window.discData);
+            }
+        });
     }
     if (e.key === 'vipen_mgr_home_banner' && e.newValue) {
         try {

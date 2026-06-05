@@ -53,8 +53,10 @@ var MiniPlayer = (function() {
         var tapes = discData.tapes || [];
         var currentIndex = discData.currentTapeIndex || 0;
         var currentTape = tapes[currentIndex] || {};
-        if (miniPlayerVinylLabel) miniPlayerVinylLabel.style.backgroundImage = 'url(' + (currentTape.cover || '') + ')';
-        if (miniPlayerCoverImg) miniPlayerCoverImg.src = currentTape.cover || '';
+        var cover = currentTape.cover || '';
+        var validCover = cover && (typeof DiscDB === 'undefined' || !DiscDB.isIndexedDBRef(cover)) ? cover : '';
+        if (miniPlayerVinylLabel) miniPlayerVinylLabel.style.backgroundImage = validCover ? 'url(' + validCover + ')' : '';
+        if (miniPlayerCoverImg) miniPlayerCoverImg.src = validCover;
         if (miniPlayerTitle) miniPlayerTitle.textContent = currentTape.title || 'Unknown Track';
         updateProgress();
         updatePlayIcon();

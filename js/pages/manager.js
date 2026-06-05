@@ -2353,7 +2353,14 @@ var ManagerGo = (function() {
             } else if (siteData && siteData.disc) {
                 discData.tapes = siteData.disc.tapes || [];
             }
-            renderDiscTracks(dc);
+            DiscDB.init().then(function() {
+                return DiscDB.migrateAllTapes(discData.tapes);
+            }).then(function() {
+                saveToLocalStorage(STORAGE_KEYS.discTapes, discData.tapes);
+                return DiscDB.resolveAllTapes(discData.tapes);
+            }).then(function() {
+                renderDiscTracks(dc);
+            });
         });
 
         document.getElementById('discAddBtn').addEventListener('click', function() {
@@ -2450,6 +2457,20 @@ var ManagerGo = (function() {
         });
     }
 
+    function dataUrlToBlob(dataUrl) {
+        if (!dataUrl) return null;
+        var parts = dataUrl.split(',');
+        if (parts.length < 2) return null;
+        var mime = parts[0].match(/:(.*?);/);
+        var mimeType = mime ? mime[1] : 'application/octet-stream';
+        var binary = atob(parts[1]);
+        var bytes = new Uint8Array(binary.length);
+        for (var i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+        return new Blob([bytes], { type: mimeType });
+    }
+
     function openDiscTrackModal(editIndex) {
         var isEdit = editIndex !== null;
         var tape = isEdit ? discData.tapes[editIndex] : {
@@ -2462,6 +2483,8 @@ var ManagerGo = (function() {
         };
 
         var currentAudio = tape.audio || '';
+        var currentAudioFile = null;
+        var currentCoverFile = null;
 
         var overlay = document.createElement('div');
         overlay.className = 'manager-modal-overlay';
@@ -2520,6 +2543,7 @@ var ManagerGo = (function() {
                 showToast('Only audio files are supported', true);
                 return;
             }
+            currentAudioFile = file;
             var reader = new FileReader();
             reader.onload = function(e) {
                 currentAudio = e.target.result;
@@ -2533,24 +2557,51 @@ var ManagerGo = (function() {
         overlay.querySelector('#modalCloseBtn').addEventListener('click', closeModal);
         overlay.querySelector('#modalCancelBtn').addEventListener('click', closeModal);
         overlay.querySelector('#modalSaveBtn').addEventListener('click', function() {
-            var updated = {
-                id: tape.id,
-                title: overlay.querySelector('#discTitle').value.trim(),
-                artist: overlay.querySelector('#discArtist').value.trim() || 'Vipen Music',
+            var trackId = tape.id;
+            var title = overlay.querySelector('#discTitle').value.trim();
+            var artist = overlay.querySelector('#discArtist').value.trim() || 'Vipen Music';
+            var coverDataUrl = getImageUploadValue(overlay, 'discCover');
+
+            var metaOnly = {
+                id: trackId,
+                title: title,
+                artist: artist,
                 time: '0:00',
-                cover: getImageUploadValue(overlay, 'discCover'),
-                audio: currentAudio
+                cover: coverDataUrl && coverDataUrl.indexOf('data:') === 0 ? DiscDB.makeRef(trackId) : coverDataUrl,
+                audio: currentAudioFile ? DiscDB.makeRef(trackId) : (currentAudio && currentAudio.indexOf('data:') === 0 ? '' : currentAudio)
             };
-            if (isEdit) {
-                discData.tapes[editIndex] = updated;
-            } else {
-                discData.tapes.push(updated);
+
+            function finishSave() {
+                if (isEdit) {
+                    discData.tapes[editIndex] = metaOnly;
+                } else {
+                    discData.tapes.push(metaOnly);
+                }
+                saveToLocalStorage(STORAGE_KEYS.discTapes, discData.tapes);
+                DiscDB.resolveAllTapes(discData.tapes).then(function() {
+                    var dc = document.getElementById('discManagerContent');
+                    if (dc) renderDiscTracks(dc);
+                });
+                showToast(isEdit ? 'Track updated' : 'Track added');
+                closeModal();
             }
-            saveToLocalStorage(STORAGE_KEYS.discTapes, discData.tapes);
-            var dc = document.getElementById('discManagerContent');
-            if (dc) renderDiscTracks(dc);
-            showToast(isEdit ? 'Track updated' : 'Track added');
-            closeModal();
+
+            var promises = [];
+            if (currentAudioFile) {
+                promises.push(DiscDB.saveTrackFiles(trackId, currentAudioFile, null));
+            }
+            if (coverDataUrl && coverDataUrl.indexOf('data:') === 0) {
+                var coverBlob = dataUrlToBlob(coverDataUrl);
+                if (coverBlob) {
+                    promises.push(DiscDB.saveCoverBlob(trackId, coverBlob));
+                }
+            }
+
+            if (promises.length > 0) {
+                Promise.all(promises).then(finishSave).catch(function() { finishSave(); });
+            } else {
+                finishSave();
+            }
         });
     }
 
@@ -2567,6 +2618,8 @@ var ManagerGo = (function() {
         var isDraggingProgress = false;
         var currentCover = tape.cover || '';
         var currentAudio = tape.audio || '';
+        var currentCoverFile = null;
+        var currentAudioFile = null;
 
         function formatDetailTime(seconds) {
             if (isNaN(seconds)) return '0:00';
@@ -2825,6 +2878,7 @@ var ManagerGo = (function() {
         }
 
         function handleDetailCoverFile(file) {
+            currentCoverFile = file;
             validateCoverImage(file, function() {
                 var reader = new FileReader();
                 reader.onload = function(e) {
@@ -2861,6 +2915,7 @@ var ManagerGo = (function() {
                 showToast('Only audio files are supported', true);
                 return;
             }
+            currentAudioFile = file;
             var reader = new FileReader();
             reader.onload = function(e) {
                 var dataUrl = e.target.result;
@@ -2874,20 +2929,49 @@ var ManagerGo = (function() {
         }
 
         overlay.querySelector('#detailSave').addEventListener('click', function() {
-            var updated = {
-                id: tape.id,
-                title: titleInput ? titleInput.value.trim() : tape.title,
-                artist: artistInput ? artistInput.value.trim() || 'Vipen Music' : tape.artist,
+            var trackId = tape.id;
+            var title = titleInput ? titleInput.value.trim() : tape.title;
+            var artist = artistInput ? artistInput.value.trim() || 'Vipen Music' : tape.artist;
+
+            var metaOnly = {
+                id: trackId,
+                title: title,
+                artist: artist,
                 time: '0:00',
-                cover: currentCover,
-                audio: currentAudio
+                cover: currentCoverFile ? DiscDB.makeRef(trackId) : (currentCover && currentCover.indexOf('data:') === 0 ? DiscDB.makeRef(trackId) : currentCover),
+                audio: currentAudioFile ? DiscDB.makeRef(trackId) : (currentAudio && currentAudio.indexOf('data:') === 0 ? '' : currentAudio)
             };
-            discData.tapes[editIndex] = updated;
-            saveToLocalStorage(STORAGE_KEYS.discTapes, discData.tapes);
-            var dc = document.getElementById('discManagerContent');
-            if (dc) renderDiscTracks(dc);
-            showToast('Track updated');
-            closeDetail();
+
+            function finishSave() {
+                discData.tapes[editIndex] = metaOnly;
+                saveToLocalStorage(STORAGE_KEYS.discTapes, discData.tapes);
+                DiscDB.resolveAllTapes(discData.tapes).then(function() {
+                    var dc = document.getElementById('discManagerContent');
+                    if (dc) renderDiscTracks(dc);
+                });
+                showToast('Track updated');
+                closeDetail();
+            }
+
+            var promises = [];
+            if (currentAudioFile) {
+                promises.push(DiscDB.saveTrackFiles(trackId, currentAudioFile, null));
+            } else if (currentAudio && currentAudio.indexOf('data:') === 0) {
+                var audioBlob = dataUrlToBlob(currentAudio);
+                if (audioBlob) promises.push(DiscDB.saveTrackFiles(trackId, audioBlob, null));
+            }
+            if (currentCoverFile) {
+                promises.push(DiscDB.saveCoverBlob(trackId, currentCoverFile));
+            } else if (currentCover && currentCover.indexOf('data:') === 0) {
+                var coverBlob = dataUrlToBlob(currentCover);
+                if (coverBlob) promises.push(DiscDB.saveCoverBlob(trackId, coverBlob));
+            }
+
+            if (promises.length > 0) {
+                Promise.all(promises).then(finishSave).catch(function() { finishSave(); });
+            } else {
+                finishSave();
+            }
         });
 
         overlay.querySelector('#detailDelete').addEventListener('click', function() {
@@ -2901,6 +2985,7 @@ var ManagerGo = (function() {
                     if (!confirmed) return;
                     saveToTrash('disc_track', JSON.parse(JSON.stringify(track)), STORAGE_KEYS.discTapes);
                     discData.tapes.splice(editIndex, 1);
+                    DiscDB.deleteTrackFiles(track.id);
                     saveToLocalStorage(STORAGE_KEYS.discTapes, discData.tapes);
                     var dc = document.getElementById('discManagerContent');
                     if (dc) renderDiscTracks(dc);
