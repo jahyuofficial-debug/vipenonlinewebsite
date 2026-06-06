@@ -529,6 +529,7 @@ var ManagerGo = (function() {
                         saveToTrash('fresh_group', JSON.parse(JSON.stringify(group)), STORAGE_KEYS.freshHeroItems);
                         freshData.heroGroups.splice(idx, 1);
                         saveToLocalStorage(STORAGE_KEYS.freshHeroItems, freshData.heroGroups);
+            saveFreshToServer({ heroGroups: freshData.heroGroups });
                         var fc = document.getElementById('freshManagerContent');
                         if (fc) renderFreshGroups(fc);
                         showToast('Group moved to Trash');
@@ -1104,6 +1105,7 @@ var ManagerGo = (function() {
                 freshData.heroGroups.push(updated);
             }
             saveToLocalStorage(STORAGE_KEYS.freshHeroItems, freshData.heroGroups);
+            saveFreshToServer({ heroGroups: freshData.heroGroups });
             var fc = document.getElementById('freshManagerContent');
             if (fc) renderFreshGroups(fc);
             showToast(isEdit ? 'Group updated' : 'Group added');
@@ -1190,6 +1192,7 @@ var ManagerGo = (function() {
             group.headline.body = overlay.querySelector('#rte-headline-edit').innerHTML.trim();
             group.headline.bodyEn = overlay.querySelector('#rte-headline-edit-en').innerHTML.trim();
             saveToLocalStorage(STORAGE_KEYS.freshHeroItems, freshData.heroGroups);
+            saveFreshToServer({ heroGroups: freshData.heroGroups });
             var fc = document.getElementById('freshManagerContent');
             if (fc) renderFreshGroups(fc);
             showToast('Headline updated');
@@ -1291,6 +1294,7 @@ var ManagerGo = (function() {
             group.spot.date = overlay.querySelector('#freshSpotDate2').value.trim();
             group.spot.bgColor = overlay.querySelector('#freshSpotBgColor2').value.trim();
             saveToLocalStorage(STORAGE_KEYS.freshHeroItems, freshData.heroGroups);
+            saveFreshToServer({ heroGroups: freshData.heroGroups });
             var fc = document.getElementById('freshManagerContent');
             if (fc) renderFreshGroups(fc);
             showToast('Spot updated');
@@ -1395,6 +1399,7 @@ var ManagerGo = (function() {
             article.bodyEn = overlay.querySelector('#rte-article-edit-en').innerHTML.trim();
             group.hotNews[articleIdx] = article;
             saveToLocalStorage(STORAGE_KEYS.freshHeroItems, freshData.heroGroups);
+            saveFreshToServer({ heroGroups: freshData.heroGroups });
             var fc = document.getElementById('freshManagerContent');
             if (fc) renderFreshGroups(fc);
             showToast('Article updated');
@@ -1592,6 +1597,7 @@ var ManagerGo = (function() {
                 };
                 freshData.heroGroups.push(groupData);
                 saveToLocalStorage(STORAGE_KEYS.freshHeroItems, freshData.heroGroups);
+            saveFreshToServer({ heroGroups: freshData.heroGroups });
                 drafts.splice(idx, 1);
                 saveToLocalStorage(STORAGE_KEYS.drafts, drafts);
                 showToast('Draft moved to Fresh');
@@ -1987,6 +1993,7 @@ var ManagerGo = (function() {
                 designData.works.push(updated);
             }
             saveToLocalStorage(STORAGE_KEYS.designDwItems, designData.works);
+            saveDesignToServer({ works: designData.works });
             if (typeof dwItems !== 'undefined') {
                 dwItems = designData.works;
             }
@@ -2430,6 +2437,24 @@ var ManagerGo = (function() {
         };
         xhr.onerror = function() { callback('Network error'); };
         xhr.send(JSON.stringify({ data: payload, sessionToken: sessionToken }));
+    }
+
+    function saveDesignToServer(data, onSuccess) {
+        if (!sessionToken) return;
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/manager/design-save', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() { if (xhr.status === 200 && onSuccess) onSuccess(); };
+        xhr.send(JSON.stringify({ data: data, sessionToken: sessionToken }));
+    }
+
+    function saveFreshToServer(data, onSuccess) {
+        if (!sessionToken) return;
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/api/manager/fresh-save', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() { if (xhr.status === 200 && onSuccess) onSuccess(); };
+        xhr.send(JSON.stringify({ data: data, sessionToken: sessionToken }));
     }
 
     function renderDiscManager(container) {

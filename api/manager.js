@@ -481,6 +481,50 @@ function handleManagerSettings(req, res) {
     });
 }
 
+function handleManagerDesignSave(req, res) {
+    if (req.method === 'OPTIONS') { handleOptions(req, res, 'POST, OPTIONS'); return; }
+    if (req.method !== 'POST') { sendJSON(res, 405, { success: false, error: 'Method not allowed' }); return; }
+
+    parseBody(req, function(err, body) {
+        if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
+        managerHelpers.verifySessionToken(body.sessionToken, function(err2, session) {
+            if (err2) { sendJSON(res, 401, { success: false, error: err2 }); return; }
+            var data = body.data;
+            if (!data) { sendJSON(res, 400, { success: false, error: 'No data provided' }); return; }
+            var json = JSON.stringify(data, null, 2);
+            put('data/design-works.json', json, { access: 'public', contentType: 'application/json', allowOverwrite: true })
+                .then(function(blob) {
+                    managerHelpers.addLog('design_save', session.username, 'Updated design works data');
+                    sendJSON(res, 200, { success: true, url: blob.url });
+                }).catch(function(putErr) {
+                    sendJSON(res, 500, { success: false, error: 'Failed to save design data: ' + putErr.message });
+                });
+        });
+    });
+}
+
+function handleManagerFreshSave(req, res) {
+    if (req.method === 'OPTIONS') { handleOptions(req, res, 'POST, OPTIONS'); return; }
+    if (req.method !== 'POST') { sendJSON(res, 405, { success: false, error: 'Method not allowed' }); return; }
+
+    parseBody(req, function(err, body) {
+        if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
+        managerHelpers.verifySessionToken(body.sessionToken, function(err2, session) {
+            if (err2) { sendJSON(res, 401, { success: false, error: err2 }); return; }
+            var data = body.data;
+            if (!data) { sendJSON(res, 400, { success: false, error: 'No data provided' }); return; }
+            var json = JSON.stringify(data, null, 2);
+            put('data/fresh-hero.json', json, { access: 'public', contentType: 'application/json', allowOverwrite: true })
+                .then(function(blob) {
+                    managerHelpers.addLog('fresh_save', session.username, 'Updated fresh hero data');
+                    sendJSON(res, 200, { success: true, url: blob.url });
+                }).catch(function(putErr) {
+                    sendJSON(res, 500, { success: false, error: 'Failed to save fresh data: ' + putErr.message });
+                });
+        });
+    });
+}
+
 module.exports = function(req, res) {
     var url = require('url');
     var parsedUrl = url.parse(req.url, true);
@@ -495,6 +539,8 @@ module.exports = function(req, res) {
         'disc-upload': handleManagerDiscUpload,
         'disc-generate-upload-token': handleManagerDiscGenerateUploadToken,
         'disc-save': handleManagerDiscSave,
+        'design-save': handleManagerDesignSave,
+        'fresh-save': handleManagerFreshSave,
         'home-banner-save': handleManagerHomeBannerSave,
         'settings': handleManagerSettings
     };

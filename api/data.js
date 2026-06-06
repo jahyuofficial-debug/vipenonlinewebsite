@@ -64,6 +64,12 @@ module.exports = function(req, res) {
         case 'home-banner':
             handleDataGeneric(req, res, 'home-banner');
             break;
+        case 'design':
+            handleDataGeneric(req, res, 'design-works');
+            break;
+        case 'fresh':
+            handleDataGeneric(req, res, 'fresh-hero');
+            break;
         default:
             sendJSON(res, 404, { error: 'Not found', message: 'Unknown action: ' + (action || 'none') });
     }
