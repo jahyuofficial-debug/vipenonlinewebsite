@@ -357,11 +357,14 @@ function handleManagerDiscGenerateUploadToken(req, res) {
             var blobPath = 'disc/' + albumDir + '/' + Date.now() + '_' + filename;
             (async function() {
                 try {
+                    console.log('START issueSignedToken');
                     var signedToken = await issueSignedToken({
                         allowedContentTypes: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/mp4', 'image/jpeg', 'image/png', 'image/webp', 'image/gif'],
                         maximumSizeInBytes: 500 * 1024 * 1024,
-                        validUntil: Date.now() + 15 * 60 * 1000
+                        validUntil: Date.now() + 15 * 60 * 1000,
+                        operations: ['put']
                     });
+                    console.log('END issueSignedToken, signedToken=', JSON.stringify(signedToken));
 
                     var result = await presignUrl(signedToken, {
                         pathname: blobPath,
@@ -373,6 +376,7 @@ function handleManagerDiscGenerateUploadToken(req, res) {
                     managerHelpers.addLog('disc_token', session.username, 'Generated upload token for ' + filename);
                     sendJSON(res, 200, { success: true, uploadUrl: result.presignedUrl, pathname: blobPath });
                 } catch (e) {
+                    console.error('disc-generate-upload-token FAILED:', e.message);
                     sendJSON(res, 500, { success: false, error: 'Failed to generate upload URL: ' + e.message });
                 }
             })();
