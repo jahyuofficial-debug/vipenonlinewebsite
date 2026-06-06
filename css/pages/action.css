@@ -1,4 +1,4 @@
-﻿.action-page{background:#000;min-height:100vh;padding-top:1.43rem;padding-bottom:2rem}
+.action-page{background:#000;min-height:100vh;padding-top:1.43rem;padding-bottom:2rem}
 .action-feed-container{max-width:6.8rem;margin:0 auto;padding:0 .4rem}
 .action-feed-header{display:none}
 .action-feed-list{display:flex;flex-direction:column;gap:.4rem}
@@ -74,4 +74,10 @@
 .action-image-lightbox-prev{left:.3rem}
 .action-image-lightbox-next{right:.3rem}
 .action-image-lightbox-counter{position:absolute;bottom:.3rem;left:50%;transform:translateX(-50%);font-size:.12rem;color:rgba(255,255,255,.5)}
+
+.action-post-owner-controls{display:flex;align-items:center;gap:.06rem;margin-right:.04rem}
+.action-post-owner-btn{width:.28rem;height:.28rem;border-radius:50%;border:none;background:transparent;color:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s}
+.action-post-owner-btn:hover{color:rgba(255,255,255,.6);background:rgba(255,255,255,.05)}
+.action-post-owner-btn svg{width:.14rem;height:.14rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.action-post-owner-btn.delete-btn:hover{color:#ef4444}
 

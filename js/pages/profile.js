@@ -428,17 +428,38 @@ var ProfilePage = (function() {
                 showToast('Please enter content', true);
                 return;
             }
-            var posts = Utils.getUserData('posts') || [];
-            posts.unshift({
+            var userId = Utils.getUserId();
+            var newPost = {
                 type: 'fresh',
                 title: title,
                 content: body,
                 images: freshImages,
                 publishedAt: new Date().toISOString(),
                 author: profileData.displayName,
-                avatar: profileData.avatar
-            });
+                avatar: profileData.avatar,
+                userId: userId
+            };
+            var posts = Utils.getUserData('posts') || [];
+            posts.unshift(newPost);
             Utils.setUserData('posts', posts);
+            var globalPosts = Utils.getGlobalData('posts') || [];
+            globalPosts.unshift(newPost);
+            Utils.setGlobalData('posts', globalPosts);
+            if (typeof window.freshItems !== 'undefined') {
+                window.freshItems.unshift({
+                    id: 'user_' + Date.now(),
+                    headline: title,
+                    summary: body.replace(/<[^>]*>/g, '').substring(0, 150),
+                    body: body,
+                    image: freshImages.length > 0 ? freshImages[0] : '',
+                    date: new Date().toISOString().split('T')[0],
+                    author: profileData.displayName,
+                    authorInitial: (profileData.displayName || 'U').charAt(0),
+                    authorBg: '#6366f1',
+                    cat: 'all',
+                    userId: userId
+                });
+            }
             showToast('Fresh article published');
             closeFreshEditor();
             renderArticlePublished();
@@ -627,6 +648,7 @@ var ProfilePage = (function() {
                 showToast('Please enter content', true);
                 return;
             }
+            var userId = Utils.getUserId();
             if (editingActionId) {
                 var posts = Utils.getUserData('actions') || [];
                 var idx = posts.findIndex(function(p) { return p.id === editingActionId; });
@@ -636,14 +658,23 @@ var ProfilePage = (function() {
                     posts[idx].editedAt = new Date().toISOString();
                     posts[idx].editCount = (posts[idx].editCount || 0) + 1;
                     Utils.setUserData('actions', posts);
+                    var globalActions = Utils.getGlobalData('actions') || [];
+                    var gIdx = globalActions.findIndex(function(p) { return p.id === editingActionId; });
+                    if (gIdx > -1) {
+                        globalActions[gIdx].content = text;
+                        globalActions[gIdx].images = actionImages;
+                        globalActions[gIdx].editedAt = new Date().toISOString();
+                        globalActions[gIdx].editCount = (globalActions[gIdx].editCount || 0) + 1;
+                        Utils.setGlobalData('actions', globalActions);
+                        syncActionFeed();
+                    }
                     showToast('Action updated');
                 }
                 closeActionEditor();
                 renderActionPublished();
                 return;
             }
-            var posts = Utils.getUserData('actions') || [];
-            posts.unshift({
+            var newAction = {
                 id: Date.now(),
                 type: 'action',
                 content: text,
@@ -652,9 +683,16 @@ var ProfilePage = (function() {
                 author: profileData.displayName,
                 avatar: profileData.avatar,
                 hidden: false,
-                editCount: 0
-            });
+                editCount: 0,
+                userId: userId
+            };
+            var posts = Utils.getUserData('actions') || [];
+            posts.unshift(newAction);
             Utils.setUserData('actions', posts);
+            var globalActions = Utils.getGlobalData('actions') || [];
+            globalActions.unshift(newAction);
+            Utils.setGlobalData('actions', globalActions);
+            syncActionFeed();
             showToast('Action update posted');
             closeActionEditor();
             renderActionPublished();
@@ -916,17 +954,38 @@ var ProfilePage = (function() {
                     showToast('Please enter content', true);
                     return;
                 }
-                var posts = Utils.getUserData('posts') || [];
-                posts.unshift({
+                var userId = Utils.getUserId();
+                var newPost = {
                     type: 'fresh',
                     title: title,
                     content: content,
                     images: freshImages,
                     publishedAt: new Date().toISOString(),
                     author: profileData.displayName,
-                    avatar: profileData.avatar
-                });
+                    avatar: profileData.avatar,
+                    userId: userId
+                };
+                var posts = Utils.getUserData('posts') || [];
+                posts.unshift(newPost);
                 Utils.setUserData('posts', posts);
+                var globalPosts = Utils.getGlobalData('posts') || [];
+                globalPosts.unshift(newPost);
+                Utils.setGlobalData('posts', globalPosts);
+                if (typeof window.freshItems !== 'undefined') {
+                    window.freshItems.unshift({
+                        id: 'user_' + Date.now(),
+                        headline: title,
+                        summary: content.replace(/<[^>]*>/g, '').substring(0, 150),
+                        body: content,
+                        image: freshImages.length > 0 ? freshImages[0] : '',
+                        date: new Date().toISOString().split('T')[0],
+                        author: profileData.displayName,
+                        authorInitial: (profileData.displayName || 'U').charAt(0),
+                        authorBg: '#6366f1',
+                        cat: 'all',
+                        userId: userId
+                    });
+                }
 
                 var allDrafts = Utils.getUserData('drafts') || [];
                 var freshDrafts = allDrafts.filter(function(d) { return d.type === 'fresh'; });
@@ -1007,14 +1066,17 @@ var ProfilePage = (function() {
         if (!container) return;
         var likes = Utils.getUserData('likes') || {};
         var likedArticles = likes.likedArticles || [];
-        if (likedArticles.length === 0) {
-            container.innerHTML = '<div class="empty-state">No liked articles yet</div>';
+        var likedActions = likes.likedActions || [];
+        var allLiked = likedArticles.concat(likedActions);
+        if (allLiked.length === 0) {
+            container.innerHTML = '<div class="empty-state">No liked content yet</div>';
             return;
         }
-        container.innerHTML = likedArticles.map(function(item) {
+        container.innerHTML = allLiked.map(function(item) {
+            var typeLabel = item.type === 'action' ? 'Action' : 'Article';
             return '<div class="like-item">' +
-                '<div class="like-item-title">' + (item.title || 'Untitled') + '</div>' +
-                '<div class="like-item-meta">by ' + (item.author || 'Unknown') + ' · ' + (item.date || '') + '</div>' +
+                '<div class="like-item-title">' + (item.title || item.content || 'Untitled') + '</div>' +
+                '<div class="like-item-meta">' + typeLabel + ' by ' + (item.author || 'Unknown') + ' · ' + (item.date || '') + '</div>' +
                 '</div>';
         }).join('');
     }
@@ -1034,6 +1096,31 @@ var ProfilePage = (function() {
                 '<div class="like-item-meta">' + (item.artist || 'Unknown') + '</div>' +
                 '</div>';
         }).join('');
+    }
+
+    function syncActionFeed() {
+        var globalActions = Utils.getGlobalData('actions') || [];
+        if (typeof window.actionFeed !== 'undefined') {
+            globalActions.forEach(function(ga) {
+                var exists = window.actionFeed.find(function(af) { return af.id === ga.id; });
+                if (!exists && !ga.hidden) {
+                    window.actionFeed.unshift({
+                        id: ga.id,
+                        username: ga.author || 'User',
+                        avatar: ga.avatar || '',
+                        images: ga.images || [],
+                        caption: ga.content || '',
+                        likes: 0,
+                        comments: 0,
+                        timeAgo: Utils.getRelativeTime(ga.publishedAt),
+                        isLiked: false,
+                        commentList: [],
+                        userId: ga.userId,
+                        isUserAction: true
+                    });
+                }
+            });
+        }
     }
 
     function renderActionPublished() {
@@ -1085,6 +1172,16 @@ var ProfilePage = (function() {
                     if (idx > -1) {
                         posts[idx].hidden = true;
                         Utils.setUserData('actions', posts);
+                        var globalActions = Utils.getGlobalData('actions') || [];
+                        var gIdx = globalActions.findIndex(function(p) { return p.id === id; });
+                        if (gIdx > -1) {
+                            globalActions[gIdx].hidden = true;
+                            Utils.setGlobalData('actions', globalActions);
+                        }
+                        if (typeof window.actionFeed !== 'undefined') {
+                            var afIdx = window.actionFeed.findIndex(function(p) { return p.id === id; });
+                            if (afIdx > -1) window.actionFeed.splice(afIdx, 1);
+                        }
                         renderActionPublished();
                         showToast('Action hidden');
                     }
@@ -1102,6 +1199,16 @@ var ProfilePage = (function() {
                     if (idx > -1) {
                         posts.splice(idx, 1);
                         Utils.setUserData('actions', posts);
+                        var globalActions = Utils.getGlobalData('actions') || [];
+                        var gIdx = globalActions.findIndex(function(p) { return p.id === id; });
+                        if (gIdx > -1) {
+                            globalActions.splice(gIdx, 1);
+                            Utils.setGlobalData('actions', globalActions);
+                        }
+                        if (typeof window.actionFeed !== 'undefined') {
+                            var afIdx = window.actionFeed.findIndex(function(p) { return p.id === id; });
+                            if (afIdx > -1) window.actionFeed.splice(afIdx, 1);
+                        }
                         renderActionPublished();
                         showToast('Action deleted');
                     }
@@ -1415,6 +1522,7 @@ var ProfilePage = (function() {
         setupArticleSubtabs();
         setupLikeSubtabs();
         setupActionSubtabs();
+        syncActionFeed();
         renderArticlePublished();
         renderArticleDrafts();
         renderLikeArticles();

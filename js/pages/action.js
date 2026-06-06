@@ -3,6 +3,46 @@ var ActionPage = (function() {
 var actionLightboxCurrentPost = null;
 var actionLightboxCurrentIndex = 0;
 
+function getMergedActionFeed() {
+    var feed = (window.actionFeed || []).slice();
+    var globalActions = (typeof Utils !== 'undefined' && Utils.getGlobalData) ? (Utils.getGlobalData('actions') || []) : [];
+    var userId = (typeof Utils !== 'undefined' && Utils.getUserId) ? Utils.getUserId() : null;
+    globalActions.forEach(function(ga) {
+        if (ga.hidden) return;
+        var exists = feed.find(function(f) { return f.id === ga.id; });
+        if (!exists) {
+            feed.unshift({
+                id: ga.id,
+                username: ga.author || 'User',
+                avatar: ga.avatar || '',
+                images: ga.images || [],
+                caption: ga.content || '',
+                likes: 0,
+                comments: 0,
+                timeAgo: (typeof Utils !== 'undefined' && Utils.getRelativeTime) ? Utils.getRelativeTime(ga.publishedAt) : 'recently',
+                isLiked: false,
+                commentList: [],
+                userId: ga.userId,
+                isUserAction: true
+            });
+        }
+    });
+    if (userId) {
+        var likes = (typeof Utils !== 'undefined' && Utils.getUserData) ? (Utils.getUserData('likes') || {}) : {};
+        var likedActions = likes.likedActions || [];
+        feed.forEach(function(post) {
+            var found = likedActions.find(function(la) { return la.id === post.id; });
+            if (found) post.isLiked = true;
+        });
+    }
+    return feed;
+}
+
+function isOwner(post) {
+    var userId = (typeof Utils !== 'undefined' && Utils.getUserId) ? Utils.getUserId() : null;
+    return post.isUserAction && userId && post.userId === userId;
+}
+
 function buildActionPostImages(post) {
     if (!post.images || post.images.length === 0) return '';
     var imgClass = post.images.length === 1 ? 'single' : post.images.length === 2 ? 'double' : post.images.length === 4 ? 'four' : 'multi';
@@ -30,6 +70,17 @@ function buildActionPostItem(post) {
     var likesInfoClass = post.isLiked ? '' : ' hidden';
     var imagesHtml = buildActionPostImages(post);
     var commentsHtml = buildActionPostComments(post);
+    var ownerControls = '';
+    if (isOwner(post)) {
+        ownerControls = '<div class="action-post-owner-controls">' +
+            '<button class="action-post-owner-btn hide-btn" data-post-id="' + post.id + '" title="Hide">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>' +
+            '</button>' +
+            '<button class="action-post-owner-btn delete-btn" data-post-id="' + post.id + '" title="Delete">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+            '</button>' +
+            '</div>';
+    }
     return '<div class="action-post" data-post-id="' + post.id + '">' +
         '<div class="action-post-header">' +
         '<img class="action-post-avatar" src="' + post.avatar + '" alt="' + post.username + '">' +
@@ -37,6 +88,7 @@ function buildActionPostItem(post) {
         '<div class="action-post-username">' + post.username + '</div>' +
         '<div class="action-post-time">' + post.timeAgo + '</div>' +
         '</div>' +
+        ownerControls +
         '<button class="action-post-more-btn share-btn" data-post-id="' + post.id + '">' +
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>' +
         '</button>' +
@@ -61,7 +113,8 @@ function buildActionPostItem(post) {
 }
 
 function buildActionPage() {
-    var postsHtml = actionFeed.map(function(post) {
+    var mergedFeed = getMergedActionFeed();
+    var postsHtml = mergedFeed.map(function(post) {
         return buildActionPostItem(post);
     }).join('');
     return '<section id="page-action" class="action-page">' +
@@ -85,7 +138,8 @@ function buildActionPage() {
 }
 
 function openActionLightbox(postId, imgIndex) {
-    var post = actionFeed.find(function(p) { return p.id === postId; });
+    var mergedFeed = getMergedActionFeed();
+    var post = mergedFeed.find(function(p) { return p.id === postId; });
     if (!post || !post.images || post.images.length === 0) return;
     actionLightboxCurrentPost = post;
     actionLightboxCurrentIndex = imgIndex;
@@ -173,11 +227,37 @@ function fallbackCopyAndToast(text) {
 }
 
 function bindActionInteractions() {
+    var mergedFeed = getMergedActionFeed();
+
+    function persistLike(postId, isLiked) {
+        if (typeof Utils === 'undefined' || !Utils.getUserData) return;
+        var likes = Utils.getUserData('likes') || {};
+        if (!likes.likedActions) likes.likedActions = [];
+        var post = mergedFeed.find(function(p) { return p.id === postId; });
+        if (!post) return;
+        if (isLiked) {
+            var exists = likes.likedActions.find(function(la) { return la.id === postId; });
+            if (!exists) {
+                likes.likedActions.unshift({
+                    id: postId,
+                    type: 'action',
+                    content: post.caption || '',
+                    title: post.caption || '',
+                    author: post.username || 'Unknown',
+                    date: new Date().toISOString().split('T')[0]
+                });
+            }
+        } else {
+            likes.likedActions = likes.likedActions.filter(function(la) { return la.id !== postId; });
+        }
+        Utils.setUserData('likes', likes);
+    }
+
     var likeBtns = document.querySelectorAll('.action-post-action-btn.like-btn');
     likeBtns.forEach(function(btn) {
         btn.addEventListener('click', function() {
             var postId = parseInt(this.getAttribute('data-post-id'), 10);
-            var post = actionFeed.find(function(p) { return p.id === postId; });
+            var post = mergedFeed.find(function(p) { return p.id === postId; });
             if (post) {
                 post.isLiked = !post.isLiked;
                 post.likes += post.isLiked ? 1 : -1;
@@ -200,6 +280,7 @@ function bindActionInteractions() {
                         likesInfo.classList.add('hidden');
                     }
                 }
+                persistLike(postId, post.isLiked);
             }
         });
     });
@@ -310,6 +391,46 @@ function bindActionInteractions() {
                 });
             } else {
                 fallbackCopyAndToast(link);
+            }
+        });
+    });
+
+    var hideBtns = document.querySelectorAll('.action-post-owner-btn.hide-btn');
+    hideBtns.forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var postId = parseInt(this.getAttribute('data-post-id'), 10);
+            var globalActions = (typeof Utils !== 'undefined' && Utils.getGlobalData) ? (Utils.getGlobalData('actions') || []) : [];
+            var gIdx = globalActions.findIndex(function(p) { return p.id === postId; });
+            if (gIdx > -1) {
+                globalActions[gIdx].hidden = true;
+                if (typeof Utils !== 'undefined' && Utils.setGlobalData) Utils.setGlobalData('actions', globalActions);
+            }
+            var postEl = document.querySelector('.action-post[data-post-id="' + postId + '"]');
+            if (postEl) postEl.remove();
+            if (typeof window.actionFeed !== 'undefined') {
+                var afIdx = window.actionFeed.findIndex(function(p) { return p.id === postId; });
+                if (afIdx > -1) window.actionFeed.splice(afIdx, 1);
+            }
+        });
+    });
+
+    var deleteBtns = document.querySelectorAll('.action-post-owner-btn.delete-btn');
+    deleteBtns.forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var postId = parseInt(this.getAttribute('data-post-id'), 10);
+            var globalActions = (typeof Utils !== 'undefined' && Utils.getGlobalData) ? (Utils.getGlobalData('actions') || []) : [];
+            var gIdx = globalActions.findIndex(function(p) { return p.id === postId; });
+            if (gIdx > -1) {
+                globalActions.splice(gIdx, 1);
+                if (typeof Utils !== 'undefined' && Utils.setGlobalData) Utils.setGlobalData('actions', globalActions);
+            }
+            var postEl = document.querySelector('.action-post[data-post-id="' + postId + '"]');
+            if (postEl) postEl.remove();
+            if (typeof window.actionFeed !== 'undefined') {
+                var afIdx = window.actionFeed.findIndex(function(p) { return p.id === postId; });
+                if (afIdx > -1) window.actionFeed.splice(afIdx, 1);
             }
         });
     });

@@ -810,6 +810,29 @@ function navigateTo(pageName) {
         banner.style.display = 'none';
         header.classList.remove('dimmed');
         subPageContainer = document.createElement('div');
+        var mergedItems = freshItems.slice();
+        var globalPosts = Utils.getGlobalData('posts') || [];
+        globalPosts.forEach(function(gp) {
+            if (gp.type === 'fresh') {
+                var exists = mergedItems.find(function(mi) { return mi.id === ('user_' + gp.publishedAt); });
+                if (!exists) {
+                    mergedItems.unshift({
+                        id: 'user_' + gp.publishedAt,
+                        headline: gp.title || 'Untitled',
+                        summary: (gp.content || '').replace(/<[^>]*>/g, '').substring(0, 150),
+                        body: gp.content || '',
+                        image: gp.images && gp.images.length > 0 ? gp.images[0] : '',
+                        date: gp.publishedAt ? gp.publishedAt.split('T')[0] : '',
+                        author: gp.author || 'User',
+                        authorInitial: (gp.author || 'U').charAt(0),
+                        authorBg: '#6366f1',
+                        cat: 'all',
+                        userId: gp.userId
+                    });
+                }
+            }
+        });
+        FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: mergedItems });
         subPageContainer.innerHTML = FreshPage.buildPage(freshActiveTab);
         app.appendChild(subPageContainer);
         FreshPage.bindAll();
@@ -866,6 +889,27 @@ function navigateTo(pageName) {
         if (herosTopBg) herosTopBg.classList.remove('hidden');
         banner.style.display = 'none';
         header.classList.remove('dimmed');
+        var globalActions = Utils.getGlobalData('actions') || [];
+        globalActions.forEach(function(ga) {
+            if (ga.hidden) return;
+            var exists = window.actionFeed.find(function(af) { return af.id === ga.id; });
+            if (!exists) {
+                window.actionFeed.unshift({
+                    id: ga.id,
+                    username: ga.author || 'User',
+                    avatar: ga.avatar || '',
+                    images: ga.images || [],
+                    caption: ga.content || '',
+                    likes: 0,
+                    comments: 0,
+                    timeAgo: Utils.getRelativeTime(ga.publishedAt),
+                    isLiked: false,
+                    commentList: [],
+                    userId: ga.userId,
+                    isUserAction: true
+                });
+            }
+        });
         subPageContainer = document.createElement('div');
         subPageContainer.innerHTML = ActionPage.buildPage();
         app.appendChild(subPageContainer);
@@ -1211,6 +1255,23 @@ function navigateToFreshDetail(id) {
                 svg.setAttribute('stroke', 'currentColor');
             }
             if (countEl) countEl.textContent = item.likeCount;
+            var likes = Utils.getUserData('likes') || {};
+            if (!likes.likedArticles) likes.likedArticles = [];
+            if (item.isLiked) {
+                var exists = likes.likedArticles.find(function(la) { return la.id === item.id; });
+                if (!exists) {
+                    likes.likedArticles.unshift({
+                        id: item.id,
+                        type: 'article',
+                        title: item.headline || '',
+                        author: item.author || 'Unknown',
+                        date: item.date || ''
+                    });
+                }
+            } else {
+                likes.likedArticles = likes.likedArticles.filter(function(la) { return la.id !== item.id; });
+            }
+            Utils.setUserData('likes', likes);
         });
     }
 

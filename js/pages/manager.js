@@ -3520,9 +3520,14 @@ var ManagerGo = (function() {
                     (bgVideo ?
                         '<div class="manager-home-video-preview" data-group="' + i + '" data-video-path="' + escapeHtml(bgVideo) + '">' +
                         '<video src="' + bgVideo + '" muted loop preload="metadata"></video>' +
+                        '<div class="manager-home-video-actions">' +
                         '<button class="manager-home-banner-replace manager-home-video-replace" data-group="' + i + '">' +
                         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>' +
                         'Replace</button>' +
+                        '<button class="manager-home-video-delete" data-group="' + i + '">' +
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
+                        'Delete</button>' +
+                        '</div>' +
                         '</div>' :
                         '<div class="manager-home-video-placeholder">' +
                         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>' +
@@ -3639,6 +3644,17 @@ var ManagerGo = (function() {
                 });
             });
 
+            var textInputs = container.querySelectorAll('.home-text-topic, .home-text-note');
+            textInputs.forEach(function(input) {
+                input.addEventListener('input', function() {
+                    collectFormData();
+                });
+                input.addEventListener('blur', function() {
+                    collectFormData();
+                    saveHomeBanner();
+                });
+            });
+
             var videoUploads = container.querySelectorAll('.manager-home-video-upload');
             videoUploads.forEach(function(zone) {
                 zone.addEventListener('click', function(e) {
@@ -3666,12 +3682,21 @@ var ManagerGo = (function() {
                         if (fi) fi.click();
                     });
                 }
+
+                var deleteBtn = zone.querySelector('.manager-home-video-delete');
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var groupIdx = parseInt(this.getAttribute('data-group'));
+                        deleteVideo(groupIdx);
+                    });
+                }
             });
 
             var previewClickables = container.querySelectorAll('.manager-home-banner-preview, .manager-home-video-preview');
             previewClickables.forEach(function(el) {
                 el.addEventListener('click', function(e) {
-                    if (e.target.closest('.manager-home-banner-replace') || e.target.closest('.manager-home-video-replace')) return;
+                    if (e.target.closest('.manager-home-banner-replace') || e.target.closest('.manager-home-video-replace') || e.target.closest('.manager-home-video-delete')) return;
                     e.stopPropagation();
                     var videoPath = this.getAttribute('data-video-path');
                     if (videoPath) {
@@ -3692,6 +3717,7 @@ var ManagerGo = (function() {
             }
             homeBannerData.groups[groupIdx].hidden = !homeBannerData.groups[groupIdx].hidden;
             buildHomeUI();
+            saveHomeBanner();
         }
 
         function switchMediaType(groupIdx, type) {
@@ -3701,6 +3727,7 @@ var ManagerGo = (function() {
             }
             homeBannerData.groups[groupIdx].bgType = type;
             buildHomeUI();
+            saveHomeBanner();
         }
 
         function handleBannerUpload(groupIdx, fileInput) {
@@ -3721,6 +3748,7 @@ var ManagerGo = (function() {
                 homeBannerData.groups[groupIdx].bgImage = dataUrl;
                 homeBannerData.groups[groupIdx].bgType = 'image';
                 buildHomeUI();
+                saveHomeBanner();
                 showToast('Banner image loaded');
             };
             reader.onerror = function() {
@@ -3764,6 +3792,7 @@ var ManagerGo = (function() {
                         homeBannerData.groups[groupIdx].bgVideo = videoPath;
                         homeBannerData.groups[groupIdx].bgType = 'video';
                         buildHomeUI();
+                        saveHomeBanner();
                         showToast('Video uploaded successfully');
                     } else {
                         showToast('Upload failed: ' + (res.error || 'Server error'), true);
@@ -3777,6 +3806,20 @@ var ManagerGo = (function() {
             };
             xhr.open('POST', '/api/manager/upload', true);
             xhr.send(formData);
+        }
+
+        function deleteVideo(groupIdx) {
+            collectFormData();
+            if (!homeBannerData.groups[groupIdx]) {
+                homeBannerData.groups[groupIdx] = { bgImage: '', bgVideo: '', bgType: 'image', carouselTexts: [] };
+            }
+            homeBannerData.groups[groupIdx].bgVideo = '';
+            if (homeBannerData.groups[groupIdx].bgType === 'video') {
+                homeBannerData.groups[groupIdx].bgType = 'image';
+            }
+            buildHomeUI();
+            saveHomeBanner();
+            showToast('Video removed');
         }
 
         function openMediaPreview(type, src) {
@@ -3816,6 +3859,7 @@ var ManagerGo = (function() {
             }
             homeBannerData.groups[groupIdx].carouselTexts.push({ topic: '', note: '' });
             buildHomeUI();
+            saveHomeBanner();
         }
 
         function removeCarouselText(groupIdx, textIdx) {
@@ -3823,6 +3867,7 @@ var ManagerGo = (function() {
             if (!homeBannerData.groups[groupIdx]) return;
             homeBannerData.groups[groupIdx].carouselTexts.splice(textIdx, 1);
             buildHomeUI();
+            saveHomeBanner();
         }
 
         function collectFormData() {
@@ -3909,7 +3954,7 @@ var ManagerGo = (function() {
             '</div>' +
             '</div>' +
             '<div class="manager-dg-answer-row' + (isNone ? ' hidden' : '') + '" id="dgAnswerRow' + level + '">' +
-            '<input type="' + (isPin ? 'password' : 'text') + '" class="manager-form-input manager-dg-answer" id="dgAnswer' + level + '" value="' + answer + '" placeholder="' + (isPin ? '6-digit PIN' : 'Correct answer') + '" maxlength="' + (isPin ? '6' : '50') + '"' + (isPin ? ' inputmode="numeric" pattern="[0-9]*"' : '') + '>' +
+            '<input type="' + (isPin ? 'password' : 'text') + '" class="manager-form-input manager-dg-answer" id="dgAnswer' + level + '" value="' + answer + '" placeholder="' + (isPin ? 'Design verification not configured — please set a 6-digit PIN' : 'Design verification not configured — please set an answer') + '" maxlength="' + (isPin ? '6' : '50') + '"' + (isPin ? ' inputmode="numeric" pattern="[0-9]*"' : '') + '>' +
             '</div>' +
             '</div>';
     }
@@ -4090,12 +4135,12 @@ var ManagerGo = (function() {
                                 if (answerInput) {
                                     if (type === 'pin') {
                                         answerInput.type = 'password';
-                                        answerInput.placeholder = '6-digit PIN';
+                                        answerInput.placeholder = 'Design verification not configured — please set a 6-digit PIN';
                                         answerInput.maxLength = 6;
                                         answerInput.setAttribute('inputmode', 'numeric');
                                     } else {
                                         answerInput.type = 'text';
-                                        answerInput.placeholder = 'Correct answer';
+                                        answerInput.placeholder = 'Design verification not configured — please set an answer';
                                         answerInput.maxLength = 50;
                                         answerInput.removeAttribute('inputmode');
                                     }

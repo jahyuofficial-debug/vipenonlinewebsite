@@ -83,6 +83,18 @@ var Utils = {
         var userId = auth.username || auth.email;
         localStorage.setItem('vipen_' + key + '_' + userId, JSON.stringify(data));
     },
+    getGlobalData: function(key) {
+        var raw = localStorage.getItem('vipen_global_' + key);
+        try { return JSON.parse(raw); } catch(e) { return null; }
+    },
+    setGlobalData: function(key, data) {
+        localStorage.setItem('vipen_global_' + key, JSON.stringify(data));
+    },
+    getUserId: function() {
+        var auth = this.getAuth();
+        if (!auth) return null;
+        return auth.username || auth.email;
+    },
     migrateUserData: function() {
         var auth = this.getAuth();
         if (!auth) return;

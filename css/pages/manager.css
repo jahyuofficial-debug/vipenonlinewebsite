@@ -3350,6 +3350,54 @@
     right: .08rem;
 }
 
+.manager-home-video-actions {
+    position: absolute;
+    top: .08rem;
+    right: .08rem;
+    display: flex;
+    gap: .08rem;
+    opacity: 0;
+    transform: translateY(.08rem);
+    transition: all .25s;
+}
+
+.manager-home-video-preview:hover .manager-home-video-actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.manager-home-video-actions .manager-home-video-replace {
+    position: static;
+}
+
+.manager-home-video-delete {
+    display: flex;
+    align-items: center;
+    gap: .04rem;
+    padding: .08rem .14rem;
+    border-radius: .06rem;
+    border: 1px solid rgba(239,68,68,.4);
+    background: rgba(239,68,68,.2);
+    color: #fca5a5;
+    font-size: .11rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all .25s;
+    letter-spacing: .01rem;
+    white-space: nowrap;
+}
+
+.manager-home-video-delete:hover {
+    background: rgba(239,68,68,.4);
+    border-color: rgba(239,68,68,.6);
+    color: #fecaca;
+}
+
+.manager-home-video-delete svg {
+    width: .14rem;
+    height: .14rem;
+}
+
 .manager-home-video-file-input {
     display: none;
 }
@@ -4066,4 +4114,9 @@
 
 .manager-dg-answer {
     width: 100%;
+}
+
+.manager-dg-answer::placeholder {
+    color: rgba(255, 255, 255, .25);
+    font-style: italic;
 }
