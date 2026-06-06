@@ -1,10 +1,13 @@
-var https = require('https');
 var { list } = require('@vercel/blob');
+
+var blobUrlCache = {};
+var CACHE_TTL = 5 * 60 * 1000;
 
 function sendJSON(res, statusCode, data) {
     res.statusCode = statusCode;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'public, max-age=30, s-maxage=60');
     res.end(JSON.stringify(data));
 }
 
@@ -16,22 +19,55 @@ function handleOptions(req, res, methods) {
     res.end();
 }
 
+function getCachedUrl(key) {
+    var entry = blobUrlCache[key];
+    if (entry && (Date.now() - entry.ts) < CACHE_TTL) return entry.url;
+    return null;
+}
+
+function setCachedUrl(key, url) {
+    blobUrlCache[key] = { url: url, ts: Date.now() };
+}
+
 function fetchBlobData(key, callback) {
+    var cachedUrl = getCachedUrl(key);
+    if (cachedUrl) {
+        fetch(cachedUrl)
+            .then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.text();
+            })
+            .then(function(data) {
+                callback({ code: 200, body: data, raw: true });
+            })
+            .catch(function() {
+                blobUrlCache[key] = null;
+                fetchBlobDataFresh(key, callback);
+            });
+        return;
+    }
+    fetchBlobDataFresh(key, callback);
+}
+
+function fetchBlobDataFresh(key, callback) {
     list({ prefix: 'data/' + key + '.json' }).then(function(response) {
         if (!response.blobs || response.blobs.length === 0) {
             callback({ code: 404, body: { error: 'Not found' } });
             return;
         }
         var blob = response.blobs[0];
-        https.get(blob.url, function(blobRes) {
-            var data = '';
-            blobRes.on('data', function(chunk) { data += chunk; });
-            blobRes.on('end', function() {
+        setCachedUrl(key, blob.url);
+        fetch(blob.url)
+            .then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.text();
+            })
+            .then(function(data) {
                 callback({ code: 200, body: data, raw: true });
+            })
+            .catch(function() {
+                callback({ code: 500, body: { error: 'Failed to fetch blob' } });
             });
-        }).on('error', function() {
-            callback({ code: 500, body: { error: 'Failed to fetch blob' } });
-        });
     }).catch(function() {
         callback({ code: 500, body: { error: 'Failed to list blobs' } });
     });
@@ -45,6 +81,7 @@ function handleDataGeneric(req, res, key) {
         if (result.raw) {
             res.statusCode = 200;
             res.setHeader('Content-Type', 'application/json');
+            res.setHeader('Cache-Control', 'public, max-age=30, s-maxage=60');
             res.end(result.body);
         } else {
             sendJSON(res, result.code, result.body);

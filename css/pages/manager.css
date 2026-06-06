@@ -4120,3 +4120,14 @@
     color: rgba(255, 255, 255, .25);
     font-style: italic;
 }
+
+.manager-dg-hint {
+    width: 100%;
+    margin-top: .08rem;
+    font-size: .12rem;
+}
+
+.manager-dg-hint::placeholder {
+    color: rgba(255, 255, 255, .2);
+    font-style: italic;
+}

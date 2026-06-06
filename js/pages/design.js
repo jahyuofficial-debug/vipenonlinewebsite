@@ -343,15 +343,15 @@ function loadDesignGuard() {
     }
     if (!designGuardLevels || !designGuardLevels.level1) {
         designGuardLevels = {
-            level1: { type: 'pin', answer: '' },
-            level2: { type: 'text', answer: '' },
-            level3: { type: 'none', answer: '' }
+            level1: { type: 'pin', answer: '', hint: '' },
+            level2: { type: 'text', answer: '', hint: '' },
+            level3: { type: 'none', answer: '', hint: '' }
         };
     }
 }
 
 function getCurrentLevelConfig() {
-    return designGuardLevels['level' + designGuardStep] || { type: 'none', answer: '' };
+    return designGuardLevels['level' + designGuardStep] || { type: 'none', answer: '', hint: '' };
 }
 
 function shakeInput(el) {
@@ -369,10 +369,13 @@ function renderDesignGuard() {
     loadDesignGuard();
     var cfg = getCurrentLevelConfig();
     var isPin = cfg.type === 'pin';
-    var placeholder = 'Enter answer';
-    if (isPin) placeholder = 'Enter PIN';
-    else if (cfg.type === 'text') placeholder = 'Enter answer';
-    else placeholder = 'Press Enter to continue';
+    var hint = cfg.hint || '';
+    var placeholder = hint || 'Enter answer';
+    if (!hint) {
+        if (isPin) placeholder = 'Enter PIN';
+        else if (cfg.type === 'text') placeholder = 'Enter answer';
+        else placeholder = 'Press Enter to continue';
+    }
 
     var html = '<div class="dw-guard-overlay" id="dwGuardOverlay" style="background:url(\'images/PIN验证.png\') center/cover no-repeat">' +
         '<button class="dw-guard-back" id="dwGuardBack">' +
@@ -418,18 +421,19 @@ function bindDesignGuard() {
         var cfg = getCurrentLevelConfig();
         var isPin = cfg.type === 'pin';
         var isNone = cfg.type === 'none';
+        var hint = cfg.hint || '';
         if (isNone) {
-            input.placeholder = 'Press Enter to continue';
+            input.placeholder = hint || 'Press Enter to continue';
             input.type = 'text';
             input.maxLength = 50;
             input.removeAttribute('inputmode');
         } else if (isPin) {
-            input.placeholder = 'Enter PIN';
+            input.placeholder = hint || 'Enter PIN';
             input.type = 'password';
             input.maxLength = 6;
             input.setAttribute('inputmode', 'numeric');
         } else {
-            input.placeholder = 'Enter answer';
+            input.placeholder = hint || 'Enter answer';
             input.type = 'text';
             input.maxLength = 50;
             input.removeAttribute('inputmode');

@@ -152,7 +152,7 @@ function buildDiscPage() {
         '<div class="disc-glass-center">' +
         '<div class="disc-glass-track-info">' +
         '<div class="disc-glass-mini-cover">' +
-        '<img src="' + coverUrl + '" alt="' + trackTitle + '" id="discGlassMiniCover" onerror="this.style.display=\'none\'">' +
+        '<img src="' + coverUrl + '" alt="' + trackTitle + '" id="discGlassMiniCover" onerror="this.style.display=\'none\';this.parentNode.style.background=\'linear-gradient(135deg,#1a1a2e,#16213e)\'">' +
         '</div>' +
         '<div class="disc-glass-meta">' +
         '<div class="disc-glass-title" id="discGlassTitle">' + trackTitle + '</div>' +
@@ -219,7 +219,11 @@ function syncDiscUIWithAudioState() {
     }
     if (miniCoverEl) {
         var miniCover = currentTape.cover || '';
-        miniCoverEl.src = miniCover || '';
+        miniCoverEl.src = miniCover;
+        if (!miniCover) {
+            miniCoverEl.style.display = 'none';
+            miniCoverEl.parentNode.style.background = 'linear-gradient(135deg,#1a1a2e,#16213e)';
+        }
     }
     if (dur && discAudio.duration) dur.textContent = formatDiscTime(discAudio.duration);
     if (bar && discAudio.duration) bar.style.width = (discAudio.currentTime / discAudio.duration * 100) + '%';
@@ -300,7 +304,15 @@ function loadDiscTrack(index) {
         if (titleEl) titleEl.textContent = tape.title || 'Unknown Track';
         if (subtitleEl) subtitleEl.textContent = tape.artist || 'Vipen Music';
         if (bgEl) bgEl.style.backgroundImage = 'url(' + (tape.cover || '') + ')';
-        if (miniCoverEl) miniCoverEl.src = tape.cover || '';
+        if (miniCoverEl) {
+            miniCoverEl.src = tape.cover || '';
+            if (!tape.cover) {
+                miniCoverEl.style.display = 'none';
+                miniCoverEl.parentNode.style.background = 'linear-gradient(135deg,#1a1a2e,#16213e)';
+            } else {
+                miniCoverEl.style.display = '';
+            }
+        }
         if (favBtn) {
             var tapes = window.discData.tapes;
             var currentIdx = window.discData.currentTapeIndex;

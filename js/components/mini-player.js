@@ -54,9 +54,19 @@ var MiniPlayer = (function() {
         var currentIndex = discData.currentTapeIndex || 0;
         var currentTape = tapes[currentIndex] || {};
         var cover = currentTape.cover || '';
-        var validCover = cover && (typeof DiscDB === 'undefined' || !DiscDB.isIndexedDBRef(cover)) ? cover : '';
+        var isIndexedDB = typeof DiscDB !== 'undefined' && DiscDB.isIndexedDBRef(cover);
+        var isLocalPath = cover && cover.indexOf('/') !== -1 && cover.indexOf('http') !== 0 && cover.indexOf('blob:') !== 0 && cover.indexOf('data:') !== 0;
+        var validCover = cover && !isIndexedDB && !isLocalPath ? cover : '';
         if (miniPlayerVinylLabel) miniPlayerVinylLabel.style.backgroundImage = validCover ? 'url(' + validCover + ')' : '';
-        if (miniPlayerCoverImg) miniPlayerCoverImg.src = validCover;
+        if (miniPlayerCoverImg) {
+            miniPlayerCoverImg.src = validCover;
+            if (!validCover) {
+                miniPlayerCoverImg.style.display = 'none';
+                if (miniPlayerCardCover) miniPlayerCardCover.style.background = 'linear-gradient(135deg,#1a1a2e,#16213e)';
+            } else {
+                miniPlayerCoverImg.style.display = '';
+            }
+        }
         if (miniPlayerTitle) miniPlayerTitle.textContent = currentTape.title || 'Unknown Track';
         updateProgress();
         updatePlayIcon();

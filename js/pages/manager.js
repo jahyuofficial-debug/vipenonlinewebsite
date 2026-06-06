@@ -3930,9 +3930,10 @@ var ManagerGo = (function() {
     }
 
     function buildDesignGuardLevel(level, designGuard) {
-        var dg = (designGuard && designGuard['level' + level]) || { type: 'none', answer: '' };
+        var dg = (designGuard && designGuard['level' + level]) || { type: 'none', answer: '', hint: '' };
         var type = dg.type || 'none';
         var answer = dg.answer || '';
+        var hint = dg.hint || '';
         var isPin = type === 'pin';
         var isText = type === 'text';
         var isNone = type === 'none';
@@ -3955,6 +3956,7 @@ var ManagerGo = (function() {
             '</div>' +
             '<div class="manager-dg-answer-row' + (isNone ? ' hidden' : '') + '" id="dgAnswerRow' + level + '">' +
             '<input type="' + (isPin ? 'password' : 'text') + '" class="manager-form-input manager-dg-answer" id="dgAnswer' + level + '" value="' + answer + '" placeholder="' + (isPin ? 'Design verification not configured — please set a 6-digit PIN' : 'Design verification not configured — please set an answer') + '" maxlength="' + (isPin ? '6' : '50') + '"' + (isPin ? ' inputmode="numeric" pattern="[0-9]*"' : '') + '>' +
+            '<input type="text" class="manager-form-input manager-dg-hint" id="dgHint' + level + '" value="' + hint + '" placeholder="Input reminder text (shown as gray hint in design page)" maxlength="100">' +
             '</div>' +
             '</div>';
     }
@@ -4065,11 +4067,14 @@ var ManagerGo = (function() {
                         var typeRadio = document.querySelector('input[name="dgType' + lv + '"]:checked');
                         var type = typeRadio ? typeRadio.value : 'none';
                         var answer = '';
+                        var hint = '';
                         if (type !== 'none') {
                             var answerInput = document.getElementById('dgAnswer' + lv);
                             answer = answerInput ? answerInput.value.trim() : '';
+                            var hintInput = document.getElementById('dgHint' + lv);
+                            hint = hintInput ? hintInput.value.trim() : '';
                         }
-                        designGuard['level' + lv] = { type: type, answer: answer };
+                        designGuard['level' + lv] = { type: type, answer: answer, hint: hint };
                     }
                     var settings = {
                         contact: document.getElementById('setContact').value.trim(),
