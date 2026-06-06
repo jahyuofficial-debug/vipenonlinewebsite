@@ -395,7 +395,7 @@ function handleManagerDiscSave(req, res) {
             var data = body.data;
             if (!data) { sendJSON(res, 400, { success: false, error: 'No data provided' }); return; }
             var json = JSON.stringify(data, null, 2);
-            put('data/disc.json', json, { access: 'public', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true })
+            put('data/disc.json', json, { access: 'public', contentType: 'application/json', allowOverwrite: true })
                 .then(function(blob) {
                     managerHelpers.addLog('disc_save', session.username, 'Updated disc track data');
                     sendJSON(res, 200, { success: true, url: blob.url });
@@ -417,7 +417,7 @@ function handleManagerHomeBannerSave(req, res) {
             var data = body.data;
             if (!data) { sendJSON(res, 400, { success: false, error: 'No data provided' }); return; }
             var json = JSON.stringify(data, null, 2);
-            put('data/home-banner.json', json, { access: 'public', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true })
+            put('data/home-banner.json', json, { access: 'public', contentType: 'application/json', allowOverwrite: true })
                 .then(function(blob) {
                     managerHelpers.addLog('home_banner_save', session.username, 'Updated HOME banner data');
                     sendJSON(res, 200, { success: true, url: blob.url });
