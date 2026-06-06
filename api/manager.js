@@ -467,8 +467,16 @@ function handleManagerSettings(req, res) {
 
                     storage.writeJSON('settings.json', settings, function(err4) {
                         if (err4) { sendJSON(res, 500, { success: false, error: 'Failed to save settings' }); return; }
-                        managerHelpers.addLog('settings_update', session.username, 'Updated site settings');
-                        sendJSON(res, 200, { success: true, settings: settings });
+                        // Also save to Vercel Blob for cross-browser persistence
+                        var json = JSON.stringify(settings, null, 2);
+                        put('data/manager/settings.json', json, { access: 'public', contentType: 'application/json', allowOverwrite: true })
+                            .then(function() {
+                                managerHelpers.addLog('settings_update', session.username, 'Updated site settings');
+                                sendJSON(res, 200, { success: true, settings: settings });
+                            }).catch(function(putErr) {
+                                managerHelpers.addLog('settings_update', session.username, 'Updated site settings (local only, blob failed: ' + putErr.message + ')');
+                                sendJSON(res, 200, { success: true, settings: settings });
+                            });
                     });
                 });
             } else {

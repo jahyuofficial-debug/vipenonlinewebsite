@@ -70,6 +70,9 @@ module.exports = function(req, res) {
         case 'fresh':
             handleDataGeneric(req, res, 'fresh-hero');
             break;
+        case 'settings':
+            handleDataGeneric(req, res, 'manager/settings');
+            break;
         default:
             sendJSON(res, 404, { error: 'Not found', message: 'Unknown action: ' + (action || 'none') });
     }

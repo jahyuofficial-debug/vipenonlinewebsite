@@ -54,7 +54,12 @@ BannerPage.initBgVideo();
         throw new Error('API not available');
     }).catch(function() { return null; });
 
-    Promise.all([loadSettings, loadFresh, loadDesign, loadAction, loadBanner, loadDiscOnline, loadDesignOnline, loadFreshOnline, loadBannerOnline]).then(function(results) {
+    var loadSettingsOnline = fetch('/api/data/settings').then(function(r) {
+        if (r.ok) return r.json();
+        throw new Error('API not available');
+    }).catch(function() { return null; });
+
+    Promise.all([loadSettings, loadFresh, loadDesign, loadAction, loadBanner, loadDiscOnline, loadDesignOnline, loadFreshOnline, loadBannerOnline, loadSettingsOnline]).then(function(results) {
         var settings = results[0];
         var freshData = results[1];
         var designData = results[2];
@@ -64,6 +69,12 @@ BannerPage.initBgVideo();
         var designOnline = results[6];
         var freshOnline = results[7];
         var bannerOnline = results[8];
+        var settingsOnline = results[9];
+
+        // Settings: Blob API overrides static file
+        if (settingsOnline && typeof settingsOnline === 'object' && !settingsOnline.error) {
+            Object.assign(settings, settingsOnline);
+        }
 
         // Disc data: backend is the source of truth
         // API success → use exactly what backend returns
