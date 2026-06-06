@@ -1,4 +1,5 @@
 var crypto = require('crypto');
+var { put, issueSignedToken, presignUrl } = require('@vercel/blob');
 
 var getAuthSecret = require('../lib/secret').getAuthSecret;
 var getOldAuthSecret = require('../lib/secret').getOldAuthSecret;
@@ -263,6 +264,162 @@ function handleManagerCheckSession(req, res) {
     });
 }
 
+function handleManagerUpload(req, res) {
+    if (req.method === 'OPTIONS') { handleOptions(req, res, 'POST, OPTIONS'); return; }
+    if (req.method !== 'POST') { sendJSON(res, 405, { success: false, error: 'Method not allowed' }); return; }
+
+    parseMultipart(req, function(err, fields, files) {
+        if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
+        var dir = (fields.dest || 'uploads').replace(/[^a-zA-Z0-9_-]/g, '_');
+        var uploadedFiles = [];
+        var pending = files.length;
+
+        if (pending === 0) { sendJSON(res, 400, { success: false, error: 'No files uploaded' }); return; }
+
+        function done() {
+            sendJSON(res, 200, { success: true, files: uploadedFiles });
+        }
+
+        for (var i = 0; i < files.length; i++) {
+            (function(f) {
+                var blobPath = dir + '/' + Date.now() + '_' + f.filename;
+                var buffer = Buffer.from(f.body, 'binary');
+                put(blobPath, buffer, { access: 'public', contentType: getContentType(f.filename), addRandomSuffix: true })
+                    .then(function(blob) {
+                        uploadedFiles.push({ name: f.filename, path: blob.url });
+                        pending--;
+                        if (pending === 0) done();
+                    }).catch(function() {
+                        pending--;
+                        if (pending === 0) done();
+                    });
+            })(files[i]);
+        }
+    });
+}
+
+function handleManagerDiscUpload(req, res) {
+    if (req.method === 'OPTIONS') { handleOptions(req, res, 'POST, OPTIONS'); return; }
+    if (req.method !== 'POST') { sendJSON(res, 405, { success: false, error: 'Method not allowed' }); return; }
+
+    parseMultipart(req, function(err, fields, files) {
+        if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
+
+        managerHelpers.verifySessionToken(fields.sessionToken, function(sessErr, session) {
+            if (sessErr) { sendJSON(res, 401, { success: false, error: sessErr }); return; }
+
+            var uploadedFiles = [];
+            var albumDir = (fields.albumDir || 'Unknown').replace(/[\\/:*?"<>|]/g, '_').trim();
+            var pending = files.length;
+
+            if (pending === 0) { sendJSON(res, 400, { success: false, error: 'No files uploaded' }); return; }
+
+            function done() {
+                if (uploadedFiles.length > 0) {
+                    managerHelpers.addLog('disc_upload', session.username, 'Uploaded ' + uploadedFiles.length + ' disc file(s) to Blob');
+                }
+                sendJSON(res, 200, { success: true, files: uploadedFiles });
+            }
+
+            for (var i = 0; i < files.length; i++) {
+                (function(f) {
+                    var blobPath = 'disc/' + albumDir + '/' + Date.now() + '_' + f.filename;
+                    var buffer = Buffer.from(f.body, 'binary');
+                    put(blobPath, buffer, { access: 'public', contentType: getContentType(f.filename), addRandomSuffix: true })
+                        .then(function(blob) {
+                            uploadedFiles.push({ name: f.filename, path: blob.url });
+                            pending--;
+                            if (pending === 0) done();
+                        }).catch(function() {
+                            pending--;
+                            if (pending === 0) done();
+                        });
+                })(files[i]);
+            }
+        });
+    });
+}
+
+function handleManagerDiscGenerateUploadToken(req, res) {
+    if (req.method === 'OPTIONS') { handleOptions(req, res, 'POST, OPTIONS'); return; }
+    if (req.method !== 'POST') { sendJSON(res, 405, { success: false, error: 'Method not allowed' }); return; }
+
+    parseBody(req, function(err, body) {
+        if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
+
+        managerHelpers.verifySessionToken(body.sessionToken, function(sessErr, session) {
+            if (sessErr) { sendJSON(res, 401, { success: false, error: sessErr }); return; }
+
+            var filename = (body.filename || '').replace(/[\\/:*?"<>|]/g, '_').trim();
+            var albumDir = (body.albumDir || 'Unknown').replace(/[\\/:*?"<>|]/g, '_').trim();
+            if (!filename) { sendJSON(res, 400, { success: false, error: 'Filename is required' }); return; }
+
+            var blobPath = 'disc/' + albumDir + '/' + Date.now() + '_' + filename;
+            var signedToken = issueSignedToken({
+                allowedContentTypes: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/mp4', 'image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+                maximumSizeInBytes: 500 * 1024 * 1024,
+                validUntil: Date.now() + 15 * 60 * 1000
+            });
+
+            presignUrl(signedToken, {
+                pathname: blobPath,
+                operation: 'put',
+                validUntil: Date.now() + 15 * 60 * 1000,
+                access: 'public'
+            }).then(function(result) {
+                managerHelpers.addLog('disc_token', session.username, 'Generated upload token for ' + filename);
+                sendJSON(res, 200, { success: true, uploadUrl: result.presignedUrl, pathname: blobPath });
+            }).catch(function(e) {
+                sendJSON(res, 500, { success: false, error: 'Failed to generate upload URL: ' + e.message });
+            });
+        });
+    });
+}
+
+function handleManagerDiscSave(req, res) {
+    if (req.method === 'OPTIONS') { handleOptions(req, res, 'POST, OPTIONS'); return; }
+    if (req.method !== 'POST') { sendJSON(res, 405, { success: false, error: 'Method not allowed' }); return; }
+
+    parseBody(req, function(err, body) {
+        if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
+        managerHelpers.verifySessionToken(body.sessionToken, function(sessErr, session) {
+            if (sessErr) { sendJSON(res, 401, { success: false, error: sessErr }); return; }
+            var data = body.data;
+            if (!data) { sendJSON(res, 400, { success: false, error: 'No data provided' }); return; }
+            var json = JSON.stringify(data, null, 2);
+            put('data/disc.json', json, { access: 'public', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true })
+                .then(function(blob) {
+                    managerHelpers.addLog('disc_save', session.username, 'Updated disc track data');
+                    sendJSON(res, 200, { success: true, url: blob.url });
+                }).catch(function(putErr) {
+                    sendJSON(res, 500, { success: false, error: 'Failed to save disc data: ' + putErr.message });
+                });
+        });
+    });
+}
+
+function handleManagerHomeBannerSave(req, res) {
+    if (req.method === 'OPTIONS') { handleOptions(req, res, 'POST, OPTIONS'); return; }
+    if (req.method !== 'POST') { sendJSON(res, 405, { success: false, error: 'Method not allowed' }); return; }
+
+    parseBody(req, function(err, body) {
+        if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
+        managerHelpers.verifySessionToken(body.sessionToken, function(err2, session) {
+            if (err2) { sendJSON(res, 401, { success: false, error: err2 }); return; }
+            var data = body.data;
+            if (!data) { sendJSON(res, 400, { success: false, error: 'No data provided' }); return; }
+            var json = JSON.stringify(data, null, 2);
+            put('data/home-banner.json', json, { access: 'public', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true })
+                .then(function(blob) {
+                    managerHelpers.addLog('home_banner_save', session.username, 'Updated HOME banner data');
+                    sendJSON(res, 200, { success: true, url: blob.url });
+                }).catch(function(putErr) {
+                    sendJSON(res, 500, { success: false, error: 'Failed to save: ' + putErr.message });
+                });
+        });
+    });
+}
+
 function handleManagerSettings(req, res) {
     if (req.method === 'OPTIONS') { handleOptions(req, res, 'POST, OPTIONS'); return; }
     if (req.method !== 'POST') { sendJSON(res, 405, { success: false, error: 'Method not allowed' }); return; }
@@ -321,6 +478,11 @@ module.exports = function(req, res) {
         'verify-design-pin': handleManagerVerifyDesignPin,
         'set-pin': handleManagerSetPin,
         'check-session': handleManagerCheckSession,
+        'upload': handleManagerUpload,
+        'disc-upload': handleManagerDiscUpload,
+        'disc-generate-upload-token': handleManagerDiscGenerateUploadToken,
+        'disc-save': handleManagerDiscSave,
+        'home-banner-save': handleManagerHomeBannerSave,
         'settings': handleManagerSettings
     };
 

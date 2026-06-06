@@ -28,6 +28,7 @@ var getOldAuthSecret = require('./lib/secret').getOldAuthSecret;
 var generateToken = require('./lib/secret').generateToken;
 var verifyToken = require('./lib/secret').verifyToken;
 var blobPut = null;
+try { blobPut = require('@vercel/blob').put; } catch (e) { blobPut = null; }
 
 if (!RESEND_API_KEY) {
     try {

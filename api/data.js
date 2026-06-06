@@ -1,3 +1,6 @@
+var https = require('https');
+var { list } = require('@vercel/blob');
+
 function sendJSON(res, statusCode, data) {
     res.statusCode = statusCode;
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -13,15 +16,55 @@ function handleOptions(req, res, methods) {
     res.end();
 }
 
+function fetchBlobData(key, callback) {
+    list({ prefix: 'data/' + key + '.json' }).then(function(response) {
+        if (!response.blobs || response.blobs.length === 0) {
+            callback({ code: 404, body: { error: 'Not found' } });
+            return;
+        }
+        var blob = response.blobs[0];
+        https.get(blob.url, function(blobRes) {
+            var data = '';
+            blobRes.on('data', function(chunk) { data += chunk; });
+            blobRes.on('end', function() {
+                callback({ code: 200, body: data, raw: true });
+            });
+        }).on('error', function() {
+            callback({ code: 500, body: { error: 'Failed to fetch blob' } });
+        });
+    }).catch(function() {
+        callback({ code: 500, body: { error: 'Failed to list blobs' } });
+    });
+}
+
+function handleDataGeneric(req, res, key) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    if (req.method === 'OPTIONS') { handleOptions(req, res, 'GET, OPTIONS'); return; }
+
+    fetchBlobData(key, function(result) {
+        if (result.raw) {
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'application/json');
+            res.end(result.body);
+        } else {
+            sendJSON(res, result.code, result.body);
+        }
+    });
+}
+
 module.exports = function(req, res) {
     var url = require('url');
     var parsed = url.parse(req.url, true);
     var action = parsed.query.action;
 
-    if (req.method === 'OPTIONS') {
-        handleOptions(req, res, 'GET, OPTIONS');
-        return;
+    switch (action) {
+        case 'disc':
+            handleDataGeneric(req, res, 'disc');
+            break;
+        case 'home-banner':
+            handleDataGeneric(req, res, 'home-banner');
+            break;
+        default:
+            sendJSON(res, 404, { error: 'Not found', message: 'Unknown action: ' + (action || 'none') });
     }
-
-    sendJSON(res, 503, { error: 'Service unavailable', message: 'Storage backend not configured' });
 };
