@@ -1,5 +1,7 @@
 var crypto = require('crypto');
-process.env.BLOB_READ_WRITE_TOKEN = process.env.BLOB_READ_WRITE_TOKEN || process.env.vipen_READ_WRITE_TOKEN;
+process.env.BLOB_STORE_ID = process.env.vipen_STORE_ID || process.env.BLOB_STORE_ID;
+process.env.BLOB_READ_WRITE_TOKEN = process.env.vipen_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+process.env.BLOB_WEBHOOK_PUBLIC_KEY = process.env.vipen_WEBHOOK_PUBLIC_KEY || process.env.BLOB_WEBHOOK_PUBLIC_KEY;
 var { put, generateClientTokenFromReadWriteToken, issueSignedToken, presignUrl } = require('@vercel/blob');
 
 var getAuthSecret = require('../lib/secret').getAuthSecret;

@@ -1,6 +1,8 @@
 var fs = require('fs');
 var path = require('path');
-process.env.BLOB_READ_WRITE_TOKEN = process.env.BLOB_READ_WRITE_TOKEN || process.env.vipen_READ_WRITE_TOKEN;
+process.env.BLOB_STORE_ID = process.env.vipen_STORE_ID || process.env.BLOB_STORE_ID;
+process.env.BLOB_READ_WRITE_TOKEN = process.env.vipen_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+process.env.BLOB_WEBHOOK_PUBLIC_KEY = process.env.vipen_WEBHOOK_PUBLIC_KEY || process.env.BLOB_WEBHOOK_PUBLIC_KEY;
 var { put } = require('@vercel/blob');
 
 var ROOT = path.join(__dirname, '..');
