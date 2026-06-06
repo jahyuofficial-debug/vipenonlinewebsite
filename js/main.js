@@ -80,6 +80,9 @@ BannerPage.initBgVideo();
         var mgrFresh = localStorage.getItem('vipen_mgr_fresh_heroItems');
         if (mgrFresh) { try { freshHeroItems = JSON.parse(mgrFresh); } catch (e) {} }
 
+        var mgrDisc = localStorage.getItem('vipen_mgr_disc_tapes');
+        if (mgrDisc) { try { discData.tapes = JSON.parse(mgrDisc); } catch (e) {} }
+
         if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
 
         Object.assign(BannerPage.bannerData, bannerData);
