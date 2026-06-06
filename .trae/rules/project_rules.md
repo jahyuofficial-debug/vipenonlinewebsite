@@ -421,3 +421,11 @@ Vercel 支持通过 `rewrites` 实现 SPA 风格的 URL 美化（无需 HTML 文
 ```
 
 新增需要美化 URL 的页面时，在 [vercel.json](file:///d:/设计文档/TareProcess/Vipen2.0/vercel.json) 的 `rewrites` 中添加对应规则。
+
+### 9.5 Serverless Functions 限制
+
+**Hobby 计划每个 Deployment 最多 12 个 Serverless Functions。**
+
+- 本项目部署在 Vercel Hobby 计划，`api/` 目录下的每个文件对应一个 Serverless Function。
+- 如需新增 API 端点，确保总数不超过 12 个。
+- 超过限制后将无法部署，需合并功能相近的端点或升级计划。

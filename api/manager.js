@@ -1,16 +1,10 @@
 var crypto = require('crypto');
-var https = require('https');
-var bcrypt = require('bcryptjs');
-var { list, put } = require('@vercel/blob');
+var { put } = require('@vercel/blob');
 
 var getAuthSecret = require('../lib/secret').getAuthSecret;
 var getOldAuthSecret = require('../lib/secret').getOldAuthSecret;
-var generateToken = require('../lib/secret').generateToken;
 var storage = require('../lib/manager-storage');
-var authHelpers = require('../lib/auth-helpers');
 var managerHelpers = require('../lib/manager-helpers');
-
-var BCRYPT_ROUNDS = 12;
 
 function sendJSON(res, statusCode, data) {
     res.statusCode = statusCode;
@@ -111,272 +105,6 @@ function handleOptions(req, res, methods) {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.end();
 }
-
-// ========== Route Handlers ==========
-
-function handleAuthSendCode(req, res) {
-    if (req.method === 'OPTIONS') { handleOptions(req, res, 'POST, OPTIONS'); return; }
-    if (req.method !== 'POST') { sendJSON(res, 405, { success: false, error: 'Method not allowed' }); return; }
-
-    parseBody(req, function(err, body) {
-        if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
-        var email = (body.email || '').trim();
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            sendJSON(res, 400, { success: false, error: 'Invalid email address' });
-            return;
-        }
-        var code = authHelpers.generateCode();
-        var ts = Date.now();
-        var hash = authHelpers.computeHash(email, code, ts);
-        authHelpers.sendEmailViaResend(email, code, function(err2) {
-            if (err2) {
-                console.error('Resend send error:', err2.message);
-                sendJSON(res, 500, { success: false, error: 'Failed to send email. Please try again.' });
-                return;
-            }
-            console.log('Verification code sent to', email, '| code:', code);
-            sendJSON(res, 200, { success: true, hash: hash, ts: ts });
-        });
-    });
-}
-
-function handleAuthVerifyCode(req, res) {
-    if (req.method === 'OPTIONS') { handleOptions(req, res, 'POST, OPTIONS'); return; }
-    if (req.method !== 'POST') { sendJSON(res, 405, { success: false, error: 'Method not allowed' }); return; }
-
-    parseBody(req, function(err, body) {
-        if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
-        var email = (body.email || '').trim();
-        var code = (body.code || '').trim();
-        var hash = (body.hash || '').trim();
-        var ts = parseInt(body.ts, 10) || 0;
-
-        if (!email || !code) {
-            sendJSON(res, 400, { success: false, error: 'Email and code are required' });
-            return;
-        }
-        if (!authHelpers.verifyHash(email, code, ts, hash)) {
-            sendJSON(res, 400, { success: false, error: 'Invalid or expired verification code' });
-            return;
-        }
-
-        var username = body.username || email.split('@')[0];
-        var password = body.password || '';
-
-        function respondWithToken(tokenEmail, tokenUsername, tokenRole) {
-            var token = generateToken(tokenEmail, tokenUsername, tokenRole);
-            sendJSON(res, 200, { success: true, token: token, username: tokenUsername, email: tokenEmail, role: tokenRole });
-        }
-
-        if (password) {
-            bcrypt.hash(password, BCRYPT_ROUNDS, function(bcryptErr, passwordHash) {
-                if (bcryptErr) { sendJSON(res, 500, { success: false, error: 'Server error' }); return; }
-                storage.readJSON('users.json', function(readErr, users) {
-                    if (readErr) users = [];
-                    var existingIdx = -1;
-                    for (var i = 0; i < users.length; i++) {
-                        if (users[i].email.toLowerCase() === email.toLowerCase()) { existingIdx = i; break; }
-                    }
-                    if (existingIdx >= 0) {
-                        users[existingIdx].passwordHash = passwordHash;
-                        if (body.username) users[existingIdx].username = body.username;
-                        users[existingIdx].lastLogin = new Date().toISOString();
-                    } else {
-                        users.push({
-                            id: 'u' + String(users.length + 1).padStart(3, '0'),
-                            username: username, email: email,
-                            role: authHelpers.isManagerGoEmail(email) ? 'ManagerGo' : 'Viper',
-                            passwordHash: passwordHash, status: 'active',
-                            createdAt: new Date().toISOString(), lastLogin: new Date().toISOString()
-                        });
-                    }
-                    storage.writeJSON('users.json', users, function() {
-                        var existing = existingIdx >= 0 ? users[existingIdx] : null;
-                        var role = existing ? existing.role : (authHelpers.isManagerGoEmail(email) ? 'ManagerGo' : 'Viper');
-                        respondWithToken(email, username, role);
-                    });
-                });
-            });
-        } else {
-            storage.readJSON('users.json', function(readErr, users) {
-                if (readErr) users = [];
-                var existingUser = null;
-                for (var i = 0; i < users.length; i++) {
-                    if (users[i].email.toLowerCase() === email.toLowerCase()) { existingUser = users[i]; break; }
-                }
-                if (existingUser) {
-                    existingUser.lastLogin = new Date().toISOString();
-                    storage.writeJSON('users.json', users, function() {});
-                }
-                var role = existingUser ? existingUser.role : 'Viper';
-                respondWithToken(email, existingUser ? existingUser.username : username, role);
-            });
-        }
-    });
-}
-
-function handleAuthLogin(req, res) {
-    if (req.method === 'OPTIONS') { handleOptions(req, res, 'POST, OPTIONS'); return; }
-    if (req.method !== 'POST') { sendJSON(res, 405, { success: false, error: 'Method not allowed' }); return; }
-
-    parseBody(req, function(err, body) {
-        if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
-        var loginField = (body.email || body.username || '').trim();
-        var password = body.password || '';
-
-        if (!loginField || !password) {
-            sendJSON(res, 400, { success: false, error: 'Email/Username and password are required' });
-            return;
-        }
-        if (!authHelpers.checkRateLimit('login_' + loginField.toLowerCase())) {
-            sendJSON(res, 429, { success: false, error: 'Too many attempts. Please try again later.' });
-            return;
-        }
-
-        storage.readJSON('users.json', function(readErr, users) {
-            if (readErr) users = [];
-
-            function verifyPassword(storedHash, callback) {
-                if (storedHash.indexOf('$2') === 0) {
-                    bcrypt.compare(password, storedHash, callback);
-                    return;
-                }
-                var newHash = crypto.createHmac('sha256', getAuthSecret()).update(loginField.toLowerCase() + '|' + password).digest('hex');
-                var oldSecret = getOldAuthSecret();
-                if (storedHash === newHash) { callback(null, true); return; }
-                if (oldSecret) {
-                    var oldHash = crypto.createHmac('sha256', oldSecret).update(loginField.toLowerCase() + '|' + password).digest('hex');
-                    if (storedHash === oldHash) { callback(null, true); return; }
-                }
-                callback(null, false);
-            }
-
-            function findAndVerify(email, callback) {
-                var user = null;
-                for (var i = 0; i < users.length; i++) {
-                    if (users[i].email.toLowerCase() === email.toLowerCase()) { user = users[i]; break; }
-                }
-                if (!user) { callback(null); return; }
-                verifyPassword(user.passwordHash, function(vErr, match) {
-                    if (match) {
-                        if (user.passwordHash.indexOf('$2') !== 0) {
-                            bcrypt.hash(password, BCRYPT_ROUNDS, function(hErr, bcryptHash) {
-                                if (!hErr) user.passwordHash = bcryptHash;
-                                callback(user);
-                            });
-                            return;
-                        }
-                        callback(user);
-                    } else {
-                        callback(null);
-                    }
-                });
-            }
-
-            findAndVerify(loginField, function(matchedUser) {
-                if (matchedUser) {
-                    matchedUser.lastLogin = new Date().toISOString();
-                    storage.writeJSON('users.json', users, function() {});
-                    var token = generateToken(matchedUser.email, matchedUser.username, matchedUser.role);
-                    sendJSON(res, 200, {
-                        success: true, token: token,
-                        username: matchedUser.username, email: matchedUser.email,
-                        role: authHelpers.isManagerGoEmail(matchedUser.email) ? 'ManagerGo' : (matchedUser.role || '')
-                    });
-                    return;
-                }
-                for (var i = 0; i < users.length; i++) {
-                    if (users[i].username.toLowerCase() === loginField.toLowerCase()) {
-                        findAndVerify(users[i].email, function(userByUsername) {
-                            if (userByUsername) {
-                                userByUsername.lastLogin = new Date().toISOString();
-                                storage.writeJSON('users.json', users, function() {});
-                                var token = generateToken(userByUsername.email, userByUsername.username, userByUsername.role);
-                                sendJSON(res, 200, {
-                                    success: true, token: token,
-                                    username: userByUsername.username, email: userByUsername.email,
-                                    role: authHelpers.isManagerGoEmail(userByUsername.email) ? 'ManagerGo' : (userByUsername.role || '')
-                                });
-                            } else {
-                                sendJSON(res, 401, { success: false, error: 'Invalid email/username or password' });
-                            }
-                        });
-                        return;
-                    }
-                }
-                sendJSON(res, 401, { success: false, error: 'Invalid email/username or password' });
-            });
-        });
-    });
-}
-
-// ========== Data Route Handlers ==========
-
-function handleDataHomeBanner(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    if (req.method === 'OPTIONS') { handleOptions(req, res, 'GET, OPTIONS'); return; }
-
-    list({ prefix: 'data/home-banner.json' }).then(function(response) {
-        if (!response.blobs || response.blobs.length === 0) {
-            res.statusCode = 404;
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ error: 'Not found' }));
-            return;
-        }
-        var blob = response.blobs[0];
-        https.get(blob.url, function(blobRes) {
-            var data = '';
-            blobRes.on('data', function(chunk) { data += chunk; });
-            blobRes.on('end', function() {
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.end(data);
-            });
-        }).on('error', function() {
-            res.statusCode = 500;
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ error: 'Failed to fetch blob' }));
-        });
-    }).catch(function() {
-        res.statusCode = 500;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ error: 'Failed to list blobs' }));
-    });
-}
-
-function handleDataDisc(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    if (req.method === 'OPTIONS') { handleOptions(req, res, 'GET, OPTIONS'); return; }
-
-    list({ prefix: 'data/disc.json' }).then(function(response) {
-        if (!response.blobs || response.blobs.length === 0) {
-            res.statusCode = 404;
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ error: 'Not found' }));
-            return;
-        }
-        var blob = response.blobs[0];
-        https.get(blob.url, function(blobRes) {
-            var data = '';
-            blobRes.on('data', function(chunk) { data += chunk; });
-            blobRes.on('end', function() {
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.end(data);
-            });
-        }).on('error', function() {
-            res.statusCode = 500;
-            res.setHeader('Content-Type', 'application/json');
-            res.end(JSON.stringify({ error: 'Failed to fetch blob' }));
-        });
-    }).catch(function() {
-        res.statusCode = 500;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ error: 'Failed to list blobs' }));
-    });
-}
-
-// ========== Manager Route Handlers ==========
 
 function handleManagerVerifyPin(req, res) {
     if (req.method === 'OPTIONS') { handleOptions(req, res, 'POST, OPTIONS'); return; }
@@ -704,35 +432,27 @@ function handleManagerSettings(req, res) {
     });
 }
 
-// ========== Main Router ==========
-
 module.exports = function(req, res) {
-    var path = req.url.split('?')[0];
-
-    // Remove leading /api/ prefix to get the sub-path
-    var route = path.replace(/^\/api\//, '');
+    var url = require('url');
+    var parsedUrl = url.parse(req.url, true);
+    var action = parsedUrl.query.action;
 
     var routeMap = {
-        'auth/send-code': handleAuthSendCode,
-        'auth/verify-code': handleAuthVerifyCode,
-        'auth/login': handleAuthLogin,
-        'data/home-banner': handleDataHomeBanner,
-        'data/disc': handleDataDisc,
-        'manager/verify-pin': handleManagerVerifyPin,
-        'manager/verify-design-pin': handleManagerVerifyDesignPin,
-        'manager/set-pin': handleManagerSetPin,
-        'manager/check-session': handleManagerCheckSession,
-        'manager/upload': handleManagerUpload,
-        'manager/disc-upload': handleManagerDiscUpload,
-        'manager/disc-save': handleManagerDiscSave,
-        'manager/home-banner-save': handleManagerHomeBannerSave,
-        'manager/settings': handleManagerSettings
+        'verify-pin': handleManagerVerifyPin,
+        'verify-design-pin': handleManagerVerifyDesignPin,
+        'set-pin': handleManagerSetPin,
+        'check-session': handleManagerCheckSession,
+        'upload': handleManagerUpload,
+        'disc-upload': handleManagerDiscUpload,
+        'disc-save': handleManagerDiscSave,
+        'home-banner-save': handleManagerHomeBannerSave,
+        'settings': handleManagerSettings
     };
 
-    var handler = routeMap[route];
+    var handler = routeMap[action];
     if (handler) {
         handler(req, res);
     } else {
-        sendJSON(res, 404, { success: false, error: 'Unknown API endpoint: ' + route });
+        sendJSON(res, 404, { success: false, error: 'Unknown manager action: ' + (action || 'none') });
     }
 };
