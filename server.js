@@ -1538,68 +1538,37 @@ function handleManagerDiscUploadChunk(req, res) {
         return;
     }
 
-    var destDir = path.join(ROOT, 'Disc', 'MusicAlbum', tokenInfo.albumDir);
-    var destPath = '';
+    var chunks = [];
     var totalBytes = 0;
-    var writeStream = null;
-    var aborted = false;
-
-    function cleanup() {
-        if (writeStream) {
-            try { writeStream.end(); } catch (e) {}
-        }
-        if (destPath && fs.existsSync(destPath)) {
-            try { fs.unlinkSync(destPath); } catch (e) {}
-        }
-        delete DISC_UPLOAD_TOKENS[uploadId];
-    }
-
-    try {
-        fs.mkdirSync(destDir, { recursive: true });
-        destPath = path.join(destDir, tokenInfo.filename);
-        writeStream = fs.createWriteStream(destPath);
-    } catch (e) {
-        sendJSON(res, 500, { success: false, error: 'Failed to create upload file: ' + e.message });
-        delete DISC_UPLOAD_TOKENS[uploadId];
-        return;
-    }
-
-    writeStream.on('error', function(err) {
-        aborted = true;
-        cleanup();
-        try { sendJSON(res, 500, { success: false, error: 'Write error: ' + err.message }); } catch (e) {}
-    });
-
     req.on('data', function(chunk) {
-        if (aborted) return;
         totalBytes += chunk.length;
         if (totalBytes > DISC_UPLOAD_MAX_SIZE) {
-            aborted = true;
             req.destroy();
-            cleanup();
+            delete DISC_UPLOAD_TOKENS[uploadId];
             sendJSON(res, 413, { success: false, error: 'File too large (max 200MB)' });
             return;
         }
-        if (writeStream) writeStream.write(chunk);
+        chunks.push(chunk);
     });
-
     req.on('end', function() {
-        if (aborted) return;
-        if (writeStream) {
-            writeStream.end(function() {
-                var relPath = path.relative(ROOT, destPath).replace(/\\/g, '/');
-                delete DISC_UPLOAD_TOKENS[uploadId];
-                sendJSON(res, 200, { url: relPath });
-            });
+        if (totalBytes > DISC_UPLOAD_MAX_SIZE) return;
+        try {
+            var buffer = Buffer.concat(chunks);
+            var destDir = path.join(ROOT, 'Disc', 'MusicAlbum', tokenInfo.albumDir);
+            fs.mkdirSync(destDir, { recursive: true });
+            var destPath = path.join(destDir, tokenInfo.filename);
+            fs.writeFileSync(destPath, buffer);
+            var relPath = path.relative(ROOT, destPath).replace(/\\/g, '/');
+
+            delete DISC_UPLOAD_TOKENS[uploadId];
+            sendJSON(res, 200, { url: relPath });
+        } catch (e) {
+            delete DISC_UPLOAD_TOKENS[uploadId];
+            sendJSON(res, 500, { success: false, error: 'Write failed: ' + e.message });
         }
     });
-
-    req.on('error', function(err) {
-        if (!aborted) {
-            aborted = true;
-            cleanup();
-            try { sendJSON(res, 500, { success: false, error: 'Upload interrupted: ' + err.message }); } catch (e) {}
-        }
+    req.on('error', function() {
+        delete DISC_UPLOAD_TOKENS[uploadId];
     });
 }
 
