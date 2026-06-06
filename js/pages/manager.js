@@ -235,6 +235,34 @@ var ManagerGo = (function() {
                 });
                 var topUsers = sortedUsers.slice(0, 5);
 
+                var freshBytes = totalArticles * 2 * 1024 * 1024;
+                var discBytes = totalTracks * 5 * 1024 * 1024;
+                var designBytes = totalWorks * 3 * 1024 * 1024;
+                var otherBytes = 1 * 1024 * 1024;
+                var totalStorage = freshBytes + discBytes + designBytes + otherBytes;
+
+                var storageSegments = [
+                    { label: 'Fresh', value: freshBytes, color: '#6366f1' },
+                    { label: 'Disc', value: discBytes, color: '#a855f7' },
+                    { label: 'Design', value: designBytes, color: '#22c55e' },
+                    { label: 'Other', value: otherBytes, color: '#f59e0b' }
+                ];
+
+                var audioBytes = discBytes;
+                var imageBytes = Math.round(totalWorks * 2.5 * 1024 * 1024 + totalArticles * 0.5 * 1024 * 1024);
+                var textBytes = Math.round(totalArticles * 1 * 1024 * 1024);
+                var videoBytes = Math.round(totalWorks * 0.5 * 1024 * 1024);
+                var otherTypeBytes = Math.round(otherBytes);
+                var totalTypeBytes = audioBytes + imageBytes + textBytes + videoBytes + otherTypeBytes;
+
+                var typeSegments = [
+                    { label: 'Audio', value: audioBytes, color: '#a855f7' },
+                    { label: 'Images', value: imageBytes, color: '#6366f1' },
+                    { label: 'Text', value: textBytes, color: '#22c55e' },
+                    { label: 'Video', value: videoBytes, color: '#f59e0b' },
+                    { label: 'Other', value: otherTypeBytes, color: '#ef4444' }
+                ];
+
                 dc.innerHTML =
                     '<div class="manager-stats-grid">' +
                     '<div class="manager-stat-card">' +
@@ -256,6 +284,16 @@ var ManagerGo = (function() {
                     '<svg class="manager-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>' +
                     '<div class="manager-stat-value">' + totalTracks + '</div>' +
                     '<div class="manager-stat-label">Disc Tracks</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="manager-donut-grid">' +
+                    '<div class="manager-donut-card">' +
+                    '<div class="manager-donut-header">Storage by Section</div>' +
+                    buildDonutChart(storageSegments, 'Total', totalStorage) +
+                    '</div>' +
+                    '<div class="manager-donut-card">' +
+                    '<div class="manager-donut-header">Storage by File Type</div>' +
+                    buildDonutChart(typeSegments, 'Total', totalTypeBytes) +
                     '</div>' +
                     '</div>' +
                     '<div class="manager-card">' +
@@ -285,6 +323,60 @@ var ManagerGo = (function() {
                 '</div>';
         }
         return html;
+    }
+
+    function formatBytes(bytes) {
+        if (!bytes || bytes === 0) return '0 B';
+        var units = ['B', 'KB', 'MB', 'GB'];
+        var i = 0;
+        while (bytes >= 1024 && i < units.length - 1) {
+            bytes /= 1024;
+            i++;
+        }
+        return bytes.toFixed(i === 0 ? 0 : 1) + ' ' + units[i];
+    }
+
+    function buildDonutChart(segments, totalLabel, totalBytes) {
+        var size = 200;
+        var cx = size / 2;
+        var cy = size / 2;
+        var radius = 68;
+        var strokeWidth = 22;
+        var circumference = 2 * Math.PI * radius;
+
+        var total = 0;
+        for (var i = 0; i < segments.length; i++) {
+            total += segments[i].value;
+        }
+        if (total === 0) total = 1;
+
+        var svg = '<svg viewBox="0 0 ' + size + ' ' + size + '" class="manager-donut-svg">';
+
+        var cumulativeOffset = 0;
+        for (var j = 0; j < segments.length; j++) {
+            var pct = segments[j].value / total;
+            var dashLen = Math.max(pct * circumference, 0.5);
+            svg += '<circle cx="' + cx + '" cy="' + cy + '" r="' + radius + '" fill="none" stroke="' + segments[j].color + '" stroke-width="' + strokeWidth + '" stroke-dasharray="' + dashLen.toFixed(2) + ' ' + (circumference - dashLen).toFixed(2) + '" stroke-dashoffset="' + (-cumulativeOffset).toFixed(2) + '" transform="rotate(-90 ' + cx + ' ' + cy + ')" />';
+            cumulativeOffset += dashLen;
+        }
+
+        svg += '<text x="' + cx + '" y="' + (cy - 6) + '" text-anchor="middle" fill="rgba(255,255,255,.75)" font-size="14" font-weight="600" font-family="Nunito,Quicksand,Helvetica Neue,Helvetica,Arial,sans-serif">' + totalLabel + '</text>';
+        svg += '<text x="' + cx + '" y="' + (cy + 14) + '" text-anchor="middle" fill="rgba(255,255,255,.35)" font-size="11" font-family="Nunito,Quicksand,Helvetica Neue,Helvetica,Arial,sans-serif">' + formatBytes(totalBytes) + '</text>';
+
+        svg += '</svg>';
+
+        var legend = '<div class="manager-donut-legend">';
+        for (var k = 0; k < segments.length; k++) {
+            var lpct = Math.round((segments[k].value / total) * 100);
+            legend += '<div class="manager-donut-legend-item">' +
+                '<span class="manager-donut-legend-dot" style="background:' + segments[k].color + '"></span>' +
+                '<span class="manager-donut-legend-label">' + segments[k].label + '</span>' +
+                '<span class="manager-donut-legend-value">' + lpct + '%</span>' +
+                '</div>';
+        }
+        legend += '</div>';
+
+        return '<div class="manager-donut-body">' + svg + legend + '</div>';
     }
 
     function renderFreshManager(container) {
@@ -3622,6 +3714,7 @@ var ManagerGo = (function() {
             var reader = new FileReader();
             reader.onload = function(e) {
                 var dataUrl = e.target.result;
+                collectFormData();
                 if (!homeBannerData.groups[groupIdx]) {
                     homeBannerData.groups[groupIdx] = { bgImage: '', bgVideo: '', bgType: 'image', carouselTexts: [] };
                 }
@@ -3664,6 +3757,7 @@ var ManagerGo = (function() {
                     var res = JSON.parse(xhr.responseText);
                     if (res.success && res.files && res.files.length > 0) {
                         var videoPath = res.files[0].path;
+                        collectFormData();
                         if (!homeBannerData.groups[groupIdx]) {
                             homeBannerData.groups[groupIdx] = { bgImage: '', bgVideo: '', bgType: 'video', carouselTexts: [] };
                         }
@@ -3716,6 +3810,7 @@ var ManagerGo = (function() {
         }
 
         function addCarouselText(groupIdx) {
+            collectFormData();
             if (!homeBannerData.groups[groupIdx]) {
                 homeBannerData.groups[groupIdx] = { bgImage: '', bgVideo: '', bgType: 'image', carouselTexts: [] };
             }
@@ -3724,6 +3819,7 @@ var ManagerGo = (function() {
         }
 
         function removeCarouselText(groupIdx, textIdx) {
+            collectFormData();
             if (!homeBannerData.groups[groupIdx]) return;
             homeBannerData.groups[groupIdx].carouselTexts.splice(textIdx, 1);
             buildHomeUI();
@@ -3786,6 +3882,36 @@ var ManagerGo = (function() {
             }
             buildHomeUI();
         });
+    }
+
+    function buildDesignGuardLevel(level, designGuard) {
+        var dg = (designGuard && designGuard['level' + level]) || { type: 'none', answer: '' };
+        var type = dg.type || 'none';
+        var answer = dg.answer || '';
+        var isPin = type === 'pin';
+        var isText = type === 'text';
+        var isNone = type === 'none';
+        var pinDisplay = isPin && answer ? answer : '';
+
+        return '<div class="manager-dg-level">' +
+            '<div class="manager-dg-level-header">' +
+            '<span class="manager-dg-level-label">Level ' + level + '</span>' +
+            '<div class="manager-dg-type-select">' +
+            '<label class="manager-dg-type-option' + (isNone ? ' active' : '') + '">' +
+            '<input type="radio" name="dgType' + level + '" value="none"' + (isNone ? ' checked' : '') + '>' +
+            '<span>No Answer</span></label>' +
+            '<label class="manager-dg-type-option' + (isPin ? ' active' : '') + '">' +
+            '<input type="radio" name="dgType' + level + '" value="pin"' + (isPin ? ' checked' : '') + '>' +
+            '<span>PIN</span></label>' +
+            '<label class="manager-dg-type-option' + (isText ? ' active' : '') + '">' +
+            '<input type="radio" name="dgType' + level + '" value="text"' + (isText ? ' checked' : '') + '>' +
+            '<span>Text</span></label>' +
+            '</div>' +
+            '</div>' +
+            '<div class="manager-dg-answer-row' + (isNone ? ' hidden' : '') + '" id="dgAnswerRow' + level + '">' +
+            '<input type="' + (isPin ? 'password' : 'text') + '" class="manager-form-input manager-dg-answer" id="dgAnswer' + level + '" value="' + answer + '" placeholder="' + (isPin ? '6-digit PIN' : 'Correct answer') + '" maxlength="' + (isPin ? '6' : '50') + '"' + (isPin ? ' inputmode="numeric" pattern="[0-9]*"' : '') + '>' +
+            '</div>' +
+            '</div>';
     }
 
     function renderSettings(container) {
@@ -3874,6 +4000,14 @@ var ManagerGo = (function() {
                 '</div>' +
                 '<input type="color" class="manager-color-input" id="setFooterTextColor" value="' + (s.footerTextColor || '#000000') + '">' +
                 '</div>' +
+                '<div class="manager-card" style="margin-top:.3rem;">' +
+                '<div class="manager-card-header">Design Access</div>' +
+                '<div class="manager-design-guard-settings" id="designGuardSettings">' +
+                buildDesignGuardLevel(1, s.designGuard) +
+                buildDesignGuardLevel(2, s.designGuard) +
+                buildDesignGuardLevel(3, s.designGuard) +
+                '</div>' +
+                '</div>' +
                 '<div style="margin-top:.2rem;">' +
                 '<button class="manager-btn manager-btn-primary" id="managerSettingsSave">Save Settings</button>' +
                 '</div>';
@@ -3881,6 +4015,17 @@ var ManagerGo = (function() {
             var saveBtn = document.getElementById('managerSettingsSave');
             if (saveBtn) {
                 saveBtn.addEventListener('click', function() {
+                    var designGuard = {};
+                    for (var lv = 1; lv <= 3; lv++) {
+                        var typeRadio = document.querySelector('input[name="dgType' + lv + '"]:checked');
+                        var type = typeRadio ? typeRadio.value : 'none';
+                        var answer = '';
+                        if (type !== 'none') {
+                            var answerInput = document.getElementById('dgAnswer' + lv);
+                            answer = answerInput ? answerInput.value.trim() : '';
+                        }
+                        designGuard['level' + lv] = { type: type, answer: answer };
+                    }
                     var settings = {
                         contact: document.getElementById('setContact').value.trim(),
                         title: document.getElementById('setTitle').value.trim(),
@@ -3890,11 +4035,14 @@ var ManagerGo = (function() {
                         extraBarFontStyle: document.getElementById('setBarFontStyle').value,
                         extraBarItalic: document.getElementById('setBarItalic').checked,
                         footerBackground: document.getElementById('setFooterBg').value,
-                        footerTextColor: document.getElementById('setFooterTextColor').value
+                        footerTextColor: document.getElementById('setFooterTextColor').value,
+                        designGuard: designGuard
                     };
                     apiCall('settings', settings, function(r) {
-                        if (r.success) showToast('Settings saved');
-                        else showToast(r.error, true);
+                        if (r.success) {
+                            localStorage.setItem('vipen_design_guard', JSON.stringify(designGuard));
+                            showToast('Settings saved');
+                        } else showToast(r.error, true);
                     });
                 });
             }
@@ -3926,6 +4074,41 @@ var ManagerGo = (function() {
             }
             bindColorPalette('footerBgPalette', 'setFooterBg');
             bindColorPalette('footerTextPalette', 'setFooterTextColor');
+
+            for (var lv = 1; lv <= 3; lv++) {
+                (function(level) {
+                    var radios = document.querySelectorAll('input[name="dgType' + level + '"]');
+                    radios.forEach(function(radio) {
+                        radio.addEventListener('change', function() {
+                            var answerRow = document.getElementById('dgAnswerRow' + level);
+                            var answerInput = document.getElementById('dgAnswer' + level);
+                            var type = this.value;
+                            if (type === 'none') {
+                                if (answerRow) answerRow.classList.add('hidden');
+                            } else {
+                                if (answerRow) answerRow.classList.remove('hidden');
+                                if (answerInput) {
+                                    if (type === 'pin') {
+                                        answerInput.type = 'password';
+                                        answerInput.placeholder = '6-digit PIN';
+                                        answerInput.maxLength = 6;
+                                        answerInput.setAttribute('inputmode', 'numeric');
+                                    } else {
+                                        answerInput.type = 'text';
+                                        answerInput.placeholder = 'Correct answer';
+                                        answerInput.maxLength = 50;
+                                        answerInput.removeAttribute('inputmode');
+                                    }
+                                }
+                            }
+                            var labels = document.querySelectorAll('input[name="dgType' + level + '"]');
+                            labels.forEach(function(r) {
+                                r.parentElement.classList.toggle('active', r.checked);
+                            });
+                        });
+                    });
+                })(lv);
+            }
         });
     }
 

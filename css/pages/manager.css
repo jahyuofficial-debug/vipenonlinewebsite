@@ -3914,3 +3914,156 @@
 .manager-toggle input:checked + .manager-toggle-slider::before {
     transform: translateX(.2rem);
 }
+
+.manager-donut-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .2rem;
+    margin-bottom: .3rem;
+}
+
+.manager-donut-card {
+    background: rgba(255, 255, 255, .03);
+    border: 1px solid rgba(255, 255, 255, .06);
+    border-radius: .12rem;
+    padding: .24rem;
+    transition: border-color .25s;
+}
+
+.manager-donut-card:hover {
+    border-color: rgba(99, 102, 241, .2);
+}
+
+.manager-donut-header {
+    font-size: .14rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, .7);
+    margin-bottom: .2rem;
+    letter-spacing: .02rem;
+    text-align: center;
+}
+
+.manager-donut-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .3rem;
+    flex-wrap: wrap;
+}
+
+.manager-donut-svg {
+    width: 1.8rem;
+    height: 1.8rem;
+    flex-shrink: 0;
+}
+
+.manager-donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: .1rem;
+    min-width: 1.2rem;
+}
+
+.manager-donut-legend-item {
+    display: flex;
+    align-items: center;
+    gap: .08rem;
+    font-size: .11rem;
+    color: rgba(255, 255, 255, .5);
+}
+
+.manager-donut-legend-dot {
+    width: .1rem;
+    height: .1rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.manager-donut-legend-label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.manager-donut-legend-value {
+    color: rgba(255, 255, 255, .35);
+    font-size: .1rem;
+    flex-shrink: 0;
+}
+
+.manager-dg-level {
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: .1rem;
+    padding: .16rem;
+    margin-bottom: .12rem;
+}
+
+.manager-dg-level:last-child {
+    margin-bottom: 0;
+}
+
+.manager-dg-level-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .16rem;
+    flex-wrap: wrap;
+}
+
+.manager-dg-level-label {
+    font-size: .14rem;
+    font-weight: 600;
+    color: rgba(255,255,255,.7);
+    letter-spacing: .02rem;
+}
+
+.manager-dg-type-select {
+    display: flex;
+    gap: .04rem;
+    background: rgba(255,255,255,.04);
+    border-radius: .06rem;
+    padding: .03rem;
+}
+
+.manager-dg-type-option {
+    display: flex;
+    align-items: center;
+    gap: .04rem;
+    padding: .05rem .12rem;
+    border-radius: .05rem;
+    cursor: pointer;
+    color: rgba(255,255,255,.35);
+    font-size: .11rem;
+    transition: all .25s;
+    user-select: none;
+}
+
+.manager-dg-type-option:hover {
+    color: rgba(255,255,255,.65);
+}
+
+.manager-dg-type-option.active {
+    background: rgba(99,102,241,.3);
+    color: #fff;
+}
+
+.manager-dg-type-option input {
+    display: none;
+}
+
+.manager-dg-answer-row {
+    margin-top: .12rem;
+    padding-top: .12rem;
+    border-top: 1px solid rgba(255,255,255,.04);
+}
+
+.manager-dg-answer-row.hidden {
+    display: none;
+}
+
+.manager-dg-answer {
+    width: 100%;
+}

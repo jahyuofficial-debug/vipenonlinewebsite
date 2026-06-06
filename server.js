@@ -1238,6 +1238,9 @@ function handleManagerSettings(res, body, session) {
             if (body.socials !== undefined) settings.socials = body.socials;
             if (body.extraBarFontStyle !== undefined) settings.extraBarFontStyle = body.extraBarFontStyle;
             if (body.extraBarItalic !== undefined) settings.extraBarItalic = body.extraBarItalic;
+            if (body.footerBackground !== undefined) settings.footerBackground = body.footerBackground;
+            if (body.footerTextColor !== undefined) settings.footerTextColor = body.footerTextColor;
+            if (body.designGuard !== undefined) settings.designGuard = body.designGuard;
 
             writeManagerJSON('settings.json', settings, function(err2) {
                 if (err2) {

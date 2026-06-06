@@ -464,6 +464,7 @@ function handleManagerSettings(req, res) {
                     if (body.extraBarItalic !== undefined) settings.extraBarItalic = body.extraBarItalic;
                     if (body.footerBackground !== undefined) settings.footerBackground = body.footerBackground;
                     if (body.footerTextColor !== undefined) settings.footerTextColor = body.footerTextColor;
+                    if (body.designGuard !== undefined) settings.designGuard = body.designGuard;
 
                     storage.writeJSON('settings.json', settings, function(err4) {
                         if (err4) { sendJSON(res, 500, { success: false, error: 'Failed to save settings' }); return; }

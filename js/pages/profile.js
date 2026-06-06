@@ -1189,7 +1189,6 @@ var ProfilePage = (function() {
             saveBtn: document.getElementById('profileEditModalSave'),
             cardYo: document.getElementById('cardYo'),
             cardHi: document.getElementById('cardHi'),
-            cardManager: document.getElementById('cardManager'),
             yoMenuModal: document.getElementById('yoMenuModal'),
             yoMenuOverlay: document.getElementById('yoMenuOverlay'),
             yoMenuFresh: document.getElementById('yoMenuFresh'),
@@ -1346,21 +1345,6 @@ var ProfilePage = (function() {
             });
         }
 
-        if (dom.cardManager) {
-            var authRole = Utils.getAuth();
-            var userDataRole = Utils.getUserData('user');
-            var isManagerGo = ((authRole && authRole.role === 'ManagerGo') ||
-                               (authRole && authRole.email === 'riverjia9527@gmail.com') ||
-                               (userDataRole && userDataRole.role === 'ManagerGo') ||
-                               (userDataRole && userDataRole.email === 'riverjia9527@gmail.com'));
-            if (isManagerGo) {
-                dom.cardManager.style.display = '';
-                dom.cardManager.addEventListener('click', function() {
-                    window.location.href = '/manager';
-                });
-            }
-        }
-
         var socialContainer = document.querySelector('.profile-social-icons');
         if (socialContainer) {
             cachedDom.socialContainer = socialContainer;
@@ -1488,18 +1472,6 @@ var ProfilePage = (function() {
             '<div class="quick-action-info">' +
             '<div class="quick-action-title">Hi</div>' +
             '<div class="quick-action-desc">Hang Out</div>' +
-            '</div>' +
-            '<div class="quick-action-arrow">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>' +
-            '</div>' +
-            '</div>' +
-            '<div class="quick-action-card card-manager" id="cardManager" style="display:none">' +
-            '<div class="quick-action-icon">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
-            '</div>' +
-            '<div class="quick-action-info">' +
-            '<div class="quick-action-title">ManagerGo</div>' +
-            '<div class="quick-action-desc">Site Management</div>' +
             '</div>' +
             '<div class="quick-action-arrow">' +
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>' +

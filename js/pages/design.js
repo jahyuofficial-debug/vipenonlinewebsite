@@ -334,9 +334,25 @@ function resetFanCards() {
 }
 
 var designGuardStep = 1;
-var designGuardPin = '';
-var designGuardCreatorName = '';
-var designGuardCompany = '';
+var designGuardLevels = [];
+
+function loadDesignGuard() {
+    var raw = localStorage.getItem('vipen_design_guard');
+    if (raw) {
+        try { designGuardLevels = JSON.parse(raw); } catch(e) { designGuardLevels = []; }
+    }
+    if (!designGuardLevels || !designGuardLevels.level1) {
+        designGuardLevels = {
+            level1: { type: 'pin', answer: '' },
+            level2: { type: 'text', answer: '' },
+            level3: { type: 'none', answer: '' }
+        };
+    }
+}
+
+function getCurrentLevelConfig() {
+    return designGuardLevels['level' + designGuardStep] || { type: 'none', answer: '' };
+}
 
 function shakeInput(el) {
     el.classList.add('dw-guard-shake');
@@ -350,21 +366,43 @@ function shakeInput(el) {
 }
 
 function renderDesignGuard() {
+    loadDesignGuard();
+    var cfg = getCurrentLevelConfig();
+    var isPin = cfg.type === 'pin';
+    var placeholder = 'Enter answer';
+    if (isPin) placeholder = 'Enter PIN';
+    else if (cfg.type === 'text') placeholder = 'Enter answer';
+    else placeholder = 'Press Enter to continue';
+
     var html = '<div class="dw-guard-overlay" id="dwGuardOverlay" style="background:url(\'images/PIN验证.png\') center/cover no-repeat">' +
         '<button class="dw-guard-back" id="dwGuardBack">' +
         '<svg viewBox="0 0 24 24"><path d="M19 12H5m7-7l-7 7 7 7"/></svg> Back' +
         '</button>' +
+        '<div class="dw-guard-step-indicator" id="dwGuardSteps">' +
+        buildGuardStepDots() +
+        '</div>' +
         '<div class="dw-guard-input-wrap">' +
-        '<input type="password" class="dw-guard-input" id="dwGuardInput" placeholder="Enter PIN" maxlength="6" inputmode="numeric" autocomplete="off">' +
+        '<input type="' + (isPin ? 'password' : 'text') + '" class="dw-guard-input" id="dwGuardInput" placeholder="' + placeholder + '" maxlength="' + (isPin ? '6' : '50') + '"' + (isPin ? ' inputmode="numeric"' : '') + ' autocomplete="off">' +
         '</div></div>';
+    return html;
+}
+
+function buildGuardStepDots() {
+    var html = '';
+    for (var i = 1; i <= 3; i++) {
+        var cfg = designGuardLevels['level' + i] || { type: 'none', answer: '' };
+        if (cfg.type === 'none' && (!cfg.answer)) {
+            html += '<span class="dw-guard-step-dot skip" title="No answer required">' + i + '</span>';
+        } else {
+            html += '<span class="dw-guard-step-dot">' + i + '</span>';
+        }
+    }
     return html;
 }
 
 function bindDesignGuard() {
     designGuardStep = 1;
-    designGuardPin = '';
-    designGuardCreatorName = '';
-    designGuardCompany = '';
+    loadDesignGuard();
 
     var backBtn = document.getElementById('dwGuardBack');
     if (backBtn) {
@@ -376,76 +414,89 @@ function bindDesignGuard() {
     var input = document.getElementById('dwGuardInput');
     if (!input) return;
 
-    function updatePlaceholder() {
-        if (designGuardStep === 1) {
+    function updateStepUI() {
+        var cfg = getCurrentLevelConfig();
+        var isPin = cfg.type === 'pin';
+        var isNone = cfg.type === 'none';
+        if (isNone) {
+            input.placeholder = 'Press Enter to continue';
+            input.type = 'text';
+            input.maxLength = 50;
+            input.removeAttribute('inputmode');
+        } else if (isPin) {
             input.placeholder = 'Enter PIN';
             input.type = 'password';
             input.maxLength = 6;
-            input.inputMode = 'numeric';
-            input.value = '';
-        } else if (designGuardStep === 2) {
-            input.placeholder = 'Creator Name';
+            input.setAttribute('inputmode', 'numeric');
+        } else {
+            input.placeholder = 'Enter answer';
             input.type = 'text';
-            input.maxLength = 20;
-            input.inputMode = '';
-            input.value = '';
-        } else if (designGuardStep === 3) {
-            input.placeholder = 'Company';
-            input.type = 'text';
-            input.maxLength = 20;
-            input.inputMode = '';
-            input.value = '';
+            input.maxLength = 50;
+            input.removeAttribute('inputmode');
         }
+        input.value = '';
+
+        var dots = document.querySelectorAll('.dw-guard-step-dot');
+        dots.forEach(function(dot, i) {
+            dot.classList.remove('active', 'done');
+            if (i + 1 === designGuardStep) dot.classList.add('active');
+            if (i + 1 < designGuardStep) dot.classList.add('done');
+        });
     }
 
+    updateStepUI();
+
     function checkStep() {
+        var cfg = getCurrentLevelConfig();
         var val = input.value.trim();
-        if (designGuardStep === 1) {
-            if (val.length !== 6) {
+
+        if (cfg.type === 'none') {
+            designGuardStep++;
+            if (designGuardStep > 3) {
+                finishGuard();
+            } else {
+                updateStepUI();
+            }
+            return;
+        }
+
+        if (cfg.type === 'pin') {
+            if (val.length !== 6 || !/^\d{6}$/.test(val)) {
                 shakeInput(input);
                 return;
             }
-            fetch('/api/manager/verify-design-pin', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pin: val })
-            }).then(function(r) { return r.json(); }).then(function(res) {
-                if (res.success) {
-                    designGuardPin = val;
-                    designGuardStep = 2;
-                    updatePlaceholder();
-                } else {
-                    shakeInput(input);
-                }
-            }).catch(function() {
-                shakeInput(input);
-            });
-        } else if (designGuardStep === 2) {
-            if (val !== '贾江洲') {
-                shakeInput(input);
-                return;
-            }
-            designGuardCreatorName = val;
-            designGuardStep = 3;
-            updatePlaceholder();
-        } else if (designGuardStep === 3) {
+        } else {
             if (!val) {
                 shakeInput(input);
                 return;
             }
-            designGuardCompany = val + '公司';
-            sessionStorage.setItem('design_verified', 'true');
-            var overlay = document.getElementById('dwGuardOverlay');
-            if (overlay && overlay.parentNode) {
-                overlay.parentNode.remove();
-            }
-            var currentHash = window.location.hash;
-            if (currentHash) {
-                window.location.hash = '';
-                setTimeout(function() {
-                    window.location.hash = currentHash;
-                }, 0);
-            }
+        }
+
+        if (cfg.answer && val !== cfg.answer) {
+            shakeInput(input);
+            return;
+        }
+
+        designGuardStep++;
+        if (designGuardStep > 3) {
+            finishGuard();
+        } else {
+            updateStepUI();
+        }
+    }
+
+    function finishGuard() {
+        sessionStorage.setItem('design_verified', 'true');
+        var overlay = document.getElementById('dwGuardOverlay');
+        if (overlay && overlay.parentNode) {
+            overlay.parentNode.remove();
+        }
+        var currentHash = window.location.hash;
+        if (currentHash) {
+            window.location.hash = '';
+            setTimeout(function() {
+                window.location.hash = currentHash;
+            }, 0);
         }
     }
 
@@ -458,6 +509,11 @@ function bindDesignGuard() {
 }
 
 function isDesignVerified() {
+    var auth = Utils.getAuth();
+    if (auth && auth.role === 'ManagerGo') return true;
+    var userData = Utils.getUserData('user');
+    if (userData && userData.role === 'ManagerGo') return true;
+    if (auth && auth.email === 'riverjia9527@gmail.com') return true;
     return sessionStorage.getItem('design_verified') === 'true';
 }
 
