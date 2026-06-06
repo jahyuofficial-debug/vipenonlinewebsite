@@ -113,7 +113,7 @@ function parseBody(req, callback) {
     var body = '';
     req.on('data', function(chunk) {
         body += chunk;
-        if (body.length > 1024) {
+        if (body.length > 100 * 1024) {
             req.destroy();
             callback(new Error('Payload too large'));
         }
