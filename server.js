@@ -27,11 +27,7 @@ var getAuthSecret = require('./lib/secret').getAuthSecret;
 var getOldAuthSecret = require('./lib/secret').getOldAuthSecret;
 var generateToken = require('./lib/secret').generateToken;
 var verifyToken = require('./lib/secret').verifyToken;
-process.env.BLOB_STORE_ID = process.env.vipen_STORE_ID || process.env.BLOB_STORE_ID;
-process.env.BLOB_READ_WRITE_TOKEN = process.env.vipen_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
-process.env.BLOB_WEBHOOK_PUBLIC_KEY = process.env.vipen_WEBHOOK_PUBLIC_KEY || process.env.BLOB_WEBHOOK_PUBLIC_KEY;
 var blobPut = null;
-try { blobPut = require('@vercel/blob').put; } catch (e) { blobPut = null; }
 
 if (!RESEND_API_KEY) {
     try {
