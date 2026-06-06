@@ -1,4 +1,5 @@
 var crypto = require('crypto');
+process.env.BLOB_READ_WRITE_TOKEN = process.env.BLOB_READ_WRITE_TOKEN || process.env.vipen_READ_WRITE_TOKEN;
 var { put, generateClientTokenFromReadWriteToken, issueSignedToken, presignUrl } = require('@vercel/blob');
 
 var getAuthSecret = require('../lib/secret').getAuthSecret;

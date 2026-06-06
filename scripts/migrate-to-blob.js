@@ -1,5 +1,6 @@
 var fs = require('fs');
 var path = require('path');
+process.env.BLOB_READ_WRITE_TOKEN = process.env.BLOB_READ_WRITE_TOKEN || process.env.vipen_READ_WRITE_TOKEN;
 var { put } = require('@vercel/blob');
 
 var ROOT = path.join(__dirname, '..');

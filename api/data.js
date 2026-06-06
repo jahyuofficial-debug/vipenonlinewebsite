@@ -1,4 +1,5 @@
 var https = require('https');
+process.env.BLOB_READ_WRITE_TOKEN = process.env.BLOB_READ_WRITE_TOKEN || process.env.vipen_READ_WRITE_TOKEN;
 var { list } = require('@vercel/blob');
 
 function sendJSON(res, statusCode, data) {

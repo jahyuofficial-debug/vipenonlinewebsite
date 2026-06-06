@@ -27,6 +27,7 @@ var getAuthSecret = require('./lib/secret').getAuthSecret;
 var getOldAuthSecret = require('./lib/secret').getOldAuthSecret;
 var generateToken = require('./lib/secret').generateToken;
 var verifyToken = require('./lib/secret').verifyToken;
+process.env.BLOB_READ_WRITE_TOKEN = process.env.BLOB_READ_WRITE_TOKEN || process.env.vipen_READ_WRITE_TOKEN;
 var blobPut = null;
 try { blobPut = require('@vercel/blob').put; } catch (e) { blobPut = null; }
 
