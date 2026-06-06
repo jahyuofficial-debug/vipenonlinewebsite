@@ -355,17 +355,25 @@ function handleManagerDiscGenerateUploadToken(req, res) {
             if (!filename) { sendJSON(res, 400, { success: false, error: 'Filename is required' }); return; }
 
             var blobPath = 'disc/' + albumDir + '/' + Date.now() + '_' + filename;
-            var signedToken = issueSignedToken({
-                allowedContentTypes: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/mp4', 'image/jpeg', 'image/png', 'image/webp', 'image/gif'],
-                maximumSizeInBytes: 500 * 1024 * 1024,
-                validUntil: Date.now() + 15 * 60 * 1000
-            });
+            var signedToken;
+            try {
+                signedToken = issueSignedToken({
+                    allowedContentTypes: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/mp4', 'image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+                    maximumSizeInBytes: 500 * 1024 * 1024,
+                    validUntil: Date.now() + 15 * 60 * 1000,
+                    token: process.env.BLOB_READ_WRITE_TOKEN
+                });
+            } catch (tokenErr) {
+                sendJSON(res, 500, { success: false, error: 'Token generation failed - missing BLOB_READ_WRITE_TOKEN: ' + tokenErr.message });
+                return;
+            }
 
             presignUrl(signedToken, {
                 pathname: blobPath,
                 operation: 'put',
                 validUntil: Date.now() + 15 * 60 * 1000,
-                access: 'public'
+                access: 'public',
+                token: process.env.BLOB_READ_WRITE_TOKEN
             }).then(function(result) {
                 managerHelpers.addLog('disc_token', session.username, 'Generated upload token for ' + filename);
                 sendJSON(res, 200, { success: true, uploadUrl: result.presignedUrl, pathname: blobPath });
