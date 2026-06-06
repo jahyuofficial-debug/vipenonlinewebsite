@@ -284,7 +284,7 @@ function handleManagerUpload(req, res) {
             (function(f) {
                 var blobPath = dir + '/' + Date.now() + '_' + f.filename;
                 var buffer = Buffer.from(f.body, 'binary');
-                put(blobPath, buffer, { access: 'public', contentType: getContentType(f.filename) })
+                put(blobPath, buffer, { access: 'public', contentType: getContentType(f.filename), addRandomSuffix: true })
                     .then(function(blob) {
                         uploadedFiles.push({ name: f.filename, path: blob.url });
                         pending--;
@@ -325,7 +325,7 @@ function handleManagerDiscUpload(req, res) {
                 (function(f) {
                     var blobPath = 'disc/' + albumDir + '/' + Date.now() + '_' + f.filename;
                     var buffer = Buffer.from(f.body, 'binary');
-                    put(blobPath, buffer, { access: 'public', contentType: getContentType(f.filename) })
+                    put(blobPath, buffer, { access: 'public', contentType: getContentType(f.filename), addRandomSuffix: true })
                         .then(function(blob) {
                             uploadedFiles.push({ name: f.filename, path: blob.url });
                             pending--;

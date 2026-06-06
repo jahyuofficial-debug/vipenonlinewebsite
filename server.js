@@ -229,10 +229,28 @@ function handleAPIRoute(req, res, apiPath) {
     if (req.method === 'OPTIONS') {
         res.writeHead(204, {
             'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+            'Access-Control-Allow-Methods': 'POST, GET, PUT, OPTIONS',
             'Access-Control-Allow-Headers': 'Content-Type, Authorization'
         });
         res.end();
+        return;
+    }
+
+    if (apiPath.indexOf('/api/manager/disc-upload-chunk') === 0) {
+        if (req.method === 'OPTIONS') {
+            res.writeHead(204, {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'PUT, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type'
+            });
+            res.end();
+            return;
+        }
+        if (req.method !== 'PUT') {
+            sendJSON(res, 405, { success: false, error: 'Method not allowed, PUT required' });
+            return;
+        }
+        handleManagerDiscUploadChunk(req, res);
         return;
     }
 
@@ -664,6 +682,18 @@ function handleManagerAPI(req, res, apiPath, body) {
     }
     if (apiPath === '/api/manager/disc-upload') {
         handleManagerDiscUpload(req, res, body);
+        return;
+    }
+    if (apiPath === '/api/manager/disc-generate-upload-token') {
+        handleManagerDiscGenerateUploadToken(req, res, body);
+        return;
+    }
+    if (apiPath === '/api/manager/disc-save') {
+        handleManagerDiscSave(req, res, body);
+        return;
+    }
+    if (apiPath === '/api/manager/disc-upload-chunk') {
+        handleManagerDiscUploadChunk(req, res);
         return;
     }
 
@@ -1333,7 +1363,8 @@ function handleManagerUpload(req, res, body) {
                         var buffer = Buffer.from(f.body, 'binary');
                         blobPut(blobPath, buffer, {
                             access: 'public',
-                            contentType: getUploadContentType(f.filename)
+                            contentType: getUploadContentType(f.filename),
+                            addRandomSuffix: true
                         }).then(function(blob) {
                             uploadedFiles.push({ name: f.filename, path: blob.url });
                             pending--;
@@ -1415,7 +1446,8 @@ function handleManagerDiscUpload(req, res, body) {
                         var buffer = Buffer.from(f.body, 'binary');
                         blobPut(blobPath, buffer, {
                             access: 'public',
-                            contentType: getUploadContentType(f.filename)
+                            contentType: getUploadContentType(f.filename),
+                            addRandomSuffix: true
                         }).then(function(blob) {
                             uploadedFiles.push({ name: f.filename, path: blob.url });
                             pending--;
@@ -1440,6 +1472,75 @@ function handleManagerDiscUpload(req, res, body) {
                 done();
             }
         });
+    });
+}
+
+var DISC_UPLOAD_TOKENS = {};
+var DISC_UPLOAD_TOKEN_TTL = 15 * 60 * 1000;
+
+function handleManagerDiscGenerateUploadToken(req, res, body) {
+    verifyManagerSession(body, function(sessErr, session) {
+        if (sessErr) {
+            sendJSON(res, 401, { success: false, error: sessErr });
+            return;
+        }
+
+        var filename = (body.filename || '').replace(/[\\/:*?"<>|]/g, '_').trim();
+        var albumDir = (body.albumDir || 'Unknown').replace(/[\\/:*?"<>|]/g, '_').trim();
+        if (!filename) {
+            sendJSON(res, 400, { success: false, error: 'Filename is required' });
+            return;
+        }
+
+        var blobPath = 'disc/' + albumDir + '/' + Date.now() + '_' + filename;
+        var uploadId = crypto.randomBytes(16).toString('hex');
+
+        DISC_UPLOAD_TOKENS[uploadId] = {
+            pathname: blobPath,
+            albumDir: albumDir,
+            filename: filename,
+            createdAt: Date.now()
+        };
+
+        var uploadUrl = 'http://localhost:' + PORT + '/api/manager/disc-upload-chunk?uploadId=' + uploadId;
+
+        addManagerLog('disc_token', session.username, 'Generated upload token for ' + filename);
+        sendJSON(res, 200, { success: true, uploadUrl: uploadUrl, pathname: blobPath });
+    });
+}
+
+function handleManagerDiscUploadChunk(req, res) {
+    var parsedUrl = url.parse(req.url, true);
+    var uploadId = parsedUrl.query.uploadId;
+
+    if (!uploadId || !DISC_UPLOAD_TOKENS[uploadId]) {
+        sendJSON(res, 401, { success: false, error: 'Invalid upload token' });
+        return;
+    }
+
+    var tokenInfo = DISC_UPLOAD_TOKENS[uploadId];
+
+    if (Date.now() - tokenInfo.createdAt > DISC_UPLOAD_TOKEN_TTL) {
+        delete DISC_UPLOAD_TOKENS[uploadId];
+        sendJSON(res, 401, { success: false, error: 'Upload token expired' });
+        return;
+    }
+
+    var chunks = [];
+    req.on('data', function(chunk) {
+        chunks.push(chunk);
+    });
+    req.on('end', function() {
+        var buffer = Buffer.concat(chunks);
+        var destDir = path.join(ROOT, 'Disc', 'MusicAlbum', tokenInfo.albumDir);
+        fs.mkdirSync(destDir, { recursive: true });
+        var destPath = path.join(destDir, tokenInfo.filename);
+        fs.writeFileSync(destPath, buffer);
+        var relPath = path.relative(ROOT, destPath).replace(/\\/g, '/');
+
+        delete DISC_UPLOAD_TOKENS[uploadId];
+
+        sendJSON(res, 200, { url: relPath });
     });
 }
 

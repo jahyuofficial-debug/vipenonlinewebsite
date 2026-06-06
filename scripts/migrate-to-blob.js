@@ -24,7 +24,8 @@ files.forEach(function(f) {
     put(f.blob, content, {
         access: 'public',
         contentType: 'application/json',
-        addRandomSuffix: false
+        addRandomSuffix: false,
+        allowOverwrite: true
     }).then(function(blob) {
         console.log('[' + f.name + '] Uploaded successfully: ' + blob.url);
         pending--;
