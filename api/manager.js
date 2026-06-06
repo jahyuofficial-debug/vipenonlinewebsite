@@ -360,16 +360,14 @@ function handleManagerDiscGenerateUploadToken(req, res) {
                     var signedToken = await issueSignedToken({
                         allowedContentTypes: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/mp4', 'image/jpeg', 'image/png', 'image/webp', 'image/gif'],
                         maximumSizeInBytes: 500 * 1024 * 1024,
-                        validUntil: Date.now() + 15 * 60 * 1000,
-                        token: process.env.BLOB_READ_WRITE_TOKEN
+                        validUntil: Date.now() + 15 * 60 * 1000
                     });
 
                     var result = await presignUrl(signedToken, {
                         pathname: blobPath,
                         operation: 'put',
                         validUntil: Date.now() + 15 * 60 * 1000,
-                        access: 'public',
-                        token: process.env.BLOB_READ_WRITE_TOKEN
+                        access: 'public'
                     });
 
                     managerHelpers.addLog('disc_token', session.username, 'Generated upload token for ' + filename);
