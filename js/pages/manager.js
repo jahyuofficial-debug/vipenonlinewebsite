@@ -3378,17 +3378,23 @@ var ManagerGo = (function() {
                 '<div class="manager-home-groups">';
 
             for (var i = 0; i < 4; i++) {
-                var group = groups[i] || { bgImage: '', bgVideo: '', bgType: 'image', carouselTexts: [] };
+                var group = groups[i] || { bgImage: '', bgVideo: '', bgType: 'image', carouselTexts: [], hidden: false };
                 var bgImage = group.bgImage || '';
                 var bgVideo = group.bgVideo || '';
                 var bgType = group.bgType || 'image';
                 var texts = group.carouselTexts || [];
+                var isHidden = group.hidden === true;
 
-                html += '<div class="manager-home-group" data-group-index="' + i + '">' +
+                html += '<div class="manager-home-group' + (isHidden ? ' manager-home-group-hidden' : '') + '" data-group-index="' + i + '">' +
                     '<div class="manager-home-group-header">' +
                     '<span class="manager-home-group-label">' +
                     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:.18rem;height:.18rem;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' +
                     'Banner ' + (i + 1) + '</span>' +
+                    '<button class="manager-home-eye-btn' + (isHidden ? ' hidden' : '') + '" data-group="' + i + '" title="Toggle visibility">' +
+                    (isHidden ?
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:.16rem;height:.16rem;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>' :
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:.16rem;height:.16rem;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>') +
+                    '</button>' +
                     '<div class="manager-home-type-toggle" data-group="' + i + '">' +
                     '<button class="manager-home-type-btn' + (bgType === 'image' ? ' active' : '') + '" data-type="image" data-group="' + i + '">' +
                     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:.14rem;height:.14rem;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' +
@@ -3398,7 +3404,7 @@ var ManagerGo = (function() {
                     'Video</button>' +
                     '</div>' +
                     '</div>' +
-                    '<div class="manager-home-body">' +
+                    '<div class="manager-home-body"' + (isHidden ? ' style="display:none"' : '') + '>' +
                     '<div class="manager-home-banner-section" data-group="' + i + '">' +
                     '<div class="manager-home-media-area manager-home-image-area" data-group="' + i + '" style="' + (bgType === 'video' ? 'display:none' : '') + '">' +
                     '<label class="manager-form-label">Banner Image</label>' +
@@ -3476,6 +3482,15 @@ var ManagerGo = (function() {
                     saveHomeBanner();
                 });
             }
+
+            var eyeBtns = container.querySelectorAll('.manager-home-eye-btn');
+            eyeBtns.forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    var groupIdx = parseInt(this.getAttribute('data-group'));
+                    toggleBannerHidden(groupIdx);
+                });
+            });
 
             var typeToggleBtns = container.querySelectorAll('.manager-home-type-btn');
             typeToggleBtns.forEach(function(btn) {
@@ -3576,6 +3591,15 @@ var ManagerGo = (function() {
                     }
                 });
             });
+        }
+
+        function toggleBannerHidden(groupIdx) {
+            collectFormData();
+            if (!homeBannerData.groups[groupIdx]) {
+                homeBannerData.groups[groupIdx] = { bgImage: '', bgVideo: '', bgType: 'image', carouselTexts: [], hidden: false };
+            }
+            homeBannerData.groups[groupIdx].hidden = !homeBannerData.groups[groupIdx].hidden;
+            buildHomeUI();
         }
 
         function switchMediaType(groupIdx, type) {

@@ -87,7 +87,7 @@ BannerPage.initBgVideo();
         }
 
         if (bannerOnline && bannerOnline.groups) {
-            bannerData.homeGroups = bannerOnline.groups;
+            bannerData.homeGroups = BannerPage.filterVisibleGroups(bannerOnline.groups);
         }
 
         applySiteSettings(settings);
@@ -154,7 +154,7 @@ BannerPage.initBgVideo();
                 try {
                     var parsedBannerFallback = JSON.parse(mgrBannerFallback);
                     if (parsedBannerFallback && parsedBannerFallback.groups) {
-                        d.banner.homeGroups = parsedBannerFallback.groups;
+                        d.banner.homeGroups = BannerPage.filterVisibleGroups(parsedBannerFallback.groups);
                     }
                 } catch (e) {}
             }
@@ -173,7 +173,7 @@ BannerPage.initBgVideo();
                 }
             });
             fetch('/api/data/home-banner').then(function(r) { if (r.ok) return r.json(); throw new Error(''); }).then(function(ob) {
-                if (ob && ob.groups) { d.banner.homeGroups = ob.groups; }
+                if (ob && ob.groups) { d.banner.homeGroups = BannerPage.filterVisibleGroups(ob.groups); }
             }).catch(function() {});
 
             Object.assign(BannerPage.bannerData, d.banner);
@@ -1310,6 +1310,33 @@ function navigateToDesignWorkDetail(id) {
             });
         });
     });
+
+    var likeBtn = document.getElementById('dwDetailLikeBtn');
+    if (likeBtn) {
+        likeBtn.addEventListener('click', function() {
+            if (!Utils.isLoggedIn()) {
+                window.location.hash = '#/signup';
+                return;
+            }
+            var item = dwItems[id];
+            if (!item) return;
+            item.isLiked = !item.isLiked;
+            item.likeCount = (item.likeCount || 0) + (item.isLiked ? 1 : -1);
+            this.classList.toggle('liked');
+            var svg = this.querySelector('svg');
+            if (svg) {
+                if (item.isLiked) {
+                    svg.setAttribute('fill', '#ed4956');
+                    svg.setAttribute('stroke', '#ed4956');
+                } else {
+                    svg.setAttribute('fill', 'none');
+                    svg.setAttribute('stroke', 'currentColor');
+                }
+            }
+            var countEl = this.querySelector('.dw-detail-like-count');
+            if (countEl) countEl.textContent = item.likeCount;
+        });
+    }
 }
 
 
@@ -1494,7 +1521,7 @@ window.addEventListener('storage', function(e) {
         try {
             var parsed = JSON.parse(e.newValue);
             if (parsed && parsed.groups) {
-                BannerPage.bannerData.homeGroups = parsed.groups;
+                BannerPage.bannerData.homeGroups = BannerPage.filterVisibleGroups(parsed.groups);
                 if (currentPage === 'home') {
                     BannerPage.changeSlide(0);
                 }

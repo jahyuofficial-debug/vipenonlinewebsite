@@ -18,13 +18,18 @@ var bannerData = {
 var bgVideo = null;
 var isAnimating = false;
 
+function filterVisibleGroups(groups) {
+    if (!groups || !groups.length) return groups;
+    return groups.filter(function(g) { return !g.hidden; });
+}
+
 function loadHomeBanner(callback) {
     try {
         var cached = localStorage.getItem('vipen_mgr_home_banner');
         if (cached) {
             var parsed = JSON.parse(cached);
             if (parsed && parsed.groups && parsed.groups.length > 0) {
-                bannerData.homeGroups = parsed.groups;
+                bannerData.homeGroups = filterVisibleGroups(parsed.groups);
                 bannerData.homeTextSlideIndices = [0, 0, 0, 0];
                 if (callback) callback(true);
                 return;
@@ -35,7 +40,7 @@ function loadHomeBanner(callback) {
     fetch('data/home-banner.json')
         .then(function(r) { return r.json(); })
         .then(function(d) {
-            bannerData.homeGroups = d.groups || [];
+            bannerData.homeGroups = filterVisibleGroups(d.groups || []);
             bannerData.homeTextSlideIndices = [0, 0, 0, 0];
             if (callback) callback(true);
         })
@@ -220,6 +225,7 @@ return {
     startAnimations: startBannerAnimations,
     stopAnimations: stopBannerAnimations,
     loadHomeBanner: loadHomeBanner,
+    filterVisibleGroups: filterVisibleGroups,
     bannerData: bannerData
 };
 
