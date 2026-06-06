@@ -1370,7 +1370,8 @@ function handleManagerDiscSave(res, body, session) {
     var json = JSON.stringify(body.data, null, 2);
     fs.writeFile(discPath, json, 'utf8', function(err) {
         if (err) {
-            sendJSON(res, 500, { success: false, error: 'Failed to save disc data' });
+            console.error('Disc save failed:', err.message);
+            sendJSON(res, 500, { success: false, error: 'Failed to save disc data: ' + err.message });
             return;
         }
         addManagerLog('disc_save', session.username, 'Updated disc track data');

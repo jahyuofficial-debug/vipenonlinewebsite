@@ -2333,17 +2333,14 @@ var ManagerGo = (function() {
     }
 
     function uploadDiscFile(file, albumDir, callback) {
-        var formData = new FormData();
-        formData.append('file', file);
-        formData.append('albumDir', albumDir);
-        formData.append('sessionToken', sessionToken || '');
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/manager/disc-upload', true);
-        xhr.onload = function() {
-            if (xhr.status === 401) {
+        var tokenXhr = new XMLHttpRequest();
+        tokenXhr.open('POST', '/api/manager/disc-generate-upload-token', true);
+        tokenXhr.setRequestHeader('Content-Type', 'application/json');
+        tokenXhr.onload = function() {
+            if (tokenXhr.status === 401) {
                 try {
-                    var res = JSON.parse(xhr.responseText);
-                    if (res.error && res.error.indexOf('session') !== -1) {
+                    var errRes = JSON.parse(tokenXhr.responseText);
+                    if (errRes.error && errRes.error.indexOf('session') !== -1) {
                         sessionToken = null;
                         sessionStorage.removeItem('manager_session');
                         callback('Session expired, please re-enter PIN', '');
@@ -2353,17 +2350,38 @@ var ManagerGo = (function() {
                 callback('Unauthorized', '');
                 return;
             }
-            if (xhr.status !== 200) {
-                callback('Server error: HTTP ' + xhr.status, '');
+            if (tokenXhr.status !== 200) {
+                callback('Server error: HTTP ' + tokenXhr.status, '');
                 return;
             }
             try {
-                var res = JSON.parse(xhr.responseText);
-                callback(res.success ? null : (res.error || 'Upload failed'), res.files && res.files[0] ? res.files[0].path : '');
-            } catch(e) { callback('Parse error', ''); }
+                var tokenRes = JSON.parse(tokenXhr.responseText);
+                if (!tokenRes.success) {
+                    callback(tokenRes.error || 'Failed to get upload token', '');
+                    return;
+                }
+                var uploadUrl = 'https://blob.vercel-storage.com/' + tokenRes.pathname;
+                var putXhr = new XMLHttpRequest();
+                putXhr.open('PUT', uploadUrl, true);
+                putXhr.setRequestHeader('Authorization', 'Bearer ' + tokenRes.token);
+                putXhr.onload = function() {
+                    if (putXhr.status === 200 || putXhr.status === 201) {
+                        try {
+                            var blobRes = JSON.parse(putXhr.responseText);
+                            callback(null, blobRes.url || ('https://' + new URL(uploadUrl).host + '/' + tokenRes.pathname));
+                        } catch(e) {
+                            callback(null, 'https://public.blob.vercel-storage.com/' + tokenRes.pathname);
+                        }
+                    } else {
+                        callback('Upload failed: HTTP ' + putXhr.status, '');
+                    }
+                };
+                putXhr.onerror = function() { callback('Network error during upload', ''); };
+                putXhr.send(file);
+            } catch(e) { callback('Token parse error', ''); }
         };
-        xhr.onerror = function() { callback('Network error', ''); };
-        xhr.send(formData);
+        tokenXhr.onerror = function() { callback('Network error', ''); };
+        tokenXhr.send(JSON.stringify({ filename: file.name || 'unknown', albumDir: albumDir, sessionToken: sessionToken }));
     }
 
     function saveDiscToServer(callback) {
@@ -2387,7 +2405,12 @@ var ManagerGo = (function() {
                 return;
             }
             if (xhr.status !== 200) {
-                callback('Server error: HTTP ' + xhr.status);
+                var errMsg = 'Server error: HTTP ' + xhr.status;
+                try {
+                    var errRes = JSON.parse(xhr.responseText);
+                    if (errRes.error) errMsg += ' - ' + errRes.error;
+                } catch(e) {}
+                callback(errMsg);
                 return;
             }
             try {

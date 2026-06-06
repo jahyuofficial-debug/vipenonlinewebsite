@@ -1,5 +1,5 @@
 var crypto = require('crypto');
-var { put } = require('@vercel/blob');
+var { put, generateClientTokenFromReadWriteToken } = require('@vercel/blob');
 
 var getAuthSecret = require('../lib/secret').getAuthSecret;
 var getOldAuthSecret = require('../lib/secret').getOldAuthSecret;
@@ -340,6 +340,34 @@ function handleManagerDiscUpload(req, res) {
     });
 }
 
+function handleManagerDiscGenerateUploadToken(req, res) {
+    if (req.method === 'OPTIONS') { handleOptions(req, res, 'POST, OPTIONS'); return; }
+    if (req.method !== 'POST') { sendJSON(res, 405, { success: false, error: 'Method not allowed' }); return; }
+
+    parseBody(req, function(err, body) {
+        if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
+
+        managerHelpers.verifySessionToken(body.sessionToken, function(sessErr, session) {
+            if (sessErr) { sendJSON(res, 401, { success: false, error: sessErr }); return; }
+
+            var filename = (body.filename || '').replace(/[\\/:*?"<>|]/g, '_').trim();
+            var albumDir = (body.albumDir || 'Unknown').replace(/[\\/:*?"<>|]/g, '_').trim();
+            if (!filename) { sendJSON(res, 400, { success: false, error: 'Filename is required' }); return; }
+
+            var blobPath = 'disc/' + albumDir + '/' + Date.now() + '_' + filename;
+            var clientToken = generateClientTokenFromReadWriteToken({
+                pathname: blobPath,
+                access: 'public',
+                maximumSizeInBytes: 500 * 1024 * 1024,
+                allowedContentTypes: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/mp4', 'image/jpeg', 'image/png', 'image/webp', 'image/gif']
+            });
+
+            managerHelpers.addLog('disc_token', session.username, 'Generated upload token for ' + filename);
+            sendJSON(res, 200, { success: true, token: clientToken, pathname: blobPath });
+        });
+    });
+}
+
 function handleManagerDiscSave(req, res) {
     if (req.method === 'OPTIONS') { handleOptions(req, res, 'POST, OPTIONS'); return; }
     if (req.method !== 'POST') { sendJSON(res, 405, { success: false, error: 'Method not allowed' }); return; }
@@ -444,6 +472,7 @@ module.exports = function(req, res) {
         'check-session': handleManagerCheckSession,
         'upload': handleManagerUpload,
         'disc-upload': handleManagerDiscUpload,
+        'disc-generate-upload-token': handleManagerDiscGenerateUploadToken,
         'disc-save': handleManagerDiscSave,
         'home-banner-save': handleManagerHomeBannerSave,
         'settings': handleManagerSettings
