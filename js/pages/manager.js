@@ -2379,7 +2379,9 @@ var ManagerGo = (function() {
                         var errMsg = 'Upload failed: HTTP ' + putXhr.status;
                         try {
                             var errBody = JSON.parse(putXhr.responseText);
-                            if (errBody.error) errMsg += ' - ' + errBody.error;
+                            var detail = errBody.error || errBody.message || '';
+                            if (typeof detail === 'object') detail = JSON.stringify(detail);
+                            if (detail) errMsg += ' - ' + detail;
                         } catch(e2) {}
                         callback(errMsg, '');
                     }

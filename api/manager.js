@@ -359,7 +359,12 @@ function handleManagerDiscGenerateUploadToken(req, res) {
                 try {
                     console.log('START issueSignedToken');
                     var signedToken = await issueSignedToken({
-                        allowedContentTypes: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/mp4', 'image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+                        allowedContentTypes: [
+                            'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/x-wav', 'audio/wave',
+                            'audio/ogg', 'audio/flac', 'audio/x-flac',
+                            'audio/mp4', 'audio/x-m4a', 'audio/aac', 'audio/webm',
+                            'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'
+                        ],
                         maximumSizeInBytes: 500 * 1024 * 1024,
                         validUntil: Date.now() + 15 * 60 * 1000,
                         operations: ['put']
