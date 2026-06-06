@@ -1279,11 +1279,22 @@ function parseMultipartUpload(req, callback) {
     }
     boundary = '--' + match[1];
 
+    var MAX_UPLOAD_SIZE = 150 * 1024 * 1024; // 150MB
     var chunks = [];
+    var totalSize = 0;
     req.on('data', function(chunk) {
+        totalSize += chunk.length;
+        if (totalSize > MAX_UPLOAD_SIZE) {
+            req.destroy();
+            return;
+        }
         chunks.push(chunk);
     });
     req.on('end', function() {
+        if (totalSize > MAX_UPLOAD_SIZE) {
+            callback(new Error('File too large (max 150MB)'));
+            return;
+        }
         var buffer = Buffer.concat(chunks);
         var str = buffer.toString('binary');
         var parts = str.split(boundary);
@@ -1477,6 +1488,7 @@ function handleManagerDiscUpload(req, res, body) {
 
 var DISC_UPLOAD_TOKENS = {};
 var DISC_UPLOAD_TOKEN_TTL = 15 * 60 * 1000;
+var DISC_UPLOAD_MAX_SIZE = 200 * 1024 * 1024; // 200MB max upload size
 
 function handleManagerDiscGenerateUploadToken(req, res, body) {
     verifyManagerSession(body, function(sessErr, session) {
@@ -1526,21 +1538,68 @@ function handleManagerDiscUploadChunk(req, res) {
         return;
     }
 
-    var chunks = [];
-    req.on('data', function(chunk) {
-        chunks.push(chunk);
-    });
-    req.on('end', function() {
-        var buffer = Buffer.concat(chunks);
-        var destDir = path.join(ROOT, 'Disc', 'MusicAlbum', tokenInfo.albumDir);
-        fs.mkdirSync(destDir, { recursive: true });
-        var destPath = path.join(destDir, tokenInfo.filename);
-        fs.writeFileSync(destPath, buffer);
-        var relPath = path.relative(ROOT, destPath).replace(/\\/g, '/');
+    var destDir = path.join(ROOT, 'Disc', 'MusicAlbum', tokenInfo.albumDir);
+    var destPath = '';
+    var totalBytes = 0;
+    var writeStream = null;
+    var aborted = false;
 
+    function cleanup() {
+        if (writeStream) {
+            try { writeStream.end(); } catch (e) {}
+        }
+        if (destPath && fs.existsSync(destPath)) {
+            try { fs.unlinkSync(destPath); } catch (e) {}
+        }
         delete DISC_UPLOAD_TOKENS[uploadId];
+    }
 
-        sendJSON(res, 200, { url: relPath });
+    try {
+        fs.mkdirSync(destDir, { recursive: true });
+        destPath = path.join(destDir, tokenInfo.filename);
+        writeStream = fs.createWriteStream(destPath);
+    } catch (e) {
+        sendJSON(res, 500, { success: false, error: 'Failed to create upload file: ' + e.message });
+        delete DISC_UPLOAD_TOKENS[uploadId];
+        return;
+    }
+
+    writeStream.on('error', function(err) {
+        aborted = true;
+        cleanup();
+        try { sendJSON(res, 500, { success: false, error: 'Write error: ' + err.message }); } catch (e) {}
+    });
+
+    req.on('data', function(chunk) {
+        if (aborted) return;
+        totalBytes += chunk.length;
+        if (totalBytes > DISC_UPLOAD_MAX_SIZE) {
+            aborted = true;
+            req.destroy();
+            cleanup();
+            sendJSON(res, 413, { success: false, error: 'File too large (max 200MB)' });
+            return;
+        }
+        if (writeStream) writeStream.write(chunk);
+    });
+
+    req.on('end', function() {
+        if (aborted) return;
+        if (writeStream) {
+            writeStream.end(function() {
+                var relPath = path.relative(ROOT, destPath).replace(/\\/g, '/');
+                delete DISC_UPLOAD_TOKENS[uploadId];
+                sendJSON(res, 200, { url: relPath });
+            });
+        }
+    });
+
+    req.on('error', function(err) {
+        if (!aborted) {
+            aborted = true;
+            cleanup();
+            try { sendJSON(res, 500, { success: false, error: 'Upload interrupted: ' + err.message }); } catch (e) {}
+        }
     });
 }
 
