@@ -37,7 +37,7 @@ BannerPage.initBgVideo();
     var loadDiscOnline = fetch('/api/data/disc').then(function(r) {
         if (r.ok) return r.json();
         throw new Error('API not available');
-    }).catch(function() { return null; });
+    });
 
     var loadBannerOnline = fetch('/api/data/home-banner').then(function(r) {
         if (r.ok) return r.json();
@@ -53,26 +53,14 @@ BannerPage.initBgVideo();
         var discOnline = results[5];
         var bannerOnline = results[6];
 
-        // Disc data priority: Blob API > localStorage > hardcoded fallback
-        var discData = {
-            tapes: [],
-            playMode: 'sequence',
-            currentTapeIndex: 0
-        };
-        if (discOnline && discOnline.tapes && discOnline.tapes.length > 0) {
-            discData.tapes = discOnline.tapes;
-            discData.playMode = discOnline.playMode || discData.playMode;
-            discData.currentTapeIndex = discOnline.currentTapeIndex || 0;
+        // Disc data: backend is the source of truth
+        // API success → use exactly what backend returns
+        // API fail  → keep initial hardcoded fallback
+        var discData;
+        if (discOnline && typeof discOnline.tapes !== 'undefined') {
+            discData = discOnline;
         } else {
-            var mgrDisc = localStorage.getItem('vipen_mgr_disc_tapes');
-            if (mgrDisc) { try { discData.tapes = JSON.parse(mgrDisc); } catch (e) {} }
-            if (!discData.tapes || discData.tapes.length === 0) {
-                discData.tapes = [
-                    { id: 1, title: '酒精', time: '0:00', cover: 'Disc/MusicAlbum/酒精/ab67616d0000b273d10560f5d73921a997dac1ac.jpg', audio: 'Disc/MusicAlbum/酒精/酒精.mp3' },
-                    { id: 2, title: '翱翔', time: '0:00', cover: 'Disc/MusicAlbum/翱翔/images.jpg', audio: 'Disc/MusicAlbum/翱翔/翱翔.mp3' },
-                    { id: 3, title: 'Young OG', time: '0:00', cover: 'Disc/MusicAlbum/YoungOG/32b32bd351ba31f737b03e2bc4a6d3a8.jpg', audio: 'Disc/MusicAlbum/YoungOG/soundclouddownloader.io_           Kris Wu Yifan  - Young OG.mp3.mp3' }
-                ];
-            }
+            discData = window.discData; // keep initial 3 hardcoded songs
         }
 
         if (bannerOnline && bannerOnline.groups) {
@@ -119,8 +107,6 @@ BannerPage.initBgVideo();
             if (mgrFresh) { try { freshHeroItems = JSON.parse(mgrFresh); } catch (e) {} }
             if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
 
-            var mgrDiscFallback = localStorage.getItem('vipen_mgr_disc_tapes');
-
             var mgrBannerFallback = localStorage.getItem('vipen_mgr_home_banner');
             if (mgrBannerFallback) {
                 try {
@@ -131,14 +117,18 @@ BannerPage.initBgVideo();
                 } catch (e) {}
             }
 
+            // Disc: try API again, fall back to localStorage, keep hardcoded if both fail
             fetch('/api/data/disc').then(function(r) { if (r.ok) return r.json(); throw new Error(''); }).then(function(od) {
-                if (od && od.tapes && od.tapes.length > 0) {
-                    d.disc.tapes = od.tapes; d.disc.playMode = od.playMode || d.disc.playMode; d.disc.currentTapeIndex = od.currentTapeIndex || 0;
-                } else if (mgrDiscFallback) {
-                    try { d.disc.tapes = JSON.parse(mgrDiscFallback); } catch (e) {}
+                if (od && typeof od.tapes !== 'undefined') {
+                    window.discData = od;
+                    if (typeof DiscPage !== 'undefined') DiscPage.setDiscData(window.discData);
                 }
             }).catch(function() {
-                if (mgrDiscFallback) { try { d.disc.tapes = JSON.parse(mgrDiscFallback); } catch (e) {} }
+                var mgrDiscFallback = localStorage.getItem('vipen_mgr_disc_tapes');
+                if (mgrDiscFallback) {
+                    try { window.discData.tapes = JSON.parse(mgrDiscFallback); } catch (e) {}
+                    if (typeof DiscPage !== 'undefined') DiscPage.setDiscData(window.discData);
+                }
             });
             fetch('/api/data/home-banner').then(function(r) { if (r.ok) return r.json(); throw new Error(''); }).then(function(ob) {
                 if (ob && ob.groups) { d.banner.homeGroups = ob.groups; }
@@ -146,7 +136,6 @@ BannerPage.initBgVideo();
 
             Object.assign(BannerPage.bannerData, d.banner);
             window.actionFeed = d.action;
-            window.discData = JSON.parse(JSON.stringify(d.disc));
             resolveDiscTapes();
             console.log('Data loaded from data.json fallback');
         }).catch(function() { console.log('Using embedded data'); });
@@ -541,7 +530,11 @@ window.actionFeed = [
 ];
 
 window.discData = {
-    tapes: [],
+    tapes: [
+        { id: 1, title: '酒精', time: '0:00', cover: 'Disc/MusicAlbum/酒精/ab67616d0000b273d10560f5d73921a997dac1ac.jpg', audio: 'Disc/MusicAlbum/酒精/酒精.mp3' },
+        { id: 2, title: '翱翔', time: '0:00', cover: 'Disc/MusicAlbum/翱翔/images.jpg', audio: 'Disc/MusicAlbum/翱翔/翱翔.mp3' },
+        { id: 3, title: 'Young OG', time: '0:00', cover: 'Disc/MusicAlbum/YoungOG/32b32bd351ba31f737b03e2bc4a6d3a8.jpg', audio: 'Disc/MusicAlbum/YoungOG/soundclouddownloader.io_           Kris Wu Yifan  - Young OG.mp3.mp3' }
+    ],
     playMode: 'sequence',
     currentTapeIndex: 0
 };
