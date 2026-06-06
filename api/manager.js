@@ -1,5 +1,5 @@
 var crypto = require('crypto');
-var { put, generateClientTokenFromReadWriteToken } = require('@vercel/blob');
+var { put, generateClientTokenFromReadWriteToken, issueSignedToken, presignUrl } = require('@vercel/blob');
 
 var getAuthSecret = require('../lib/secret').getAuthSecret;
 var getOldAuthSecret = require('../lib/secret').getOldAuthSecret;
@@ -355,15 +355,23 @@ function handleManagerDiscGenerateUploadToken(req, res) {
             if (!filename) { sendJSON(res, 400, { success: false, error: 'Filename is required' }); return; }
 
             var blobPath = 'disc/' + albumDir + '/' + Date.now() + '_' + filename;
-            var clientToken = generateClientTokenFromReadWriteToken({
-                pathname: blobPath,
-                access: 'public',
+            var token = issueSignedToken({
+                allowedContentTypes: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/mp4', 'image/jpeg', 'image/png', 'image/webp', 'image/gif'],
                 maximumSizeInBytes: 500 * 1024 * 1024,
-                allowedContentTypes: ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/flac', 'audio/mp4', 'image/jpeg', 'image/png', 'image/webp', 'image/gif']
+                validUntil: Date.now() + 15 * 60 * 1000
             });
 
-            managerHelpers.addLog('disc_token', session.username, 'Generated upload token for ' + filename);
-            sendJSON(res, 200, { success: true, token: clientToken, pathname: blobPath });
+            presignUrl(token, {
+                pathname: blobPath,
+                operation: 'put',
+                validUntil: Date.now() + 15 * 60 * 1000,
+                access: 'public'
+            }).then(function(result) {
+                managerHelpers.addLog('disc_token', session.username, 'Generated upload token for ' + filename);
+                sendJSON(res, 200, { success: true, uploadUrl: result.presignedUrl, pathname: blobPath });
+            }).catch(function(e) {
+                sendJSON(res, 500, { success: false, error: 'Failed to generate upload URL: ' + e.message });
+            });
         });
     });
 }
@@ -379,7 +387,7 @@ function handleManagerDiscSave(req, res) {
             var data = body.data;
             if (!data) { sendJSON(res, 400, { success: false, error: 'No data provided' }); return; }
             var json = JSON.stringify(data, null, 2);
-            put('data/disc.json', json, { access: 'public', contentType: 'application/json', addRandomSuffix: false })
+            put('data/disc.json', json, { access: 'public', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true })
                 .then(function(blob) {
                     managerHelpers.addLog('disc_save', session.username, 'Updated disc track data');
                     sendJSON(res, 200, { success: true, url: blob.url });
@@ -401,7 +409,7 @@ function handleManagerHomeBannerSave(req, res) {
             var data = body.data;
             if (!data) { sendJSON(res, 400, { success: false, error: 'No data provided' }); return; }
             var json = JSON.stringify(data, null, 2);
-            put('data/home-banner.json', json, { access: 'public', contentType: 'application/json', addRandomSuffix: false })
+            put('data/home-banner.json', json, { access: 'public', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true })
                 .then(function(blob) {
                     managerHelpers.addLog('home_banner_save', session.username, 'Updated HOME banner data');
                     sendJSON(res, 200, { success: true, url: blob.url });

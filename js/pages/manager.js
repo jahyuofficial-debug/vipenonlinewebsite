@@ -2333,6 +2333,10 @@ var ManagerGo = (function() {
     }
 
     function uploadDiscFile(file, albumDir, callback) {
+        if (!sessionToken) {
+            callback('Not logged in, please refresh page', '');
+            return;
+        }
         var tokenXhr = new XMLHttpRequest();
         tokenXhr.open('POST', '/api/manager/disc-generate-upload-token', true);
         tokenXhr.setRequestHeader('Content-Type', 'application/json');
@@ -2356,24 +2360,28 @@ var ManagerGo = (function() {
             }
             try {
                 var tokenRes = JSON.parse(tokenXhr.responseText);
-                if (!tokenRes.success) {
-                    callback(tokenRes.error || 'Failed to get upload token', '');
+                if (!tokenRes.success || !tokenRes.uploadUrl) {
+                    callback(tokenRes.error || 'Failed to get upload URL', '');
                     return;
                 }
-                var uploadUrl = 'https://blob.vercel-storage.com/' + tokenRes.pathname;
                 var putXhr = new XMLHttpRequest();
-                putXhr.open('PUT', uploadUrl, true);
-                putXhr.setRequestHeader('Authorization', 'Bearer ' + tokenRes.token);
+                putXhr.open('PUT', tokenRes.uploadUrl, true);
+                putXhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
                 putXhr.onload = function() {
                     if (putXhr.status === 200 || putXhr.status === 201) {
                         try {
                             var blobRes = JSON.parse(putXhr.responseText);
-                            callback(null, blobRes.url || ('https://' + new URL(uploadUrl).host + '/' + tokenRes.pathname));
+                            callback(null, blobRes.url || ('https://public.blob.vercel-storage.com/' + tokenRes.pathname));
                         } catch(e) {
                             callback(null, 'https://public.blob.vercel-storage.com/' + tokenRes.pathname);
                         }
                     } else {
-                        callback('Upload failed: HTTP ' + putXhr.status, '');
+                        var errMsg = 'Upload failed: HTTP ' + putXhr.status;
+                        try {
+                            var errBody = JSON.parse(putXhr.responseText);
+                            if (errBody.error) errMsg += ' - ' + errBody.error;
+                        } catch(e2) {}
+                        callback(errMsg, '');
                     }
                 };
                 putXhr.onerror = function() { callback('Network error during upload', ''); };
