@@ -16,7 +16,13 @@ BannerPage.initBgVideo();
 
 (function loadData(){
     var loadJSON = function(url) {
-        return fetch(url).then(function(r) { return r.json(); });
+        return fetch(url).then(function(r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        }).catch(function(err) {
+            console.warn('Failed to load ' + url + ': ' + err.message);
+            return null;
+        });
     };
 
     function resolveDiscTapes() {
@@ -138,31 +144,55 @@ BannerPage.initBgVideo();
         resolveDiscTapes();
 
         console.log('Data loaded from ManagerGo data files');
-    }).catch(function() {
-        console.log('Falling back to data.json');
-        fetch('data.json').then(function(r) { return r.json(); }).then(function(d) {
-            dwItems = d.design.dwItems;
-            dwSuits = d.design.dwSuits;
-            dwRanks = d.design.dwRanks;
-            freshHeroItems = d.fresh.heroGroups || d.fresh.heroItems || [];
-            freshCategories = d.fresh.categories;
-            freshItems = d.fresh.items;
+    }).catch(function(err) {
+        console.warn('Primary load failed: ' + err + ', trying index.json files individually');
+        // Try loading each index.json individually as fallback
+        var tryLoad = function(path, mapFn) {
+            return fetch(path).then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; });
+        };
+        Promise.all([
+            tryLoad('disc/index.json'),
+            tryLoad('design/index.json'),
+            tryLoad('home/index.json'),
+            loadJSON('data/fresh.json'),
+            loadJSON('data/action.json')
+        ]).then(function(r) {
+            var discData = r[0], designData = r[1], bannerData = r[2];
+            var freshData = r[3], actionData = r[4];
 
-            var mgrDesign = localStorage.getItem('vipen_mgr_design_dwItems');
-            if (mgrDesign) { try { dwItems = JSON.parse(mgrDesign); } catch (e) {} }
-
-            var mgrFresh = localStorage.getItem('vipen_mgr_fresh_heroItems');
-            if (mgrFresh) { try { freshHeroItems = JSON.parse(mgrFresh); } catch (e) {} }
-            if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
-
-            if (d.banner) Object.assign(BannerPage.bannerData, d.banner);
-            if (d.disc) {
-                window.discData = { tapes: d.disc.tapes, playMode: 'sequence', currentTapeIndex: 0 };
+            if (discData && Array.isArray(discData)) {
+                window.discData = {
+                    tapes: discData.map(function(item, i) {
+                        var title = item.folder.replace(/^\d+-/, '');
+                        return { id: i+1, title: title, time: '0:00', cover: 'disc/' + item.folder + '/' + item.cover, audio: item.audio };
+                    }),
+                    playMode: 'sequence', currentTapeIndex: 0
+                };
             }
-            window.actionFeed = d.action;
+            if (designData && Array.isArray(designData)) {
+                dwItems = designData.map(function(item) {
+                    var title = item.folder.replace(/^\d+-/, '');
+                    return { title: title, cat: item.cat||'', gradient: item.gradient||'', year: item.year||'', client: item.client||'', tools: item.tools||'', desc: item.desc||'', coverImage:'', fanCardImage:'', listThumbImage:'', content:'', tags: item.tags||[], likeCount: item.likeCount||0 };
+                });
+                dwSuits = designData.map(function(item) { return item.suit||''; });
+                dwRanks = designData.map(function(item) { return item.rank||''; });
+            }
+            if (bannerData && Array.isArray(bannerData)) {
+                var hg = bannerData.map(function(g) {
+                    var u = g.banner;
+                    if (u && !/^https?:\/\//.test(u)) u = 'home/' + g.folder + '/' + u;
+                    return { bgType: g.bgType, bgVideo: g.bgType==='video'?u:'', bgImage: g.bgType!=='video'?u:'', carouselTexts: [{ topic: g.topic||'', note: g.note||'' }] };
+                });
+                BannerPage.bannerData.homeGroups = hg;
+            }
+            if (freshData) { freshHeroItems = freshData.heroGroups||freshData.heroItems||[]; freshCategories = freshData.categories; freshItems = freshData.items; }
+            window.actionFeed = actionData;
             resolveDiscTapes();
-            console.log('Data loaded from data.json fallback');
-        }).catch(function() { console.log('Using embedded data'); });
+            console.log('Data loaded from individual index.json files');
+        }).catch(function() {
+            console.log('All loading failed, using embedded defaults');
+        });
+    });
     });
 
     function applySiteSettings(settings) {
