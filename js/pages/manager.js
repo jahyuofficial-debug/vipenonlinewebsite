@@ -52,6 +52,28 @@
         xhr.send(JSON.stringify(payload));
     }
 
+    function saveFreshToServer(data) {
+        if (!sessionToken) { console.warn('[ManagerGo] saveFreshToServer skipped: not logged in'); return; }
+        apiCall('fresh-save', { data: data }, function(res) {
+            if (res && res.success) {
+                console.log('[ManagerGo] Fresh data saved to server (Blob URL: ' + (res.url || 'OK') + ')');
+            } else {
+                console.error('[ManagerGo] Fresh save failed:', (res && res.error) || 'Unknown error');
+            }
+        });
+    }
+
+    function saveDesignToServer(data) {
+        if (!sessionToken) { console.warn('[ManagerGo] saveDesignToServer skipped: not logged in'); return; }
+        apiCall('design-save', { data: data }, function(res) {
+            if (res && res.success) {
+                console.log('[ManagerGo] Design data saved to server (Blob URL: ' + (res.url || 'OK') + ')');
+            } else {
+                console.error('[ManagerGo] Design save failed:', (res && res.error) || 'Unknown error');
+            }
+        });
+    }
+
     function showToast(msg, isError) {
         var existing = document.querySelector('.manager-toast');
         if (existing) existing.remove();

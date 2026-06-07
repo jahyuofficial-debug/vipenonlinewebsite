@@ -307,6 +307,102 @@ function handleUserData(req, res) {
     sendJSON(res, 400, { success: false, error: 'Unknown action: ' + action });
 }
 
+function handleDataAPI(req, res, apiPath) {
+    // Extract data key from path or query
+    var action = '';
+    if (apiPath.indexOf('/api/data/') === 0) {
+        action = apiPath.substring('/api/data/'.length);
+    } else if (apiPath === '/api/data') {
+        var parsedUrl = url.parse(req.url, true);
+        action = parsedUrl.query.action || '';
+    }
+
+    if (req.method === 'OPTIONS') {
+        res.writeHead(204, {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        });
+        res.end();
+        return;
+    }
+
+    var dataKeyMap = {
+        'design': 'design-works',
+        'fresh': 'fresh-hero',
+        'settings': 'manager/settings'
+    };
+
+    var blobKey = dataKeyMap[action];
+    if (!blobKey) {
+        sendJSON(res, 404, { success: false, error: 'Unknown data action: ' + action });
+        return;
+    }
+
+    // Try serving from local file first (fast), then fallback to Blob
+    var localPath = path.join(ROOT, 'data', 'manager', blobKey + '.json');
+    fs.readFile(localPath, 'utf8', function(localErr, localRaw) {
+        if (!localErr) {
+            try {
+                sendJSON(res, 200, JSON.parse(localRaw));
+            } catch (e) {
+                sendJSON(res, 500, { success: false, error: 'Failed to parse local data' });
+            }
+            // Also try refreshing from Blob in background
+            if (blobPut) {
+                try { require('@vercel/blob').list({ prefix: 'data/' + blobKey + '.json' }).then(function(resp) {
+                    if (resp.blobs && resp.blobs[0]) {
+                        fetch(resp.blobs[0].url).then(function(r) {
+                            if (r.ok) return r.text();
+                            throw new Error('');
+                        }).then(function(data) {
+                            var dir = path.dirname(localPath);
+                            fs.mkdirSync(dir, { recursive: true });
+                            fs.writeFileSync(localPath, data, 'utf8');
+                        }).catch(function() {});
+                    }
+                }).catch(function() {}); } catch(e) {}
+            }
+            return;
+        }
+        // Local file not found, try Blob
+        if (!blobPut) {
+            sendJSON(res, 404, { success: false, error: 'Data not found' });
+            return;
+        }
+        try {
+            var listFn = require('@vercel/blob').list;
+            listFn({ prefix: 'data/' + blobKey + '.json' }).then(function(resp) {
+                if (!resp.blobs || resp.blobs.length === 0) {
+                    sendJSON(res, 404, { success: false, error: 'Data not found in Blob' });
+                    return;
+                }
+                fetch(resp.blobs[0].url).then(function(r2) {
+                    if (!r2.ok) throw new Error('HTTP ' + r2.status);
+                    return r2.text();
+                }).then(function(data) {
+                    try {
+                        var parsed = JSON.parse(data);
+                        // Cache locally
+                        var dir = path.dirname(localPath);
+                        fs.mkdirSync(dir, { recursive: true });
+                        fs.writeFileSync(localPath, data, 'utf8');
+                        sendJSON(res, 200, parsed);
+                    } catch (e) {
+                        sendJSON(res, 500, { success: false, error: 'Failed to parse Blob data' });
+                    }
+                }).catch(function() {
+                    sendJSON(res, 500, { success: false, error: 'Failed to fetch Blob data' });
+                });
+            }).catch(function() {
+                sendJSON(res, 500, { success: false, error: 'Failed to list Blob data' });
+            });
+        } catch (e) {
+            sendJSON(res, 500, { success: false, error: 'Blob not available' });
+        }
+    });
+}
+
 function handleAPIRoute(req, res, apiPath) {
     if (req.method === 'OPTIONS') {
         res.writeHead(204, {
@@ -329,6 +425,11 @@ function handleAPIRoute(req, res, apiPath) {
         return;
     }
 
+    if (apiPath.indexOf('/api/data') === 0) {
+        handleDataAPI(req, res, apiPath);
+        return;
+    }
+
     if (req.method === 'GET') {
         sendJSON(res, 405, { success: false, error: 'Method not allowed' });
         return;
@@ -342,7 +443,7 @@ function handleAPIRoute(req, res, apiPath) {
     var contentType = req.headers['content-type'] || '';
     var isMultipart = contentType.indexOf('multipart/form-data') !== -1;
 
-    if (isMultipart && apiPath.indexOf('/api/manager/') === 0) {
+    if (isMultipart && (apiPath.indexOf('/api/manager/') === 0 || apiPath === '/api/manager')) {
         handleManagerAPI(req, res, apiPath, null);
         return;
     }
@@ -353,16 +454,25 @@ function handleAPIRoute(req, res, apiPath) {
             return;
         }
 
-        if (apiPath === '/api/auth/send-code') {
+        // Auth routes: support both /api/auth/send-code and /api/auth?action=send-code
+        var authAction = '';
+        if (apiPath.indexOf('/api/auth/') === 0) {
+            authAction = apiPath.substring('/api/auth/'.length);
+        } else if (apiPath === '/api/auth') {
+            var parsedUrl = url.parse(req.url, true);
+            authAction = parsedUrl.query.action || '';
+        }
+
+        if (authAction === 'send-code') {
             handleSendCode(res, body);
-        } else if (apiPath === '/api/auth/verify-code') {
+        } else if (authAction === 'verify-code') {
             handleVerifyCode(res, body);
-        } else if (apiPath === '/api/auth/login') {
+        } else if (authAction === 'login') {
             handleLogin(res, body);
         } else if (apiPath === '/api/profile/save') {
             if (!verifyAuth(req, res)) return;
             handleSaveProfile(res, body);
-        } else if (apiPath.indexOf('/api/manager/') === 0) {
+        } else if (apiPath.indexOf('/api/manager/') === 0 || apiPath === '/api/manager') {
             handleManagerAPI(req, res, apiPath, body);
         } else {
             sendJSON(res, 404, { success: false, error: 'Unknown API endpoint' });
@@ -720,56 +830,75 @@ function verifyManagerSession(body, callback) {
     callback(null, session);
 }
 
+function getManagerAction(req, apiPath) {
+    if (apiPath.indexOf('/api/manager/') === 0) {
+        return apiPath.substring('/api/manager/'.length);
+    }
+    if (apiPath === '/api/manager') {
+        var parsedUrl = url.parse(req.url, true);
+        return parsedUrl.query.action || '';
+    }
+    return '';
+}
+
 function handleManagerAPI(req, res, apiPath, body) {
-    if (apiPath === '/api/manager/verify-pin') {
+    var action = getManagerAction(req, apiPath);
+
+    if (action === 'verify-pin') {
         handleManagerVerifyPin(res, body);
         return;
     }
-    if (apiPath === '/api/manager/verify-design-pin') {
+    if (action === 'verify-design-pin') {
         handleManagerVerifyDesignPin(res, body);
         return;
     }
-    if (apiPath === '/api/manager/set-pin') {
+    if (action === 'set-pin') {
         handleManagerSetPin(res, body);
         return;
     }
-    if (apiPath === '/api/manager/check-session') {
+    if (action === 'check-session') {
         handleManagerCheckSession(res, body);
         return;
     }
-    if (apiPath === '/api/manager/upload') {
+    if (action === 'upload') {
         handleManagerUpload(req, res, body);
         return;
     }
+
+    // Authenticated-only actions below
     verifyManagerSession(body, function(err, session) {
         if (err) {
             sendJSON(res, 401, { success: false, error: err });
             return;
         }
-        if (apiPath === '/api/manager/dashboard') {
+        if (action === 'dashboard') {
             handleManagerDashboard(res, session);
-        } else if (apiPath === '/api/manager/users') {
+        } else if (action === 'users') {
             handleManagerUsers(res, body, session);
-        } else if (apiPath === '/api/manager/user-update') {
+        } else if (action === 'user-update') {
             handleManagerUserUpdate(res, body, session);
-        } else if (apiPath === '/api/manager/user-delete') {
+        } else if (action === 'user-delete') {
             handleManagerUserDelete(res, body, session);
-        } else if (apiPath === '/api/manager/users-sync') {
+        } else if (action === 'users-sync') {
             handleManagerUsersSync(res, body, session);
-        } else if (apiPath === '/api/manager/content') {
+        } else if (action === 'content') {
             handleManagerContent(res, session);
-        } else if (apiPath === '/api/manager/content-action') {
+        } else if (action === 'content-action') {
             handleManagerContentAction(res, body, session);
-        } else if (apiPath === '/api/manager/media') {
+        } else if (action === 'media') {
             handleManagerMedia(res, session);
-        } else if (apiPath === '/api/manager/media-delete') {
+        } else if (action === 'media-delete') {
             handleManagerMediaDelete(res, body, session);
-        } else if (apiPath === '/api/manager/settings') {
+        } else if (action === 'settings') {
             handleManagerSettings(res, body, session);
-        } else if (apiPath === '/api/manager/logs') {
+        } else if (action === 'design-save') {
+            handleManagerDesignSave(res, body, session);
+        } else if (action === 'fresh-save') {
+            handleManagerFreshSave(res, body, session);
+        } else if (action === 'logs') {
             handleManagerLogs(res, session);
         } else {
-            sendJSON(res, 404, { success: false, error: 'Unknown manager endpoint' });
+            sendJSON(res, 404, { success: false, error: 'Unknown manager endpoint: ' + action });
         }
     });
 }
@@ -1289,8 +1418,23 @@ function handleManagerSettings(res, body, session) {
                     sendJSON(res, 500, { success: false, error: 'Failed to save settings' });
                     return;
                 }
-                addManagerLog('settings_update', session.username, 'Updated site settings');
-                sendJSON(res, 200, { success: true, settings: settings });
+                // Also sync to Vercel Blob for cross-instance persistence
+                if (blobPut) {
+                    var settingsJson = JSON.stringify(settings, null, 2);
+                    blobPut('data/manager/settings.json', settingsJson, {
+                        access: 'public', contentType: 'application/json', allowOverwrite: true
+                    }).then(function() {
+                        addManagerLog('settings_update', session.username, 'Updated site settings (synced to Blob)');
+                        sendJSON(res, 200, { success: true, settings: settings });
+                    }).catch(function(putErr) {
+                        console.error('[ManagerGo] Settings Blob sync failed:', putErr.message);
+                        addManagerLog('settings_update', session.username, 'Updated site settings (local only, blob failed: ' + putErr.message + ')');
+                        sendJSON(res, 200, { success: true, settings: settings });
+                    });
+                } else {
+                    addManagerLog('settings_update', session.username, 'Updated site settings');
+                    sendJSON(res, 200, { success: true, settings: settings });
+                }
             });
         });
     } else {
@@ -1311,6 +1455,66 @@ function handleManagerLogs(res, session) {
             return;
         }
         sendJSON(res, 200, { success: true, logs: logs });
+    });
+}
+
+function handleManagerDesignSave(res, body, session) {
+    if (!body.data) {
+        sendJSON(res, 400, { success: false, error: 'No design data provided' });
+        return;
+    }
+    var json = JSON.stringify(body.data, null, 2);
+
+    // Always save locally first (for local dev fallback)
+    writeManagerJSON('design-works.json', body.data, function(localErr) {
+        // Also save to Vercel Blob (primary storage)
+        if (blobPut) {
+            blobPut('data/design-works.json', json, {
+                access: 'public',
+                contentType: 'application/json',
+                allowOverwrite: true
+            }).then(function(blob) {
+                addManagerLog('design_save', session.username, 'Updated design works data to Blob');
+                sendJSON(res, 200, { success: true, url: blob.url });
+            }).catch(function(putErr) {
+                console.error('[ManagerGo] Design Blob save failed:', putErr.message);
+                addManagerLog('design_save', session.username, 'Updated design works data (local only, blob failed: ' + putErr.message + ')');
+                sendJSON(res, 200, { success: true, warning: 'Saved locally but Blob sync failed' });
+            });
+        } else {
+            addManagerLog('design_save', session.username, 'Updated design works data (local only, no Blob)');
+            sendJSON(res, 200, { success: true });
+        }
+    });
+}
+
+function handleManagerFreshSave(res, body, session) {
+    if (!body.data) {
+        sendJSON(res, 400, { success: false, error: 'No fresh data provided' });
+        return;
+    }
+    var json = JSON.stringify(body.data, null, 2);
+
+    // Always save locally first (for local dev fallback)
+    writeManagerJSON('fresh-hero.json', body.data, function(localErr) {
+        // Also save to Vercel Blob (primary storage)
+        if (blobPut) {
+            blobPut('data/fresh-hero.json', json, {
+                access: 'public',
+                contentType: 'application/json',
+                allowOverwrite: true
+            }).then(function(blob) {
+                addManagerLog('fresh_save', session.username, 'Updated fresh hero data to Blob');
+                sendJSON(res, 200, { success: true, url: blob.url });
+            }).catch(function(putErr) {
+                console.error('[ManagerGo] Fresh Blob save failed:', putErr.message);
+                addManagerLog('fresh_save', session.username, 'Updated fresh hero data (local only, blob failed: ' + putErr.message + ')');
+                sendJSON(res, 200, { success: true, warning: 'Saved locally but Blob sync failed' });
+            });
+        } else {
+            addManagerLog('fresh_save', session.username, 'Updated fresh hero data (local only, no Blob)');
+            sendJSON(res, 200, { success: true });
+        }
     });
 }
 
