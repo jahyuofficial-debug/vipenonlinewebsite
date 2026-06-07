@@ -29,7 +29,22 @@
     };
 
     function saveToLocalStorage(key, data) {
-        try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {}
+        try {
+            var json = JSON.stringify(data);
+            var MAX_SAFE_BYTES = 4 * 1024 * 1024; // 4MB — warn above this threshold
+            var sizeBytes = (typeof TextEncoder !== 'undefined')
+                ? new TextEncoder().encode(json).length
+                : (new Blob([json])).size;
+            if (sizeBytes > MAX_SAFE_BYTES) {
+                var sizeMB = (sizeBytes / 1024 / 1024).toFixed(1);
+                console.warn('[ManagerGo] Large data write to localStorage (' + sizeMB + 'MB) for key: ' + key + '. May exceed quota.');
+                showToast('Data is large (' + sizeMB + 'MB). Browser storage may fail.', true);
+            }
+            localStorage.setItem(key, json);
+        } catch (e) {
+            console.error('[ManagerGo] Failed to save to localStorage (key: ' + key + '):', e.message || e);
+            showToast('Save failed! Storage may be full or disabled. Please check browser settings.', true);
+        }
     }
 
     function loadFromLocalStorage(key) {
@@ -57,8 +72,14 @@
         apiCall('fresh-save', { data: data }, function(res) {
             if (res && res.success) {
                 console.log('[ManagerGo] Fresh data saved to server (Blob URL: ' + (res.url || 'OK') + ')');
+                // Cross-tab sync: re-write localStorage so other tabs pick up the change via 'storage' event
+                if (data.heroGroups) {
+                    try { localStorage.setItem(STORAGE_KEYS.freshHeroItems, JSON.stringify(data.heroGroups)); } catch (e) {}
+                }
+                showToast('Fresh content saved & synced', false);
             } else {
                 console.error('[ManagerGo] Fresh save failed:', (res && res.error) || 'Unknown error');
+                showToast('Failed to save Fresh content to server', true);
             }
         });
     }
@@ -68,8 +89,14 @@
         apiCall('design-save', { data: data }, function(res) {
             if (res && res.success) {
                 console.log('[ManagerGo] Design data saved to server (Blob URL: ' + (res.url || 'OK') + ')');
+                // Cross-tab sync: re-write localStorage so other tabs pick up the change via 'storage' event
+                if (data.works) {
+                    try { localStorage.setItem(STORAGE_KEYS.designDwItems, JSON.stringify(data.works)); } catch (e) {}
+                }
+                showToast('Design content saved & synced', false);
             } else {
                 console.error('[ManagerGo] Design save failed:', (res && res.error) || 'Unknown error');
+                showToast('Failed to save Design content to server', true);
             }
         });
     }

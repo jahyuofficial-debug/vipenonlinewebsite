@@ -339,33 +339,20 @@ function handleDataAPI(req, res, apiPath) {
         return;
     }
 
-    // Try serving from local file first (fast), then fallback to Blob
-    var localPath = path.join(ROOT, 'data', 'manager', blobKey + '.json');
-    fs.readFile(localPath, 'utf8', function(localErr, localRaw) {
-        if (!localErr) {
-            try {
-                sendJSON(res, 200, JSON.parse(localRaw));
-            } catch (e) {
-                sendJSON(res, 500, { success: false, error: 'Failed to parse local data' });
-            }
-            // Also try refreshing from Blob in background
-            if (blobPut) {
-                try { require('@vercel/blob').list({ prefix: 'data/' + blobKey + '.json' }).then(function(resp) {
-                    if (resp.blobs && resp.blobs[0]) {
-                        fetch(resp.blobs[0].url).then(function(r) {
-                            if (r.ok) return r.text();
-                            throw new Error('');
-                        }).then(function(data) {
-                            var dir = path.dirname(localPath);
-                            fs.mkdirSync(dir, { recursive: true });
-                            fs.writeFileSync(localPath, data, 'utf8');
-                        }).catch(function() {});
-                    }
-                }).catch(function() {}); } catch(e) {}
-            }
-            return;
-        }
-        // Local file not found, try Blob
+    // Helper: send JSON with Cache-Control header for data API responses
+    function sendDataJSON(status, data) {
+        var json = JSON.stringify(data);
+        res.writeHead(status, {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Content-Length': Buffer.byteLength(json),
+            'Access-Control-Allow-Origin': '*',
+            'Cache-Control': 'public, max-age=60, s-maxage=300, stale-while-revalidate=600'
+        });
+        res.end(json);
+    }
+
+    // Helper: fetch from Vercel Blob and serve
+    function serveFromBlob(cachePath) {
         if (!blobPut) {
             sendJSON(res, 404, { success: false, error: 'Data not found' });
             return;
@@ -383,11 +370,13 @@ function handleDataAPI(req, res, apiPath) {
                 }).then(function(data) {
                     try {
                         var parsed = JSON.parse(data);
-                        // Cache locally
-                        var dir = path.dirname(localPath);
-                        fs.mkdirSync(dir, { recursive: true });
-                        fs.writeFileSync(localPath, data, 'utf8');
-                        sendJSON(res, 200, parsed);
+                        // Cache locally if a cachePath is provided (non-Vercel local dev)
+                        if (cachePath) {
+                            var dir = path.dirname(cachePath);
+                            fs.mkdirSync(dir, { recursive: true });
+                            fs.writeFileSync(cachePath, data, 'utf8');
+                        }
+                        sendDataJSON(200, parsed);
                     } catch (e) {
                         sendJSON(res, 500, { success: false, error: 'Failed to parse Blob data' });
                     }
@@ -400,6 +389,45 @@ function handleDataAPI(req, res, apiPath) {
         } catch (e) {
             sendJSON(res, 500, { success: false, error: 'Blob not available' });
         }
+    }
+
+    // Detect Vercel serverless environment
+    var isVercel = !!(process.env.VERCEL || process.env.VERCEL_ENV);
+
+    if (isVercel) {
+        // Vercel: skip local file read (filesystem is ephemeral), go straight to Blob
+        serveFromBlob(null);
+        return;
+    }
+
+    // Local dev: try serving from local file first (fast), then fallback to Blob
+    var localPath = path.join(ROOT, 'data', 'manager', blobKey + '.json');
+    fs.readFile(localPath, 'utf8', function(localErr, localRaw) {
+        if (!localErr) {
+            try {
+                sendDataJSON(200, JSON.parse(localRaw));
+            } catch (e) {
+                sendJSON(res, 500, { success: false, error: 'Failed to parse local data' });
+            }
+            // Background refresh from Blob to keep local cache in sync
+            if (blobPut) {
+                try { require('@vercel/blob').list({ prefix: 'data/' + blobKey + '.json' }).then(function(resp) {
+                    if (resp.blobs && resp.blobs[0]) {
+                        fetch(resp.blobs[0].url).then(function(r) {
+                            if (r.ok) return r.text();
+                            throw new Error('');
+                        }).then(function(data) {
+                            var dir = path.dirname(localPath);
+                            fs.mkdirSync(dir, { recursive: true });
+                            fs.writeFileSync(localPath, data, 'utf8');
+                        }).catch(function() {});
+                    }
+                }).catch(function() {}); } catch(e) {}
+            }
+            return;
+        }
+        // Local file not found, try Blob
+        serveFromBlob(localPath);
     });
 }
 

@@ -38,11 +38,17 @@ BannerPage.initBgVideo();
     var loadDesignOnline = fetch('/api/data/design').then(function(r) {
         if (r.ok) return r.json();
         throw new Error('API not available');
+    }).catch(function(err) {
+        console.warn('[Vipen] /api/data/design fetch failed, will fall back to localStorage:', err.message);
+        return null;
     });
 
     var loadFreshOnline = fetch('/api/data/fresh').then(function(r) {
         if (r.ok) return r.json();
         throw new Error('API not available');
+    }).catch(function(err) {
+        console.warn('[Vipen] /api/data/fresh fetch failed, will fall back to localStorage:', err.message);
+        return null;
     });
 
     var loadSettingsOnline = fetch('/api/data/settings').then(function(r) {
@@ -1517,6 +1523,9 @@ window.addEventListener('storage', function(e) {
     if (!e.key) return;
     if (e.key === 'vipen_mgr_design_dwItems' && e.newValue) {
         try { dwItems = JSON.parse(e.newValue); } catch (ex) {}
+        if (typeof currentPage === 'string' && currentPage.indexOf('design') === 0 && typeof DesignPage !== 'undefined' && DesignPage.renderDesignWorks) {
+            DesignPage.renderDesignWorks();
+        }
     }
     if (e.key === 'vipen_mgr_fresh_heroItems' && e.newValue) {
         try { freshHeroItems = JSON.parse(e.newValue); } catch (ex) {}
