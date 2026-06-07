@@ -525,11 +525,8 @@ module.exports = function(req, res) {
         'set-pin': handleManagerSetPin,
         'check-session': handleManagerCheckSession,
         'upload': handleManagerUpload,
-        'disc-generate-upload-token': handleManagerDiscGenerateUploadToken,
-        'disc-save': handleManagerDiscSave,
         'design-save': handleManagerDesignSave,
         'fresh-save': handleManagerFreshSave,
-        'home-banner-save': handleManagerHomeBannerSave,
         'users-sync': handleManagerUsersSync,
         'settings': handleManagerSettings
     };
