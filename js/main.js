@@ -532,9 +532,29 @@ window.actionFeed = [
 
 window.discData = {
     tapes: [
-        { id: 1, title: '酒精', time: '0:00', cover: 'Disc/MusicAlbum/酒精/ab67616d0000b273d10560f5d73921a997dac1ac.jpg', audio: 'Disc/MusicAlbum/酒精/酒精.mp3' },
-        { id: 2, title: '翱翔', time: '0:00', cover: 'Disc/MusicAlbum/翱翔/images.jpg', audio: 'Disc/MusicAlbum/翱翔/翱翔.mp3' },
-        { id: 3, title: 'Young OG', time: '0:00', cover: 'Disc/MusicAlbum/YoungOG/32b32bd351ba31f737b03e2bc4a6d3a8.jpg', audio: 'Disc/MusicAlbum/YoungOG/soundclouddownloader.io_           Kris Wu Yifan  - Young OG.mp3.mp3' }
+        { id: 1, title: 'CryForMe', time: '0:00', cover: 'Disc/MusicAlbum/CryForMe/109951173144798445.jpg', audio: 'Disc/MusicAlbum/CryForMe/CryForME-the weeknd.mp3' },
+        { id: 2, title: 'Everything', time: '0:00', cover: 'Disc/MusicAlbum/Everything/YouAreEverything_Beat.png', audio: 'Disc/MusicAlbum/Everything/YouAreEverything_Beat.wav' },
+        { id: 3, title: 'Fearless', time: '0:00', cover: 'Disc/MusicAlbum/Fearless/151519762533818200_a700x398.jpg', audio: 'Disc/MusicAlbum/Fearless/无畏-PGONE.mp3' },
+        { id: 4, title: 'Isabellae', time: '0:00', cover: 'Disc/MusicAlbum/Isabellae/047cb4bfd966b9d9e45ee334af79c962.jpg', audio: 'Disc/MusicAlbum/Isabellae/Isabellae-HigherBrothers.flac' },
+        { id: 5, title: 'MADEINCHINA', time: '0:00', cover: 'Disc/MusicAlbum/MADEINCHINA/047cb4bfd966b9d9e45ee334af79c962.jpg', audio: 'Disc/MusicAlbum/MADEINCHINA/MADEINCHINA-HigherBrothers.mp3' },
+        { id: 6, title: 'Rocket', time: '0:00', cover: 'Disc/MusicAlbum/Rocket/artworks-000217154625-npl2l5-t500x500.jpg', audio: 'Disc/MusicAlbum/Rocket/Rocket-红花会xTizzyTx满舒克.mp3' },
+        { id: 7, title: 'SHOOTING2', time: '0:00', cover: 'Disc/MusicAlbum/SHOOTING2/0x1900-000000-80-0-0.jpg', audio: 'Disc/MusicAlbum/SHOOTING2/SHOOTING_jinjibewatersun.mp3' },
+        { id: 8, title: 'TIME', time: '0:00', cover: 'Disc/MusicAlbum/TIME/boom.png', audio: 'Disc/MusicAlbum/TIME/TIME(feat无糖可乐)-黄旭BooM.flac' },
+        { id: 9, title: 'Wagwan', time: '0:00', cover: 'Disc/MusicAlbum/Wagwan/af15c598ee9d2806a92f3efbcef3bb60.1000x1000x1.png', audio: 'Disc/MusicAlbum/Wagwan/WAGWAN-CentralCee.mp3' },
+        { id: 10, title: 'YoungOG', time: '0:00', cover: 'Disc/MusicAlbum/YoungOG/32b32bd351ba31f737b03e2bc4a6d3a8.jpg', audio: 'Disc/MusicAlbum/YoungOG/soundclouddownloader.io_           Kris Wu Yifan  - Young OG.mp3.mp3' },
+        { id: 11, title: 'killTheONE', time: '0:00', cover: 'Disc/MusicAlbum/killTheONE/下载.jpg', audio: 'Disc/MusicAlbum/killTheONE/KILL THE ONE.mp3' },
+        { id: 12, title: '你', time: '0:00', cover: 'Disc/MusicAlbum/你/9395dd6f19034f16ad0177bbba06eabb.jpeg', audio: 'Disc/MusicAlbum/你/你-飞.mp3' },
+        { id: 13, title: '北京地牢', time: '0:00', cover: 'Disc/MusicAlbum/北京地牢/109951163544358233.jpg', audio: 'Disc/MusicAlbum/北京地牢/北京地牢  - 丹镇北京.mp3' },
+        { id: 14, title: '北京晚报', time: '0:00', cover: 'Disc/MusicAlbum/北京晚报/artworks-000242710231-w8xznz-t1080x1080.jpg', audio: 'Disc/MusicAlbum/北京晚报/北京晚报-in3.mp3' },
+        { id: 15, title: '史诗', time: '0:00', cover: 'Disc/MusicAlbum/史诗/109951169249124048.jpg', audio: 'Disc/MusicAlbum/史诗/史诗-蛋堡.mp3' },
+        { id: 16, title: '崂山道士', time: '0:00', cover: 'Disc/MusicAlbum/崂山道士/d347654260da37fec5ab9983cc17c101.jpg', audio: 'Disc/MusicAlbum/崂山道士/崂山道士.mp3' },
+        { id: 17, title: '每当我想起她', time: '0:00', cover: 'Disc/MusicAlbum/每当我想起她/4ae3c9cfa0454823a6f4d7906ad3a528.jpeg', audio: 'Disc/MusicAlbum/每当我想起她/-saber_Jamorphosia.mp3' },
+        { id: 18, title: '空城计', time: '0:00', cover: 'Disc/MusicAlbum/空城计/109951162910489580.jpg', audio: 'Disc/MusicAlbum/空城计/空城计-GAI.mp3' },
+        { id: 19, title: '翱翔', time: '0:00', cover: 'Disc/MusicAlbum/翱翔/images.jpg', audio: 'Disc/MusicAlbum/翱翔/翱翔.mp3' },
+        { id: 20, title: '街头力量', time: '0:00', cover: 'Disc/MusicAlbum/街头力量/109951166538213829.jpg', audio: 'Disc/MusicAlbum/街头力量/街头力量-黄硕&C2C.flac' },
+        { id: 21, title: '请揣满人民币', time: '0:00', cover: 'Disc/MusicAlbum/请揣满人民币/maxresdefault.jpg', audio: 'Disc/MusicAlbum/请揣满人民币/请揣满人民币-谢帝.mp3' },
+        { id: 22, title: '酒精', time: '0:00', cover: 'Disc/MusicAlbum/酒精/ab67616d0000b273d10560f5d73921a997dac1ac.jpg', audio: 'Disc/MusicAlbum/酒精/酒精.mp3' },
+        { id: 23, title: '齐天大圣', time: '0:00', cover: 'Disc/MusicAlbum/齐天大圣/e2274fdebb222a609c00804a18fd9976.jpg', audio: 'Disc/MusicAlbum/齐天大圣/红花会.mp3' }
     ],
     playMode: 'sequence',
     currentTapeIndex: 0
