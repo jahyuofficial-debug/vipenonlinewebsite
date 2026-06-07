@@ -6,7 +6,8 @@ node_modules/
 # 敏感用户数据
 .trae/documents/
 
-# .md 日志/计划/总结等文档不同步到仓库
+# 大文件 — 已迁移到 Cloudflare R2
+banner/bg.mp4
 .workbuddy/
 .codebuddy/
 *.plan.md

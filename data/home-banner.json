@@ -24,7 +24,7 @@
     },
     {
       "bgImage": "",
-      "bgVideo": "banner/bg.mp4",
+      "bgVideo": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/bg.mp4",
       "bgType": "video",
       "carouselTexts": [
         {
@@ -35,7 +35,7 @@
     },
     {
       "bgImage": "",
-      "bgVideo": "banner/bg.mp4",
+      "bgVideo": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/bg.mp4",
       "bgType": "video",
       "carouselTexts": [
         {

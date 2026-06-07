@@ -26,9 +26,9 @@
     ],
     "bgVideoSrc": [
       "banner/bg_opt.mp4",
-      "banner/bg.mp4",
-      "banner/bg.mp4",
-      "banner/bg.mp4"
+      "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/bg.mp4",
+      "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/bg.mp4",
+      "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/bg.mp4"
     ],
     "current": 0,
     "textSlideIndex": 0
