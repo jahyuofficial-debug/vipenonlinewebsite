@@ -318,44 +318,6 @@ window.addEventListener('scroll', function(){
     }
 });
 
-var bgm = document.getElementById('bgm');
-var musicOn = true;
-
-function playBgm(){
-    if(!bgm) return;
-    if(bgm.readyState < 2){
-        bgm.load();
-    }
-    bgm.volume = 0.5;
-    var playPromise = bgm.play();
-    if(playPromise !== undefined){
-        playPromise.then(function(){
-            musicOn = true;
-        }).catch(function(err){
-            musicOn = false;
-        });
-    }
-}
-
-function pauseBgm(){
-    if(!bgm) return;
-    bgm.pause();
-    musicOn = false;
-}
-
-function tryAutoPlay(){
-    if(bgm && bgm.paused && !musicOn){
-        playBgm();
-    }
-}
-
-if(bgm){
-    bgm.addEventListener('canplaythrough', function(){
-        if(!musicOn){
-            playBgm();
-        }
-    });
-}
 
 var signinBtn = document.getElementById('signinBtn');
     var signupBtn = document.getElementById('signupBtn');

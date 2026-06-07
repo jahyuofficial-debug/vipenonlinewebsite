@@ -8,5 +8,6 @@ node_modules/
 
 # .md 日志/计划/总结等文档不同步到仓库
 .workbuddy/
+.codebuddy/
 *.plan.md
 *.summary.md
