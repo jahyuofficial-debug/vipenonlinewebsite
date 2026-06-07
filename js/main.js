@@ -35,42 +35,13 @@ BannerPage.initBgVideo();
     var loadBanner = loadJSON('data/banner.json');
     var loadDisc = loadJSON('data/disc.json');
 
-    var loadDesignOnline = fetch('/api/data/design').then(function(r) {
-        if (r.ok) return r.json();
-        throw new Error('API not available');
-    }).catch(function(err) {
-        console.warn('[Vipen] /api/data/design fetch failed, will fall back to localStorage:', err.message);
-        return null;
-    });
-
-    var loadFreshOnline = fetch('/api/data/fresh').then(function(r) {
-        if (r.ok) return r.json();
-        throw new Error('API not available');
-    }).catch(function(err) {
-        console.warn('[Vipen] /api/data/fresh fetch failed, will fall back to localStorage:', err.message);
-        return null;
-    });
-
-    var loadSettingsOnline = fetch('/api/data/settings').then(function(r) {
-        if (r.ok) return r.json();
-        throw new Error('API not available');
-    }).catch(function() { return null; });
-
-    Promise.all([loadSettings, loadFresh, loadDesign, loadAction, loadBanner, loadDisc, loadDesignOnline, loadFreshOnline, loadSettingsOnline]).then(function(results) {
+    Promise.all([loadSettings, loadFresh, loadDesign, loadAction, loadBanner, loadDisc]).then(function(results) {
         var settings = results[0];
         var freshData = results[1];
         var designData = results[2];
         var actionData = results[3];
         var bannerData = results[4];
         var discData = results[5];
-        var designOnline = results[6];
-        var freshOnline = results[7];
-        var settingsOnline = results[8];
-
-        // Settings: Blob API overrides static file
-        if (settingsOnline && typeof settingsOnline === 'object' && !settingsOnline.error) {
-            Object.assign(settings, settingsOnline);
-        }
 
         // Disc data: loaded from local static file
         if (discData && discData.tapes) {
@@ -83,25 +54,17 @@ BannerPage.initBgVideo();
         dwSuits = designData.dwSuits;
         dwRanks = designData.dwRanks;
 
-        // Design: Blob API > localStorage > static file
-        if (designOnline && designOnline.works) {
-            dwItems = designOnline.works;
-        } else {
-            var mgrDesign = localStorage.getItem('vipen_mgr_design_dwItems');
-            if (mgrDesign) { try { dwItems = JSON.parse(mgrDesign); } catch (e) {} }
-        }
+        // Design: localStorage > static file
+        var mgrDesign = localStorage.getItem('vipen_mgr_design_dwItems');
+        if (mgrDesign) { try { dwItems = JSON.parse(mgrDesign); } catch (e) {} }
 
         freshHeroItems = freshData.heroGroups || freshData.heroItems || [];
         freshCategories = freshData.categories;
         freshItems = freshData.items;
 
-        // Fresh: Blob API > localStorage > static file
-        if (freshOnline && freshOnline.heroGroups) {
-            freshHeroItems = freshOnline.heroGroups;
-        } else {
-            var mgrFresh = localStorage.getItem('vipen_mgr_fresh_heroItems');
-            if (mgrFresh) { try { freshHeroItems = JSON.parse(mgrFresh); } catch (e) {} }
-        }
+        // Fresh: localStorage > static file
+        var mgrFresh = localStorage.getItem('vipen_mgr_fresh_heroItems');
+        if (mgrFresh) { try { freshHeroItems = JSON.parse(mgrFresh); } catch (e) {} }
 
         if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
 
@@ -121,18 +84,12 @@ BannerPage.initBgVideo();
             freshCategories = d.fresh.categories;
             freshItems = d.fresh.items;
 
-            // Design & Fresh: try Blob API, fall back to localStorage
+            // Design & Fresh: use localStorage, fall back to static file
             var mgrDesign = localStorage.getItem('vipen_mgr_design_dwItems');
             if (mgrDesign) { try { dwItems = JSON.parse(mgrDesign); } catch (e) {} }
-            fetch('/api/data/design').then(function(r) { if (r.ok) return r.json(); throw new Error(''); }).then(function(od) {
-                if (od && od.works) { dwItems = od.works; DesignPage.renderDesignWorks(); }
-            }).catch(function() {});
 
             var mgrFresh = localStorage.getItem('vipen_mgr_fresh_heroItems');
             if (mgrFresh) { try { freshHeroItems = JSON.parse(mgrFresh); } catch (e) {} }
-            fetch('/api/data/fresh').then(function(r) { if (r.ok) return r.json(); throw new Error(''); }).then(function(of) {
-                if (of && of.heroGroups) { freshHeroItems = of.heroGroups; if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems }); }
-            }).catch(function() {});
             if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
 
             Object.assign(BannerPage.bannerData, d.banner);

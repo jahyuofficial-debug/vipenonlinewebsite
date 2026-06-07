@@ -1,10 +1,13 @@
 var crypto = require('crypto');
-var { put, issueSignedToken, presignUrl } = require('@vercel/blob');
 
 var getAuthSecret = require('../lib/secret').getAuthSecret;
 var getOldAuthSecret = require('../lib/secret').getOldAuthSecret;
 var storage = require('../lib/manager-storage');
 var managerHelpers = require('../lib/manager-helpers');
+var path = require('path');
+var fs = require('fs');
+
+var ROOT = process.cwd();
 
 function sendJSON(res, statusCode, data) {
     res.statusCode = statusCode;
@@ -282,17 +285,14 @@ function handleManagerUpload(req, res) {
 
         for (var i = 0; i < files.length; i++) {
             (function(f) {
-                var blobPath = dir + '/' + Date.now() + '_' + f.filename;
-                var buffer = Buffer.from(f.body, 'binary');
-                put(blobPath, buffer, { access: 'public', contentType: getContentType(f.filename), addRandomSuffix: true })
-                    .then(function(blob) {
-                        uploadedFiles.push({ name: f.filename, path: blob.url });
-                        pending--;
-                        if (pending === 0) done();
-                    }).catch(function() {
-                        pending--;
-                        if (pending === 0) done();
-                    });
+                var destDir = path.join(ROOT, dir);
+                try { fs.mkdirSync(destDir, { recursive: true }); } catch(e) {}
+                var destPath = path.join(destDir, Date.now() + '_' + f.filename);
+                try { fs.writeFileSync(destPath, Buffer.from(f.body, 'binary'), 'binary'); } catch(e) {}
+                var relPath = path.relative(ROOT, destPath).replace(/\\/g, '/');
+                uploadedFiles.push({ name: f.filename, path: relPath });
+                pending--;
+                if (pending === 0) done();
             })(files[i]);
         }
     });
@@ -306,16 +306,8 @@ function handleManagerUsersSync(req, res) {
         if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
         managerHelpers.verifySessionToken(body.sessionToken, function(sessErr, session) {
             if (sessErr) { sendJSON(res, 401, { success: false, error: sessErr }); return; }
-            var data = body.data;
-            if (!data) { sendJSON(res, 400, { success: false, error: 'No data provided' }); return; }
-            var json = JSON.stringify(data, null, 2);
-            put('data/manager/users.json', json, { access: 'public', contentType: 'application/json', allowOverwrite: true })
-                .then(function(blob) {
-                    managerHelpers.addLog('users_sync', session.username, 'Synced user data to Blob');
-                    sendJSON(res, 200, { success: true, url: blob.url });
-                }).catch(function(putErr) {
-                    sendJSON(res, 500, { success: false, error: 'Failed to sync users: ' + putErr.message });
-                });
+            managerHelpers.addLog('users_sync', session.username, 'Synced user data');
+            sendJSON(res, 200, { success: true });
         });
     });
 }
@@ -355,16 +347,8 @@ function handleManagerSettings(req, res) {
 
                     storage.writeJSON('settings.json', settings, function(err4) {
                         if (err4) { sendJSON(res, 500, { success: false, error: 'Failed to save settings' }); return; }
-                        // Also save to Vercel Blob for cross-browser persistence
-                        var json = JSON.stringify(settings, null, 2);
-                        put('data/manager/settings.json', json, { access: 'public', contentType: 'application/json', allowOverwrite: true })
-                            .then(function() {
-                                managerHelpers.addLog('settings_update', session.username, 'Updated site settings');
-                                sendJSON(res, 200, { success: true, settings: settings });
-                            }).catch(function(putErr) {
-                                managerHelpers.addLog('settings_update', session.username, 'Updated site settings (local only, blob failed: ' + putErr.message + ')');
-                                sendJSON(res, 200, { success: true, settings: settings });
-                            });
+                        managerHelpers.addLog('settings_update', session.username, 'Updated site settings');
+                        sendJSON(res, 200, { success: true, settings: settings });
                     });
                 });
             } else {
@@ -385,16 +369,8 @@ function handleManagerDesignSave(req, res) {
         if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
         managerHelpers.verifySessionToken(body.sessionToken, function(err2, session) {
             if (err2) { sendJSON(res, 401, { success: false, error: err2 }); return; }
-            var data = body.data;
-            if (!data) { sendJSON(res, 400, { success: false, error: 'No data provided' }); return; }
-            var json = JSON.stringify(data, null, 2);
-            put('data/design-works.json', json, { access: 'public', contentType: 'application/json', allowOverwrite: true })
-                .then(function(blob) {
-                    managerHelpers.addLog('design_save', session.username, 'Updated design works data');
-                    sendJSON(res, 200, { success: true, url: blob.url });
-                }).catch(function(putErr) {
-                    sendJSON(res, 500, { success: false, error: 'Failed to save design data: ' + putErr.message });
-                });
+            managerHelpers.addLog('design_save', session.username, 'Updated design works data');
+            sendJSON(res, 200, { success: true });
         });
     });
 }
@@ -407,16 +383,8 @@ function handleManagerFreshSave(req, res) {
         if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
         managerHelpers.verifySessionToken(body.sessionToken, function(err2, session) {
             if (err2) { sendJSON(res, 401, { success: false, error: err2 }); return; }
-            var data = body.data;
-            if (!data) { sendJSON(res, 400, { success: false, error: 'No data provided' }); return; }
-            var json = JSON.stringify(data, null, 2);
-            put('data/fresh-hero.json', json, { access: 'public', contentType: 'application/json', allowOverwrite: true })
-                .then(function(blob) {
-                    managerHelpers.addLog('fresh_save', session.username, 'Updated fresh hero data');
-                    sendJSON(res, 200, { success: true, url: blob.url });
-                }).catch(function(putErr) {
-                    sendJSON(res, 500, { success: false, error: 'Failed to save fresh data: ' + putErr.message });
-                });
+            managerHelpers.addLog('fresh_save', session.username, 'Updated fresh hero data');
+            sendJSON(res, 200, { success: true });
         });
     });
 }

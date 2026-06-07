@@ -1,7 +1,7 @@
-var { list } = require('@vercel/blob');
+var fs = require('fs');
+var path = require('path');
 
-var blobUrlCache = {};
-var CACHE_TTL = 5 * 60 * 1000;
+var ROOT = process.cwd();
 
 function sendJSON(res, statusCode, data) {
     res.statusCode = statusCode;
@@ -19,74 +19,18 @@ function handleOptions(req, res, methods) {
     res.end();
 }
 
-function getCachedUrl(key) {
-    var entry = blobUrlCache[key];
-    if (entry && (Date.now() - entry.ts) < CACHE_TTL) return entry.url;
-    return null;
-}
-
-function setCachedUrl(key, url) {
-    blobUrlCache[key] = { url: url, ts: Date.now() };
-}
-
-function fetchBlobData(key, callback) {
-    var cachedUrl = getCachedUrl(key);
-    if (cachedUrl) {
-        fetch(cachedUrl)
-            .then(function(r) {
-                if (!r.ok) throw new Error('HTTP ' + r.status);
-                return r.text();
-            })
-            .then(function(data) {
-                callback({ code: 200, body: data, raw: true });
-            })
-            .catch(function() {
-                blobUrlCache[key] = null;
-                fetchBlobDataFresh(key, callback);
-            });
-        return;
-    }
-    fetchBlobDataFresh(key, callback);
-}
-
-function fetchBlobDataFresh(key, callback) {
-    list({ prefix: 'data/' + key + '.json' }).then(function(response) {
-        if (!response.blobs || response.blobs.length === 0) {
-            callback({ code: 404, body: { error: 'Not found' } });
-            return;
-        }
-        var blob = response.blobs[0];
-        setCachedUrl(key, blob.url);
-        fetch(blob.url)
-            .then(function(r) {
-                if (!r.ok) throw new Error('HTTP ' + r.status);
-                return r.text();
-            })
-            .then(function(data) {
-                callback({ code: 200, body: data, raw: true });
-            })
-            .catch(function() {
-                callback({ code: 500, body: { error: 'Failed to fetch blob' } });
-            });
-    }).catch(function() {
-        callback({ code: 500, body: { error: 'Failed to list blobs' } });
-    });
-}
-
-function handleDataGeneric(req, res, key) {
+function serveStaticFile(req, res, filePath) {
     res.setHeader('Access-Control-Allow-Origin', '*');
     if (req.method === 'OPTIONS') { handleOptions(req, res, 'GET, OPTIONS'); return; }
-
-    fetchBlobData(key, function(result) {
-        if (result.raw) {
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
-            res.setHeader('Cache-Control', 'public, max-age=30, s-maxage=60');
-            res.end(result.body);
-        } else {
-            sendJSON(res, result.code, result.body);
-        }
-    });
+    try {
+        var data = fs.readFileSync(path.join(ROOT, filePath), 'utf8');
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Cache-Control', 'public, max-age=30, s-maxage=60');
+        res.end(data);
+    } catch (e) {
+        sendJSON(res, 404, { error: 'Not found' });
+    }
 }
 
 module.exports = function(req, res) {
@@ -96,13 +40,13 @@ module.exports = function(req, res) {
 
     switch (action) {
         case 'design':
-            handleDataGeneric(req, res, 'design-works');
+            serveStaticFile(req, res, 'data/design.json');
             break;
         case 'fresh':
-            handleDataGeneric(req, res, 'fresh-hero');
+            serveStaticFile(req, res, 'data/fresh.json');
             break;
         case 'settings':
-            handleDataGeneric(req, res, 'manager/settings');
+            serveStaticFile(req, res, 'data/manager/settings.json');
             break;
         default:
             sendJSON(res, 404, { error: 'Not found', message: 'Unknown action: ' + (action || 'none') });
