@@ -19,6 +19,12 @@ var Loading = (function() {
         document.body.appendChild(div);
     }
 
+    function hideNativeCursor() {
+        if (typeof Cursor !== 'undefined' && Cursor.isReady && Cursor.isReady()) {
+            document.body.style.cursor = 'none';
+        }
+    }
+
     return {
         init: function(onComplete) {
             loading = document.getElementById('loading');
@@ -30,7 +36,7 @@ var Loading = (function() {
             var hasShown = sessionStorage.getItem(STORAGE_KEY);
             if (hasShown) {
                 loading.classList.add('hidden');
-                document.body.style.cursor = 'none';
+                hideNativeCursor();
                 if (onComplete) onComplete();
                 return;
             }
@@ -53,7 +59,7 @@ var Loading = (function() {
                         if (loadImg) loadImg.classList.add('zoomOut');
                         setTimeout(function() {
                             if (loading) loading.classList.add('hidden');
-                            document.body.style.cursor = 'none';
+                            hideNativeCursor();
                             if (onCompleteCallback) onCompleteCallback();
                         }, 900);
                     }, 400);
