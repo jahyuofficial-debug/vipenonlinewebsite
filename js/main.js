@@ -201,7 +201,6 @@ BannerPage.initBgVideo();
             console.log('All loading failed, using embedded defaults');
         });
     });
-    });
 
     function applySiteSettings(settings) {
         if (!settings) return;
