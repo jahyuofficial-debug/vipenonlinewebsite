@@ -55,8 +55,7 @@ var MiniPlayer = (function() {
         var currentTape = tapes[currentIndex] || {};
         var cover = currentTape.cover || '';
         var isIndexedDB = typeof DiscDB !== 'undefined' && DiscDB.isIndexedDBRef(cover);
-        var isLocalPath = cover && cover.indexOf('/') !== -1 && cover.indexOf('http') !== 0 && cover.indexOf('blob:') !== 0 && cover.indexOf('data:') !== 0;
-        var validCover = cover && !isIndexedDB && !isLocalPath ? cover : '';
+        var validCover = cover && !isIndexedDB ? cover : '';
         if (miniPlayerVinylLabel) miniPlayerVinylLabel.style.backgroundImage = validCover ? 'url(' + validCover + ')' : '';
         if (miniPlayerCoverImg) {
             miniPlayerCoverImg.src = validCover;
