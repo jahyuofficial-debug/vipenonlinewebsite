@@ -421,6 +421,99 @@ function handleManagerFreshSave(req, res) {
     });
 }
 
+function handleManagerDiscGenerateUploadToken(req, res) {
+    if (req.method === 'OPTIONS') { handleOptions(req, res, 'POST, OPTIONS'); return; }
+    if (req.method !== 'POST') { sendJSON(res, 405, { success: false, error: 'Method not allowed' }); return; }
+
+    parseBody(req, function(err, body) {
+        if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
+
+        managerHelpers.verifySessionToken(body.sessionToken, function(sessErr, session) {
+            if (sessErr) { sendJSON(res, 401, { success: false, error: sessErr }); return; }
+
+            var filename = (body.filename || '').replace(/[\\/:*?"<>|]/g, '_').trim();
+            var albumDir = (body.albumDir || 'Unknown').replace(/[\\/:*?"<>|]/g, '_').trim();
+            if (!filename) { sendJSON(res, 400, { success: false, error: 'Filename is required' }); return; }
+
+            var blobPath = 'disc/' + albumDir + '/' + Date.now() + '_' + filename;
+            (async function() {
+                try {
+                    console.log('START issueSignedToken');
+                    var signedToken = await issueSignedToken({
+                        allowedContentTypes: [
+                            'audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/x-wav', 'audio/wave',
+                            'audio/ogg', 'audio/flac', 'audio/x-flac',
+                            'audio/mp4', 'audio/x-m4a', 'audio/aac', 'audio/webm',
+                            'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'
+                        ],
+                        maximumSizeInBytes: 500 * 1024 * 1024,
+                        validUntil: Date.now() + 15 * 60 * 1000,
+                        operations: ['put']
+                    });
+                    console.log('END issueSignedToken, signedToken=', JSON.stringify(signedToken));
+
+                    var result = await presignUrl(signedToken, {
+                        pathname: blobPath,
+                        operation: 'put',
+                        validUntil: Date.now() + 15 * 60 * 1000,
+                        access: 'public'
+                    });
+
+                    managerHelpers.addLog('disc_token', session.username, 'Generated upload token for ' + filename);
+                    sendJSON(res, 200, { success: true, uploadUrl: result.presignedUrl, pathname: blobPath });
+                } catch (e) {
+                    console.error('disc-generate-upload-token FAILED:', e.message);
+                    sendJSON(res, 500, { success: false, error: 'Failed to generate upload URL: ' + e.message });
+                }
+            })();
+        });
+    });
+}
+
+function handleManagerDiscSave(req, res) {
+    if (req.method === 'OPTIONS') { handleOptions(req, res, 'POST, OPTIONS'); return; }
+    if (req.method !== 'POST') { sendJSON(res, 405, { success: false, error: 'Method not allowed' }); return; }
+
+    parseBody(req, function(err, body) {
+        if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
+        managerHelpers.verifySessionToken(body.sessionToken, function(sessErr, session) {
+            if (sessErr) { sendJSON(res, 401, { success: false, error: sessErr }); return; }
+            var data = body.data;
+            if (!data) { sendJSON(res, 400, { success: false, error: 'No data provided' }); return; }
+            var json = JSON.stringify(data, null, 2);
+            put('data/disc.json', json, { access: 'public', contentType: 'application/json', allowOverwrite: true })
+                .then(function(blob) {
+                    managerHelpers.addLog('disc_save', session.username, 'Updated disc track data');
+                    sendJSON(res, 200, { success: true, url: blob.url });
+                }).catch(function(putErr) {
+                    sendJSON(res, 500, { success: false, error: 'Failed to save disc data: ' + putErr.message });
+                });
+        });
+    });
+}
+
+function handleManagerHomeBannerSave(req, res) {
+    if (req.method === 'OPTIONS') { handleOptions(req, res, 'POST, OPTIONS'); return; }
+    if (req.method !== 'POST') { sendJSON(res, 405, { success: false, error: 'Method not allowed' }); return; }
+
+    parseBody(req, function(err, body) {
+        if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
+        managerHelpers.verifySessionToken(body.sessionToken, function(err2, session) {
+            if (err2) { sendJSON(res, 401, { success: false, error: err2 }); return; }
+            var data = body.data;
+            if (!data) { sendJSON(res, 400, { success: false, error: 'No data provided' }); return; }
+            var json = JSON.stringify(data, null, 2);
+            put('data/home-banner.json', json, { access: 'public', contentType: 'application/json', allowOverwrite: true })
+                .then(function(blob) {
+                    managerHelpers.addLog('home_banner_save', session.username, 'Updated HOME banner data');
+                    sendJSON(res, 200, { success: true, url: blob.url });
+                }).catch(function(putErr) {
+                    sendJSON(res, 500, { success: false, error: 'Failed to save: ' + putErr.message });
+                });
+        });
+    });
+}
+
 module.exports = function(req, res) {
     var url = require('url');
     var parsedUrl = url.parse(req.url, true);
@@ -432,8 +525,11 @@ module.exports = function(req, res) {
         'set-pin': handleManagerSetPin,
         'check-session': handleManagerCheckSession,
         'upload': handleManagerUpload,
+        'disc-generate-upload-token': handleManagerDiscGenerateUploadToken,
+        'disc-save': handleManagerDiscSave,
         'design-save': handleManagerDesignSave,
         'fresh-save': handleManagerFreshSave,
+        'home-banner-save': handleManagerHomeBannerSave,
         'users-sync': handleManagerUsersSync,
         'settings': handleManagerSettings
     };
