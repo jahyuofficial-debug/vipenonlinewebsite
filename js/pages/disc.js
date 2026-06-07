@@ -75,7 +75,7 @@ function buildAlbumCarousel() {
         var artist = tape.artist || 'Vipen Music';
         var coverSrc = tape.cover || '';
         cards += '<div class="disc-album-card ' + cls + '" data-disc-id="' + tape.id + '">' +
-            '<img src="' + coverSrc + '" alt="' + (tape.title || '') + '" onerror="this.style.display=\'none\';this.parentNode.style.background=\'linear-gradient(135deg,#1a1a2e,#16213e)\'">' +
+            '<img src="' + coverSrc + '" alt="' + (tape.title || '') + '" data-disc-id="' + tape.id + '" data-cover-fb-idx="0" onerror="window.tryCoverFallback?window.tryCoverFallback(this):(this.style.display=\'none\')">' +
             '<div class="disc-album-info">' +
             '<div class="disc-album-title">' + (tape.title || 'Unknown') + '</div>' +
             '<div class="disc-album-artist">' + artist + '</div>' +
@@ -306,6 +306,9 @@ function loadDiscTrack(index) {
         if (bgEl) bgEl.style.backgroundImage = 'url(' + (tape.cover || '') + ')';
         if (miniCoverEl) {
             miniCoverEl.src = tape.cover || '';
+            miniCoverEl.setAttribute('data-disc-id', tape.id);
+            miniCoverEl.setAttribute('data-cover-fb-idx', '0');
+            miniCoverEl.onerror = function() { window.tryCoverFallback ? window.tryCoverFallback(this) : (this.style.display = 'none'); };
             if (!tape.cover) {
                 miniCoverEl.style.display = 'none';
                 miniCoverEl.parentNode.style.background = 'linear-gradient(135deg,#1a1a2e,#16213e)';

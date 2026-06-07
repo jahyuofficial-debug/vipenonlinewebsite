@@ -59,6 +59,9 @@ var MiniPlayer = (function() {
         if (miniPlayerVinylLabel) miniPlayerVinylLabel.style.backgroundImage = validCover ? 'url(' + validCover + ')' : '';
         if (miniPlayerCoverImg) {
             miniPlayerCoverImg.src = validCover;
+            miniPlayerCoverImg.setAttribute('data-disc-id', currentTape.id);
+            miniPlayerCoverImg.setAttribute('data-cover-fb-idx', '0');
+            miniPlayerCoverImg.onerror = function() { window.tryCoverFallback ? window.tryCoverFallback(this) : (this.style.display = 'none'); };
             if (!validCover) {
                 miniPlayerCoverImg.style.display = 'none';
                 if (miniPlayerCardCover) miniPlayerCardCover.style.background = 'linear-gradient(135deg,#1a1a2e,#16213e)';

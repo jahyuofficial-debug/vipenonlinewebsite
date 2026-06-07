@@ -51,14 +51,20 @@ BannerPage.initBgVideo();
 
         // Disc: map from disc/index.json format
         if (discData && Array.isArray(discData)) {
+            var r2Base = 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev';
             window.discData = {
                 tapes: discData.map(function(item, i) {
                     var title = item.folder.replace(/^\d+-/, '');
+                    var enc = encodeURIComponent(title);
                     return {
                         id: i + 1,
                         title: title,
                         time: '0:00',
-                        cover: 'disc/' + item.folder + '/' + item.cover,
+                        cover: r2Base + '/' + enc + '/cover.jpg',
+                        coverFallback: [
+                            r2Base + '/' + enc + '/cover.png',
+                            r2Base + '/' + enc + '/cover.jpeg'
+                        ],
                         audio: item.audio
                     };
                 }),
@@ -161,10 +167,12 @@ BannerPage.initBgVideo();
             var freshData = r[3], actionData = r[4];
 
             if (discData && Array.isArray(discData)) {
+                var r2Base2 = 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev';
                 window.discData = {
                     tapes: discData.map(function(item, i) {
                         var title = item.folder.replace(/^\d+-/, '');
-                        return { id: i+1, title: title, time: '0:00', cover: 'disc/' + item.folder + '/' + item.cover, audio: item.audio };
+                        var enc = encodeURIComponent(title);
+                        return { id: i+1, title: title, time: '0:00', cover: r2Base2 + '/' + enc + '/cover.jpg', coverFallback: [r2Base2 + '/' + enc + '/cover.png', r2Base2 + '/' + enc + '/cover.jpeg'], audio: item.audio };
                     }),
                     playMode: 'sequence', currentTapeIndex: 0
                 };
@@ -1561,3 +1569,23 @@ window.addEventListener('storage', function(e) {
 });
 
 })();
+
+// Cover image fallback: tries cover.jpg → cover.png → cover.jpeg from R2
+window.tryCoverFallback = function(img) {
+    var discId = parseInt(img.getAttribute('data-disc-id'));
+    if (!discId) { img.style.display = 'none'; return; }
+    var tapes = window.discData && window.discData.tapes;
+    if (!tapes) { img.style.display = 'none'; return; }
+    var tape = tapes.find(function(t) { return t.id === discId; });
+    if (!tape) { img.style.display = 'none'; return; }
+    var idx = parseInt(img.getAttribute('data-cover-fb-idx') || '0');
+    var fbs = tape.coverFallback || [];
+    if (idx < fbs.length) {
+        img.src = fbs[idx];
+        img.setAttribute('data-cover-fb-idx', String(idx + 1));
+    } else {
+        img.onerror = null;
+        img.style.display = 'none';
+        if (img.parentNode) img.parentNode.style.background = 'linear-gradient(135deg,#1a1a2e,#16213e)';
+    }
+};
