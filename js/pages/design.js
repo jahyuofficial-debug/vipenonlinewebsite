@@ -513,12 +513,15 @@ function bindDesignGuard() {
 }
 
 function isDesignVerified() {
-    var auth = Utils.getAuth();
-    if (auth && auth.role === 'ManagerGo') return true;
-    var userData = Utils.getUserData('user');
-    if (userData && userData.role === 'ManagerGo') return true;
-    if (auth && auth.email === 'riverjia9527@gmail.com') return true;
-    return sessionStorage.getItem('design_verified') === 'true';
+    // Cloudflare Pages static site: Design works are publicly viewable
+    return true;
+    // Auth-based management only on local server (node server.js)
+    // var auth = Utils.getAuth();
+    // if (auth && auth.role === 'ManagerGo') return true;
+    // var userData = Utils.getUserData('user');
+    // if (userData && userData.role === 'ManagerGo') return true;
+    // if (auth && auth.email === 'riverjia9527@gmail.com') return true;
+    // return sessionStorage.getItem('design_verified') === 'true';
 }
 
 return {
