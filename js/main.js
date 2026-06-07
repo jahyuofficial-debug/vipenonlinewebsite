@@ -30,10 +30,10 @@ BannerPage.initBgVideo();
 
     var loadSettings = loadJSON('data/manager/settings.json');
     var loadFresh = loadJSON('data/fresh.json');
-    var loadDesign = loadJSON('data/design.json');
+    var loadDesign = loadJSON('design/index.json');
     var loadAction = loadJSON('data/action.json');
-    var loadBanner = loadJSON('data/banner.json');
-    var loadDisc = loadJSON('data/disc.json');
+    var loadBanner = loadJSON('home/index.json');
+    var loadDisc = loadJSON('disc/index.json');
 
     Promise.all([loadSettings, loadFresh, loadDesign, loadAction, loadBanner, loadDisc]).then(function(results) {
         var settings = results[0];
@@ -43,16 +43,49 @@ BannerPage.initBgVideo();
         var bannerData = results[4];
         var discData = results[5];
 
-        // Disc data: loaded from local static file
-        if (discData && discData.tapes) {
-            window.discData = JSON.parse(JSON.stringify(discData));
+        // Disc: map from disc/index.json format
+        if (discData && Array.isArray(discData)) {
+            window.discData = {
+                tapes: discData.map(function(item, i) {
+                    var title = item.folder.replace(/^\d+-/, '');
+                    return {
+                        id: i + 1,
+                        title: title,
+                        time: '0:00',
+                        cover: 'disc/' + item.folder + '/' + item.cover,
+                        audio: item.audio
+                    };
+                }),
+                playMode: 'sequence',
+                currentTapeIndex: 0
+            };
         }
 
         applySiteSettings(settings);
 
-        dwItems = designData.dwItems;
-        dwSuits = designData.dwSuits;
-        dwRanks = designData.dwRanks;
+        // Design: map from design/index.json format
+        if (designData && Array.isArray(designData)) {
+            dwItems = designData.map(function(item) {
+                var title = item.folder.replace(/^\d+-/, '');
+                return {
+                    title: title,
+                    cat: item.cat || '',
+                    gradient: item.gradient || '',
+                    year: item.year || '',
+                    client: item.client || '',
+                    tools: item.tools || '',
+                    desc: item.desc || '',
+                    coverImage: '',
+                    fanCardImage: '',
+                    listThumbImage: '',
+                    content: '',
+                    tags: item.tags || [],
+                    likeCount: item.likeCount || 0
+                };
+            });
+            dwSuits = designData.map(function(item) { return item.suit || ''; });
+            dwRanks = designData.map(function(item) { return item.rank || ''; });
+        }
 
         // Design: localStorage > static file
         var mgrDesign = localStorage.getItem('vipen_mgr_design_dwItems');
@@ -68,7 +101,38 @@ BannerPage.initBgVideo();
 
         if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
 
-        Object.assign(BannerPage.bannerData, bannerData);
+        // Banner: map from home/index.json format
+        if (bannerData && Array.isArray(bannerData)) {
+            var hg = bannerData.map(function(g) {
+                var bannerUrl = g.banner;
+                // Local files reference from home/folder/ path
+                if (bannerUrl && !/^https?:\/\//.test(bannerUrl)) {
+                    bannerUrl = 'home/' + g.folder + '/' + bannerUrl;
+                }
+                var isVideo = g.bgType === 'video';
+                return {
+                    bgType: g.bgType,
+                    bgVideo: isVideo ? bannerUrl : '',
+                    bgImage: !isVideo ? bannerUrl : '',
+                    carouselTexts: [{ topic: g.topic || '', note: g.note || '' }]
+                };
+            });
+            BannerPage.bannerData.homeGroups = hg;
+            // Legacy fields
+            BannerPage.bannerData.topics = bannerData.map(function(g) { return g.topic || ''; });
+            BannerPage.bannerData.notes = bannerData.map(function(g) { return g.note || ''; });
+            BannerPage.bannerData.bgType = bannerData.map(function(g) { return g.bgType; });
+            BannerPage.bannerData.bgVideoSrc = bannerData.map(function(g) {
+                var u = g.banner;
+                if (u && !/^https?:\/\//.test(u)) u = 'home/' + g.folder + '/' + u;
+                return g.bgType === 'video' ? u : '';
+            });
+            BannerPage.bannerData.bgImage = bannerData.map(function(g) {
+                var u = g.banner;
+                if (u && !/^https?:\/\//.test(u)) u = 'home/' + g.folder + '/' + u;
+                return g.bgType === 'image' ? u : '';
+            });
+        }
         window.actionFeed = actionData;
 
         resolveDiscTapes();
@@ -84,7 +148,6 @@ BannerPage.initBgVideo();
             freshCategories = d.fresh.categories;
             freshItems = d.fresh.items;
 
-            // Design & Fresh: use localStorage, fall back to static file
             var mgrDesign = localStorage.getItem('vipen_mgr_design_dwItems');
             if (mgrDesign) { try { dwItems = JSON.parse(mgrDesign); } catch (e) {} }
 
@@ -92,7 +155,10 @@ BannerPage.initBgVideo();
             if (mgrFresh) { try { freshHeroItems = JSON.parse(mgrFresh); } catch (e) {} }
             if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
 
-            Object.assign(BannerPage.bannerData, d.banner);
+            if (d.banner) Object.assign(BannerPage.bannerData, d.banner);
+            if (d.disc) {
+                window.discData = { tapes: d.disc.tapes, playMode: 'sequence', currentTapeIndex: 0 };
+            }
             window.actionFeed = d.action;
             resolveDiscTapes();
             console.log('Data loaded from data.json fallback');
@@ -449,35 +515,7 @@ window.actionFeed = [
     { id: 39, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', images: ['https://images.unsplash.com/photo-1633596683562-4a47eb4983c5?w=800&q=80'], caption: '', likes: 4455, comments: 389, timeAgo: '2 months ago', isLiked: false, commentList: [{user:'Zhao Zixuan',text:'Documentation is a skill too'},{user:'Zhou Yuhang',text:'Communication efficiency is everything'}] }
 ];
 
-window.discData = {
-    tapes: [
-        { id: 1, title: '酒精', time: '0:00', cover: 'Disc/MusicAlbum/酒精/ab67616d0000b273d10560f5d73921a997dac1ac.jpg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E9%85%92%E7%B2%BE.mp3' },
-        { id: 2, title: '史诗', time: '0:00', cover: 'Disc/MusicAlbum/史诗/109951169249124048.jpg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E5%8F%B2%E8%AF%97-%E8%9B%8B%E5%A0%A1.mp3' },
-        { id: 3, title: '北京晚报', time: '0:00', cover: 'Disc/MusicAlbum/北京晚报/artworks-000242710231-w8xznz-t1080x1080.jpg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E5%8C%97%E4%BA%AC%E6%99%9A%E6%8A%A5-in3.mp3' },
-        { id: 4, title: 'CryForMe', time: '0:00', cover: 'Disc/MusicAlbum/CryForMe/109951173144798445.jpg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/CryForME-the%20weeknd.mp3' },
-        { id: 5, title: 'Everything', time: '0:00', cover: 'Disc/MusicAlbum/Everything/YouAreEverything_Beat.png', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/YouAreEverything_Beat.wav' },
-        { id: 6, title: 'Fearless', time: '0:00', cover: 'Disc/MusicAlbum/Fearless/151519762533818200_a700x398.jpg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E6%97%A0%E7%95%8F-PGONE.mp3' },
-        { id: 7, title: 'Isabellae', time: '0:00', cover: 'Disc/MusicAlbum/Isabellae/047cb4bfd966b9d9e45ee334af79c962.jpg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/Isabellae-HigherBrothers.flac' },
-        { id: 8, title: 'MADEINCHINA', time: '0:00', cover: 'Disc/MusicAlbum/MADEINCHINA/047cb4bfd966b9d9e45ee334af79c962.jpg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/MADEINCHINA-HigherBrothers.mp3' },
-        { id: 9, title: 'Rocket', time: '0:00', cover: 'Disc/MusicAlbum/Rocket/artworks-000217154625-npl2l5-t500x500.jpg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/Rocket-%E7%BA%A2%E8%8A%B1%E4%BC%9AxTizzyTx%E6%BB%A1%E8%88%92%E5%85%8B.mp3' },
-        { id: 10, title: 'SHOOTING2', time: '0:00', cover: 'Disc/MusicAlbum/SHOOTING2/0x1900-000000-80-0-0.jpg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/SHOOTING_jinjibewatersun.mp3' },
-        { id: 11, title: 'TIME', time: '0:00', cover: 'Disc/MusicAlbum/TIME/boom.png', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/TIME%28feat%E6%97%A0%E7%B3%96%E5%8F%AF%E4%B9%90%29-%E9%BB%84%E6%97%ADBooM.flac' },
-        { id: 12, title: 'Wagwan', time: '0:00', cover: 'Disc/MusicAlbum/Wagwan/af15c598ee9d2806a92f3efbcef3bb60.1000x1000x1.png', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/WAGWAN-CentralCee.mp3' },
-        { id: 13, title: 'YoungOG', time: '0:00', cover: 'Disc/MusicAlbum/YoungOG/32b32bd351ba31f737b03e2bc4a6d3a8.jpg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/soundclouddownloader.io_%20%20%20%20%20%20%20%20%20%20%20Kris%20Wu%20Yifan%20%20-%20Young%20OG.mp3.mp3' },
-        { id: 14, title: 'killTheONE', time: '0:00', cover: 'Disc/MusicAlbum/killTheONE/下载.jpg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/KILL%20THE%20ONE.mp3' },
-        { id: 15, title: '你', time: '0:00', cover: 'Disc/MusicAlbum/你/9395dd6f19034f16ad0177bbba06eabb.jpeg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E4%BD%A0-%E9%A3%9E.mp3' },
-        { id: 16, title: '北京地牢', time: '0:00', cover: 'Disc/MusicAlbum/北京地牢/1abfbec13e07456a9e0ceece671fd089.jpeg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E5%8C%97%E4%BA%AC%E5%9C%B0%E7%89%A2%20%20-%20%E4%B8%B9%E9%95%87%E5%8C%97%E4%BA%AC.mp3' },
-        { id: 17, title: '崂山道士', time: '0:00', cover: 'Disc/MusicAlbum/崂山道士/d347654260da37fec5ab9983cc17c101.jpg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E5%B4%82%E5%B1%B1%E9%81%93%E5%A3%AB.mp3' },
-        { id: 18, title: '每当我想起她', time: '0:00', cover: 'Disc/MusicAlbum/每当我想起她/4ae3c9cfa0454823a6f4d7906ad3a528.jpeg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E6%AF%8F%E5%BD%93%E6%88%91%E6%83%B3%E8%B5%B7%E5%A5%B9-%E6%A2%81%E7%BB%B4%E5%98%89saber.mp3' },
-        { id: 19, title: '空城计', time: '0:00', cover: 'Disc/MusicAlbum/空城计/109951162910489580.jpg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E7%A9%BA%E5%9F%8E%E8%AE%A1-GAI.mp3' },
-        { id: 20, title: '翱翔', time: '0:00', cover: 'Disc/MusicAlbum/翱翔/images.jpg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E7%BF%B1%E7%BF%94.mp3' },
-        { id: 21, title: '街头力量', time: '0:00', cover: 'Disc/MusicAlbum/街头力量/109951166538213829.jpg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E8%A1%97%E5%A4%B4%E5%8A%9B%E9%87%8F-%E9%BB%84%E7%A1%95%26C2C.flac' },
-        { id: 22, title: '请揣满人民币', time: '0:00', cover: 'Disc/MusicAlbum/请揣满人民币/maxresdefault.jpg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E8%AF%B7%E6%8F%A3%E6%BB%A1%E4%BA%BA%E6%B0%91%E5%B8%81-%E8%B0%A2%E5%B8%9D.mp3' },
-        { id: 23, title: '齐天大圣', time: '0:00', cover: 'Disc/MusicAlbum/齐天大圣/e2274fdebb222a609c00804a18fd9976.jpg', audio: 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E7%BA%A2%E8%8A%B1%E4%BC%9A.mp3' }
-    ],
-    playMode: 'sequence',
-    currentTapeIndex: 0
-};
+window.discData = { tapes: [], playMode: 'sequence', currentTapeIndex: 0 };
 
 var pageTemplates = {};
 

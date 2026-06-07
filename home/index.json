@@ -1,0 +1,30 @@
+[
+  {
+    "folder": "01-vibe",
+    "bgType": "video",
+    "banner": "banner.mp4",
+    "topic": "UUNN--",
+    "note": "DeepDesign"
+  },
+  {
+    "folder": "02-disctrack",
+    "bgType": "image",
+    "banner": "banner.png",
+    "topic": "VIBE",
+    "note": "Creative Studio"
+  },
+  {
+    "folder": "03-pulse",
+    "bgType": "video",
+    "banner": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/bg.mp4",
+    "topic": "PULSE",
+    "note": "Digital Art"
+  },
+  {
+    "folder": "04-flux",
+    "bgType": "video",
+    "banner": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/bg.mp4",
+    "topic": "FLUX",
+    "note": "New Media"
+  }
+]

@@ -1,0 +1,4 @@
+{
+  "description": "Design project folders. Each subfolder = one design work.",
+  "order": "Lexicographic folder name order determines display order."
+}

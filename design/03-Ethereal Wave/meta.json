@@ -1,0 +1,12 @@
+{
+  "cat": "Web Design",
+  "gradient": "linear-gradient(135deg,#b2b9ff 0%,#5c6bc0 30%,#0a0a1a 100%)",
+  "year": "2025",
+  "client": "Waveform Audio",
+  "tools": "React / Three.js / WebGL",
+  "desc": "A next-generation web experience for Waveform Audio, featuring real-time 3D audio visualization and an immersive browsing interface. The design pushes the boundaries of web technology while maintaining intuitive navigation and accessibility standards across all devices.",
+  "suit": "♥",
+  "rank": "3",
+  "tags": [],
+  "likeCount": 0
+}

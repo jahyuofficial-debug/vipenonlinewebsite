@@ -37,10 +37,24 @@ function loadHomeBanner(callback) {
         }
     } catch (e) {}
 
-    fetch('data/home-banner.json')
+    fetch('home/index.json')
         .then(function(r) { return r.json(); })
-        .then(function(d) {
-            bannerData.homeGroups = filterVisibleGroups(d.groups || []);
+        .then(function(data) {
+            // Map from home/index.json format to homeGroups format
+            var groups = (data || []).map(function(g) {
+                var bannerUrl = g.banner;
+                if (bannerUrl && !/^https?:\/\//.test(bannerUrl)) {
+                    bannerUrl = 'home/' + g.folder + '/' + bannerUrl;
+                }
+                var isVideo = g.bgType === 'video';
+                return {
+                    bgType: g.bgType,
+                    bgVideo: isVideo ? bannerUrl : '',
+                    bgImage: !isVideo ? bannerUrl : '',
+                    carouselTexts: [{ topic: g.topic || '', note: g.note || '' }]
+                };
+            });
+            bannerData.homeGroups = filterVisibleGroups(groups);
             bannerData.homeTextSlideIndices = [0, 0, 0, 0];
             if (callback) callback(true);
         })
