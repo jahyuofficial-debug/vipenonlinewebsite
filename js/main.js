@@ -33,11 +33,7 @@ BannerPage.initBgVideo();
     var loadDesign = loadJSON('data/design.json');
     var loadAction = loadJSON('data/action.json');
     var loadBanner = loadJSON('data/banner.json');
-
-    var loadDiscOnline = fetch('/api/data/disc').then(function(r) {
-        if (r.ok) return r.json();
-        throw new Error('API not available');
-    });
+    var loadDisc = loadJSON('data/disc.json');
 
     var loadDesignOnline = fetch('/api/data/design').then(function(r) {
         if (r.ok) return r.json();
@@ -49,45 +45,30 @@ BannerPage.initBgVideo();
         throw new Error('API not available');
     });
 
-    var loadBannerOnline = fetch('/api/data/home-banner').then(function(r) {
-        if (r.ok) return r.json();
-        throw new Error('API not available');
-    }).catch(function() { return null; });
-
     var loadSettingsOnline = fetch('/api/data/settings').then(function(r) {
         if (r.ok) return r.json();
         throw new Error('API not available');
     }).catch(function() { return null; });
 
-    Promise.all([loadSettings, loadFresh, loadDesign, loadAction, loadBanner, loadDiscOnline, loadDesignOnline, loadFreshOnline, loadBannerOnline, loadSettingsOnline]).then(function(results) {
+    Promise.all([loadSettings, loadFresh, loadDesign, loadAction, loadBanner, loadDisc, loadDesignOnline, loadFreshOnline, loadSettingsOnline]).then(function(results) {
         var settings = results[0];
         var freshData = results[1];
         var designData = results[2];
         var actionData = results[3];
         var bannerData = results[4];
-        var discOnline = results[5];
+        var discData = results[5];
         var designOnline = results[6];
         var freshOnline = results[7];
-        var bannerOnline = results[8];
-        var settingsOnline = results[9];
+        var settingsOnline = results[8];
 
         // Settings: Blob API overrides static file
         if (settingsOnline && typeof settingsOnline === 'object' && !settingsOnline.error) {
             Object.assign(settings, settingsOnline);
         }
 
-        // Disc data: backend is the source of truth
-        // API success → use exactly what backend returns
-        // API fail  → keep initial hardcoded fallback
-        var discData;
-        if (discOnline && typeof discOnline.tapes !== 'undefined') {
-            discData = discOnline;
-        } else {
-            discData = window.discData; // keep initial 3 hardcoded songs
-        }
-
-        if (bannerOnline && bannerOnline.groups) {
-            bannerData.homeGroups = BannerPage.filterVisibleGroups(bannerOnline.groups);
+        // Disc data: loaded from local static file
+        if (discData && discData.tapes) {
+            window.discData = JSON.parse(JSON.stringify(discData));
         }
 
         applySiteSettings(settings);
@@ -120,7 +101,6 @@ BannerPage.initBgVideo();
 
         Object.assign(BannerPage.bannerData, bannerData);
         window.actionFeed = actionData;
-        window.discData = JSON.parse(JSON.stringify(discData));
 
         resolveDiscTapes();
 
@@ -148,33 +128,6 @@ BannerPage.initBgVideo();
                 if (of && of.heroGroups) { freshHeroItems = of.heroGroups; if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems }); }
             }).catch(function() {});
             if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
-
-            var mgrBannerFallback = localStorage.getItem('vipen_mgr_home_banner');
-            if (mgrBannerFallback) {
-                try {
-                    var parsedBannerFallback = JSON.parse(mgrBannerFallback);
-                    if (parsedBannerFallback && parsedBannerFallback.groups) {
-                        d.banner.homeGroups = BannerPage.filterVisibleGroups(parsedBannerFallback.groups);
-                    }
-                } catch (e) {}
-            }
-
-            // Disc: try API again, fall back to localStorage, keep hardcoded if both fail
-            fetch('/api/data/disc').then(function(r) { if (r.ok) return r.json(); throw new Error(''); }).then(function(od) {
-                if (od && typeof od.tapes !== 'undefined') {
-                    window.discData = od;
-                    if (typeof DiscPage !== 'undefined') DiscPage.setDiscData(window.discData);
-                }
-            }).catch(function() {
-                var mgrDiscFallback = localStorage.getItem('vipen_mgr_disc_tapes');
-                if (mgrDiscFallback) {
-                    try { window.discData.tapes = JSON.parse(mgrDiscFallback); } catch (e) {}
-                    if (typeof DiscPage !== 'undefined') DiscPage.setDiscData(window.discData);
-                }
-            });
-            fetch('/api/data/home-banner').then(function(r) { if (r.ok) return r.json(); throw new Error(''); }).then(function(ob) {
-                if (ob && ob.groups) { d.banner.homeGroups = BannerPage.filterVisibleGroups(ob.groups); }
-            }).catch(function() {});
 
             Object.assign(BannerPage.bannerData, d.banner);
             window.actionFeed = d.action;

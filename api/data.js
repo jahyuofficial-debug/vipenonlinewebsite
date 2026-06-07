@@ -95,12 +95,6 @@ module.exports = function(req, res) {
     var action = parsed.query.action;
 
     switch (action) {
-        case 'disc':
-            handleDataGeneric(req, res, 'disc');
-            break;
-        case 'home-banner':
-            handleDataGeneric(req, res, 'home-banner');
-            break;
         case 'design':
             handleDataGeneric(req, res, 'design-works');
             break;

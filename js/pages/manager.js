@@ -1,4 +1,4 @@
-var ManagerGo = (function() {
+﻿var ManagerGo = (function() {
     'use strict';
 
     var sessionToken = null;
@@ -7,11 +7,9 @@ var ManagerGo = (function() {
 
     var navItems = [
         { id: 'dashboard', label: 'Dashboard', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>' },
-        { id: 'home', label: 'HOME', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>' },
         { id: 'fresh', label: 'Fresh', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>' },
         { id: 'drafts', label: 'Drafts', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' },
         { id: 'design', label: 'Design', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' },
-        { id: 'disc', label: 'Disc', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>' },
         { id: 'users', label: 'Users', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>' },
         { id: 'trash', label: 'Trash', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>' },
         { id: 'settings', label: 'Settings', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l-.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>' }
@@ -19,13 +17,11 @@ var ManagerGo = (function() {
 
     var freshData = { heroGroups: [], articles: [], categories: [] };
     var designData = { works: [] };
-    var discData = { tapes: [] };
     var usersData = [];
 
     var STORAGE_KEYS = {
         freshHeroItems: 'vipen_mgr_fresh_heroItems',
         designDwItems: 'vipen_mgr_design_dwItems',
-        discTapes: 'vipen_mgr_disc_tapes',
         users: 'vipen_mgr_users',
         trash: 'vipen_mgr_trash',
         drafts: 'vipen_mgr_drafts',
@@ -188,11 +184,9 @@ var ManagerGo = (function() {
         if (!mainArea) return;
 
         if (page === 'dashboard') renderDashboard(mainArea);
-        else if (page === 'home') renderHome(mainArea);
         else if (page === 'fresh') renderFreshManager(mainArea);
         else if (page === 'drafts') renderDrafts(mainArea);
         else if (page === 'design') renderDesignManager(mainArea);
-        else if (page === 'disc') renderDiscManager(mainArea);
         else if (page === 'users') renderUsersManager(mainArea);
         else if (page === 'trash') renderTrash(mainArea);
         else if (page === 'settings') renderSettings(mainArea);
@@ -224,10 +218,8 @@ var ManagerGo = (function() {
                 var activeUsers = usersData.filter(function(u) { return u.status === 'active'; }).length || 0;
                 var totalArticles = (siteData && siteData.fresh && siteData.fresh.items) ? siteData.fresh.items.length : 0;
                 var mgrDwItems = loadFromLocalStorage(STORAGE_KEYS.designDwItems);
-                var mgrDiscTapes = loadFromLocalStorage(STORAGE_KEYS.discTapes);
                 var mgrFreshHero = loadFromLocalStorage(STORAGE_KEYS.freshHeroItems);
                 var totalWorks = mgrDwItems ? mgrDwItems.length : ((siteData && siteData.design && siteData.design.dwItems) ? siteData.design.dwItems.length : 0);
-                var totalTracks = mgrDiscTapes ? mgrDiscTapes.length : ((siteData && siteData.disc && siteData.disc.tapes) ? siteData.disc.tapes.length : 0);
                 var totalHeroGroups = mgrFreshHero ? mgrFreshHero.length : ((siteData && siteData.fresh && siteData.fresh.heroGroups) ? siteData.fresh.heroGroups.length : ((siteData && siteData.fresh && siteData.fresh.heroItems) ? siteData.fresh.heroItems.length : 0));
 
                 var sortedUsers = usersData.slice().sort(function(a, b) {
@@ -236,27 +228,23 @@ var ManagerGo = (function() {
                 var topUsers = sortedUsers.slice(0, 5);
 
                 var freshBytes = totalArticles * 2 * 1024 * 1024;
-                var discBytes = totalTracks * 5 * 1024 * 1024;
                 var designBytes = totalWorks * 3 * 1024 * 1024;
                 var otherBytes = 1 * 1024 * 1024;
-                var totalStorage = freshBytes + discBytes + designBytes + otherBytes;
+                var totalStorage = freshBytes + designBytes + otherBytes;
 
                 var storageSegments = [
                     { label: 'Fresh', value: freshBytes, color: '#6366f1' },
-                    { label: 'Disc', value: discBytes, color: '#a855f7' },
                     { label: 'Design', value: designBytes, color: '#22c55e' },
                     { label: 'Other', value: otherBytes, color: '#f59e0b' }
                 ];
 
-                var audioBytes = discBytes;
                 var imageBytes = Math.round(totalWorks * 2.5 * 1024 * 1024 + totalArticles * 0.5 * 1024 * 1024);
                 var textBytes = Math.round(totalArticles * 1 * 1024 * 1024);
                 var videoBytes = Math.round(totalWorks * 0.5 * 1024 * 1024);
                 var otherTypeBytes = Math.round(otherBytes);
-                var totalTypeBytes = audioBytes + imageBytes + textBytes + videoBytes + otherTypeBytes;
+                var totalTypeBytes = imageBytes + textBytes + videoBytes + otherTypeBytes;
 
                 var typeSegments = [
-                    { label: 'Audio', value: audioBytes, color: '#a855f7' },
                     { label: 'Images', value: imageBytes, color: '#6366f1' },
                     { label: 'Text', value: textBytes, color: '#22c55e' },
                     { label: 'Video', value: videoBytes, color: '#f59e0b' },
@@ -279,11 +267,6 @@ var ManagerGo = (function() {
                     '<svg class="manager-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' +
                     '<div class="manager-stat-value">' + totalWorks + '</div>' +
                     '<div class="manager-stat-label">Design Works</div>' +
-                    '</div>' +
-                    '<div class="manager-stat-card">' +
-                    '<svg class="manager-stat-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>' +
-                    '<div class="manager-stat-value">' + totalTracks + '</div>' +
-                    '<div class="manager-stat-label">Disc Tracks</div>' +
                     '</div>' +
                     '</div>' +
                     '<div class="manager-donut-grid">' +
@@ -2493,823 +2476,6 @@ var ManagerGo = (function() {
         tokenXhr.send(JSON.stringify({ filename: file.name || 'unknown', albumDir: albumDir, sessionToken: sessionToken }));
     }
 
-    function saveDiscToServer(callback) {
-        var payload = { tapes: discData.tapes, playMode: 'sequence', currentTapeIndex: 0 };
-        saveToLocalStorage(STORAGE_KEYS.discTapes, discData.tapes);
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/manager/disc-save', true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.onload = function() {
-            if (xhr.status === 401) {
-                try {
-                    var res = JSON.parse(xhr.responseText);
-                    if (res.error && res.error.indexOf('session') !== -1) {
-                        sessionToken = null;
-                        sessionStorage.removeItem('manager_session');
-                        callback('Session expired, please re-enter PIN');
-                        return;
-                    }
-                } catch(e) {}
-                callback('Unauthorized');
-                return;
-            }
-            if (xhr.status !== 200) {
-                var errMsg = 'Server error: HTTP ' + xhr.status;
-                try {
-                    var errRes = JSON.parse(xhr.responseText);
-                    if (errRes.error) errMsg += ' - ' + errRes.error;
-                } catch(e) {}
-                callback(errMsg);
-                return;
-            }
-            try {
-                var res = JSON.parse(xhr.responseText);
-                callback(res.success ? null : (res.error || 'Save failed'));
-            } catch(e) { callback('Parse error'); }
-        };
-        xhr.onerror = function() { callback('Network error'); };
-        xhr.send(JSON.stringify({ data: payload, sessionToken: sessionToken }));
-    }
-
-    function saveDesignToServer(data, onSuccess) {
-        if (!sessionToken) return;
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/manager/design-save', true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.onload = function() { if (xhr.status === 200 && onSuccess) onSuccess(); };
-        xhr.send(JSON.stringify({ data: data, sessionToken: sessionToken }));
-    }
-
-    function saveFreshToServer(data, onSuccess) {
-        if (!sessionToken) return;
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/manager/fresh-save', true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.onload = function() { if (xhr.status === 200 && onSuccess) onSuccess(); };
-        xhr.send(JSON.stringify({ data: data, sessionToken: sessionToken }));
-    }
-
-    function renderDiscManager(container) {
-        container.innerHTML =
-            '<div class="manager-main-header">' +
-            '<h1 class="manager-main-title">Disc Manager</h1>' +
-            '<div class="manager-main-actions">' +
-            '<button class="manager-btn manager-btn-primary" id="discAddBtn">' +
-            '<svg class="manager-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
-            'Add Track</button>' +
-            '</div>' +
-            '</div>' +
-            '<div id="discManagerContent"><div style="text-align:center;padding:.6rem;color:rgba(255,255,255,.25);">Loading...</div></div>';
-
-        var savedDiscTapes = loadFromLocalStorage(STORAGE_KEYS.discTapes);
-        if (savedDiscTapes) {
-            discData.tapes = savedDiscTapes;
-            var dc = document.getElementById('discManagerContent');
-            if (dc) renderDiscTracks(dc);
-        } else {
-            fetch('data/disc.json')
-                .then(function(r) { return r.json(); })
-                .then(function(data) {
-                    var dc = document.getElementById('discManagerContent');
-                    if (!dc) return;
-                    discData.tapes = data.tapes || [];
-                    renderDiscTracks(dc);
-                })
-                .catch(function() {
-                    var dc = document.getElementById('discManagerContent');
-                    if (!dc) return;
-                    discData.tapes = [];
-                    renderDiscTracks(dc);
-                });
-        }
-
-        document.getElementById('discAddBtn').addEventListener('click', function() {
-            openDiscTrackModal(null);
-        });
-    }
-
-    function renderDiscTracks(container) {
-        if (!discData.tapes || discData.tapes.length === 0) {
-            container.innerHTML = '<div class="manager-empty">No tracks yet.</div>';
-            return;
-        }
-
-        var html = '<div class="manager-disc-list">';
-        for (var i = 0; i < discData.tapes.length; i++) {
-            var tape = discData.tapes[i];
-            html += buildDiscTrackCard(tape, i);
-        }
-        html += '</div>';
-        container.innerHTML = html;
-
-        bindDiscTrackEvents(container);
-    }
-
-    function buildDiscTrackCard(tape, index) {
-        return '<div class="manager-disc-item" data-track-index="' + index + '" draggable="true">' +
-            '<div class="manager-disc-drag-handle" title="Drag to reorder">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg>' +
-            '</div>' +
-            '<div class="manager-disc-cover btn-disc-detail" data-idx="' + index + '">' +
-            '<img src="' + (tape.cover || '') + '" alt="' + (tape.title || '') + '">' +
-            '</div>' +
-            '<div class="manager-disc-body">' +
-            '<div class="manager-disc-track-info">' +
-            '<h3 class="manager-disc-title">' + (tape.title || 'Unknown') + '</h3>' +
-            '<p class="manager-disc-artist">' + (tape.artist || 'Vipen Music') + '</p>' +
-            '</div>' +
-            '</div>' +
-            '</div>';
-    }
-
-    function bindDiscTrackEvents(container) {
-        var detailBtns = container.querySelectorAll('.btn-disc-detail');
-        detailBtns.forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                var idx = parseInt(this.getAttribute('data-idx'), 10);
-                openDiscTrackDetail(idx);
-            });
-        });
-
-        var items = container.querySelectorAll('.manager-disc-item');
-        var dragSrcIndex = -1;
-
-        items.forEach(function(item) {
-            item.addEventListener('dragstart', function(e) {
-                dragSrcIndex = parseInt(this.getAttribute('data-track-index'), 10);
-                this.classList.add('dragging');
-                e.dataTransfer.effectAllowed = 'move';
-                e.dataTransfer.setData('text/plain', dragSrcIndex);
-            });
-
-            item.addEventListener('dragend', function() {
-                this.classList.remove('dragging');
-                items.forEach(function(it) { it.classList.remove('drag-over'); });
-                dragSrcIndex = -1;
-            });
-
-            item.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = 'move';
-                var targetIndex = parseInt(this.getAttribute('data-track-index'), 10);
-                if (targetIndex !== dragSrcIndex) {
-                    this.classList.add('drag-over');
-                }
-            });
-
-            item.addEventListener('dragleave', function() {
-                this.classList.remove('drag-over');
-            });
-
-            item.addEventListener('drop', function(e) {
-                e.preventDefault();
-                this.classList.remove('drag-over');
-                var targetIndex = parseInt(this.getAttribute('data-track-index'), 10);
-                if (dragSrcIndex === -1 || dragSrcIndex === targetIndex) return;
-
-                var moved = discData.tapes.splice(dragSrcIndex, 1)[0];
-                discData.tapes.splice(targetIndex, 0, moved);
-                saveDiscToServer(function(err) {
-                    if (err) {
-                        showToast('Reorder saved locally, but server sync failed: ' + err, true);
-                    }
-                });
-
-                var dc = document.getElementById('discManagerContent');
-                if (dc) renderDiscTracks(dc);
-            });
-        });
-    }
-
-    function dataUrlToBlob(dataUrl) {
-        if (!dataUrl) return null;
-        var parts = dataUrl.split(',');
-        if (parts.length < 2) return null;
-        var mime = parts[0].match(/:(.*?);/);
-        var mimeType = mime ? mime[1] : 'application/octet-stream';
-        var binary = atob(parts[1]);
-        var bytes = new Uint8Array(binary.length);
-        for (var i = 0; i < binary.length; i++) {
-            bytes[i] = binary.charCodeAt(i);
-        }
-        return new Blob([bytes], { type: mimeType });
-    }
-
-    function openDiscTrackModal(editIndex) {
-        var isEdit = editIndex !== null;
-        var tape = isEdit ? discData.tapes[editIndex] : {
-            id: Date.now(),
-            title: '',
-            artist: 'Vipen Music',
-            time: '0:00',
-            cover: '',
-            audio: ''
-        };
-
-        var currentAudio = tape.audio || '';
-        var currentAudioFile = null;
-        var currentCoverFile = null;
-
-        var overlay = document.createElement('div');
-        overlay.className = 'manager-modal-overlay';
-        overlay.innerHTML =
-            '<div class="manager-modal" style="max-width:5rem;">' +
-            '<button class="manager-modal-close" id="modalCloseBtn">&times;</button>' +
-            '<div class="manager-modal-title">' + (isEdit ? 'Edit' : 'Add') + ' Track</div>' +
-            '<div class="manager-form-group">' +
-            '<label class="manager-form-label">Title</label>' +
-            '<input type="text" class="manager-form-input" id="discTitle" value="' + tape.title + '">' +
-            '</div>' +
-            '<div class="manager-form-group">' +
-            '<label class="manager-form-label">Artist</label>' +
-            '<input type="text" class="manager-form-input" id="discArtist" value="' + tape.artist + '">' +
-            '</div>' +
-            createImageUploadField('disc', tape.cover, 'Cover Image', 'discCover') +
-            '<div class="manager-form-group">' +
-            '<label class="manager-form-label">Audio File</label>' +
-            '<div class="manager-design-cover-zone" id="discAudioZone" style="height:1rem;border-style:dashed;">' +
-            '<input type="file" class="manager-design-file-input" id="discAudioInput" accept="audio/*">' +
-            '<div class="manager-design-cover-placeholder">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>' +
-            '<span id="discAudioLabel">' + (currentAudio ? 'Audio file selected' : 'Click to upload audio') + '</span>' +
-            '</div>' +
-            '</div>' +
-            '</div>' +
-            '<div class="manager-modal-actions">' +
-            '<button class="manager-btn manager-btn-outline" id="modalCancelBtn">Cancel</button>' +
-            '<button class="manager-btn manager-btn-primary" id="modalSaveBtn">Save</button>' +
-            '</div>' +
-            '</div>';
-
-        document.body.appendChild(overlay);
-
-        bindImageUploadField(overlay, 'discCover');
-
-        var audioZone = overlay.querySelector('#discAudioZone');
-        var audioInput = overlay.querySelector('#discAudioInput');
-        var audioLabel = overlay.querySelector('#discAudioLabel');
-        if (audioZone && audioInput) {
-            audioZone.addEventListener('click', function() { audioInput.click(); });
-            audioZone.addEventListener('dragover', function(e) { e.preventDefault(); audioZone.classList.add('dragover'); });
-            audioZone.addEventListener('dragleave', function() { audioZone.classList.remove('dragover'); });
-            audioZone.addEventListener('drop', function(e) {
-                e.preventDefault();
-                audioZone.classList.remove('dragover');
-                if (e.dataTransfer.files.length > 0) handleDiscAudioFile(e.dataTransfer.files[0]);
-            });
-            audioInput.addEventListener('change', function() {
-                if (this.files.length > 0) handleDiscAudioFile(this.files[0]);
-            });
-        }
-
-        function handleDiscAudioFile(file) {
-            if (!file.type.startsWith('audio/')) {
-                showToast('Only audio files are supported', true);
-                return;
-            }
-            if (file.size > CONFIG.DISC_AUDIO_MAX_SIZE) {
-                showToast('Audio too large (max 50MB)', true);
-                return;
-            }
-            currentAudioFile = file;
-            if (currentAudio && currentAudio.indexOf('blob:') === 0) {
-                URL.revokeObjectURL(currentAudio);
-            }
-            currentAudio = URL.createObjectURL(file);
-            if (audioLabel) audioLabel.textContent = file.name;
-        }
-
-        function closeModal() {
-            if (currentAudio && currentAudio.indexOf('blob:') === 0) {
-                URL.revokeObjectURL(currentAudio);
-            }
-            overlay.remove();
-        }
-        overlay.addEventListener('click', function(e) { if (e.target === overlay) closeModal(); });
-        overlay.querySelector('#modalCloseBtn').addEventListener('click', closeModal);
-        overlay.querySelector('#modalCancelBtn').addEventListener('click', closeModal);
-        overlay.querySelector('#modalSaveBtn').addEventListener('click', function() {
-            var trackId = tape.id;
-            var title = overlay.querySelector('#discTitle').value.trim();
-            var artist = overlay.querySelector('#discArtist').value.trim() || 'Vipen Music';
-            var coverDataUrl = getImageUploadValue(overlay, 'discCover');
-            var albumDir = title || 'untitled';
-
-            var metaOnly = {
-                id: trackId,
-                title: title,
-                artist: artist,
-                time: '0:00',
-                cover: coverDataUrl && coverDataUrl.indexOf('data:') === 0 ? '' : (coverDataUrl && coverDataUrl.indexOf('blob:') === 0 ? '' : (coverDataUrl || '')),
-                audio: currentAudioFile ? '' : (currentAudio && currentAudio.indexOf('blob:') === 0 ? '' : (currentAudio || ''))
-            };
-
-            function finishSave() {
-                if (isEdit) {
-                    discData.tapes[editIndex] = metaOnly;
-                } else {
-                    discData.tapes.push(metaOnly);
-                }
-                saveDiscToServer(function(err) {
-                    var dc = document.getElementById('discManagerContent');
-                    if (dc) renderDiscTracks(dc);
-                    if (err) {
-                        showToast('Saved locally, but server sync failed: ' + err, true);
-                    } else {
-                        showToast(isEdit ? 'Track updated' : 'Track added');
-                    }
-                    closeModal();
-                });
-            }
-
-            var pending = 0;
-            function tryFinish() {
-                pending--;
-                if (pending <= 0) finishSave();
-            }
-
-            if (currentAudioFile) {
-                pending++;
-                uploadDiscFile(currentAudioFile, albumDir, function(err, path) {
-                    if (err) {
-                        showToast('Audio upload failed: ' + err, true);
-                    } else if (path) {
-                        metaOnly.audio = path;
-                    } else {
-                        showToast('Audio upload returned empty path', true);
-                    }
-                    tryFinish();
-                });
-            }
-            if (coverDataUrl && coverDataUrl.indexOf('data:') === 0) {
-                var coverBlob = dataUrlToBlob(coverDataUrl);
-                if (coverBlob) {
-                    pending++;
-                    uploadDiscFile(coverBlob, albumDir, function(err, path) {
-                        if (err) {
-                            showToast('Cover upload failed: ' + err, true);
-                        } else if (path) {
-                            metaOnly.cover = path;
-                        } else {
-                            showToast('Cover upload returned empty path', true);
-                        }
-                        tryFinish();
-                    });
-                }
-            }
-
-            if (pending === 0) finishSave();
-        });
-    }
-
-    function openDiscTrackDetail(editIndex) {
-        var tape = JSON.parse(JSON.stringify(discData.tapes[editIndex]));
-        if (!tape) return;
-
-        var overlay = document.createElement('div');
-        overlay.className = 'manager-modal-overlay manager-disc-detail-overlay';
-        overlay.id = 'discDetailOverlay';
-
-        var detailAudio = new Audio();
-        var isPlaying = false;
-        var isDraggingProgress = false;
-        var currentCover = tape.cover || '';
-        var currentAudio = tape.audio || '';
-        var currentCoverFile = null;
-        var currentAudioFile = null;
-
-        function formatDetailTime(seconds) {
-            if (isNaN(seconds)) return '0:00';
-            var m = Math.floor(seconds / 60);
-            var s = Math.floor(seconds % 60);
-            return m + ':' + (s < 10 ? '0' + s : s);
-        }
-
-        function updateDetailProgress() {
-            var bar = document.getElementById('detailProgressBar');
-            var cur = document.getElementById('detailCurrentTime');
-            var dur = document.getElementById('detailDuration');
-            if (bar && detailAudio.duration) {
-                bar.style.width = (detailAudio.currentTime / detailAudio.duration * 100) + '%';
-            }
-            if (cur) cur.textContent = formatDetailTime(detailAudio.currentTime);
-            if (dur && detailAudio.duration) dur.textContent = formatDetailTime(detailAudio.duration);
-        }
-
-        var detailProgressInterval = null;
-
-        function syncDetailPlayUI() {
-            var icon = document.getElementById('detailPlayIcon');
-            if (isPlaying) {
-                if (icon) icon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
-                if (detailProgressInterval) clearInterval(detailProgressInterval);
-                detailProgressInterval = setInterval(updateDetailProgress, 500);
-            } else {
-                if (icon) icon.innerHTML = '<path d="M8 5v14l11-7z"/>';
-                if (detailProgressInterval) clearInterval(detailProgressInterval);
-            }
-        }
-
-        function toggleDetailPlay() {
-            if (isPlaying) {
-                detailAudio.pause();
-            } else {
-                detailAudio.play().catch(function() {});
-            }
-        }
-
-        function updateDetailCover(url) {
-            var coverEl = document.getElementById('detailCoverImg');
-            var bgEl = document.getElementById('detailPlayerBg');
-            if (coverEl) coverEl.src = url;
-            if (bgEl) bgEl.style.backgroundImage = 'url(' + url + ')';
-        }
-
-        function buildDetailUI() {
-            return '<div class="manager-disc-detail">' +
-                '<div class="manager-disc-detail-header">' +
-                '<button class="manager-design-editor-back" id="detailBack">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m7-7l-7 7 7 7"/></svg>' +
-                'Back</button>' +
-                '<div class="manager-design-editor-title">Track Detail</div>' +
-                '<button class="manager-btn manager-btn-primary manager-design-editor-save active" id="detailSave">Save</button>' +
-                '</div>' +
-                '<div class="manager-disc-detail-body">' +
-                '<div class="manager-disc-detail-left">' +
-                '<div class="manager-disc-detail-player" id="detailPlayer">' +
-                '<div class="detail-player-bg" id="detailPlayerBg" style="background-image:url(' + currentCover + ')"></div>' +
-                '<div class="detail-player-bg-overlay"></div>' +
-                '<div class="detail-player-controls">' +
-                '<button class="detail-player-btn" id="detailPrevBtn" disabled>' +
-                '<svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>' +
-                '</button>' +
-                '<button class="detail-player-btn play" id="detailPlayBtn">' +
-                '<svg viewBox="0 0 24 24" id="detailPlayIcon"><path d="M8 5v14l11-7z"/></svg>' +
-                '</button>' +
-                '<button class="detail-player-btn" id="detailNextBtn" disabled>' +
-                '<svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>' +
-                '</button>' +
-                '</div>' +
-                '<div class="detail-player-center">' +
-                '<div class="detail-player-track-info">' +
-                '<div class="detail-player-mini-cover">' +
-                '<img src="' + currentCover + '" alt="' + (tape.title || '') + '" id="detailCoverImg">' +
-                '</div>' +
-                '<div class="detail-player-meta">' +
-                '<div class="detail-player-title" id="detailPlayerTitle">' + (tape.title || 'Unknown') + '</div>' +
-                '<div class="detail-player-artist" id="detailPlayerArtist">' + (tape.artist || 'Vipen Music') + '</div>' +
-                '</div>' +
-                '</div>' +
-                '<div class="detail-player-progress-wrap">' +
-                '<span class="detail-player-time" id="detailCurrentTime">0:00</span>' +
-                '<div class="detail-player-progress-track" id="detailProgressTrack">' +
-                '<div class="detail-player-progress-bar" id="detailProgressBar" style="width:0%"></div>' +
-                '</div>' +
-                '<span class="detail-player-time" id="detailDuration">0:00</span>' +
-                '</div>' +
-                '</div>' +
-                '<button class="detail-player-delete" id="detailDelete" title="Delete Track">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
-                '</button>' +
-                '</div>' +
-                '</div>' +
-                '<div class="manager-disc-detail-right">' +
-                '<div class="manager-disc-detail-section">' +
-                '<div class="manager-disc-detail-section-title">Track Info</div>' +
-                '<div class="manager-form-group">' +
-                '<label class="manager-form-label">Title</label>' +
-                '<input type="text" class="manager-form-input" id="detailTitle" value="' + (tape.title || '') + '">' +
-                '</div>' +
-                '<div class="manager-form-group">' +
-                '<label class="manager-form-label">Artist</label>' +
-                '<input type="text" class="manager-form-input" id="detailArtist" value="' + (tape.artist || '') + '">' +
-                '</div>' +
-                '</div>' +
-                '<div class="manager-disc-detail-section">' +
-                '<div class="manager-disc-detail-section-title">Cover Image</div>' +
-                '<div class="manager-design-cover-zone" id="detailCoverZone" style="height:1.6rem;">' +
-                '<input type="file" class="manager-design-file-input" id="detailCoverInput" accept="image/*">' +
-                '<div class="manager-design-cover-preview" id="detailCoverPreview" style="background:url(' + currentCover + ') center/cover no-repeat"></div>' +
-                '<div class="manager-design-cover-placeholder">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' +
-                '<span>Click to change cover</span>' +
-                '</div>' +
-                '</div>' +
-                '</div>' +
-                '<div class="manager-disc-detail-section">' +
-                '<div class="manager-disc-detail-section-title">Audio File</div>' +
-                '<div class="manager-form-group">' +
-                '<label class="manager-form-label">Upload File</label>' +
-                '<div class="manager-design-cover-zone" id="detailAudioZone" style="height:1rem;border-style:dashed;">' +
-                '<input type="file" class="manager-design-file-input" id="detailAudioInput" accept="audio/*">' +
-                '<div class="manager-design-cover-placeholder">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>' +
-                '<span>Click to upload audio</span>' +
-                '</div>' +
-                '</div>' +
-                '</div>' +
-                '</div>' +
-                '</div>' +
-                '</div>' +
-                '</div>';
-        }
-
-        overlay.innerHTML = buildDetailUI();
-        document.body.appendChild(overlay);
-
-        if (currentAudio) {
-            detailAudio.src = currentAudio;
-            detailAudio.load();
-        }
-
-        detailAudio.addEventListener('play', function() {
-            isPlaying = true;
-            syncDetailPlayUI();
-        });
-        detailAudio.addEventListener('pause', function() {
-            isPlaying = false;
-            syncDetailPlayUI();
-        });
-        detailAudio.addEventListener('loadedmetadata', function() {
-            var dur = document.getElementById('detailDuration');
-            if (dur && detailAudio.duration) dur.textContent = formatDetailTime(detailAudio.duration);
-        });
-        detailAudio.addEventListener('ended', function() {
-            isPlaying = false;
-            syncDetailPlayUI();
-            if (detailProgressInterval) clearInterval(detailProgressInterval);
-            updateDetailProgress();
-        });
-
-        function closeDetail() {
-            detailAudio.pause();
-            if (detailProgressInterval) clearInterval(detailProgressInterval);
-            if (currentAudio && currentAudio.indexOf('blob:') === 0) {
-                URL.revokeObjectURL(currentAudio);
-            }
-            overlay.remove();
-        }
-
-        overlay.addEventListener('click', function(e) { if (e.target === overlay) closeDetail(); });
-        overlay.querySelector('#detailBack').addEventListener('click', closeDetail);
-
-        var playBtn = overlay.querySelector('#detailPlayBtn');
-        if (playBtn) {
-            playBtn.addEventListener('click', toggleDetailPlay);
-        }
-
-        var progressTrack = overlay.querySelector('#detailProgressTrack');
-        if (progressTrack) {
-            function setDetailProgressFromX(clientX) {
-                if (!detailAudio.duration) return;
-                var rect = progressTrack.getBoundingClientRect();
-                var percent = (clientX - rect.left) / rect.width;
-                percent = Math.max(0, Math.min(1, percent));
-                detailAudio.currentTime = percent * detailAudio.duration;
-                updateDetailProgress();
-            }
-            progressTrack.addEventListener('mousedown', function(e) {
-                isDraggingProgress = true;
-                setDetailProgressFromX(e.clientX);
-            });
-            progressTrack.addEventListener('touchstart', function(e) {
-                isDraggingProgress = true;
-                if (e.touches && e.touches.length > 0) setDetailProgressFromX(e.touches[0].clientX);
-            }, { passive: false });
-        }
-
-        window.addEventListener('mousemove', function(e) {
-            if (isDraggingProgress) {
-                var track = document.getElementById('detailProgressTrack');
-                if (track) {
-                    var rect = track.getBoundingClientRect();
-                    var percent = (e.clientX - rect.left) / rect.width;
-                    percent = Math.max(0, Math.min(1, percent));
-                    detailAudio.currentTime = percent * detailAudio.duration;
-                    updateDetailProgress();
-                }
-            }
-        });
-        window.addEventListener('mouseup', function() { isDraggingProgress = false; });
-        window.addEventListener('touchmove', function(e) {
-            if (isDraggingProgress && e.touches && e.touches.length > 0) {
-                var track = document.getElementById('detailProgressTrack');
-                if (track) {
-                    var rect = track.getBoundingClientRect();
-                    var percent = (e.touches[0].clientX - rect.left) / rect.width;
-                    percent = Math.max(0, Math.min(1, percent));
-                    detailAudio.currentTime = percent * detailAudio.duration;
-                    updateDetailProgress();
-                }
-            }
-        }, { passive: false });
-        window.addEventListener('touchend', function() { isDraggingProgress = false; });
-
-        var titleInput = overlay.querySelector('#detailTitle');
-        var artistInput = overlay.querySelector('#detailArtist');
-        if (titleInput) {
-            titleInput.addEventListener('input', function() {
-                var titleEl = overlay.querySelector('#detailPlayerTitle');
-                if (titleEl) titleEl.textContent = titleInput.value.trim() || 'Unknown';
-            });
-        }
-        if (artistInput) {
-            artistInput.addEventListener('input', function() {
-                var artistEl = overlay.querySelector('#detailPlayerArtist');
-                if (artistEl) artistEl.textContent = artistInput.value.trim() || 'Vipen Music';
-            });
-        }
-
-        var coverZone = overlay.querySelector('#detailCoverZone');
-        var coverInput = overlay.querySelector('#detailCoverInput');
-        var coverPreview = overlay.querySelector('#detailCoverPreview');
-        if (coverZone && coverInput) {
-            coverZone.addEventListener('click', function() { coverInput.click(); });
-            coverZone.addEventListener('dragover', function(e) { e.preventDefault(); coverZone.classList.add('dragover'); });
-            coverZone.addEventListener('dragleave', function() { coverZone.classList.remove('dragover'); });
-            coverZone.addEventListener('drop', function(e) {
-                e.preventDefault();
-                coverZone.classList.remove('dragover');
-                if (e.dataTransfer.files.length > 0) handleDetailCoverFile(e.dataTransfer.files[0]);
-            });
-            coverInput.addEventListener('change', function() {
-                if (this.files.length > 0) handleDetailCoverFile(this.files[0]);
-            });
-        }
-
-        function handleDetailCoverFile(file) {
-            currentCoverFile = file;
-            validateCoverImage(file, function() {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    var dataUrl = e.target.result;
-                    currentCover = dataUrl;
-                    if (coverPreview) coverPreview.style.background = 'url(' + dataUrl + ') center/cover no-repeat';
-                    updateDetailCover(dataUrl);
-                    showToast('Cover image uploaded successfully');
-                };
-                reader.readAsDataURL(file);
-            }, function(msg) {
-                showToast(msg, true);
-            });
-        }
-
-        var audioZone = overlay.querySelector('#detailAudioZone');
-        var audioInput = overlay.querySelector('#detailAudioInput');
-        if (audioZone && audioInput) {
-            audioZone.addEventListener('click', function() { audioInput.click(); });
-            audioZone.addEventListener('dragover', function(e) { e.preventDefault(); audioZone.classList.add('dragover'); });
-            audioZone.addEventListener('dragleave', function() { audioZone.classList.remove('dragover'); });
-            audioZone.addEventListener('drop', function(e) {
-                e.preventDefault();
-                audioZone.classList.remove('dragover');
-                if (e.dataTransfer.files.length > 0) handleDetailAudioFile(e.dataTransfer.files[0]);
-            });
-            audioInput.addEventListener('change', function() {
-                if (this.files.length > 0) handleDetailAudioFile(this.files[0]);
-            });
-        }
-
-        function handleDetailAudioFile(file) {
-            if (!file.type.startsWith('audio/')) {
-                showToast('Only audio files are supported', true);
-                return;
-            }
-            if (file.size > CONFIG.DISC_AUDIO_MAX_SIZE) {
-                showToast('Audio too large (max 50MB)', true);
-                return;
-            }
-            currentAudioFile = file;
-            if (currentAudio && currentAudio.indexOf('blob:') === 0) {
-                URL.revokeObjectURL(currentAudio);
-            }
-            currentAudio = URL.createObjectURL(file);
-            detailAudio.src = currentAudio;
-            detailAudio.load();
-            isPlaying = false;
-            syncDetailPlayUI();
-        }
-
-        overlay.querySelector('#detailSave').addEventListener('click', function() {
-            var trackId = tape.id;
-            var title = titleInput ? titleInput.value.trim() : tape.title;
-            var artist = artistInput ? artistInput.value.trim() || 'Vipen Music' : tape.artist;
-            var albumDir = title || 'untitled';
-
-            var metaOnly = {
-                id: trackId,
-                title: title,
-                artist: artist,
-                time: '0:00',
-                cover: currentCoverFile ? '' : (currentCover && currentCover.indexOf('data:') === 0 ? '' : (currentCover && currentCover.indexOf('blob:') === 0 ? '' : (currentCover || ''))),
-                audio: currentAudioFile ? '' : (currentAudio && currentAudio.indexOf('data:') === 0 ? '' : (currentAudio && currentAudio.indexOf('blob:') === 0 ? '' : (currentAudio || '')))
-            };
-
-            function finishSave() {
-                discData.tapes[editIndex] = metaOnly;
-                saveDiscToServer(function(err) {
-                    var dc = document.getElementById('discManagerContent');
-                    if (dc) renderDiscTracks(dc);
-                    if (err) {
-                        showToast('Saved locally, but server sync failed: ' + err, true);
-                    } else {
-                        showToast('Track updated');
-                    }
-                    closeDetail();
-                });
-            }
-
-            var pending = 0;
-            function tryFinish() {
-                pending--;
-                if (pending <= 0) finishSave();
-            }
-
-            if (currentAudioFile) {
-                pending++;
-                uploadDiscFile(currentAudioFile, albumDir, function(err, path) {
-                    if (err) {
-                        showToast('Audio upload failed: ' + err, true);
-                    } else if (path) {
-                        metaOnly.audio = path;
-                    } else {
-                        showToast('Audio upload returned empty path', true);
-                    }
-                    tryFinish();
-                });
-            } else if (currentAudio && currentAudio.indexOf('data:') === 0) {
-                var audioBlob = dataUrlToBlob(currentAudio);
-                if (audioBlob) {
-                    pending++;
-                    uploadDiscFile(audioBlob, albumDir, function(err, path) {
-                        if (err) {
-                            showToast('Audio upload failed: ' + err, true);
-                        } else if (path) {
-                            metaOnly.audio = path;
-                        } else {
-                            showToast('Audio upload returned empty path', true);
-                        }
-                        tryFinish();
-                    });
-                }
-            }
-            if (currentCoverFile) {
-                pending++;
-                uploadDiscFile(currentCoverFile, albumDir, function(err, path) {
-                    if (err) {
-                        showToast('Cover upload failed: ' + err, true);
-                    } else if (path) {
-                        metaOnly.cover = path;
-                    } else {
-                        showToast('Cover upload returned empty path', true);
-                    }
-                    tryFinish();
-                });
-            } else if (currentCover && currentCover.indexOf('data:') === 0) {
-                var coverBlob = dataUrlToBlob(currentCover);
-                if (coverBlob) {
-                    pending++;
-                    uploadDiscFile(coverBlob, albumDir, function(err, path) {
-                        if (err) {
-                            showToast('Cover upload failed: ' + err, true);
-                        } else if (path) {
-                            metaOnly.cover = path;
-                        } else {
-                            showToast('Cover upload returned empty path', true);
-                        }
-                        tryFinish();
-                    });
-                }
-            }
-
-            if (pending === 0) finishSave();
-        });
-
-        overlay.querySelector('#detailDelete').addEventListener('click', function() {
-            var track = discData.tapes[editIndex];
-            showDeleteConfirm(
-                'Delete Track',
-                'Are you sure you want to delete "' + (track.title || 'Unknown') + '"? This will be moved to Trash.',
-                'Delete',
-                'Move to Trash',
-                function(confirmed) {
-                    if (!confirmed) return;
-                    saveToTrash('disc_track', JSON.parse(JSON.stringify(track)), STORAGE_KEYS.discTapes);
-                    discData.tapes.splice(editIndex, 1);
-                    saveDiscToServer(function(err) {
-                        var dc = document.getElementById('discManagerContent');
-                        if (dc) renderDiscTracks(dc);
-                        if (err) {
-                            showToast('Deleted locally, but server sync failed: ' + err, true);
-                        } else {
-                            showToast('Track moved to Trash');
-                        }
-                        closeDetail();
-                    });
-                }
-            );
-        });
-    }
 
     function renderUsersManager(container) {
         container.innerHTML =
@@ -3329,6 +2495,26 @@ var ManagerGo = (function() {
             }
             renderUsersLeaderboard(uc);
         });
+    }
+
+    function getUserBehaviorStats(userId) {
+        var keys = ['posts', 'drafts', 'actions', 'actionDrafts', 'likes', 'comments', 'notifications', 'chat'];
+        var stats = {};
+        keys.forEach(function(k) {
+            var raw = localStorage.getItem('vipen_' + k + '_' + userId);
+            var parsed = null;
+            try { parsed = raw ? JSON.parse(raw) : null; } catch (e) { parsed = null; }
+            var count = 0;
+            if (parsed) {
+                if (Array.isArray(parsed)) {
+                    count = parsed.length;
+                } else if (typeof parsed === 'object') {
+                    count = Object.keys(parsed).length;
+                }
+            }
+            stats[k] = { data: parsed, count: count };
+        });
+        return stats;
     }
 
     function renderUsersLeaderboard(container) {
@@ -3361,8 +2547,10 @@ var ManagerGo = (function() {
                 '<div class="manager-user-row-actions">' +
                 '<button class="manager-btn manager-btn-outline manager-btn-sm btn-user-profile" data-uid="' + u.id + '">Profile</button>' +
                 '<button class="manager-btn manager-btn-outline manager-btn-sm btn-user-edit" data-uid="' + u.id + '">Edit</button>' +
+                '<button class="manager-btn manager-btn-outline manager-btn-sm btn-user-stats" data-uid="' + u.id + '">Stats</button>' +
                 '</div>' +
-                '</div>';
+                '</div>' +
+                '<div class="manager-user-stats-panel" id="statsPanel' + u.id + '" style="display:none;"></div>';
         }
 
         html += '</div></div>';
@@ -3388,6 +2576,41 @@ var ManagerGo = (function() {
             btn.addEventListener('click', function() {
                 var uid = this.getAttribute('data-uid');
                 openUserEditModal(uid);
+            });
+        });
+
+        var statsBtns = container.querySelectorAll('.btn-user-stats');
+        statsBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var uid = this.getAttribute('data-uid');
+                var panel = document.getElementById('statsPanel' + uid);
+                if (!panel) return;
+                if (panel.style.display === 'none') {
+                    var stats = getUserBehaviorStats(uid);
+                    var labelMap = {
+                        posts: 'Published Posts',
+                        drafts: 'Drafts',
+                        actions: 'Actions',
+                        actionDrafts: 'Action Drafts',
+                        likes: 'Likes',
+                        comments: 'Comments',
+                        notifications: 'Notifications',
+                        chat: 'Chat Messages'
+                    };
+                    var html = '<div class="manager-stats-grid">';
+                    Object.keys(labelMap).forEach(function(k) {
+                        var s = stats[k];
+                        html += '<div class="manager-stat-item">' +
+                            '<span class="manager-stat-label">' + labelMap[k] + '</span>' +
+                            '<span class="manager-stat-count">' + (s ? s.count : 0) + '</span>' +
+                            '</div>';
+                    });
+                    html += '</div>';
+                    panel.innerHTML = html;
+                    panel.style.display = 'block';
+                } else {
+                    panel.style.display = 'none';
+                }
             });
         });
     }
@@ -3451,481 +2674,6 @@ var ManagerGo = (function() {
             if (uc) renderUsersLeaderboard(uc);
             showToast('User updated');
             closeModal();
-        });
-    }
-
-    function renderHome(container) {
-        var homeBannerData = null;
-
-        function buildHomeUI() {
-            var groups = homeBannerData ? homeBannerData.groups : [];
-            var html = '<div class="manager-main-header">' +
-                '<h1 class="manager-main-title">HOME - Banner Manager</h1>' +
-                '<div class="manager-main-actions">' +
-                '<button class="manager-btn manager-btn-primary" id="homeSaveBtn">' +
-                '<svg class="manager-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>' +
-                'Save</button>' +
-                '</div>' +
-                '</div>' +
-                '<div class="manager-home-groups">';
-
-            for (var i = 0; i < 4; i++) {
-                var group = groups[i] || { bgImage: '', bgVideo: '', bgType: 'image', carouselTexts: [], hidden: false };
-                var bgImage = group.bgImage || '';
-                var bgVideo = group.bgVideo || '';
-                var bgType = group.bgType || 'image';
-                var texts = group.carouselTexts || [];
-                var isHidden = group.hidden === true;
-
-                html += '<div class="manager-home-group' + (isHidden ? ' manager-home-group-hidden' : '') + '" data-group-index="' + i + '">' +
-                    '<div class="manager-home-group-header">' +
-                    '<span class="manager-home-group-label">' +
-                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:.18rem;height:.18rem;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' +
-                    'Banner ' + (i + 1) + '</span>' +
-                    '<button class="manager-home-eye-btn' + (isHidden ? ' hidden' : '') + '" data-group="' + i + '" title="Toggle visibility">' +
-                    (isHidden ?
-                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:.16rem;height:.16rem;"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>' :
-                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:.16rem;height:.16rem;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>') +
-                    '</button>' +
-                    '<div class="manager-home-type-toggle" data-group="' + i + '">' +
-                    '<button class="manager-home-type-btn' + (bgType === 'image' ? ' active' : '') + '" data-type="image" data-group="' + i + '">' +
-                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:.14rem;height:.14rem;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' +
-                    'Image</button>' +
-                    '<button class="manager-home-type-btn' + (bgType === 'video' ? ' active' : '') + '" data-type="video" data-group="' + i + '">' +
-                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:.14rem;height:.14rem;"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>' +
-                    'Video</button>' +
-                    '</div>' +
-                    '</div>' +
-                    '<div class="manager-home-body"' + (isHidden ? ' style="display:none"' : '') + '>' +
-                    '<div class="manager-home-banner-section" data-group="' + i + '">' +
-                    '<div class="manager-home-media-area manager-home-image-area" data-group="' + i + '" style="' + (bgType === 'video' ? 'display:none' : '') + '">' +
-                    '<label class="manager-form-label">Banner Image</label>' +
-                    '<div class="manager-home-banner-upload" data-group="' + i + '">' +
-                    (bgImage ?
-                        '<div class="manager-home-banner-preview" style="background-image:url(' + bgImage + ')">' +
-                        '<button class="manager-home-banner-replace" data-group="' + i + '">' +
-                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>' +
-                        'Replace</button>' +
-                        '</div>' :
-                        '<div class="manager-home-banner-placeholder">' +
-                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>' +
-                        '<span>Click to upload banner image</span>' +
-                        '</div>') +
-                    '<input type="file" class="manager-home-file-input" accept="image/*" data-group="' + i + '">' +
-                    '</div>' +
-                    '</div>' +
-                    '<div class="manager-home-media-area manager-home-video-area" data-group="' + i + '" style="' + (bgType === 'image' ? 'display:none' : '') + '">' +
-                    '<label class="manager-form-label">Banner Video</label>' +
-                    '<div class="manager-home-video-upload" data-group="' + i + '">' +
-                    (bgVideo ?
-                        '<div class="manager-home-video-preview" data-group="' + i + '" data-video-path="' + escapeHtml(bgVideo) + '">' +
-                        '<video src="' + bgVideo + '" muted loop preload="metadata"></video>' +
-                        '<div class="manager-home-video-actions">' +
-                        '<button class="manager-home-banner-replace manager-home-video-replace" data-group="' + i + '">' +
-                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>' +
-                        'Replace</button>' +
-                        '<button class="manager-home-video-delete" data-group="' + i + '">' +
-                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>' +
-                        'Delete</button>' +
-                        '</div>' +
-                        '</div>' :
-                        '<div class="manager-home-video-placeholder">' +
-                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>' +
-                        '<span>Click to upload banner video</span>' +
-                        '</div>') +
-                    '<input type="file" class="manager-home-video-file-input" accept="video/*" data-group="' + i + '">' +
-                    '</div>' +
-                    '</div>' +
-                    '</div>' +
-                    '<div class="manager-home-texts-section">' +
-                    '<div class="manager-home-texts-header">' +
-                    '<label class="manager-form-label">Carousel Texts</label>' +
-                    '<button class="manager-btn manager-btn-outline manager-btn-sm home-add-text-btn" data-group="' + i + '">' +
-                    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:.14rem;height:.14rem;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
-                    'Add Text</button>' +
-                    '</div>' +
-                    '<div class="manager-home-texts-list" data-group="' + i + '">';
-
-                for (var j = 0; j < texts.length; j++) {
-                    var t = texts[j];
-                    html += '<div class="manager-home-text-item" data-group="' + i + '" data-text-index="' + j + '">' +
-                        '<div class="manager-home-text-fields">' +
-                        '<input type="text" class="manager-form-input home-text-topic" value="' + escapeHtml(t.topic || '') + '" placeholder="Topic" data-group="' + i + '" data-text-index="' + j + '">' +
-                        '<input type="text" class="manager-form-input home-text-note" value="' + escapeHtml(t.note || '') + '" placeholder="Note" data-group="' + i + '" data-text-index="' + j + '">' +
-                        '</div>' +
-                        '<button class="manager-btn manager-btn-danger manager-btn-sm home-remove-text-btn" data-group="' + i + '" data-text-index="' + j + '">' +
-                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:.14rem;height:.14rem;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
-                        '</button>' +
-                        '</div>';
-                }
-
-                if (texts.length === 0) {
-                    html += '<div class="manager-empty" style="padding:.3rem;font-size:.11rem;">No carousel texts yet. Click "Add Text" to add one.</div>';
-                }
-
-                html += '</div></div></div></div>';
-            }
-
-            html += '</div>';
-            container.innerHTML = html;
-
-            bindHomeEvents();
-        }
-
-        function bindHomeEvents() {
-            var saveBtn = document.getElementById('homeSaveBtn');
-            if (saveBtn) {
-                saveBtn.addEventListener('click', function() {
-                    saveHomeBanner();
-                });
-            }
-
-            var eyeBtns = container.querySelectorAll('.manager-home-eye-btn');
-            eyeBtns.forEach(function(btn) {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    var groupIdx = parseInt(this.getAttribute('data-group'));
-                    toggleBannerHidden(groupIdx);
-                });
-            });
-
-            var typeToggleBtns = container.querySelectorAll('.manager-home-type-btn');
-            typeToggleBtns.forEach(function(btn) {
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    var groupIdx = parseInt(this.getAttribute('data-group'));
-                    var type = this.getAttribute('data-type');
-                    switchMediaType(groupIdx, type);
-                });
-            });
-
-            var uploadZones = container.querySelectorAll('.manager-home-banner-upload');
-            uploadZones.forEach(function(zone) {
-                zone.addEventListener('click', function(e) {
-                    if (e.target.closest('.manager-home-banner-replace')) return;
-                    var groupIdx = zone.getAttribute('data-group');
-                    var fileInput = zone.querySelector('.manager-home-file-input');
-                    if (fileInput) fileInput.click();
-                });
-
-                var fileInput = zone.querySelector('.manager-home-file-input');
-                if (fileInput) {
-                    fileInput.addEventListener('change', function() {
-                        var groupIdx = this.getAttribute('data-group');
-                        handleBannerUpload(groupIdx, this);
-                    });
-                }
-
-                var replaceBtn = zone.querySelector('.manager-home-banner-replace');
-                if (replaceBtn) {
-                    replaceBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        var groupIdx = this.getAttribute('data-group');
-                        var fi = zone.querySelector('.manager-home-file-input');
-                        if (fi) fi.click();
-                    });
-                }
-            });
-
-            var addTextBtns = container.querySelectorAll('.home-add-text-btn');
-            addTextBtns.forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    var groupIdx = parseInt(this.getAttribute('data-group'));
-                    addCarouselText(groupIdx);
-                });
-            });
-
-            var removeTextBtns = container.querySelectorAll('.home-remove-text-btn');
-            removeTextBtns.forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    var groupIdx = parseInt(this.getAttribute('data-group'));
-                    var textIdx = parseInt(this.getAttribute('data-text-index'));
-                    removeCarouselText(groupIdx, textIdx);
-                });
-            });
-
-            var textInputs = container.querySelectorAll('.home-text-topic, .home-text-note');
-            textInputs.forEach(function(input) {
-                input.addEventListener('input', function() {
-                    collectFormData();
-                });
-                input.addEventListener('blur', function() {
-                    collectFormData();
-                    saveHomeBanner();
-                });
-            });
-
-            var videoUploads = container.querySelectorAll('.manager-home-video-upload');
-            videoUploads.forEach(function(zone) {
-                zone.addEventListener('click', function(e) {
-                    if (e.target.closest('.manager-home-video-replace')) return;
-                    if (e.target.closest('video')) return;
-                    var groupIdx = zone.getAttribute('data-group');
-                    var fileInput = zone.querySelector('.manager-home-video-file-input');
-                    if (fileInput) fileInput.click();
-                });
-
-                var videoInput = zone.querySelector('.manager-home-video-file-input');
-                if (videoInput) {
-                    videoInput.addEventListener('change', function() {
-                        var groupIdx = this.getAttribute('data-group');
-                        handleVideoUpload(groupIdx, this);
-                    });
-                }
-
-                var replaceBtn = zone.querySelector('.manager-home-video-replace');
-                if (replaceBtn) {
-                    replaceBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        var groupIdx = this.getAttribute('data-group');
-                        var fi = zone.querySelector('.manager-home-video-file-input');
-                        if (fi) fi.click();
-                    });
-                }
-
-                var deleteBtn = zone.querySelector('.manager-home-video-delete');
-                if (deleteBtn) {
-                    deleteBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        var groupIdx = parseInt(this.getAttribute('data-group'));
-                        deleteVideo(groupIdx);
-                    });
-                }
-            });
-
-            var previewClickables = container.querySelectorAll('.manager-home-banner-preview, .manager-home-video-preview');
-            previewClickables.forEach(function(el) {
-                el.addEventListener('click', function(e) {
-                    if (e.target.closest('.manager-home-banner-replace') || e.target.closest('.manager-home-video-replace') || e.target.closest('.manager-home-video-delete')) return;
-                    e.stopPropagation();
-                    var videoPath = this.getAttribute('data-video-path');
-                    if (videoPath) {
-                        openMediaPreview('video', videoPath);
-                    } else {
-                        var bg = this.style.backgroundImage;
-                        var imgUrl = bg.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
-                        if (imgUrl) openMediaPreview('image', imgUrl);
-                    }
-                });
-            });
-        }
-
-        function toggleBannerHidden(groupIdx) {
-            collectFormData();
-            if (!homeBannerData.groups[groupIdx]) {
-                homeBannerData.groups[groupIdx] = { bgImage: '', bgVideo: '', bgType: 'image', carouselTexts: [], hidden: false };
-            }
-            homeBannerData.groups[groupIdx].hidden = !homeBannerData.groups[groupIdx].hidden;
-            buildHomeUI();
-            saveHomeBanner();
-        }
-
-        function switchMediaType(groupIdx, type) {
-            collectFormData();
-            if (!homeBannerData.groups[groupIdx]) {
-                homeBannerData.groups[groupIdx] = { bgImage: '', bgVideo: '', bgType: 'image', carouselTexts: [] };
-            }
-            homeBannerData.groups[groupIdx].bgType = type;
-            buildHomeUI();
-            saveHomeBanner();
-        }
-
-        function handleBannerUpload(groupIdx, fileInput) {
-            var file = fileInput.files[0];
-            if (!file) return;
-            if (!file.type.match(/^image\//)) {
-                showToast('Please select an image file', true);
-                return;
-            }
-
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var dataUrl = e.target.result;
-                collectFormData();
-                if (!homeBannerData.groups[groupIdx]) {
-                    homeBannerData.groups[groupIdx] = { bgImage: '', bgVideo: '', bgType: 'image', carouselTexts: [] };
-                }
-                homeBannerData.groups[groupIdx].bgImage = dataUrl;
-                homeBannerData.groups[groupIdx].bgType = 'image';
-                buildHomeUI();
-                saveHomeBanner();
-                showToast('Banner image loaded');
-            };
-            reader.onerror = function() {
-                showToast('Failed to read image', true);
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function handleVideoUpload(groupIdx, fileInput) {
-            var file = fileInput.files[0];
-            if (!file) return;
-            if (!file.type.match(/^video\//)) {
-                showToast('Please select a video file', true);
-                return;
-            }
-            if (file.size > 150 * 1024 * 1024) {
-                showToast('Video too large (max 150MB)', true);
-                return;
-            }
-
-            var formData = new FormData();
-            formData.append('dest', 'banner');
-            formData.append('file', file);
-
-            var xhr = new XMLHttpRequest();
-            xhr.upload.onprogress = function(e) {
-                if (e.lengthComputable) {
-                    var pct = Math.round((e.loaded / e.total) * 100);
-                    showToast('Uploading video: ' + pct + '%');
-                }
-            };
-            xhr.onload = function() {
-                try {
-                    var res = JSON.parse(xhr.responseText);
-                    if (res.success && res.files && res.files.length > 0) {
-                        var videoPath = res.files[0].path;
-                        collectFormData();
-                        if (!homeBannerData.groups[groupIdx]) {
-                            homeBannerData.groups[groupIdx] = { bgImage: '', bgVideo: '', bgType: 'video', carouselTexts: [] };
-                        }
-                        homeBannerData.groups[groupIdx].bgVideo = videoPath;
-                        homeBannerData.groups[groupIdx].bgType = 'video';
-                        buildHomeUI();
-                        saveHomeBanner();
-                        showToast('Video uploaded successfully');
-                    } else {
-                        showToast('Upload failed: ' + (res.error || 'Server error'), true);
-                    }
-                } catch (e) {
-                    showToast('Upload failed: unexpected response', true);
-                }
-            };
-            xhr.onerror = function() {
-                showToast('Upload failed: network error', true);
-            };
-            xhr.open('POST', '/api/manager/upload', true);
-            xhr.send(formData);
-        }
-
-        function deleteVideo(groupIdx) {
-            collectFormData();
-            if (!homeBannerData.groups[groupIdx]) {
-                homeBannerData.groups[groupIdx] = { bgImage: '', bgVideo: '', bgType: 'image', carouselTexts: [] };
-            }
-            homeBannerData.groups[groupIdx].bgVideo = '';
-            if (homeBannerData.groups[groupIdx].bgType === 'video') {
-                homeBannerData.groups[groupIdx].bgType = 'image';
-            }
-            buildHomeUI();
-            saveHomeBanner();
-            showToast('Video removed');
-        }
-
-        function openMediaPreview(type, src) {
-            var existing = document.getElementById('mediaPreviewOverlay');
-            if (existing) existing.remove();
-
-            var overlay = document.createElement('div');
-            overlay.id = 'mediaPreviewOverlay';
-            overlay.className = 'media-preview-overlay';
-            overlay.innerHTML = '<button class="media-preview-close">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
-                '</button>' +
-                '<div class="media-preview-content">' +
-                (type === 'video' ?
-                    '<video src="' + src + '" controls autoplay loop style="max-width:90vw;max-height:85vh;border-radius:.08rem;"></video>' :
-                    '<img src="' + src + '" style="max-width:90vw;max-height:85vh;border-radius:.08rem;object-fit:contain;" alt="Preview">') +
-                '</div>';
-
-            overlay.addEventListener('click', function(e) {
-                if (e.target === overlay || e.target.closest('.media-preview-close')) {
-                    overlay.remove();
-                }
-            });
-            document.addEventListener('keydown', function escHandler(e) {
-                if (e.key === 'Escape') {
-                    overlay.remove();
-                    document.removeEventListener('keydown', escHandler);
-                }
-            });
-            document.body.appendChild(overlay);
-        }
-
-        function addCarouselText(groupIdx) {
-            collectFormData();
-            if (!homeBannerData.groups[groupIdx]) {
-                homeBannerData.groups[groupIdx] = { bgImage: '', bgVideo: '', bgType: 'image', carouselTexts: [] };
-            }
-            homeBannerData.groups[groupIdx].carouselTexts.push({ topic: '', note: '' });
-            buildHomeUI();
-            saveHomeBanner();
-        }
-
-        function removeCarouselText(groupIdx, textIdx) {
-            collectFormData();
-            if (!homeBannerData.groups[groupIdx]) return;
-            homeBannerData.groups[groupIdx].carouselTexts.splice(textIdx, 1);
-            buildHomeUI();
-            saveHomeBanner();
-        }
-
-        function collectFormData() {
-            var topicInputs = container.querySelectorAll('.home-text-topic');
-            var noteInputs = container.querySelectorAll('.home-text-note');
-
-            topicInputs.forEach(function(input) {
-                var gIdx = parseInt(input.getAttribute('data-group'));
-                var tIdx = parseInt(input.getAttribute('data-text-index'));
-                if (homeBannerData.groups[gIdx] && homeBannerData.groups[gIdx].carouselTexts[tIdx]) {
-                    homeBannerData.groups[gIdx].carouselTexts[tIdx].topic = input.value;
-                }
-            });
-
-            noteInputs.forEach(function(input) {
-                var gIdx = parseInt(input.getAttribute('data-group'));
-                var tIdx = parseInt(input.getAttribute('data-text-index'));
-                if (homeBannerData.groups[gIdx] && homeBannerData.groups[gIdx].carouselTexts[tIdx]) {
-                    homeBannerData.groups[gIdx].carouselTexts[tIdx].note = input.value;
-                }
-            });
-        }
-
-        function saveHomeBanner() {
-            collectFormData();
-            try { localStorage.setItem('vipen_mgr_home_banner', JSON.stringify(homeBannerData)); } catch (e) {}
-            apiCall('home-banner-save', { data: homeBannerData }, function(res) {
-                if (res.success) {
-                    showToast('Banner saved successfully! Synced to main website.');
-                } else {
-                    showToast('Save failed: ' + (res.error || 'Unknown error'), true);
-                }
-            });
-        }
-
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-        }
-
-        container.innerHTML = '<div style="text-align:center;padding:.6rem;color:rgba(255,255,255,.25);">Loading...</div>';
-
-        loadJsonData('data/home-banner.json', function(data) {
-            if (data) {
-                homeBannerData = data;
-            } else {
-                homeBannerData = {
-                    groups: [
-                        { bgImage: '', bgVideo: '', bgType: 'image', carouselTexts: [] },
-                        { bgImage: '', bgVideo: '', bgType: 'image', carouselTexts: [] },
-                        { bgImage: '', bgVideo: '', bgType: 'image', carouselTexts: [] },
-                        { bgImage: '', bgVideo: '', bgType: 'image', carouselTexts: [] }
-                    ],
-                    current: 0,
-                    textSlideIndex: 0
-                };
-            }
-            buildHomeUI();
         });
     }
 

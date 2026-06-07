@@ -225,6 +225,88 @@ function handleOGImage(req, res, query) {
     });
 }
 
+function handleUserData(req, res) {
+    var parsedUrl = url.parse(req.url, true);
+    var action = parsedUrl.query.action;
+    var userId = parsedUrl.query.userId;
+    var key = parsedUrl.query.key;
+
+    if (!verifyAuth(req, res)) return;
+
+    if (!userId) {
+        sendJSON(res, 400, { success: false, error: 'Missing userId' });
+        return;
+    }
+
+    if (action === 'read') {
+        if (!key) {
+            sendJSON(res, 400, { success: false, error: 'Missing key' });
+            return;
+        }
+        var filePath = path.join(ROOT, 'data', 'user-data', userId, key + '.json');
+        fs.readFile(filePath, 'utf8', function(err, data) {
+            if (err) {
+                sendJSON(res, 404, { success: false, error: 'Data not found: ' + key });
+                return;
+            }
+            try {
+                sendJSON(res, 200, { success: true, data: JSON.parse(data) });
+            } catch (e) {
+                sendJSON(res, 500, { success: false, error: 'Failed to parse data' });
+            }
+        });
+        return;
+    }
+
+    if (action === 'write') {
+        if (!key) {
+            sendJSON(res, 400, { success: false, error: 'Missing key' });
+            return;
+        }
+        parseBody(req, function(err, body) {
+            if (err) {
+                sendJSON(res, 400, { success: false, error: err.message });
+                return;
+            }
+            var dirPath = path.join(ROOT, 'data', 'user-data', userId);
+            var filePath = path.join(dirPath, key + '.json');
+            fs.mkdir(dirPath, { recursive: true }, function() {
+                fs.writeFile(filePath, JSON.stringify(body.data, null, 2), 'utf8', function(writeErr) {
+                    if (writeErr) {
+                        sendJSON(res, 500, { success: false, error: 'Failed to write data' });
+                        return;
+                    }
+                    sendJSON(res, 200, { success: true });
+                });
+            });
+        });
+        return;
+    }
+
+    if (action === 'read-all') {
+        var ALL_KEYS = ['user', 'posts', 'drafts', 'actions', 'actionDrafts', 'likes', 'notifications', 'chat'];
+        var dirPath = path.join(ROOT, 'data', 'user-data', userId);
+        var result = {};
+        var pending = ALL_KEYS.length;
+
+        ALL_KEYS.forEach(function(k) {
+            var fp = path.join(dirPath, k + '.json');
+            fs.readFile(fp, 'utf8', function(err, data) {
+                if (!err) {
+                    try { result[k] = JSON.parse(data); } catch (e) {}
+                }
+                pending--;
+                if (pending === 0) {
+                    sendJSON(res, 200, { success: true, data: result });
+                }
+            });
+        });
+        return;
+    }
+
+    sendJSON(res, 400, { success: false, error: 'Unknown action: ' + action });
+}
+
 function handleAPIRoute(req, res, apiPath) {
     if (req.method === 'OPTIONS') {
         res.writeHead(204, {
@@ -236,21 +318,8 @@ function handleAPIRoute(req, res, apiPath) {
         return;
     }
 
-    if (apiPath.indexOf('/api/manager/disc-upload-chunk') === 0) {
-        if (req.method === 'OPTIONS') {
-            res.writeHead(204, {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'PUT, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type'
-            });
-            res.end();
-            return;
-        }
-        if (req.method !== 'PUT') {
-            sendJSON(res, 405, { success: false, error: 'Method not allowed, PUT required' });
-            return;
-        }
-        handleManagerDiscUploadChunk(req, res);
+    if (apiPath.indexOf('/api/user-data') === 0) {
+        handleUserData(req, res);
         return;
     }
 
@@ -261,14 +330,6 @@ function handleAPIRoute(req, res, apiPath) {
     }
 
     if (req.method === 'GET') {
-        if (apiPath === '/api/data/disc') {
-            serveStatic(req, res, path.join(ROOT, 'data', 'disc.json'));
-            return;
-        }
-        if (apiPath === '/api/data/home-banner') {
-            serveStatic(req, res, path.join(ROOT, 'data', 'home-banner.json'));
-            return;
-        }
         sendJSON(res, 405, { success: false, error: 'Method not allowed' });
         return;
     }
@@ -680,23 +741,6 @@ function handleManagerAPI(req, res, apiPath, body) {
         handleManagerUpload(req, res, body);
         return;
     }
-    if (apiPath === '/api/manager/disc-upload') {
-        handleManagerDiscUpload(req, res, body);
-        return;
-    }
-    if (apiPath === '/api/manager/disc-generate-upload-token') {
-        handleManagerDiscGenerateUploadToken(req, res, body);
-        return;
-    }
-    if (apiPath === '/api/manager/disc-save') {
-        handleManagerDiscSave(req, res, body);
-        return;
-    }
-    if (apiPath === '/api/manager/disc-upload-chunk') {
-        handleManagerDiscUploadChunk(req, res);
-        return;
-    }
-
     verifyManagerSession(body, function(err, session) {
         if (err) {
             sendJSON(res, 401, { success: false, error: err });
@@ -710,6 +754,8 @@ function handleManagerAPI(req, res, apiPath, body) {
             handleManagerUserUpdate(res, body, session);
         } else if (apiPath === '/api/manager/user-delete') {
             handleManagerUserDelete(res, body, session);
+        } else if (apiPath === '/api/manager/users-sync') {
+            handleManagerUsersSync(res, body, session);
         } else if (apiPath === '/api/manager/content') {
             handleManagerContent(res, session);
         } else if (apiPath === '/api/manager/content-action') {
@@ -722,10 +768,6 @@ function handleManagerAPI(req, res, apiPath, body) {
             handleManagerSettings(res, body, session);
         } else if (apiPath === '/api/manager/logs') {
             handleManagerLogs(res, session);
-        } else if (apiPath === '/api/manager/home-banner-save') {
-            handleManagerHomeBannerSave(res, body, session);
-        } else if (apiPath === '/api/manager/disc-save') {
-            handleManagerDiscSave(res, body, session);
         } else {
             sendJSON(res, 404, { success: false, error: 'Unknown manager endpoint' });
         }
@@ -1410,186 +1452,30 @@ function sanitizeFilename(name) {
     return name.replace(/[\\/:*?"<>|]/g, '_').trim();
 }
 
-function handleManagerDiscSave(res, body, session) {
-    var discPath = path.join(ROOT, 'data', 'disc.json');
-    var json = JSON.stringify(body.data, null, 2);
-    fs.writeFile(discPath, json, 'utf8', function(err) {
-        if (err) {
-            console.error('Disc save failed:', err.message);
-            sendJSON(res, 500, { success: false, error: 'Failed to save disc data: ' + err.message });
-            return;
-        }
-        addManagerLog('disc_save', session.username, 'Updated disc track data');
-        sendJSON(res, 200, { success: true });
-    });
-}
-
-function handleManagerDiscUpload(req, res, body) {
-    parseMultipartUpload(req, function(err, fields, files) {
-        if (err) {
-            sendJSON(res, 400, { success: false, error: err.message });
-            return;
-        }
-
-        verifyManagerSession(fields, function(sessErr, session) {
-            if (sessErr) {
-                sendJSON(res, 401, { success: false, error: sessErr });
-                return;
-            }
-
-            var uploadedFiles = [];
-            var albumDir = sanitizeFilename(fields.albumDir || '');
-            var pending = files.length;
-
-            if (pending === 0) {
-                sendJSON(res, 400, { success: false, error: 'No files uploaded' });
-                return;
-            }
-
-            function done() {
-                if (uploadedFiles.length > 0) {
-                    addManagerLog('disc_upload', session.username, 'Uploaded ' + uploadedFiles.length + ' disc file(s)');
-                }
-                sendJSON(res, 200, { success: true, files: uploadedFiles });
-            }
-
-            if (blobPut) {
-                for (var i = 0; i < files.length; i++) {
-                    (function(f) {
-                        var blobPath = 'disc/' + (albumDir || 'Unknown') + '/' + Date.now() + '_' + f.filename;
-                        var buffer = Buffer.from(f.body, 'binary');
-                        blobPut(blobPath, buffer, {
-                            access: 'public',
-                            contentType: getUploadContentType(f.filename),
-                            addRandomSuffix: true
-                        }).then(function(blob) {
-                            uploadedFiles.push({ name: f.filename, path: blob.url });
-                            pending--;
-                            if (pending === 0) done();
-                        }).catch(function() {
-                            pending--;
-                            if (pending === 0) done();
-                        });
-                    })(files[i]);
-                }
-            } else {
-                for (var j = 0; j < files.length; j++) {
-                    var f = files[j];
-                    var filename = f.filename;
-                    var destDir = path.join(ROOT, 'Disc', 'MusicAlbum', albumDir || 'Unknown');
-                    fs.mkdirSync(destDir, { recursive: true });
-                    var destPath = path.join(destDir, filename);
-                    fs.writeFileSync(destPath, Buffer.from(f.body, 'binary'), 'binary');
-                    var relPath = path.relative(ROOT, destPath).replace(/\\/g, '/');
-                    uploadedFiles.push({ name: filename, path: relPath });
-                }
-                done();
-            }
-        });
-    });
-}
-
-var DISC_UPLOAD_TOKENS = {};
-var DISC_UPLOAD_TOKEN_TTL = 15 * 60 * 1000;
-var DISC_UPLOAD_MAX_SIZE = 200 * 1024 * 1024; // 200MB max upload size
-
-function handleManagerDiscGenerateUploadToken(req, res, body) {
-    verifyManagerSession(body, function(sessErr, session) {
-        if (sessErr) {
-            sendJSON(res, 401, { success: false, error: sessErr });
-            return;
-        }
-
-        var filename = (body.filename || '').replace(/[\\/:*?"<>|]/g, '_').trim();
-        var albumDir = (body.albumDir || 'Unknown').replace(/[\\/:*?"<>|]/g, '_').trim();
-        if (!filename) {
-            sendJSON(res, 400, { success: false, error: 'Filename is required' });
-            return;
-        }
-
-        var blobPath = 'disc/' + albumDir + '/' + Date.now() + '_' + filename;
-        var uploadId = crypto.randomBytes(16).toString('hex');
-
-        DISC_UPLOAD_TOKENS[uploadId] = {
-            pathname: blobPath,
-            albumDir: albumDir,
-            filename: filename,
-            createdAt: Date.now()
-        };
-
-        var uploadUrl = 'http://localhost:' + PORT + '/api/manager/disc-upload-chunk?uploadId=' + uploadId;
-
-        addManagerLog('disc_token', session.username, 'Generated upload token for ' + filename);
-        sendJSON(res, 200, { success: true, uploadUrl: uploadUrl, pathname: blobPath });
-    });
-}
-
-function handleManagerDiscUploadChunk(req, res) {
-    var parsedUrl = url.parse(req.url, true);
-    var uploadId = parsedUrl.query.uploadId;
-
-    if (!uploadId || !DISC_UPLOAD_TOKENS[uploadId]) {
-        sendJSON(res, 401, { success: false, error: 'Invalid upload token' });
+function handleManagerUsersSync(res, body, session) {
+    var users = body.data;
+    if (!users) {
+        sendJSON(res, 400, { success: false, error: 'No users data provided' });
         return;
     }
 
-    var tokenInfo = DISC_UPLOAD_TOKENS[uploadId];
+    var json = JSON.stringify(users, null, 2);
 
-    if (Date.now() - tokenInfo.createdAt > DISC_UPLOAD_TOKEN_TTL) {
-        delete DISC_UPLOAD_TOKENS[uploadId];
-        sendJSON(res, 401, { success: false, error: 'Upload token expired' });
-        return;
-    }
-
-    var chunks = [];
-    var totalBytes = 0;
-    req.on('data', function(chunk) {
-        totalBytes += chunk.length;
-        if (totalBytes > DISC_UPLOAD_MAX_SIZE) {
-            req.destroy();
-            delete DISC_UPLOAD_TOKENS[uploadId];
-            sendJSON(res, 413, { success: false, error: 'File too large (max 200MB)' });
-            return;
-        }
-        chunks.push(chunk);
-    });
-    req.on('end', function() {
-        if (totalBytes > DISC_UPLOAD_MAX_SIZE) return;
-        try {
-            var buffer = Buffer.concat(chunks);
-            var destDir = path.join(ROOT, 'Disc', 'MusicAlbum', tokenInfo.albumDir);
-            fs.mkdirSync(destDir, { recursive: true });
-            var destPath = path.join(destDir, tokenInfo.filename);
-            fs.writeFileSync(destPath, buffer);
-            var relPath = path.relative(ROOT, destPath).replace(/\\/g, '/');
-
-            delete DISC_UPLOAD_TOKENS[uploadId];
-            sendJSON(res, 200, { url: relPath });
-        } catch (e) {
-            delete DISC_UPLOAD_TOKENS[uploadId];
-            sendJSON(res, 500, { success: false, error: 'Write failed: ' + e.message });
-        }
-    });
-    req.on('error', function() {
-        delete DISC_UPLOAD_TOKENS[uploadId];
-    });
-}
-
-function handleManagerHomeBannerSave(res, body, session) {
-    var data = body.data;
-    if (!data) {
-        sendJSON(res, 400, { success: false, error: 'No data provided' });
-        return;
-    }
-
-    var homeBannerPath = path.join(ROOT, 'data', 'home-banner.json');
-    var json = JSON.stringify(data, null, 2);
-    fs.writeFile(homeBannerPath, json, 'utf8', function(err) {
+    writeManagerJSON('users.json', users, function(err) {
         if (err) {
-            sendJSON(res, 500, { success: false, error: 'Failed to save home banner data' });
+            sendJSON(res, 500, { success: false, error: 'Failed to write users data' });
             return;
         }
-        addManagerLog('home_banner_save', session.username, 'Updated HOME banner data');
+        addManagerLog('users_sync', session.username, 'Synced user data');
+
+        if (blobPut) {
+            blobPut('data/manager/users.json', json, {
+                access: 'public',
+                contentType: 'application/json',
+                allowOverwrite: true
+            }).catch(function() {});
+        }
+
         sendJSON(res, 200, { success: true });
     });
 }

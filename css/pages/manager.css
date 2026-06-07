@@ -2141,6 +2141,44 @@
     flex-shrink: 0;
 }
 
+.manager-user-stats-panel {
+    padding: .16rem .2rem;
+    background: rgba(99, 102, 241, .04);
+    border: 1px solid rgba(255, 255, 255, .06);
+    border-radius: .08rem;
+    margin-top: .04rem;
+}
+
+.manager-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: .1rem;
+}
+
+.manager-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: .12rem .08rem;
+    background: rgba(255, 255, 255, .03);
+    border-radius: .08rem;
+    border: 1px solid rgba(255, 255, 255, .04);
+}
+
+.manager-stat-label {
+    font-size: .11rem;
+    color: rgba(255, 255, 255, .4);
+    margin-bottom: .04rem;
+    text-transform: uppercase;
+    letter-spacing: .01rem;
+}
+
+.manager-stat-count {
+    font-size: .2rem;
+    font-weight: 700;
+    color: #818cf8;
+}
+
 .manager-disc-cover {
     cursor: pointer;
 }

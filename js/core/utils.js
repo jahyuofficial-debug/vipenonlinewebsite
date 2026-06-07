@@ -82,6 +82,11 @@ var Utils = {
         if (!auth) return;
         var userId = auth.username || auth.email;
         localStorage.setItem('vipen_' + key + '_' + userId, JSON.stringify(data));
+        this.authFetch('/api/user-data/write?key=' + encodeURIComponent(key), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data: data })
+        }).catch(function() {});
     },
     getGlobalData: function(key) {
         var raw = localStorage.getItem('vipen_global_' + key);
@@ -161,5 +166,26 @@ var Utils = {
         try {
             localStorage.setItem('vipen_migrated_' + userId, '1');
         } catch(e) {}
+    },
+    syncFromCloud: function(callback) {
+        var auth = this.getAuth();
+        if (!auth) { if (callback) callback(); return; }
+        var userId = auth.username || auth.email;
+        var keys = ['posts', 'drafts', 'actions', 'actionDrafts', 'likes', 'comments', 'notifications', 'chat'];
+        this.authFetch('/api/user-data/read-all', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ keys: keys })
+        }).then(function(r) { return r.json(); })
+          .then(function(result) {
+              if (result.success && result.data) {
+                  keys.forEach(function(key) {
+                      if (result.data[key]) {
+                          localStorage.setItem('vipen_' + key + '_' + userId, JSON.stringify(result.data[key]));
+                      }
+                  });
+              }
+              if (callback) callback();
+          }).catch(function() { if (callback) callback(); });
     }
 };

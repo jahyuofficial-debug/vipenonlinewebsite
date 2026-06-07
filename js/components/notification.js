@@ -42,6 +42,7 @@ var NotificationCenter = (function() {
     function saveToStorage() {
         var key = getStorageKey();
         localStorage.setItem(key, JSON.stringify(notifications));
+        Utils.setUserData('notifications', notifications);
     }
 
     function loadChatMessages(userName) {
@@ -65,6 +66,7 @@ var NotificationCenter = (function() {
         }
         allChats[userName] = msgs;
         localStorage.setItem(chatKey, JSON.stringify(allChats));
+        Utils.setUserData('chat', allChats);
     }
 
     function getMockData() {

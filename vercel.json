@@ -4,7 +4,8 @@
     { "source": "/manager", "destination": "/manager.html" },
     { "source": "/api/auth/(.*)", "destination": "/api/auth?action=$1" },
     { "source": "/api/data/(.*)", "destination": "/api/data?action=$1" },
-    { "source": "/api/manager/(.*)", "destination": "/api/manager?action=$1" }
+    { "source": "/api/manager/(.*)", "destination": "/api/manager?action=$1" },
+    { "source": "/api/user-data/(.*)", "destination": "/api/user-data?action=$1" }
   ],
   "headers": [
     {
