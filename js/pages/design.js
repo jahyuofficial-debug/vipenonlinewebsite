@@ -11,20 +11,22 @@ var dieIsHovering = false;
 // Face order: front, back, right, left, top, bottom
 var FACE_CLASSES = ['front', 'back', 'right', 'left', 'top', 'bottom'];
 
+var PIP_POSITIONS = [
+    [[50,50]],                                          // 1
+    [[25,25],[75,75]],                                   // 2
+    [[20,20],[50,50],[80,80]],                           // 3
+    [[25,25],[75,25],[25,75],[75,75]],                   // 4
+    [[25,25],[75,25],[50,50],[25,75],[75,75]],           // 5
+    [[20,20],[50,20],[80,20],[20,80],[50,80],[80,80]]    // 6
+];
+
 function buildDesignWorkGrid() {
     var faces = dwItems.slice(0, 6).map(function(item, i) {
-        var suit = dwSuits[i] || '';
-        var rank = dwRanks[i] || '';
-        var bg = item.cardBg ? 'url(' + item.cardBg + ') center/cover' : 'linear-gradient(145deg,#f8f4eb,#ebe3d5)';
-        return '<div class="die-face die-' + FACE_CLASSES[i] + '" data-face="' + i + '">' +
-            '<div class="die-face-inner">' +
-            '<div class="die-face-bg" style="background:' + bg + '"></div>' +
-            '<div class="die-face-mask"></div>' +
-            '<span class="die-corner-decoration">' + rank + suit + '</span>' +
-            '<span class="die-corner-decoration-br">' + rank + suit + '</span>' +
-            '<p class="die-face-title">' + item.title + '</p>' +
-            '<p class="die-face-cat">' + item.cat + '</p>' +
-            '</div></div>';
+        var pips = '';
+        (PIP_POSITIONS[i] || []).forEach(function(pos, pi) {
+            pips += '<span class="die-pip die-pip-' + (pi+1) + '" style="top:' + pos[0] + '%;left:' + pos[1] + '%"></span>';
+        });
+        return '<div class="die-face die-' + FACE_CLASSES[i] + '" data-face="' + i + '">' + pips + '</div>';
     }).join('');
 
     return '<section id="page-design-work" class="dw-page">' +
@@ -51,7 +53,7 @@ function startDieRotation() {
     dieAutoRotation = gsap.to(cube, {
         rotateX: -25,
         rotateY: 360 + 25,
-        duration: 14,
+        duration: 8,
         repeat: -1,
         ease: 'none',
         modifiers: {

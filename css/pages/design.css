@@ -6,14 +6,28 @@
 .die-scene-bg.active{opacity:.25}
 .die-scene-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,.7) 100%)}
 
-.die-cube-wrap{position:relative;z-index:2;cursor:pointer}
-.die-cube{position:relative;width:3rem;height:3rem;transform-style:preserve-3d;transform:rotateX(-15deg) rotateY(25deg)}
-.die-face{position:absolute;inset:0;border-radius:.12rem;overflow:hidden;backface-visibility:hidden;border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 0 .1rem rgba(0,0,0,.3),0 0 .4rem rgba(0,0,0,.5)}
-.die-face-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:.3rem}
-.die-face-bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.85}
-.die-face-mask{position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,.5) 100%)}
-.die-face-title{position:relative;z-index:1;font-size:.14rem;font-weight:600;color:#fff;text-align:center;letter-spacing:.01rem}
-.die-face-cat{position:relative;z-index:1;font-size:.09rem;color:rgba(255,255,255,.5);margin-top:.06rem;text-transform:uppercase;letter-spacing:.04rem}
+.die-cube-wrap{position:relative;z-index:2;cursor:pointer;filter:drop-shadow(0 .2rem .6rem rgba(0,0,0,.5))}
+.die-cube{position:relative;width:1.6rem;height:1.6rem;transform-style:preserve-3d;transform:rotateX(-20deg) rotateY(30deg)}
+.die-face{position:absolute;inset:0;border-radius:.14rem;overflow:hidden;backface-visibility:hidden;background:linear-gradient(135deg,#fefefe 0%,#f0ece0 50%,#e2ddd2 100%);border:1px solid rgba(0,0,0,.06);box-shadow:inset 0 .01rem .06rem rgba(255,255,255,.8),inset 0 .03rem .1rem rgba(0,0,0,.04)}
+/* Subtle inner surface texture */
+.die-face::after{content:'';position:absolute;inset:.03rem;border-radius:.12rem;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.015) 100%);z-index:1;pointer-events:none}
+
+/* Pips (dots) */
+.die-pip{position:absolute;width:.16rem;height:.16rem;border-radius:50%;background:radial-gradient(circle at 35% 35%,#555,#1a1a1a 70%);z-index:2;box-shadow:inset 0 .01rem .02rem rgba(0,0,0,.5),0 0 .01rem rgba(0,0,0,.3);transform:translate(-50%,-50%)}
+/* Pip positions for each face */
+.die-front .die-pip-1{left:50%;top:50%}
+.die-front .die-pip-2{left:50%;top:50%}
+.die-back .die-pip-1{left:25%;top:25%}.die-back .die-pip-2{left:75%;top:75%}
+.die-back .die-pip-3{left:25%;top:50%}.die-back .die-pip-4{left:75%;top:50%}
+.die-back .die-pip-5{left:25%;top:75%}.die-back .die-pip-6{left:75%;top:25%}
+.die-right .die-pip-1{left:20%;top:20%}.die-right .die-pip-2{left:80%;top:80%}
+.die-right .die-pip-3{left:50%;top:50%}
+.die-left .die-pip-1{left:25%;top:25%}.die-left .die-pip-2{left:75%;top:25%}
+.die-left .die-pip-3{left:25%;top:75%}.die-left .die-pip-4{left:75%;top:75%}
+.die-top .die-pip-1{left:25%;top:25%}.die-top .die-pip-2{left:75%;top:25%}
+.die-top .die-pip-3{left:50%;top:50%}.die-top .die-pip-4{left:25%;top:75%}.die-top .die-pip-5{left:75%;top:75%}
+.die-bottom .die-pip-1{left:20%;top:20%}.die-bottom .die-pip-2{left:50%;top:20%}.die-bottom .die-pip-3{left:80%;top:20%}
+.die-bottom .die-pip-4{left:20%;top:80%}.die-bottom .die-pip-5{left:50%;top:80%}.die-bottom .die-pip-6{left:80%;top:80%}
 
 .die-info{position:relative;z-index:3;text-align:center;margin-top:.6rem;opacity:0;transform:translateY(.2rem);transition:opacity .5s ease,transform .5s ease}
 .die-info.active{opacity:1;transform:translateY(0)}
@@ -23,13 +37,13 @@
 .die-corner-decoration{position:absolute;top:.12rem;left:.12rem;font-size:.18rem;color:rgba(255,255,255,.15);z-index:2;font-family:Georgia,serif}
 .die-corner-decoration-br{position:absolute;bottom:.12rem;right:.12rem;font-size:.18rem;color:rgba(255,255,255,.15);z-index:2;font-family:Georgia,serif;transform:rotate(180deg)}
 
-/* Face transforms */
-.die-front{transform:translateZ(1.5rem)}
-.die-back{transform:rotateY(180deg) translateZ(1.5rem)}
-.die-right{transform:rotateY(90deg) translateZ(1.5rem)}
-.die-left{transform:rotateY(-90deg) translateZ(1.5rem)}
-.die-top{transform:rotateX(90deg) translateZ(1.5rem)}
-.die-bottom{transform:rotateX(-90deg) translateZ(1.5rem)}
+/* Face transforms (cube half=0.8rem) */
+.die-front{transform:translateZ(.8rem)}
+.die-back{transform:rotateY(180deg) translateZ(.8rem)}
+.die-right{transform:rotateY(90deg) translateZ(.8rem)}
+.die-left{transform:rotateY(-90deg) translateZ(.8rem)}
+.die-top{transform:rotateX(90deg) translateZ(.8rem)}
+.die-bottom{transform:rotateX(-90deg) translateZ(.8rem)}
 
 /* === Detail Page (kept) === */
 .dw-detail{position:fixed;top:0;left:0;width:100%;height:100%;z-index:150;background:#000;overflow-y:auto;animation:dwFadeIn .4s ease}
