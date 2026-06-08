@@ -1,26 +1,26 @@
 [
   {
-    "folder": "01Bannner",
-    "banner": "https://pub-3c6f999311af4dc38671403851f8973f.r2.dev/01Bannner/bg.mp4",
+    "folder": "01Banner",
+    "banner": "https://pub-3c6f999311af4dc38671403851f8973f.r2.dev/01Banner/bg.mp4",
     "bgType": "video",
-    "meta": "https://pub-3c6f999311af4dc38671403851f8973f.r2.dev/01Bannner/meta1.json"
+    "meta": "https://pub-3c6f999311af4dc38671403851f8973f.r2.dev/01Banner/meta1.json"
   },
   {
-    "folder": "02Bannner",
-    "banner": "https://pub-3c6f999311af4dc38671403851f8973f.r2.dev/02Bannner/%E9%A6%96%E9%A1%B5%E8%BD%AE%E6%92%ADDisctrack.png",
+    "folder": "02Banner",
+    "banner": "https://pub-3c6f999311af4dc38671403851f8973f.r2.dev/02Banner/%E9%A6%96%E9%A1%B5%E8%BD%AE%E6%92%ADDisctrack.png",
     "bgType": "image",
-    "meta": "https://pub-3c6f999311af4dc38671403851f8973f.r2.dev/02Bannner/meta2.json"
+    "meta": "https://pub-3c6f999311af4dc38671403851f8973f.r2.dev/02Banner/meta2.json"
   },
   {
-    "folder": "03Bannner",
+    "folder": "03Banner",
     "banner": "",
     "bgType": "none",
-    "meta": "https://pub-3c6f999311af4dc38671403851f8973f.r2.dev/03Bannner/meta3.json"
+    "meta": "https://pub-3c6f999311af4dc38671403851f8973f.r2.dev/03Banner/meta3.json"
   },
   {
-    "folder": "04Bannner",
+    "folder": "04Banner",
     "banner": "",
     "bgType": "none",
-    "meta": "https://pub-3c6f999311af4dc38671403851f8973f.r2.dev/04Bannner/meta4.json"
+    "meta": "https://pub-3c6f999311af4dc38671403851f8973f.r2.dev/04Banner/meta4.json"
   }
 ]
