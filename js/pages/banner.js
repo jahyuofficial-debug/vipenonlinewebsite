@@ -24,6 +24,7 @@ function filterVisibleGroups(groups) {
 }
 
 function loadHomeBanner(callback) {
+    // Check if ManagerGo cached data exists in localStorage
     try {
         var cached = localStorage.getItem('vipen_mgr_home_banner');
         if (cached) {
@@ -37,27 +38,9 @@ function loadHomeBanner(callback) {
         }
     } catch (e) {}
 
-    // main.js handles R2 meta loading and triggers changeSlide(0) when ready
-    // Check if data is already available
-    if (bannerData.homeGroups && bannerData.homeGroups.length > 0) {
-        if (callback) callback(true);
-        return;
-    }
-
-    // Poll briefly in case main.js hasn't finished yet
-    var attempts = 0;
-    function checkReady() {
-        if (bannerData.homeGroups && bannerData.homeGroups.length > 0) {
-            if (callback) callback(true);
-            return;
-        }
-        if (++attempts < 50) {
-            setTimeout(checkReady, 100);
-        } else {
-            if (callback) callback(false);
-        }
-    }
-    checkReady();
+    // main.js handles R2 meta loading and triggers changeSlide when ready
+    // Just return success to not block the caller
+    if (callback) callback(true);
 }
 
 function getTotalSlides() {

@@ -142,13 +142,15 @@ BannerPage.initBgVideo();
                 BannerPage.bannerData.bgVideoSrc = bannerData.map(function(g) { return g.bgType === 'video' ? (g.banner || '') : ''; });
                 BannerPage.bannerData.bgImage = bannerData.map(function(g) { return g.bgType === 'image' ? (g.banner || '') : ''; });
                 console.log('Banner metas loaded from R2');
-                // Initialize banner slides now that meta is loaded
+                // Stop auto-slide, set up dots, show slide 0, then restart
+                SlideDots.stopAutoSlide();
                 var total = BannerPage.bannerData.homeGroups.length;
                 var dots = document.querySelectorAll('#slideDots .dot');
                 dots.forEach(function(dot, i) {
                     dot.style.display = i < total ? '' : 'none';
                 });
                 BannerPage.changeSlide(0);
+                SlideDots.startAutoSlide();
             }).catch(function() {
                 console.warn('Failed to load banner metas from R2');
             });
@@ -372,21 +374,6 @@ SlideDots.init({
         } else if (typeof idx === 'number') {
             BannerPage.changeSlide(idx);
         }
-    }
-});
-
-BannerPage.loadHomeBanner(function(success) {
-    if (success) {
-        var total = BannerPage.bannerData.homeGroups.length;
-        var dots = document.querySelectorAll('#slideDots .dot');
-        dots.forEach(function(dot, i) {
-            if (i < total) {
-                dot.style.display = '';
-            } else {
-                dot.style.display = 'none';
-            }
-        });
-        BannerPage.changeSlide(0);
     }
 });
 
