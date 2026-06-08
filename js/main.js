@@ -142,17 +142,22 @@ BannerPage.initBgVideo();
                 BannerPage.bannerData.bgVideoSrc = bannerData.map(function(g) { return g.bgType === 'video' ? (g.banner || '') : ''; });
                 BannerPage.bannerData.bgImage = bannerData.map(function(g) { return g.bgType === 'image' ? (g.banner || '') : ''; });
                 console.log('Banner metas loaded from R2');
-                // Stop auto-slide, set up dots, show slide 0, then restart
-                SlideDots.stopAutoSlide();
+                // Directly set first banner text and init slides
+                var meta0 = metas[0] || {};
+                var h2 = document.querySelector('#topicLine h2');
+                var h3 = document.querySelector('#noteLine h3');
+                if (h2) h2.textContent = meta0.topic || '';
+                if (h3) h3.textContent = meta0.note || '';
                 var total = BannerPage.bannerData.homeGroups.length;
                 var dots = document.querySelectorAll('#slideDots .dot');
                 dots.forEach(function(dot, i) {
                     dot.style.display = i < total ? '' : 'none';
                 });
+                SlideDots.stopAutoSlide();
                 BannerPage.changeSlide(0);
                 SlideDots.startAutoSlide();
-            }).catch(function() {
-                console.warn('Failed to load banner metas from R2');
+            }).catch(function(e) {
+                console.warn('Failed to load banner metas from R2', e);
             });
         }
         window.actionFeed = actionData;
