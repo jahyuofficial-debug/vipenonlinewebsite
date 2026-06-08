@@ -197,19 +197,34 @@ function bindDesignWorkListPagination() {
 function positionFanCards() {
     var cards = document.querySelectorAll('.dw-card');
     var total = cards.length;
-    var fanAngle = 60;
+    var fanAngle = 40;
     var startAngle = -fanAngle / 2;
     var step = fanAngle / (total - 1);
-    var radius = 3.2;
+    var radius = 2.8;
+    // Store random offset per card for realism
+    window.__dwOffsets = window.__dwOffsets || [];
+    // Initialize card surface (paper feel)
+    gsap.set('.dw-card', { backgroundColor: '#faf8f3' });
 
     cards.forEach(function(card, i) {
         var angle = startAngle + step * i;
         var rad = angle * Math.PI / 180;
         var x = Math.sin(rad) * radius;
-        var y = (1 - Math.cos(rad)) * radius * 0.3;
-        var transform = 'translate(' + x.toFixed(3) + 'rem, ' + y.toFixed(3) + 'rem) rotate(' + angle.toFixed(1) + 'deg)';
-        card.style.transform = transform;
+        var y = (1 - Math.cos(rad)) * radius * 0.25;
+        var rOffset = (Math.random() - 0.5) * 2;
+        window.__dwOffsets[i] = rOffset;
+        var transform = 'translate(' + x.toFixed(3) + 'rem, ' + y.toFixed(3) + 'rem) rotate(' + (angle + rOffset).toFixed(2) + 'deg)';
         card.setAttribute('data-fan-transform', transform);
+        card.setAttribute('data-fan-angle', angle.toFixed(3));
+        card.setAttribute('data-fan-x', x.toFixed(3));
+        card.setAttribute('data-fan-y', y.toFixed(3));
+    });
+
+    // Animate to position with GSAP
+    var tl = gsap.timeline();
+    cards.forEach(function(card, i) {
+        var t = card.getAttribute('data-fan-transform');
+        tl.to(card, { transform: t, duration: 0.6, ease: 'power3.out' }, i * 0.04);
     });
 }
 
@@ -243,19 +258,76 @@ function bindDesignWorkCardClicks() {
 }
 
 function liftCard(card) {
-    var fanTransform = card.getAttribute('data-fan-transform') || '';
-    card.setAttribute('data-lift-transform', fanTransform);
-    var lifted = fanTransform.replace(/rotate\(([^)]+)\)/, 'rotate($1) translateY(-.6rem) scale(1.08)');
-    card.style.transform = lifted;
-    card.style.zIndex = '100';
+    if (!card) return;
+    var cards = document.querySelectorAll('.dw-card');
+    var hoverIdx = parseInt(card.getAttribute('data-dw-id'), 10);
+    var total = cards.length;
+    var tl = gsap.timeline();
+
+    cards.forEach(function(c, i) {
+        var baseTransform = c.getAttribute('data-fan-transform') || '';
+        var angle = parseFloat(c.getAttribute('data-fan-angle') || '0');
+        var fx = parseFloat(c.getAttribute('data-fan-x') || '0');
+        var fy = parseFloat(c.getAttribute('data-fan-y') || '0');
+        var rOffset = window.__dwOffsets ? (window.__dwOffsets[i] || 0) : 0;
+        var dist = Math.abs(i - hoverIdx);
+        var dir = i < hoverIdx ? -1 : (i > hoverIdx ? 1 : 0);
+
+        if (i === hoverIdx) {
+            // Lifted card: move toward viewer, larger scale, higher z-index
+            c.style.zIndex = 100;
+            c.classList.add('hovered');
+            tl.to(c, {
+                transform: 'translate(' + fx.toFixed(3) + 'rem, ' + (fy - 0.3).toFixed(3) + 'rem) rotate(' + (angle + rOffset).toFixed(2) + 'deg)',
+                scale: 1.06,
+                duration: 0.45,
+                ease: 'power2.out'
+            }, 0);
+        } else if (dist <= 2) {
+            // Adjacent cards: shift away from hovered card
+            c.style.zIndex = 1;
+            c.classList.remove('hovered');
+            var shiftX = dir * (0.15 + (3 - dist) * 0.05);
+            tl.to(c, {
+                transform: 'translate(' + (fx + shiftX).toFixed(3) + 'rem, ' + fy.toFixed(3) + 'rem) rotate(' + (angle + rOffset + dir * 1.5).toFixed(2) + 'deg)',
+                duration: 0.45,
+                ease: 'power2.out'
+            }, 0);
+        } else {
+            // Far cards: slight spread
+            c.style.zIndex = 1;
+            c.classList.remove('hovered');
+            var dir2 = i < hoverIdx ? -1 : 1;
+            tl.to(c, {
+                transform: 'translate(' + (fx + dir2 * 0.04).toFixed(3) + 'rem, ' + fy.toFixed(3) + 'rem) rotate(' + (angle + rOffset).toFixed(2) + 'deg)',
+                duration: 0.5,
+                ease: 'power2.out'
+            }, 0);
+        }
+    });
 }
 
 function unliftCard(card) {
-    var fanTransform = card.getAttribute('data-fan-transform');
-    if (fanTransform) {
-        card.style.transform = fanTransform;
-    }
-    card.style.zIndex = '';
+    if (!card) return;
+    var cards = document.querySelectorAll('.dw-card');
+    var tl = gsap.timeline();
+
+    cards.forEach(function(c, i) {
+        var baseTransform = c.getAttribute('data-fan-transform') || '';
+        var angle = parseFloat(c.getAttribute('data-fan-angle') || '0');
+        var fx = parseFloat(c.getAttribute('data-fan-x') || '0');
+        var fy = parseFloat(c.getAttribute('data-fan-y') || '0');
+        var rOffset = window.__dwOffsets ? (window.__dwOffsets[i] || 0) : 0;
+
+        c.style.zIndex = 1;
+        c.classList.remove('hovered');
+        tl.to(c, {
+            transform: baseTransform,
+            scale: 1,
+            duration: 0.5,
+            ease: 'power3.inOut'
+        }, 0);
+    });
 }
 
 function showCardPreview(id) {
