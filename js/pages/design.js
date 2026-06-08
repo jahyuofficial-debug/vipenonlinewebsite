@@ -4,177 +4,37 @@ var DesignPage = (function() {
 var dwZoomedCard = null;
 var dwListPageSize = 6;
 var dwListCurrentPage = 1;
-var dieAutoRotation = null;
-var dieActiveFace = 0;
-var dieIsHovering = false;
 
-// Face order: front, back, right, left, top, bottom
-var FACE_CLASSES = ['front', 'back', 'right', 'left', 'top', 'bottom'];
-
-var PIP_POSITIONS = [
-    [[50,50]],                                          // 1
-    [[25,25],[75,75]],                                   // 2
-    [[20,20],[50,50],[80,80]],                           // 3
-    [[25,25],[75,25],[25,75],[75,75]],                   // 4
-    [[25,25],[75,25],[50,50],[25,75],[75,75]],           // 5
-    [[20,20],[50,20],[80,20],[20,80],[50,80],[80,80]]    // 6
-];
-
+// === Card Grid ===
 function buildDesignWorkGrid() {
-    var faces = dwItems.slice(0, 6).map(function(item, i) {
-        var pips = '';
-        (PIP_POSITIONS[i] || []).forEach(function(pos, pi) {
-            pips += '<span class="die-pip die-pip-' + (pi+1) + '" style="top:' + pos[0] + '%;left:' + pos[1] + '%"></span>';
-        });
-        return '<div class="die-face die-' + FACE_CLASSES[i] + '" data-face="' + i + '">' + pips + '</div>';
+    var cards = dwItems.map(function(item, i) {
+        var img = item.cardHoverBg || item.cardBg || item.headerBg || '';
+        return '<div class="dw-card" data-dw-id="' + i + '">' +
+            '<div class="dw-card-img-wrap">' +
+            '<div class="dw-card-img" style="background-image:url(' + img + ')"></div>' +
+            '<div class="dw-card-img-overlay"></div>' +
+            '</div>' +
+            '<div class="dw-card-body">' +
+            '<p class="dw-card-cat">' + (item.cat || '') + '</p>' +
+            '<h3 class="dw-card-title">' + (item.title || '') + '</h3>' +
+            '<p class="dw-card-desc">' + ((item.desc || '').substring(0, 80)) + '</p>' +
+            '</div>' +
+            '</div>';
     }).join('');
 
     return '<section id="page-design-work" class="dw-page">' +
-        '<div class="die-scene" id="dieScene">' +
-        '<div class="die-scene-bg" id="dieSceneBg"></div>' +
-        '<div class="die-cube-wrap" id="dieCubeWrap">' +
-        '<div class="die-cube" id="dieCube">' + faces + '</div>' +
-        '</div>' +
-        '<div class="die-info" id="dieInfo">' +
-        '<p class="die-info-cat" id="dieInfoCat"></p>' +
-        '<h3 class="die-info-title" id="dieInfoTitle"></h3>' +
-        '</div>' +
-        '</div>' +
+        '<div class="dw-card-grid">' + cards + '</div>' +
         '</section>';
 }
 
-function startDieRotation() {
-    var cube = document.getElementById('dieCube');
-    if (!cube) return;
-
-    // Kill any existing rotation
-    if (dieAutoRotation) dieAutoRotation.kill();
-
-    dieAutoRotation = gsap.to(cube, {
-        rotateX: -25,
-        rotateY: 360 + 25,
-        duration: 8,
-        repeat: -1,
-        ease: 'none',
-        modifiers: {
-            rotateY: function(val) { return parseFloat(val) % 360; }
-        },
-        onUpdate: function() {
-            if (!dieIsHovering) updateActiveFaceFromRotation();
-        }
-    });
-}
-
-function updateActiveFaceFromRotation() {
-    var cube = document.getElementById('dieCube');
-    if (!cube) return;
-    var style = cube._gsap || gsap.getProperty(cube);
-    var ry = gsap.getProperty(cube, 'rotateY') % 360;
-    if (ry < 0) ry += 360;
-    var rx = gsap.getProperty(cube, 'rotateX') % 360;
-    if (rx < 0) rx += 360;
-
-    // Normalize to 0-360
-    ry = ((ry % 360) + 360) % 360;
-
-    // Determine which face is most facing the camera based on Y rotation
-    // Each face occupies 90 degrees of Y rotation
-    var faceIdx;
-    if (ry < 45 || ry >= 315) faceIdx = 0;      // front
-    else if (ry >= 45 && ry < 135) faceIdx = 2;  // right
-    else if (ry >= 135 && ry < 225) faceIdx = 1; // back
-    else faceIdx = 3;                             // left: 225-315
-
-    showDieFaceInfo(faceIdx);
-}
-
-function updateDieFaceText(idx) {
-    var item = dwItems[idx];
-    if (!item) return;
-    var catEl = document.getElementById('dieInfoCat');
-    var titleEl = document.getElementById('dieInfoTitle');
-    if (catEl) catEl.textContent = item.cat;
-    if (titleEl) titleEl.textContent = item.title;
-}
-
-function showDieFaceInfo(idx) {
-    if (idx === dieActiveFace) return;
-    dieActiveFace = idx;
-    updateDieFaceText(idx);
-    // Background and text visibility are ONLY toggled on hover (see bindDieInteraction)
-}
-
-function applyDieHoverVisuals(idx) {
-    var item = dwItems[idx];
-    if (!item) return;
-    var sceneBg = document.getElementById('dieSceneBg');
-    var dieInfo = document.getElementById('dieInfo');
-    if (sceneBg && item.cardHoverBg) {
-        sceneBg.style.backgroundImage = 'url(' + item.cardHoverBg + ')';
-        sceneBg.classList.add('active');
-    }
-    if (dieInfo) dieInfo.classList.add('active');
-}
-
-function bindDieInteraction() {
-    var wrap = document.getElementById('dieCubeWrap');
-    var cube = document.getElementById('dieCube');
-    var scene = document.getElementById('dieScene');
-    if (!wrap || !cube) return;
-
-    wrap.addEventListener('mouseenter', function() {
-        dieIsHovering = true;
-        if (dieAutoRotation) dieAutoRotation.pause();
-        applyDieHoverVisuals(dieActiveFace);
-    });
-
-    wrap.addEventListener('mouseleave', function() {
-        dieIsHovering = false;
-        var sceneBg = document.getElementById('dieSceneBg');
-        if (sceneBg) sceneBg.classList.remove('active');
-        document.getElementById('dieInfo').classList.remove('active');
-        if (dieAutoRotation) dieAutoRotation.play();
-    });
-
-    wrap.addEventListener('mousemove', function(e) {
-        if (!dieIsHovering) return;
-        var rect = wrap.getBoundingClientRect();
-        var cx = rect.left + rect.width / 2;
-        var cy = rect.top + rect.height / 2;
-        var dx = (e.clientX - cx) / rect.width;
-        var dy = (e.clientY - cy) / rect.height;
-
-        // Map mouse position to rotation (subtle, keeping cube facing viewer-ish)
-        var targetRY = 25 + dx * 40;
-        var targetRX = -15 - dy * 30;
-
-        gsap.to(cube, {
-            rotateX: targetRX,
-            rotateY: targetRY,
-            duration: 0.6,
-            ease: 'power2.out',
-            overwrite: 'auto'
+function bindCardGridClicks() {
+    var cards = document.querySelectorAll('.dw-card');
+    cards.forEach(function(card) {
+        card.addEventListener('click', function() {
+            var id = this.getAttribute('data-dw-id');
+            window.location.hash = '#/design-work/detail/' + id;
         });
-
-        // Update active face based on Y rotation
-        var ry = ((targetRY % 360) + 360) % 360;
-        var faceIdx;
-        if (ry < 45 || ry >= 315) faceIdx = 0;
-        else if (ry >= 45 && ry < 135) faceIdx = 2;
-        else if (ry >= 135 && ry < 225) faceIdx = 1;
-        else faceIdx = 3;
-        if (faceIdx !== dieActiveFace) {
-            showDieFaceInfo(faceIdx);
-            applyDieHoverVisuals(faceIdx);
-        }
     });
-
-    wrap.addEventListener('click', function() {
-        window.location.hash = '#/design-work/detail/' + dieActiveFace;
-    });
-
-    // Initial face info
-    showDieFaceInfo(0);
 }
 
 // === Detail Page (unchanged) ===
@@ -396,9 +256,9 @@ return {
     buildGrid: function() { return buildDesignWorkGrid(); },
     buildDetail: function(id) { return buildDesignWorkDetail(id); },
     buildList: function() { return buildDesignWorkList(); },
-    bindGrid: function() { startDieRotation(); bindDieInteraction(); },
+    bindGrid: function() { bindCardGridClicks(); },
     bindList: function() { bindDesignWorkListClicks(); bindDesignWorkListPagination(); },
-    resetCards: function() { if (dieAutoRotation) dieAutoRotation.play(); },
+    resetCards: function() {},
     renderGuard: function() { return renderDesignGuard(); },
     bindGuard: function() { bindDesignGuard(); },
     isVerified: function() { return isDesignVerified(); }
