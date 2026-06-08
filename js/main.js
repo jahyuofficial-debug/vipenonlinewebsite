@@ -108,34 +108,42 @@ BannerPage.initBgVideo();
 
         if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
 
-        // Banner: map from home/index.json format
+        // Banner: load home/index.json, then fetch meta from R2
         if (bannerData && Array.isArray(bannerData)) {
-            var hg = bannerData.map(function(g) {
-                var bannerUrl = g.banner;
-                // Already R2 URL, no path transformation needed
-                var isVideo = g.bgType === 'video';
-                var isImage = g.bgType === 'image';
-                return {
-                    bgType: g.bgType || 'video',
-                    bgVideo: isVideo ? bannerUrl : '',
-                    bgImage: isImage ? bannerUrl : '',
-                    carouselTexts: [{ topic: g.topic || '', note: g.note || '' }]
-                };
+            var metaFetches = bannerData.map(function(g) {
+                return g.meta ? fetch(g.meta).then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; }) : Promise.resolve(null);
             });
-            BannerPage.bannerData.homeGroups = hg;
-            // Legacy fields
-            BannerPage.bannerData.topics = bannerData.map(function(g) { return g.topic || ''; });
-            BannerPage.bannerData.notes = bannerData.map(function(g) { return g.note || ''; });
-            BannerPage.bannerData.bgType = bannerData.map(function(g) { return g.bgType; });
-            BannerPage.bannerData.bgVideoSrc = bannerData.map(function(g) {
-                var u = g.banner;
-                if (u && !/^https?:\/\//.test(u)) u = 'home/' + g.folder + '/' + u;
-                return g.bgType === 'video' ? u : '';
-            });
-            BannerPage.bannerData.bgImage = bannerData.map(function(g) {
-                var u = g.banner;
-                if (u && !/^https?:\/\//.test(u)) u = 'home/' + g.folder + '/' + u;
-                return g.bgType === 'image' ? u : '';
+            Promise.all(metaFetches).then(function(metas) {
+                var homeGroups = bannerData.map(function(g, i) {
+                    var meta = metas[i] || {};
+                    var topic = meta.topic || '';
+                    var note = meta.note || '';
+                    var isVideo = g.bgType === 'video';
+                    var isImage = g.bgType === 'image';
+                    // Apply text styles
+                    var topicStyle = '';
+                    if (meta.topicBold) topicStyle += 'font-weight:bold;';
+                    if (meta.topicItalic) topicStyle += 'font-style:italic;';
+                    var noteStyle = '';
+                    if (meta.noteBold) noteStyle += 'font-weight:bold;';
+                    if (meta.noteItalic) noteStyle += 'font-style:italic;';
+                    return {
+                        bgType: g.bgType || 'video',
+                        bgVideo: isVideo ? (g.banner || '') : '',
+                        bgImage: isImage ? (g.banner || '') : '',
+                        carouselTexts: [{ topic: topic, note: note, topicStyle: topicStyle, noteStyle: noteStyle }]
+                    };
+                });
+                BannerPage.bannerData.homeGroups = homeGroups.filter(function(g) { return !g.hidden; });
+                BannerPage.bannerData.homeTextSlideIndices = [0, 0, 0, 0];
+                BannerPage.bannerData.topics = metas.map(function(m) { return m && m.topic ? m.topic : ''; });
+                BannerPage.bannerData.notes = metas.map(function(m) { return m && m.note ? m.note : ''; });
+                BannerPage.bannerData.bgType = bannerData.map(function(g) { return g.bgType; });
+                BannerPage.bannerData.bgVideoSrc = bannerData.map(function(g) { return g.bgType === 'video' ? (g.banner || '') : ''; });
+                BannerPage.bannerData.bgImage = bannerData.map(function(g) { return g.bgType === 'image' ? (g.banner || '') : ''; });
+                console.log('Banner metas loaded from R2');
+            }).catch(function() {
+                console.warn('Failed to load banner metas from R2');
             });
         }
         window.actionFeed = actionData;

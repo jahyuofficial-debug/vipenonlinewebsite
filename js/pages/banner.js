@@ -98,8 +98,8 @@ function changeSlide(index){
             if (texts.length > 0) {
                 bannerData.homeTextSlideIndices[bannerData.current] = (bannerData.homeTextSlideIndices[bannerData.current] + 1) % texts.length;
                 var ti = bannerData.homeTextSlideIndices[bannerData.current];
-                if (h2) h2.textContent = texts[ti].topic || '';
-                if (h3) h3.textContent = texts[ti].note || '';
+                if (h2) { h2.textContent = texts[ti].topic || ''; h2.setAttribute('style', texts[ti].topicStyle || ''); }
+                if (h3) { h3.textContent = texts[ti].note || ''; h3.setAttribute('style', texts[ti].noteStyle || ''); }
                 if (msgEl) msgEl.style.display = '';
             } else {
                 if (msgEl) msgEl.style.display = 'none';
