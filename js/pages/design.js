@@ -5,182 +5,328 @@ var dwZoomedCard = null;
 var dwListPageSize = 6;
 var dwListCurrentPage = 1;
 
-// === Nokia Phone State ===
-var nokiaSelectedIndex = 0;
-var nokiaInDetail = false;
-var nokiaDetailId = null;
+// === XP Desktop State ===
+var xpWindows = {};     // { id: { x, y, w, h, minimized, zIndex, dragging } }
+var xpZIndex = 10;
+var xpDragging = null;
+var xpDragOX = 0;
+var xpDragOY = 0;
 
-// === Nokia Phone Grid ===
+// Emoji icons per category
+var CAT_ICONS = {
+    'Branding': '\u{1F3A8}',     // 🎨
+    'UI/UX': '\u{1F4F1}',        // 📱
+    'Motion': '\u{1F3AC}',       // 🎬
+    'Web': '\u{1F310}',          // 🌐
+    '3D': '\u{1F4E6}',          // 📦
+    'Print': '\u{1F4F0}',       // 📰
+    'Photo': '\u{1F4F7}',       // 📷
+};
+var FALLBACK_ICONS = ['\u{1F4BB}','\u{1F5A5}','\u{1F4BE}','\u{1F4CE}','\u{2B50}','\u{2728}','\u{1F48E}','\u{1F525}','\u{1F30D}']; // 💻🖥💾📎⭐✨💎🔥🌍
+
+function iconForItem(item, i) {
+    if (CAT_ICONS[item.cat]) return CAT_ICONS[item.cat];
+    return FALLBACK_ICONS[i % FALLBACK_ICONS.length];
+}
+
+// === Build XP Desktop ===
 function buildDesignWorkGrid() {
+    var icons = dwItems.map(function(item, i) {
+        var icon = iconForItem(item, i);
+        return '<div class="xp-icon" data-xp-id="' + i + '">' +
+            '<div class="xp-icon-img"><span>' + icon + '</span></div>' +
+            '<div class="xp-icon-label">' + xpTruncate(item.title, 14) + '</div>' +
+            '</div>';
+    }).join('');
+
+    var now = new Date();
+    var timeStr = padTime(now.getHours()) + ':' + padTime(now.getMinutes());
+
     return '<section id="page-design-work" class="dw-page">' +
-        '<div class="nokia-phone" id="nokiaPhone">' +
-        '<div class="nokia-earpiece"><span></span></div>' +
-        '<div class="nokia-brand">NOKIA</div>' +
-        '<div class="nokia-screen-frame">' +
-        '<div class="nokia-screen" id="nokiaScreen">' +
-        '<div class="nokia-screen-content" id="nokiaScreenContent"></div>' +
-        '</div></div>' +
-        '<div class="nokia-softkeys">' +
-        '<div class="nokia-softkey nokia-softkey-left" id="nokiaSoftLeft" data-action="back">Back</div>' +
-        '<div class="nokia-navpad">' +
-        '<div class="nokia-nav nokia-nav-up" data-dir="up"></div>' +
-        '<div class="nokia-nav nokia-nav-down" data-dir="down"></div>' +
-        '<div class="nokia-nav nokia-nav-ok" data-action="ok">OK</div>' +
+        '<div class="xp-desktop" id="xpDesktop">' +
+        '<div class="xp-icons-grid">' + icons + '</div>' +
         '</div>' +
-        '<div class="nokia-softkey nokia-softkey-right" id="nokiaSoftRight" data-action="select">Select</div>' +
-        '</div>' +
-        '<div class="nokia-keypad">' +
-        '<div class="nokia-key-row">' +
-        '<div class="nokia-key" data-num="1">1<span>o_o</span></div>' +
-        '<div class="nokia-key" data-num="2">2<span>abc</span></div>' +
-        '<div class="nokia-key" data-num="3">3<span>def</span></div>' +
-        '</div>' +
-        '<div class="nokia-key-row">' +
-        '<div class="nokia-key" data-num="4">4<span>ghi</span></div>' +
-        '<div class="nokia-key" data-num="5">5<span>jkl</span></div>' +
-        '<div class="nokia-key" data-num="6">6<span>mno</span></div>' +
-        '</div>' +
-        '<div class="nokia-key-row">' +
-        '<div class="nokia-key" data-num="7">7<span>pqrs</span></div>' +
-        '<div class="nokia-key" data-num="8">8<span>tuv</span></div>' +
-        '<div class="nokia-key" data-num="9">9<span>wxyz</span></div>' +
-        '</div>' +
-        '<div class="nokia-key-row">' +
-        '<div class="nokia-key nokia-key-star" data-num="*">*</div>' +
-        '<div class="nokia-key" data-num="0">0<span>_</span></div>' +
-        '<div class="nokia-key nokia-key-hash" data-num="#">#</div>' +
-        '</div>' +
+        '<div class="xp-taskbar" id="xpTaskbar">' +
+        '<button class="xp-start-btn" id="xpStartBtn"><span>\u{F0FF}</span> start</button>' +
+        '<div class="xp-taskbar-divider"></div>' +
+        '<div class="xp-taskbar-tasks" id="xpTaskbarTasks"></div>' +
+        '<div class="xp-taskbar-tray">' +
+        '<span class="xp-tray-icon">\u{1F50A}</span>' +
+        '<span class="xp-tray-icon">\u{1F4E1}</span>' +
+        '<span class="xp-tray-time" id="xpTrayTime">' + timeStr + '</span>' +
         '</div>' +
         '</div>' +
         '</section>';
 }
 
-function renderNokiaMenu() {
-    var content = document.getElementById('nokiaScreenContent');
-    if (!content) return;
-    nokiaInDetail = false;
-    nokiaDetailId = null;
+function padTime(n) { return n < 10 ? '0' + n : '' + n; }
 
-    var maxVisible = 4;
-    var total = dwItems.length;
-    var start = Math.max(0, Math.min(nokiaSelectedIndex, total - maxVisible));
-    var visible = dwItems.slice(start, start + maxVisible);
-
-    var html = '<div class="nokia-status-bar"><span class="nokia-signal">|||||</span><span>WORKS</span><span class="nokia-batt">||||</span></div>';
-    html += '<div class="nokia-menu">';
-    visible.forEach(function(item, i) {
-        var realIdx = start + i;
-        var isActive = realIdx === nokiaSelectedIndex;
-        var arrow = isActive ? '<span class="nokia-arrow">&gt;</span>' : '<span class="nokia-arrow-space">&nbsp;</span>';
-        var num = (realIdx + 1);
-        html += '<div class="nokia-menu-item' + (isActive ? ' active' : '') + '" data-idx="' + realIdx + '">' +
-            arrow + '<span class="nokia-menu-num">' + num + '.</span>' + '<span class="nokia-menu-text">' + truncatePixel(item.title, 12) + '</span>' +
-            '</div>';
-    });
-    html += '</div>';
-    html += '<div class="nokia-soft-hint"><span>Select</span><span>Menu</span></div>';
-
-    content.innerHTML = html;
-}
-
-function renderNokiaDetail(id) {
-    var content = document.getElementById('nokiaScreenContent');
-    if (!content) return;
-    var item = dwItems[id];
-    if (!item) { renderNokiaMenu(); return; }
-    nokiaInDetail = true;
-    nokiaDetailId = id;
-
-    var html = '<div class="nokia-status-bar"><span class="nokia-signal">|||||</span><span>DETAIL</span><span class="nokia-batt">||||</span></div>';
-    html += '<div class="nokia-detail">';
-    html += '<div class="nokia-detail-title">' + truncatePixel(item.title, 14) + '</div>';
-    html += '<div class="nokia-detail-cat">[' + (item.cat || '') + ']</div>';
-    html += '<div class="nokia-detail-line"></div>';
-    html += '<div class="nokia-detail-desc">' + truncatePixel((item.desc || '').substring(0, 60), 28) + '</div>';
-    html += '<div class="nokia-detail-line"></div>';
-    html += '<div class="nokia-detail-meta">C:' + truncatePixel(item.client || '-', 10) + '</div>';
-    html += '<div class="nokia-detail-meta">Y:' + (item.published || '-') + '</div>';
-    html += '</div>';
-    html += '<div class="nokia-soft-hint"><span>Back</span><span>Open</span></div>';
-
-    content.innerHTML = html;
-}
-
-function truncatePixel(str, maxLen) {
+function xpTruncate(str, max) {
     if (!str) return '';
     var s = str.toString();
-    if (s.length <= maxLen) return s;
-    return s.substring(0, maxLen - 1) + '..';
+    return s.length > max ? s.substring(0, max - 1) + '..' : s;
 }
 
-function nokiaSelectNext() {
-    if (nokiaInDetail) return;
-    nokiaSelectedIndex = (nokiaSelectedIndex + 1) % dwItems.length;
-    renderNokiaMenu();
-}
+// === Windows ===
+function xpOpenWindow(id) {
+    var item = dwItems[id];
+    if (!item) return;
 
-function nokiaSelectPrev() {
-    if (nokiaInDetail) return;
-    nokiaSelectedIndex = (nokiaSelectedIndex - 1 + dwItems.length) % dwItems.length;
-    renderNokiaMenu();
-}
-
-function nokiaSelectNum(num) {
-    if (nokiaInDetail) return;
-    var idx = num - 1;
-    if (idx >= 0 && idx < dwItems.length) {
-        nokiaSelectedIndex = idx;
-        renderNokiaMenu();
-        // Auto-open after short delay
-        setTimeout(function() { nokiaOpen(); }, 200);
+    if (xpWindows[id]) {
+        xpFocusWindow(id);
+        if (xpWindows[id].minimized) xpRestoreWindow(id);
+        return;
     }
+
+    var baseX = 0.5 + (Object.keys(xpWindows).length * 0.25);
+    var baseY = 0.3 + (Object.keys(xpWindows).length * 0.2);
+
+    xpWindows[id] = { x: baseX, y: baseY, w: 5, minimized: false, zIndex: ++xpZIndex };
+    xpRenderWindow(id);
+    xpFocusWindow(id);
 }
 
-function nokiaOpen() {
-    if (nokiaInDetail) {
-        window.location.hash = '#/design-work/detail/' + nokiaDetailId;
-    } else {
-        renderNokiaDetail(nokiaSelectedIndex);
+function xpRenderWindow(id) {
+    var item = dwItems[id];
+    if (!item) return;
+    var win = xpWindows[id];
+    if (!win) return;
+
+    var desktop = document.getElementById('xpDesktop');
+    if (!desktop) return;
+
+    // Remove old window
+    var oldWin = document.getElementById('xpWindow' + id);
+    if (oldWin) oldWin.remove();
+
+    var icon = iconForItem(item, id);
+
+    var content = '<div class="xp-detail-title">' + icon + ' ' + item.title + '</div>' +
+        '<div class="xp-detail-cat">' + (item.cat || '') + '</div>' +
+        '<div class="xp-detail-sep"></div>';
+    if (item.desc) content += '<div class="xp-detail-desc">' + item.desc.substring(0, 180) + '</div>';
+    content += '<div class="xp-detail-meta">Published: ' + (item.published || '-') + '</div>';
+    content += '<div class="xp-detail-meta">Client: ' + (item.client || '-') + '</div>';
+    content += '<button class="xp-detail-open" data-xp-full="' + id + '">Open Full Detail</button>';
+
+    var winHTML = '<div class="xp-window" id="xpWindow' + id + '" style="left:' + win.x + 'rem;top:' + win.y + 'rem;width:' + win.w + 'rem;z-index:' + win.zIndex + ';display:none">' +
+        '<div class="xp-titlebar" data-xp-drag="' + id + '">' +
+        '<span class="xp-titlebar-icon">' + icon + '</span>' +
+        '<span class="xp-titlebar-text">' + item.title + '</span>' +
+        '<div class="xp-titlebar-btns">' +
+        '<button class="xp-tb-btn xp-tb-minimize" data-xp-min="' + id + '">_</button>' +
+        '<button class="xp-tb-btn xp-tb-close" data-xp-close="' + id + '">X</button>' +
+        '</div></div>' +
+        '<div class="xp-window-body">' +
+        '<div class="xp-window-content">' + content + '</div>' +
+        '<div class="xp-window-statusbar">' +
+        '<span>' + (item.tools || '') + '</span>' +
+        '</div></div></div>';
+
+    var temp = document.createElement('div');
+    temp.innerHTML = winHTML;
+    var winEl = temp.firstChild;
+    desktop.appendChild(winEl);
+
+    if (!win.minimized) winEl.style.display = '';
+
+    // Drag
+    var titlebar = winEl.querySelector('.xp-titlebar');
+    if (titlebar) {
+        titlebar.addEventListener('mousedown', function(e) {
+            xpDragging = id;
+            xpDragOX = e.clientX - winEl.offsetLeft;
+            xpDragOY = e.clientY - winEl.offsetTop;
+            e.preventDefault();
+        });
     }
-}
 
-function nokiaBack() {
-    if (nokiaInDetail) {
-        renderNokiaMenu();
-    } else {
-        window.history.back();
+    // Minimize
+    var minBtn = winEl.querySelector('[data-xp-min]');
+    if (minBtn) {
+        minBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            xpMinimizeWindow(id);
+        });
     }
-}
 
-function bindNokiaKeys() {
-    var phone = document.getElementById('nokiaPhone');
-    if (!phone) return;
+    // Close
+    var closeBtn = winEl.querySelector('[data-xp-close]');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            xpCloseWindow(id);
+        });
+    }
 
-    // Soft keys & nav
-    phone.addEventListener('click', function(e) {
-        var el = e.target.closest('[data-dir], [data-action], [data-num]');
-        if (!el) return;
-        var dir = el.getAttribute('data-dir');
-        var action = el.getAttribute('data-action');
-        var num = el.getAttribute('data-num');
-        if (dir === 'up') nokiaSelectPrev();
-        else if (dir === 'down') nokiaSelectNext();
-        else if (action === 'ok') nokiaOpen();
-        else if (action === 'select') nokiaOpen();
-        else if (action === 'back') nokiaBack();
-        else if (num && num !== '*' && num !== '#') nokiaSelectNum(parseInt(num, 10));
+    // Full detail button
+    var fullBtn = winEl.querySelector('[data-xp-full]');
+    if (fullBtn) {
+        fullBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            window.location.hash = '#/design-work/detail/' + id;
+        });
+    }
+
+    // Focus on click
+    winEl.addEventListener('mousedown', function() {
+        xpFocusWindow(id);
     });
 
-    // Keyboard support
-    document.addEventListener('keydown', function onKey(e) {
-        var activeSection = document.getElementById('page-design-work');
-        if (!activeSection || activeSection.offsetParent === null) return;
-        if (e.key === 'ArrowUp') { e.preventDefault(); nokiaSelectPrev(); }
-        else if (e.key === 'ArrowDown') { e.preventDefault(); nokiaSelectNext(); }
-        else if (e.key === 'Enter') { e.preventDefault(); nokiaOpen(); }
-        else if (e.key === 'Escape' || e.key === 'Backspace') { e.preventDefault(); nokiaBack(); }
-        else if (e.key >= '1' && e.key <= '9') { nokiaSelectNum(parseInt(e.key, 10)); }
+    xpUpdateTaskButtons();
+}
+
+function xpFocusWindow(id) {
+    if (!xpWindows[id]) return;
+    xpWindows[id].zIndex = ++xpZIndex;
+    var winEl = document.getElementById('xpWindow' + id);
+    if (winEl) winEl.style.zIndex = xpWindows[id].zIndex;
+    // Update taskbar active state
+    document.querySelectorAll('.xp-task-btn').forEach(function(btn) {
+        var btnId = parseInt(btn.getAttribute('data-xp-task'), 10);
+        btn.classList.toggle('xp-task-focused', btnId === id);
     });
+}
+
+function xpMinimizeWindow(id) {
+    if (!xpWindows[id]) return;
+    xpWindows[id].minimized = true;
+    var winEl = document.getElementById('xpWindow' + id);
+    if (winEl) winEl.style.display = 'none';
+    xpUpdateTaskButtons();
+}
+
+function xpRestoreWindow(id) {
+    if (!xpWindows[id]) return;
+    xpWindows[id].minimized = false;
+    var winEl = document.getElementById('xpWindow' + id);
+    if (winEl) winEl.style.display = '';
+    xpFocusWindow(id);
+    xpUpdateTaskButtons();
+}
+
+function xpCloseWindow(id) {
+    var winEl = document.getElementById('xpWindow' + id);
+    if (winEl) winEl.remove();
+    delete xpWindows[id];
+    xpUpdateTaskButtons();
+}
+
+function xpUpdateTaskButtons() {
+    var container = document.getElementById('xpTaskbarTasks');
+    if (!container) return;
+    container.innerHTML = '';
+    Object.keys(xpWindows).forEach(function(k) {
+        var id = parseInt(k, 10);
+        var item = dwItems[id];
+        var win = xpWindows[id];
+        var icon = iconForItem(item, id);
+        var btn = document.createElement('button');
+        btn.className = 'xp-task-btn';
+        if (!win.minimized) btn.classList.add('xp-task-focused');
+        btn.setAttribute('data-xp-task', id);
+        btn.innerHTML = '<span class="xp-task-btn-icon">' + icon + '</span><span class="xp-task-btn-text">' + (item ? item.title : '') + '</span>';
+        btn.addEventListener('click', function() {
+            if (xpWindows[id] && xpWindows[id].minimized) {
+                xpRestoreWindow(id);
+            } else if (!xpWindows[id]) {
+                xpOpenWindow(id);
+            } else {
+                xpMinimizeWindow(id);
+            }
+        });
+        container.appendChild(btn);
+    });
+}
+
+// === Mouse events ===
+function bindXpDesktop() {
+    var page = document.getElementById('page-design-work');
+    if (!page) return;
+
+    // Icon clicks
+    page.addEventListener('click', function(e) {
+        var icon = e.target.closest('.xp-icon');
+        if (!icon) return;
+        var id = parseInt(icon.getAttribute('data-xp-id'), 10);
+        if (!isNaN(id)) xpOpenWindow(id);
+    });
+
+    // Icon double click
+    page.addEventListener('dblclick', function(e) {
+        var icon = e.target.closest('.xp-icon');
+        if (!icon) return;
+        var id = parseInt(icon.getAttribute('data-xp-id'), 10);
+        if (!isNaN(id)) xpOpenWindow(id);
+    });
+
+    // Global mousemove for drag
+    document.addEventListener('mousemove', function(e) {
+        if (xpDragging === null) return;
+        var id = xpDragging;
+        var winEl = document.getElementById('xpWindow' + id);
+        if (!winEl) return;
+        var newX = e.clientX - xpDragOX;
+        var newY = e.clientY - xpDragOY;
+        newX = Math.max(0, newX);
+        newY = Math.max(0, newY);
+        xpWindows[id].x = newX / (window.innerWidth > 0 ? window.innerWidth : 1) * 16; // convert to rem approx
+        xpWindows[id].x = newX / 16;
+        xpWindows[id].y = newY / 16;
+        winEl.style.left = (newX / 16) + 'rem';
+        winEl.style.top = (newY / 16) + 'rem';
+    });
+
+    document.addEventListener('mouseup', function() {
+        xpDragging = null;
+    });
+
+    // Desktop click deselects
+    var desktop = document.getElementById('xpDesktop');
+    if (desktop) {
+        desktop.addEventListener('mousedown', function(e) {
+            if (!e.target.closest('.xp-window')) {
+                xpDragging = null;
+            }
+            if (!e.target.closest('.xp-icon') && !e.target.closest('.xp-window')) {
+                document.querySelectorAll('.xp-icon.selected').forEach(function(ic) {
+                    ic.classList.remove('selected');
+                });
+            }
+        });
+    }
+
+    // Start button - reset all windows
+    var startBtn = document.getElementById('xpStartBtn');
+    if (startBtn) {
+        startBtn.addEventListener('click', function() {
+            Object.keys(xpWindows).forEach(function(k) {
+                var id = parseInt(k, 10);
+                xpCloseWindow(id);
+            });
+        });
+    }
+
+    // Keyboard shortcuts
+    page.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            var openIds = Object.keys(xpWindows);
+            if (openIds.length > 0) {
+                xpCloseWindow(parseInt(openIds[openIds.length - 1], 10));
+            }
+        }
+    });
+
+    // Update clock
+    function updateClock() {
+        var now = new Date();
+        var clock = document.getElementById('xpTrayTime');
+        if (clock && page && page.offsetParent !== null) {
+            clock.textContent = padTime(now.getHours()) + ':' + padTime(now.getMinutes());
+        }
+    }
+    setInterval(updateClock, 30000);
+    updateClock();
 }
 
 // === Detail Page (unchanged) ===
@@ -402,10 +548,7 @@ return {
     buildGrid: function() { return buildDesignWorkGrid(); },
     buildDetail: function(id) { return buildDesignWorkDetail(id); },
     buildList: function() { return buildDesignWorkList(); },
-    bindGrid: function() {
-        renderNokiaMenu();
-        bindNokiaKeys();
-    },
+    bindGrid: function() { bindXpDesktop(); },
     bindList: function() { bindDesignWorkListClicks(); bindDesignWorkListPagination(); },
     resetCards: function() {},
     renderGuard: function() { return renderDesignGuard(); },
