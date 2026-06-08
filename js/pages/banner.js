@@ -37,27 +37,20 @@ function loadHomeBanner(callback) {
         }
     } catch (e) {}
 
-    fetch('home/index.json')
-        .then(function(r) { return r.json(); })
-        .then(function(data) {
-            // Map from home/index.json format to homeGroups format (R2 URLs)
-            var groups = (data || []).map(function(g) {
-                var isVideo = g.bgType === 'video';
-                var isImage = g.bgType === 'image';
-                return {
-                    bgType: g.bgType || 'video',
-                    bgVideo: isVideo ? (g.banner || '') : '',
-                    bgImage: isImage ? (g.banner || '') : '',
-                    carouselTexts: [{ topic: g.topic || '', note: g.note || '' }]
-                };
-            });
-            bannerData.homeGroups = filterVisibleGroups(groups);
-            bannerData.homeTextSlideIndices = [0, 0, 0, 0];
+    // Wait for main.js to load banner data from R2 meta.json files
+    var attempts = 0;
+    function checkReady() {
+        if (bannerData.homeGroups && bannerData.homeGroups.length > 0) {
             if (callback) callback(true);
-        })
-        .catch(function() {
+            return;
+        }
+        if (++attempts < 50) {
+            setTimeout(checkReady, 100);
+        } else {
             if (callback) callback(false);
-        });
+        }
+    }
+    checkReady();
 }
 
 function getTotalSlides() {
