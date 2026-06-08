@@ -112,15 +112,13 @@ BannerPage.initBgVideo();
         if (bannerData && Array.isArray(bannerData)) {
             var hg = bannerData.map(function(g) {
                 var bannerUrl = g.banner;
-                // Local files reference from home/folder/ path
-                if (bannerUrl && !/^https?:\/\//.test(bannerUrl)) {
-                    bannerUrl = 'home/' + g.folder + '/' + bannerUrl;
-                }
+                // Already R2 URL, no path transformation needed
                 var isVideo = g.bgType === 'video';
+                var isImage = g.bgType === 'image';
                 return {
-                    bgType: g.bgType,
+                    bgType: g.bgType || 'video',
                     bgVideo: isVideo ? bannerUrl : '',
-                    bgImage: !isVideo ? bannerUrl : '',
+                    bgImage: isImage ? bannerUrl : '',
                     carouselTexts: [{ topic: g.topic || '', note: g.note || '' }]
                 };
             });

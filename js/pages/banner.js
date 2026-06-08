@@ -40,17 +40,14 @@ function loadHomeBanner(callback) {
     fetch('home/index.json')
         .then(function(r) { return r.json(); })
         .then(function(data) {
-            // Map from home/index.json format to homeGroups format
+            // Map from home/index.json format to homeGroups format (R2 URLs)
             var groups = (data || []).map(function(g) {
-                var bannerUrl = g.banner;
-                if (bannerUrl && !/^https?:\/\//.test(bannerUrl)) {
-                    bannerUrl = 'home/' + g.folder + '/' + bannerUrl;
-                }
                 var isVideo = g.bgType === 'video';
+                var isImage = g.bgType === 'image';
                 return {
-                    bgType: g.bgType,
-                    bgVideo: isVideo ? bannerUrl : '',
-                    bgImage: !isVideo ? bannerUrl : '',
+                    bgType: g.bgType || 'video',
+                    bgVideo: isVideo ? (g.banner || '') : '',
+                    bgImage: isImage ? (g.banner || '') : '',
                     carouselTexts: [{ topic: g.topic || '', note: g.note || '' }]
                 };
             });

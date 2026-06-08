@@ -1,29 +1,29 @@
 [
   {
-    "folder": "01-vibe",
+    "folder": "01Banner",
+    "banner": "https://pub-3c6f999311af4dc38671403851f8973f.r2.dev/01Banner/banner.mp4",
     "bgType": "video",
-    "banner": "banner.mp4",
     "topic": "UUNN--",
     "note": "DeepDesign"
   },
   {
-    "folder": "02-disctrack",
+    "folder": "02Banner",
+    "banner": "https://pub-3c6f999311af4dc38671403851f8973f.r2.dev/02Banner/banner.png",
     "bgType": "image",
-    "banner": "banner.png",
     "topic": "VIBE",
     "note": "Creative Studio"
   },
   {
-    "folder": "03-pulse",
-    "bgType": "video",
-    "banner": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/bg.mp4",
+    "folder": "03Banner",
+    "banner": "",
+    "bgType": "none",
     "topic": "PULSE",
     "note": "Digital Art"
   },
   {
-    "folder": "04-flux",
-    "bgType": "video",
-    "banner": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/bg.mp4",
+    "folder": "04Banner",
+    "banner": "",
+    "bgType": "none",
     "topic": "FLUX",
     "note": "New Media"
   }
