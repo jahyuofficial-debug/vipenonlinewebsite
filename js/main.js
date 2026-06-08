@@ -55,16 +55,11 @@ BannerPage.initBgVideo();
             window.discData = {
                 tapes: discData.map(function(item, i) {
                     var title = item.folder.replace(/^\d+-/, '');
-                    var enc = encodeURIComponent(title);
                     return {
                         id: i + 1,
                         title: title,
                         time: '0:00',
-                        cover: r2Base + '/' + enc + '/cover.jpg',
-                        coverFallback: [
-                            r2Base + '/' + enc + '/cover.png',
-                            r2Base + '/' + enc + '/cover.jpeg'
-                        ],
+                        cover: item.coverUrl || '',
                         audio: item.audio
                     };
                 }),
@@ -167,12 +162,10 @@ BannerPage.initBgVideo();
             var freshData = r[3], actionData = r[4];
 
             if (discData && Array.isArray(discData)) {
-                var r2Base2 = 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev';
                 window.discData = {
                     tapes: discData.map(function(item, i) {
                         var title = item.folder.replace(/^\d+-/, '');
-                        var enc = encodeURIComponent(title);
-                        return { id: i+1, title: title, time: '0:00', cover: r2Base2 + '/' + enc + '/cover.jpg', coverFallback: [r2Base2 + '/' + enc + '/cover.png', r2Base2 + '/' + enc + '/cover.jpeg'], audio: item.audio };
+                        return { id: i+1, title: title, time: '0:00', cover: item.coverUrl || '', audio: item.audio };
                     }),
                     playMode: 'sequence', currentTapeIndex: 0
                 };

@@ -1,94 +1,140 @@
 [
   {
     "folder": "01-酒精",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E9%85%92%E7%B2%BE/%E9%85%92%E7%B2%BE.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E9%85%92%E7%B2%BE/%E9%85%92%E7%B2%BE.mp3",
+    "coverFile": "ab67616d0000b273d10560f5d73921a997dac1ac.jpg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E9%85%92%E7%B2%BE/ab67616d0000b273d10560f5d73921a997dac1ac.jpg"
   },
   {
     "folder": "02-史诗",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E5%8F%B2%E8%AF%97/%E5%8F%B2%E8%AF%97-%E8%9B%8B%E5%A0%A1.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E5%8F%B2%E8%AF%97/%E5%8F%B2%E8%AF%97-%E8%9B%8B%E5%A0%A1.mp3",
+    "coverFile": "109951169249124048.jpg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E5%8F%B2%E8%AF%97/109951169249124048.jpg"
   },
   {
     "folder": "03-北京晚报",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E5%8C%97%E4%BA%AC%E6%99%9A%E6%8A%A5/%E5%8C%97%E4%BA%AC%E6%99%9A%E6%8A%A5-in3.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E5%8C%97%E4%BA%AC%E6%99%9A%E6%8A%A5/%E5%8C%97%E4%BA%AC%E6%99%9A%E6%8A%A5-in3.mp3",
+    "coverFile": "artworks-000242710231-w8xznz-t1080x1080.jpg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E5%8C%97%E4%BA%AC%E6%99%9A%E6%8A%A5/artworks-000242710231-w8xznz-t1080x1080.jpg"
   },
   {
     "folder": "04-CryForMe",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/CryForMe/CryForME-the%20weeknd.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/CryForMe/CryForME-the%20weeknd.mp3",
+    "coverFile": "109951173144798445.jpg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/CryForMe/109951173144798445.jpg"
   },
   {
     "folder": "05-Everything",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/Everything/YouAreEverything_Beat.wav"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/Everything/YouAreEverything_Beat.wav",
+    "coverFile": "YouAreEverything_Beat.png",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/Everything/YouAreEverything_Beat.png"
   },
   {
     "folder": "06-Fearless",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/Fearless/%E6%97%A0%E7%95%8F-PGONE.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/Fearless/%E6%97%A0%E7%95%8F-PGONE.mp3",
+    "coverFile": "151519762533818200_a700x398.jpg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/Fearless/151519762533818200_a700x398.jpg"
   },
   {
     "folder": "07-Isabellae",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/Isabellae/Isabellae-HigherBrothers.flac"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/Isabellae/Isabellae-HigherBrothers.flac",
+    "coverFile": "047cb4bfd966b9d9e45ee334af79c962.jpg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/Isabellae/047cb4bfd966b9d9e45ee334af79c962.jpg"
   },
   {
     "folder": "08-MADEINCHINA",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/MADEINCHINA/MADEINCHINA-HigherBrothers.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/MADEINCHINA/MADEINCHINA-HigherBrothers.mp3",
+    "coverFile": "047cb4bfd966b9d9e45ee334af79c962.jpg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/MADEINCHINA/047cb4bfd966b9d9e45ee334af79c962.jpg"
   },
   {
     "folder": "09-Rocket",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/Rocket/Rocket-%E7%BA%A2%E8%8A%B1%E4%BC%9AxTizzyTx%E6%BB%A1%E8%88%92%E5%85%8B.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/Rocket/Rocket-%E7%BA%A2%E8%8A%B1%E4%BC%9AxTizzyTx%E6%BB%A1%E8%88%92%E5%85%8B.mp3",
+    "coverFile": "artworks-000217154625-npl2l5-t500x500.jpg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/Rocket/artworks-000217154625-npl2l5-t500x500.jpg"
   },
   {
     "folder": "10-SHOOTING2",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/SHOOTING2/SHOOTING_jinjibewatersun.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/SHOOTING2/SHOOTING_jinjibewatersun.mp3",
+    "coverFile": "0x1900-000000-80-0-0.jpg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/SHOOTING2/0x1900-000000-80-0-0.jpg"
   },
   {
     "folder": "11-TIME",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/TIME/TIME%28feat%E6%97%A0%E7%B3%96%E5%8F%AF%E4%B9%90%29-%E9%BB%84%E6%97%ADBooM.flac"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/TIME/TIME%28feat%E6%97%A0%E7%B3%96%E5%8F%AF%E4%B9%90%29-%E9%BB%84%E6%97%ADBooM.flac",
+    "coverFile": "boom.png",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/TIME/boom.png"
   },
   {
     "folder": "12-Wagwan",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/Wagwan/WAGWAN-CentralCee.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/Wagwan/WAGWAN-CentralCee.mp3",
+    "coverFile": "af15c598ee9d2806a92f3efbcef3bb60.1000x1000x1.png",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/Wagwan/af15c598ee9d2806a92f3efbcef3bb60.1000x1000x1.png"
   },
   {
     "folder": "13-YoungOG",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/YoungOG/soundclouddownloader.io_%20%20%20%20%20%20%20%20%20%20%20Kris%20Wu%20Yifan%20%20-%20Young%20OG.mp3.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/YoungOG/soundclouddownloader.io_%20%20%20%20%20%20%20%20%20%20%20Kris%20Wu%20Yifan%20%20-%20Young%20OG.mp3.mp3",
+    "coverFile": "32b32bd351ba31f737b03e2bc4a6d3a8.jpg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/YoungOG/32b32bd351ba31f737b03e2bc4a6d3a8.jpg"
   },
   {
     "folder": "14-killTheONE",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/killTheONE/KILL%20THE%20ONE.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/killTheONE/KILL%20THE%20ONE.mp3",
+    "coverFile": "下载.jpg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/killTheONE/%E4%B8%8B%E8%BD%BD.jpg"
   },
   {
     "folder": "15-你",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E4%BD%A0/%E4%BD%A0-%E9%A3%9E.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E4%BD%A0/%E4%BD%A0-%E9%A3%9E.mp3",
+    "coverFile": "9395dd6f19034f16ad0177bbba06eabb.jpeg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E4%BD%A0/9395dd6f19034f16ad0177bbba06eabb.jpeg"
   },
   {
     "folder": "16-北京地牢",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E5%8C%97%E4%BA%AC%E5%9C%B0%E7%89%A2/%E5%8C%97%E4%BA%AC%E5%9C%B0%E7%89%A2%20%20-%20%E4%B8%B9%E9%95%87%E5%8C%97%E4%BA%AC.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E5%8C%97%E4%BA%AC%E5%9C%B0%E7%89%A2/%E5%8C%97%E4%BA%AC%E5%9C%B0%E7%89%A2%20%20-%20%E4%B8%B9%E9%95%87%E5%8C%97%E4%BA%AC.mp3",
+    "coverFile": "1abfbec13e07456a9e0ceece671fd089.jpeg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E5%8C%97%E4%BA%AC%E5%9C%B0%E7%89%A2/1abfbec13e07456a9e0ceece671fd089.jpeg"
   },
   {
     "folder": "17-崂山道士",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E5%B4%82%E5%B1%B1%E9%81%93%E5%A3%AB/%E5%B4%82%E5%B1%B1%E9%81%93%E5%A3%AB.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E5%B4%82%E5%B1%B1%E9%81%93%E5%A3%AB/%E5%B4%82%E5%B1%B1%E9%81%93%E5%A3%AB.mp3",
+    "coverFile": "d347654260da37fec5ab9983cc17c101.jpg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E5%B4%82%E5%B1%B1%E9%81%93%E5%A3%AB/d347654260da37fec5ab9983cc17c101.jpg"
   },
   {
     "folder": "18-每当我想起她",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E6%AF%8F%E5%BD%93%E6%88%91%E6%83%B3%E8%B5%B7%E5%A5%B9/%E6%AF%8F%E5%BD%93%E6%88%91%E6%83%B3%E8%B5%B7%E5%A5%B9-%E6%A2%81%E7%BB%B4%E5%98%89saber.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E6%AF%8F%E5%BD%93%E6%88%91%E6%83%B3%E8%B5%B7%E5%A5%B9/%E6%AF%8F%E5%BD%93%E6%88%91%E6%83%B3%E8%B5%B7%E5%A5%B9-%E6%A2%81%E7%BB%B4%E5%98%89saber.mp3",
+    "coverFile": "4ae3c9cfa0454823a6f4d7906ad3a528.jpeg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E6%AF%8F%E5%BD%93%E6%88%91%E6%83%B3%E8%B5%B7%E5%A5%B9/4ae3c9cfa0454823a6f4d7906ad3a528.jpeg"
   },
   {
     "folder": "19-空城计",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E7%A9%BA%E5%9F%8E%E8%AE%A1/%E7%A9%BA%E5%9F%8E%E8%AE%A1-GAI.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E7%A9%BA%E5%9F%8E%E8%AE%A1/%E7%A9%BA%E5%9F%8E%E8%AE%A1-GAI.mp3",
+    "coverFile": "109951162910489580.jpg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E7%A9%BA%E5%9F%8E%E8%AE%A1/109951162910489580.jpg"
   },
   {
     "folder": "20-翱翔",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E7%BF%B1%E7%BF%94/%E7%BF%B1%E7%BF%94.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E7%BF%B1%E7%BF%94/%E7%BF%B1%E7%BF%94.mp3",
+    "coverFile": "images.jpg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E7%BF%B1%E7%BF%94/images.jpg"
   },
   {
     "folder": "21-街头力量",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E8%A1%97%E5%A4%B4%E5%8A%9B%E9%87%8F/%E8%A1%97%E5%A4%B4%E5%8A%9B%E9%87%8F-%E9%BB%84%E7%A1%95%26C2C.flac"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E8%A1%97%E5%A4%B4%E5%8A%9B%E9%87%8F/%E8%A1%97%E5%A4%B4%E5%8A%9B%E9%87%8F-%E9%BB%84%E7%A1%95%26C2C.flac",
+    "coverFile": "109951166538213829.jpg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E8%A1%97%E5%A4%B4%E5%8A%9B%E9%87%8F/109951166538213829.jpg"
   },
   {
     "folder": "22-请揣满人民币",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E8%AF%B7%E6%8F%A3%E6%BB%A1%E4%BA%BA%E6%B0%91%E5%B8%81/%E8%AF%B7%E6%8F%A3%E6%BB%A1%E4%BA%BA%E6%B0%91%E5%B8%81-%E8%B0%A2%E5%B8%9D.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E8%AF%B7%E6%8F%A3%E6%BB%A1%E4%BA%BA%E6%B0%91%E5%B8%81/%E8%AF%B7%E6%8F%A3%E6%BB%A1%E4%BA%BA%E6%B0%91%E5%B8%81-%E8%B0%A2%E5%B8%9D.mp3",
+    "coverFile": "maxresdefault.jpg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E8%AF%B7%E6%8F%A3%E6%BB%A1%E4%BA%BA%E6%B0%91%E5%B8%81/maxresdefault.jpg"
   },
   {
     "folder": "23-齐天大圣",
-    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E9%BD%90%E5%A4%A9%E5%A4%A7%E5%9C%A3/%E7%BA%A2%E8%8A%B1%E4%BC%9A.mp3"
+    "audio": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E9%BD%90%E5%A4%A9%E5%A4%A7%E5%9C%A3/%E7%BA%A2%E8%8A%B1%E4%BC%9A.mp3",
+    "coverFile": "e2274fdebb222a609c00804a18fd9976.jpg",
+    "coverUrl": "https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/%E9%BD%90%E5%A4%A9%E5%A4%A7%E5%9C%A3/e2274fdebb222a609c00804a18fd9976.jpg"
   }
 ]
