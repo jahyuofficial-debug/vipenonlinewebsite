@@ -6,10 +6,12 @@ node_modules/
 # 敏感用户数据
 .trae/documents/
 
-# 大文件 — 已迁移到 Cloudflare R2
+# 大文件 — 已迁移到 Cloudflare R2（禁止提交）
 banner/bg.mp4
+/bg.mp4
+home/01-vibe/banner.mp4
+home/02-disctrack/banner.png
 .workbuddy/
 .codebuddy/
 *.plan.md
-*.summary.mdhome/01-vibe/banner.mp4
-home/02-disctrack/banner.png
+*.summary.md
