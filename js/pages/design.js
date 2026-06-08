@@ -2,49 +2,172 @@ var DesignPage = (function() {
 'use strict';
 
 var dwZoomedCard = null;
-var dwZoomedCardOriginalTransform = '';
 var dwListPageSize = 6;
 var dwListCurrentPage = 1;
+var dieAutoRotation = null;
+var dieActiveFace = 0;
+var dieIsHovering = false;
+
+// Face order: front, back, right, left, top, bottom
+var FACE_CLASSES = ['front', 'back', 'right', 'left', 'top', 'bottom'];
 
 function buildDesignWorkGrid() {
-    var cards = dwItems.map(function(item, i) {
-        var suit = dwSuits[i];
-        var rank = dwRanks[i];
-        var cardBg = item.cardBg ? 'url(' + item.cardBg + ') center/cover, linear-gradient(145deg,#f8f4eb 0%,#ebe3d5 50%,#f0ece0 100%)' : 'linear-gradient(145deg,#f8f4eb 0%,#ebe3d5 50%,#f0ece0 100%)';
-        return '<div class="dw-card" data-dw-id="' + i + '" id="dwCard' + i + '">' +
-            '<div class="dw-card-img" style="background:' + cardBg + '"></div>' +
-            '<div class="dw-card-mask"></div>' +
-            '<span class="dw-card-corner">' + rank + suit + '</span>' +
-            '<span class="dw-card-corner-bottom">' + rank + suit + '</span>' +
-            '<span class="dw-card-suit">' + suit + '</span>' +
-            '<div class="dw-card-content">' +
-            '<p class="dw-card-cat">' + item.cat + '</p>' +
-            '<h3 class="dw-card-title">' + item.title + '</h3>' +
-            '<p class="dw-card-meta">' + item.year + ' &#183; ' + item.client + '</p>' +
+    var faces = dwItems.slice(0, 6).map(function(item, i) {
+        var suit = dwSuits[i] || '';
+        var rank = dwRanks[i] || '';
+        var bg = item.cardBg ? 'url(' + item.cardBg + ') center/cover' : 'linear-gradient(145deg,#f8f4eb,#ebe3d5)';
+        return '<div class="die-face die-' + FACE_CLASSES[i] + '" data-face="' + i + '">' +
+            '<div class="die-face-inner">' +
+            '<div class="die-face-bg" style="background:' + bg + '"></div>' +
+            '<div class="die-face-mask"></div>' +
+            '<span class="die-corner-decoration">' + rank + suit + '</span>' +
+            '<span class="die-corner-decoration-br">' + rank + suit + '</span>' +
+            '<p class="die-face-title">' + item.title + '</p>' +
+            '<p class="die-face-cat">' + item.cat + '</p>' +
             '</div></div>';
     }).join('');
+
     return '<section id="page-design-work" class="dw-page">' +
-        '<div class="dw-card-preview" id="dwCardPreview">' +
-        '<div class="dw-card-preview-bg" id="dwCardPreviewBg"></div>' +
+        '<div class="die-scene" id="dieScene">' +
+        '<div class="die-scene-bg" id="dieSceneBg"></div>' +
+        '<div class="die-cube-wrap" id="dieCubeWrap">' +
+        '<div class="die-cube" id="dieCube">' + faces + '</div>' +
         '</div>' +
-        '<div class="dw-card-info" id="dwCardInfo">' +
-        '<p class="dw-card-info-cat" id="dwCardInfoCat"></p>' +
-        '<h3 class="dw-card-info-title" id="dwCardInfoTitle"></h3>' +
-        '<p class="dw-card-info-meta" id="dwCardInfoMeta"></p>' +
+        '<div class="die-info" id="dieInfo">' +
+        '<p class="die-info-cat" id="dieInfoCat"></p>' +
+        '<h3 class="die-info-title" id="dieInfoTitle"></h3>' +
         '</div>' +
-        '<div class="dw-more-btn" id="dwMoreBtn">' +
-        '<span class="dw-more-text">More</span>' +
-        '<div class="dw-more-dots"><span></span><span></span><span></span></div>' +
         '</div>' +
-        '<div class="dw-fan-container" id="dwFanContainer">' +
-        '<div class="dw-fan" id="dwFan">' + cards + '</div>' +
-        '</div>' +
-        '<div class="dw-fan-overlay" id="dwFanOverlay"></div>' +
         '</section>';
 }
 
+function startDieRotation() {
+    var cube = document.getElementById('dieCube');
+    if (!cube) return;
+
+    // Kill any existing rotation
+    if (dieAutoRotation) dieAutoRotation.kill();
+
+    dieAutoRotation = gsap.to(cube, {
+        rotateX: -25,
+        rotateY: 360 + 25,
+        duration: 14,
+        repeat: -1,
+        ease: 'none',
+        modifiers: {
+            rotateY: function(val) { return parseFloat(val) % 360; }
+        },
+        onUpdate: function() {
+            if (!dieIsHovering) updateActiveFaceFromRotation();
+        }
+    });
+}
+
+function updateActiveFaceFromRotation() {
+    var cube = document.getElementById('dieCube');
+    if (!cube) return;
+    var style = cube._gsap || gsap.getProperty(cube);
+    var ry = gsap.getProperty(cube, 'rotateY') % 360;
+    if (ry < 0) ry += 360;
+    var rx = gsap.getProperty(cube, 'rotateX') % 360;
+    if (rx < 0) rx += 360;
+
+    // Normalize to 0-360
+    ry = ((ry % 360) + 360) % 360;
+
+    // Determine which face is most facing the camera based on Y rotation
+    // Each face occupies 90 degrees of Y rotation
+    var faceIdx;
+    if (ry < 45 || ry >= 315) faceIdx = 0;      // front
+    else if (ry >= 45 && ry < 135) faceIdx = 2;  // right
+    else if (ry >= 135 && ry < 225) faceIdx = 1; // back
+    else faceIdx = 3;                             // left: 225-315
+
+    showDieFaceInfo(faceIdx);
+}
+
+function showDieFaceInfo(idx) {
+    if (idx === dieActiveFace) return;
+    dieActiveFace = idx;
+    var item = dwItems[idx];
+    if (!item) return;
+    var catEl = document.getElementById('dieInfoCat');
+    var titleEl = document.getElementById('dieInfoTitle');
+    var dieInfo = document.getElementById('dieInfo');
+    if (catEl) catEl.textContent = item.cat;
+    if (titleEl) titleEl.textContent = item.title;
+    if (dieInfo) dieInfo.classList.add('active');
+
+    // Background
+    var sceneBg = document.getElementById('dieSceneBg');
+    if (sceneBg && item.cardHoverBg) {
+        sceneBg.style.backgroundImage = 'url(' + item.cardHoverBg + ')';
+        sceneBg.classList.add('active');
+    }
+}
+
+function bindDieInteraction() {
+    var wrap = document.getElementById('dieCubeWrap');
+    var cube = document.getElementById('dieCube');
+    var scene = document.getElementById('dieScene');
+    if (!wrap || !cube) return;
+
+    wrap.addEventListener('mouseenter', function() {
+        dieIsHovering = true;
+        if (dieAutoRotation) dieAutoRotation.pause();
+        document.getElementById('dieInfo').classList.add('active');
+    });
+
+    wrap.addEventListener('mouseleave', function() {
+        dieIsHovering = false;
+        var sceneBg = document.getElementById('dieSceneBg');
+        if (sceneBg) sceneBg.classList.remove('active');
+        document.getElementById('dieInfo').classList.remove('active');
+        if (dieAutoRotation) dieAutoRotation.play();
+    });
+
+    wrap.addEventListener('mousemove', function(e) {
+        if (!dieIsHovering) return;
+        var rect = wrap.getBoundingClientRect();
+        var cx = rect.left + rect.width / 2;
+        var cy = rect.top + rect.height / 2;
+        var dx = (e.clientX - cx) / rect.width;
+        var dy = (e.clientY - cy) / rect.height;
+
+        // Map mouse position to rotation (subtle, keeping cube facing viewer-ish)
+        var targetRY = 25 + dx * 40;
+        var targetRX = -15 - dy * 30;
+
+        gsap.to(cube, {
+            rotateX: targetRX,
+            rotateY: targetRY,
+            duration: 0.6,
+            ease: 'power2.out',
+            overwrite: 'auto'
+        });
+
+        // Update active face based on Y rotation
+        var ry = ((targetRY % 360) + 360) % 360;
+        var faceIdx;
+        if (ry < 45 || ry >= 315) faceIdx = 0;
+        else if (ry >= 45 && ry < 135) faceIdx = 2;
+        else if (ry >= 135 && ry < 225) faceIdx = 1;
+        else faceIdx = 3;
+        showDieFaceInfo(faceIdx);
+    });
+
+    wrap.addEventListener('click', function() {
+        window.location.hash = '#/design-work/detail/' + dieActiveFace;
+    });
+
+    // Initial face info
+    showDieFaceInfo(0);
+}
+
+// === Detail Page (unchanged) ===
 function buildDesignWorkDetail(id) {
     var item = dwItems[id];
+    if (!item) return '';
     var heroBg = item.headerBg ? 'url(' + item.headerBg + ') center/cover' : '#0a0a0a';
     var toolsStr = item.tools || '';
     var clientStr = item.client || '';
@@ -96,10 +219,7 @@ function buildDesignWorkDetail(id) {
         '<p class="dw-detail-hero-cat">' + item.cat + '</p>' +
         '</div></div>' +
         '<div class="dw-detail-body">' +
-        descHtml +
-        mediaHtml +
-        tagsHtml +
-        likeHtml +
+        descHtml + mediaHtml + tagsHtml + likeHtml +
         '<div class="dw-detail-meta">' +
         '<div class="dw-detail-meta-item"><p class="dw-detail-meta-label">Client</p><p class="dw-detail-meta-value">' + clientStr + '</p></div>' +
         '<div class="dw-detail-meta-item"><p class="dw-detail-meta-label">Published</p><p class="dw-detail-meta-value">' + publishedStr + '</p></div>' +
@@ -107,9 +227,10 @@ function buildDesignWorkDetail(id) {
         '</div></div></div>';
 }
 
+// === List Page (unchanged) ===
 function buildDesignWorkListCards(page) {
     var start = (page - 1) * dwListPageSize;
-    var end = start + dwListPageSize;
+    var end = Math.min(start + dwListPageSize, dwItems.length);
     var pageItems = dwItems.slice(start, end);
     return pageItems.map(function(item, i) {
         var realIndex = start + i;
@@ -126,6 +247,7 @@ function buildDesignWorkListCards(page) {
 }
 
 function buildDesignWorkListPagination(totalPages, currentPage) {
+    if (totalPages <= 1) return '';
     var html = '<div class="dw-list-pagination">';
     html += '<button class="dw-list-page-btn prev" data-page="prev">&lt;</button>';
     for (var i = 1; i <= totalPages; i++) {
@@ -185,442 +307,85 @@ function bindDesignWorkListPagination() {
                 var newBtns = tempDiv.querySelectorAll('.dw-list-page-btn');
                 var oldBtns = paginationEl.querySelectorAll('.dw-list-page-btn');
                 oldBtns.forEach(function(oldBtn, index) {
-                    if (newBtns[index]) {
-                        oldBtn.className = newBtns[index].className;
-                    }
+                    if (newBtns[index]) oldBtn.className = newBtns[index].className;
                 });
             }
         });
     });
 }
 
-function positionFanCards() {
-    var cards = document.querySelectorAll('.dw-card');
-    var total = cards.length;
-    var fanAngle = 40;
-    var startAngle = -fanAngle / 2;
-    var step = fanAngle / (total - 1);
-    var radius = 2.8;
-    // Store random offset per card for realism
-    window.__dwOffsets = window.__dwOffsets || [];
-    // Initialize card surface (paper feel)
-    gsap.set('.dw-card', { backgroundColor: '#faf8f3' });
-
-    cards.forEach(function(card, i) {
-        var angle = startAngle + step * i;
-        var rad = angle * Math.PI / 180;
-        var x = Math.sin(rad) * radius;
-        var y = (1 - Math.cos(rad)) * radius * 0.25;
-        var rOffset = (Math.random() - 0.5) * 2;
-        window.__dwOffsets[i] = rOffset;
-        var transform = 'translate(' + x.toFixed(3) + 'rem, ' + y.toFixed(3) + 'rem) rotate(' + (angle + rOffset).toFixed(2) + 'deg)';
-        card.setAttribute('data-fan-transform', transform);
-        card.setAttribute('data-fan-angle', angle.toFixed(3));
-        card.setAttribute('data-fan-x', x.toFixed(3));
-        card.setAttribute('data-fan-y', y.toFixed(3));
-    });
-
-    // Animate to position with GSAP
-    var tl = gsap.timeline();
-    cards.forEach(function(card, i) {
-        var t = card.getAttribute('data-fan-transform');
-        tl.to(card, { transform: t, duration: 0.6, ease: 'power3.out' }, i * 0.04);
-    });
-}
-
-function bindDesignWorkCardClicks() {
-    var cards = document.querySelectorAll('.dw-card');
-    cards.forEach(function(card) {
-        card.addEventListener('click', function() {
-            if (dwZoomedCard) return;
-            var id = this.getAttribute('data-dw-id');
-            zoomToCard(this, id);
-        });
-        card.addEventListener('mouseenter', function() {
-            if (dwZoomedCard) return;
-            var id = parseInt(this.getAttribute('data-dw-id'), 10);
-            showCardPreview(id);
-            liftCard(this);
-        });
-        card.addEventListener('mouseleave', function() {
-            if (dwZoomedCard) return;
-            hideCardPreview();
-            unliftCard(this);
-        });
-    });
-
-    var moreBtn = document.getElementById('dwMoreBtn');
-    if (moreBtn) {
-        moreBtn.addEventListener('click', function() {
-            window.location.hash = '#/design-work-list';
-        });
-    }
-}
-
-function liftCard(card) {
-    if (!card) return;
-    var cards = document.querySelectorAll('.dw-card');
-    var hoverIdx = parseInt(card.getAttribute('data-dw-id'), 10);
-    var total = cards.length;
-    var tl = gsap.timeline();
-
-    cards.forEach(function(c, i) {
-        var baseTransform = c.getAttribute('data-fan-transform') || '';
-        var angle = parseFloat(c.getAttribute('data-fan-angle') || '0');
-        var fx = parseFloat(c.getAttribute('data-fan-x') || '0');
-        var fy = parseFloat(c.getAttribute('data-fan-y') || '0');
-        var rOffset = window.__dwOffsets ? (window.__dwOffsets[i] || 0) : 0;
-        var dist = Math.abs(i - hoverIdx);
-        var dir = i < hoverIdx ? -1 : (i > hoverIdx ? 1 : 0);
-
-        if (i === hoverIdx) {
-            // Lifted card: move toward viewer, larger scale, higher z-index
-            c.style.zIndex = 100;
-            c.classList.add('hovered');
-            tl.to(c, {
-                transform: 'translate(' + fx.toFixed(3) + 'rem, ' + (fy - 0.3).toFixed(3) + 'rem) rotate(' + (angle + rOffset).toFixed(2) + 'deg)',
-                scale: 1.06,
-                duration: 0.45,
-                ease: 'power2.out'
-            }, 0);
-        } else if (dist <= 2) {
-            // Adjacent cards: shift away from hovered card
-            c.style.zIndex = 1;
-            c.classList.remove('hovered');
-            var shiftX = dir * (0.15 + (3 - dist) * 0.05);
-            tl.to(c, {
-                transform: 'translate(' + (fx + shiftX).toFixed(3) + 'rem, ' + fy.toFixed(3) + 'rem) rotate(' + (angle + rOffset + dir * 1.5).toFixed(2) + 'deg)',
-                duration: 0.45,
-                ease: 'power2.out'
-            }, 0);
-        } else {
-            // Far cards: slight spread
-            c.style.zIndex = 1;
-            c.classList.remove('hovered');
-            var dir2 = i < hoverIdx ? -1 : 1;
-            tl.to(c, {
-                transform: 'translate(' + (fx + dir2 * 0.04).toFixed(3) + 'rem, ' + fy.toFixed(3) + 'rem) rotate(' + (angle + rOffset).toFixed(2) + 'deg)',
-                duration: 0.5,
-                ease: 'power2.out'
-            }, 0);
-        }
-    });
-}
-
-function unliftCard(card) {
-    if (!card) return;
-    var cards = document.querySelectorAll('.dw-card');
-    var tl = gsap.timeline();
-
-    cards.forEach(function(c, i) {
-        var baseTransform = c.getAttribute('data-fan-transform') || '';
-        var angle = parseFloat(c.getAttribute('data-fan-angle') || '0');
-        var fx = parseFloat(c.getAttribute('data-fan-x') || '0');
-        var fy = parseFloat(c.getAttribute('data-fan-y') || '0');
-        var rOffset = window.__dwOffsets ? (window.__dwOffsets[i] || 0) : 0;
-
-        c.style.zIndex = 1;
-        c.classList.remove('hovered');
-        tl.to(c, {
-            transform: baseTransform,
-            scale: 1,
-            duration: 0.5,
-            ease: 'power3.inOut'
-        }, 0);
-    });
-}
-
-function showCardPreview(id) {
-    var item = dwItems[id];
-    if (!item) return;
-    var preview = document.getElementById('dwCardPreview');
-    var bg = document.getElementById('dwCardPreviewBg');
-    var info = document.getElementById('dwCardInfo');
-    var infoTitle = document.getElementById('dwCardInfoTitle');
-    var infoCat = document.getElementById('dwCardInfoCat');
-    var infoMeta = document.getElementById('dwCardInfoMeta');
-    var moreBtn = document.getElementById('dwMoreBtn');
-    if (!preview || !bg || !info || !infoTitle || !infoCat || !infoMeta) return;
-
-    // Fullscreen hover background with 60% opacity + blur
-    if (item.cardHoverBg) {
-        bg.style.background = 'url(' + item.cardHoverBg + ') center/cover';
-        bg.style.opacity = '0.6';
-        bg.style.filter = 'blur(12px)';
-    } else {
-        bg.style.background = '#000';
-        bg.style.opacity = '1';
-        bg.style.filter = 'none';
-    }
-    infoTitle.textContent = item.title;
-    infoCat.textContent = item.cat;
-    infoMeta.textContent = (item.published || '') + '  ' + (item.client || '');
-    preview.classList.add('active');
-    info.classList.add('active');
-    if (moreBtn) moreBtn.classList.add('hidden');
-}
-
-function hideCardPreview() {
-    var preview = document.getElementById('dwCardPreview');
-    var info = document.getElementById('dwCardInfo');
-    var moreBtn = document.getElementById('dwMoreBtn');
-    var bg = document.getElementById('dwCardPreviewBg');
-    if (preview) preview.classList.remove('active');
-    if (info) info.classList.remove('active');
-    if (moreBtn) moreBtn.classList.remove('hidden');
-    if (bg) { bg.style.opacity = '1'; bg.style.filter = 'none'; }
-}
-
-function zoomToCard(card, id) {
-    dwZoomedCard = card;
-    var overlay = document.getElementById('dwFanOverlay');
-    if (overlay) overlay.classList.add('active');
-
-    var rect = card.getBoundingClientRect();
-    var centerX = window.innerWidth / 2;
-    var centerY = window.innerHeight / 2;
-    var cardCenterX = rect.left + rect.width / 2;
-    var cardCenterY = rect.top + rect.height / 2;
-
-    var scaleX = window.innerWidth / rect.width * 0.85;
-    var scaleY = window.innerHeight / rect.height * 0.85;
-    var scale = Math.min(scaleX, scaleY);
-
-    var translateX = centerX - cardCenterX;
-    var translateY = centerY - cardCenterY;
-
-    dwZoomedCardOriginalTransform = card.getAttribute('data-fan-transform') || card.style.transform;
-
-    card.classList.add('zoomed');
-    card.style.transform = 'translate(' + translateX + 'px, ' + translateY + 'px) scale(' + scale + ') rotate(0deg)';
-    card.style.left = rect.left + 'px';
-    card.style.top = rect.top + 'px';
-
-    setTimeout(function() {
-        window.location.hash = '#/design-work/detail/' + id;
-        dwZoomedCard = null;
-    }, 700);
-}
-
-function resetFanCards() {
-    var cards = document.querySelectorAll('.dw-card');
-    cards.forEach(function(card) {
-        card.classList.remove('zoomed');
-        card.style.left = '';
-        card.style.top = '';
-        var fanTransform = card.getAttribute('data-fan-transform');
-        if (fanTransform) {
-            card.style.transform = fanTransform;
-        }
-    });
-    var overlay = document.getElementById('dwFanOverlay');
-    if (overlay) overlay.classList.remove('active');
-}
-
+// === Guard (unchanged) ===
 var designGuardStep = 1;
 var designGuardLevels = [];
 
 function loadDesignGuard() {
     var raw = localStorage.getItem('vipen_design_guard');
-    if (raw) {
-        try { designGuardLevels = JSON.parse(raw); } catch(e) { designGuardLevels = []; }
-    }
+    if (raw) { try { designGuardLevels = JSON.parse(raw); } catch(e) { designGuardLevels = []; } }
     if (!designGuardLevels || !designGuardLevels.level1) {
-        designGuardLevels = {
-            level1: { type: 'pin', answer: '', hint: '' },
-            level2: { type: 'text', answer: '', hint: '' },
-            level3: { type: 'none', answer: '', hint: '' }
-        };
+        designGuardLevels = { level1: { type: 'pin', answer: '', hint: '' }, level2: { type: 'text', answer: '', hint: '' }, level3: { type: 'none', answer: '', hint: '' } };
     }
 }
 
-function getCurrentLevelConfig() {
-    return designGuardLevels['level' + designGuardStep] || { type: 'none', answer: '', hint: '' };
-}
+function getCurrentLevelConfig() { return designGuardLevels['level' + designGuardStep] || { type: 'none', answer: '', hint: '' }; }
 
-function shakeInput(el) {
-    el.classList.add('dw-guard-shake');
-    el.classList.add('dw-guard-error-border');
-    setTimeout(function() {
-        el.classList.remove('dw-guard-shake');
-    }, 500);
-    setTimeout(function() {
-        el.classList.remove('dw-guard-error-border');
-    }, 2000);
+function buildGuardStepDots() {
+    var html = '';
+    for (var i = 1; i <= 3; i++) {
+        var cfg = designGuardLevels['level' + i] || { type: 'none', answer: '' };
+        html += '<span class="dw-guard-step-dot' + (cfg.type === 'none' && !cfg.answer ? ' skip' : '') + '">' + i + '</span>';
+    }
+    return html;
 }
 
 function renderDesignGuard() {
     loadDesignGuard();
     var cfg = getCurrentLevelConfig();
     var isPin = cfg.type === 'pin';
-    var hint = cfg.hint || '';
-    var placeholder = hint || 'Enter answer';
-    if (!hint) {
-        if (isPin) placeholder = 'Enter PIN';
-        else if (cfg.type === 'text') placeholder = 'Enter answer';
-        else placeholder = 'Press Enter to continue';
-    }
-
-    var html = '<div class="dw-guard-overlay" id="dwGuardOverlay" style="background:url(\'images/PIN验证.png\') center/cover no-repeat">' +
-        '<button class="dw-guard-back" id="dwGuardBack">' +
-        '<svg viewBox="0 0 24 24"><path d="M19 12H5m7-7l-7 7 7 7"/></svg> Back' +
-        '</button>' +
-        '<div class="dw-guard-step-indicator" id="dwGuardSteps">' +
-        buildGuardStepDots() +
-        '</div>' +
+    var hint = cfg.hint || (isPin ? 'Enter PIN' : cfg.type === 'text' ? 'Enter answer' : 'Press Enter');
+    return '<div class="dw-guard-overlay" id="dwGuardOverlay" style="background:url(\'images/PIN验证.png\') center/cover no-repeat">' +
+        '<button class="dw-guard-back" id="dwGuardBack"><svg viewBox="0 0 24 24"><path d="M19 12H5m7-7l-7 7 7 7"/></svg> Back</button>' +
+        '<div class="dw-guard-step-indicator">' + buildGuardStepDots() + '</div>' +
         '<div class="dw-guard-input-wrap">' +
-        '<input type="' + (isPin ? 'password' : 'text') + '" class="dw-guard-input" id="dwGuardInput" placeholder="' + placeholder + '" maxlength="' + (isPin ? '6' : '50') + '"' + (isPin ? ' inputmode="numeric"' : '') + ' autocomplete="off">' +
+        '<input type="' + (isPin ? 'password' : 'text') + '" class="dw-guard-input" id="dwGuardInput" placeholder="' + hint + '" maxlength="' + (isPin ? 6 : 50) + '"' + (isPin ? ' inputmode="numeric"' : '') + ' autocomplete="off">' +
         '</div></div>';
-    return html;
 }
 
-function buildGuardStepDots() {
-    var html = '';
-    for (var i = 1; i <= 3; i++) {
-        var cfg = designGuardLevels['level' + i] || { type: 'none', answer: '' };
-        if (cfg.type === 'none' && (!cfg.answer)) {
-            html += '<span class="dw-guard-step-dot skip" title="No answer required">' + i + '</span>';
-        } else {
-            html += '<span class="dw-guard-step-dot">' + i + '</span>';
-        }
-    }
-    return html;
-}
+function shakeInput(el) { el.classList.add('dw-guard-shake','dw-guard-error-border'); setTimeout(function(){ el.classList.remove('dw-guard-shake'); }, 500); setTimeout(function(){ el.classList.remove('dw-guard-error-border'); }, 2000); }
 
 function bindDesignGuard() {
-    designGuardStep = 1;
-    loadDesignGuard();
-
+    designGuardStep = 1; loadDesignGuard();
     var backBtn = document.getElementById('dwGuardBack');
-    if (backBtn) {
-        backBtn.addEventListener('click', function() {
-            window.history.back();
-        });
-    }
-
+    if (backBtn) backBtn.addEventListener('click', function() { window.history.back(); });
     var input = document.getElementById('dwGuardInput');
     if (!input) return;
-
-    function updateStepUI() {
-        var cfg = getCurrentLevelConfig();
-        var isPin = cfg.type === 'pin';
-        var isNone = cfg.type === 'none';
-        var hint = cfg.hint || '';
-        if (isNone) {
-            input.placeholder = hint || 'Press Enter to continue';
-            input.type = 'text';
-            input.maxLength = 50;
-            input.removeAttribute('inputmode');
-        } else if (isPin) {
-            input.placeholder = hint || 'Enter PIN';
-            input.type = 'password';
-            input.maxLength = 6;
-            input.setAttribute('inputmode', 'numeric');
-        } else {
-            input.placeholder = hint || 'Enter answer';
-            input.type = 'text';
-            input.maxLength = 50;
-            input.removeAttribute('inputmode');
-        }
+    function updateUI() {
+        var cfg = getCurrentLevelConfig(), isPin = cfg.type === 'pin', isNone = cfg.type === 'none';
+        input.placeholder = cfg.hint || (isNone ? 'Press Enter' : isPin ? 'Enter PIN' : 'Enter answer');
+        input.type = isPin ? 'password' : 'text';
+        input.maxLength = isPin ? 6 : 50;
+        if (isPin) input.setAttribute('inputmode', 'numeric'); else input.removeAttribute('inputmode');
         input.value = '';
-
-        var dots = document.querySelectorAll('.dw-guard-step-dot');
-        dots.forEach(function(dot, i) {
-            dot.classList.remove('active', 'done');
-            if (i + 1 === designGuardStep) dot.classList.add('active');
-            if (i + 1 < designGuardStep) dot.classList.add('done');
-        });
+        document.querySelectorAll('.dw-guard-step-dot').forEach(function(d, i) { d.classList.remove('active','done'); if (i+1===designGuardStep) d.classList.add('active'); if (i+1<designGuardStep) d.classList.add('done'); });
     }
-
-    updateStepUI();
-
-    function checkStep() {
-        var cfg = getCurrentLevelConfig();
-        var val = input.value.trim();
-
-        if (cfg.type === 'none') {
-            designGuardStep++;
-            if (designGuardStep > 3) {
-                finishGuard();
-            } else {
-                updateStepUI();
-            }
-            return;
-        }
-
-        if (cfg.type === 'pin') {
-            if (val.length !== 6 || !/^\d{6}$/.test(val)) {
-                shakeInput(input);
-                return;
-            }
-        } else {
-            if (!val) {
-                shakeInput(input);
-                return;
-            }
-        }
-
-        if (cfg.answer && val !== cfg.answer) {
-            shakeInput(input);
-            return;
-        }
-
-        designGuardStep++;
-        if (designGuardStep > 3) {
-            finishGuard();
-        } else {
-            updateStepUI();
-        }
-    }
-
-    function finishGuard() {
-        sessionStorage.setItem('design_verified', 'true');
-        var overlay = document.getElementById('dwGuardOverlay');
-        if (overlay && overlay.parentNode) {
-            overlay.parentNode.remove();
-        }
-        var currentHash = window.location.hash;
-        if (currentHash) {
-            window.location.hash = '';
-            setTimeout(function() {
-                window.location.hash = currentHash;
-            }, 0);
-        }
-    }
-
+    updateUI();
     input.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            checkStep();
-        }
+        if (e.key !== 'Enter') return; e.preventDefault();
+        var cfg = getCurrentLevelConfig(), val = input.value.trim();
+        if (cfg.type !== 'none') { if ((cfg.type==='pin'&&! /^\d{6}$/.test(val))||(!val)) { shakeInput(input); return; } if (cfg.answer && val !== cfg.answer) { shakeInput(input); return; } }
+        if (++designGuardStep > 3) { sessionStorage.setItem('design_verified','true'); var ov = document.getElementById('dwGuardOverlay'); if (ov&&ov.parentNode) ov.parentNode.remove(); var h = window.location.hash; if (h) { window.location.hash=''; setTimeout(function(){ window.location.hash=h; }, 0); } }
+        else updateUI();
     });
 }
 
-function isDesignVerified() {
-    // Cloudflare Pages static site: Design works are publicly viewable
-    return true;
-    // Auth-based management only on local server (node server.js)
-    // var auth = Utils.getAuth();
-    // if (auth && auth.role === 'ManagerGo') return true;
-    // var userData = Utils.getUserData('user');
-    // if (userData && userData.role === 'ManagerGo') return true;
-    // if (auth && auth.email === 'riverjia9527@gmail.com') return true;
-    // return sessionStorage.getItem('design_verified') === 'true';
-}
+function isDesignVerified() { return true; }
 
 return {
     buildGrid: function() { return buildDesignWorkGrid(); },
     buildDetail: function(id) { return buildDesignWorkDetail(id); },
     buildList: function() { return buildDesignWorkList(); },
-    bindGrid: function() {
-        positionFanCards();
-        bindDesignWorkCardClicks();
-    },
-    bindList: function() {
-        bindDesignWorkListClicks();
-        bindDesignWorkListPagination();
-    },
-    resetCards: function() { resetFanCards(); },
+    bindGrid: function() { startDieRotation(); bindDieInteraction(); },
+    bindList: function() { bindDesignWorkListClicks(); bindDesignWorkListPagination(); },
+    resetCards: function() { if (dieAutoRotation) dieAutoRotation.play(); },
     renderGuard: function() { return renderDesignGuard(); },
     bindGuard: function() { bindDesignGuard(); },
     isVerified: function() { return isDesignVerified(); }
