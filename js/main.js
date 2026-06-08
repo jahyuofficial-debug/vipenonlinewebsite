@@ -142,6 +142,13 @@ BannerPage.initBgVideo();
                 BannerPage.bannerData.bgVideoSrc = bannerData.map(function(g) { return g.bgType === 'video' ? (g.banner || '') : ''; });
                 BannerPage.bannerData.bgImage = bannerData.map(function(g) { return g.bgType === 'image' ? (g.banner || '') : ''; });
                 console.log('Banner metas loaded from R2');
+                // Initialize banner slides now that meta is loaded
+                var total = BannerPage.bannerData.homeGroups.length;
+                var dots = document.querySelectorAll('#slideDots .dot');
+                dots.forEach(function(dot, i) {
+                    dot.style.display = i < total ? '' : 'none';
+                });
+                BannerPage.changeSlide(0);
             }).catch(function() {
                 console.warn('Failed to load banner metas from R2');
             });

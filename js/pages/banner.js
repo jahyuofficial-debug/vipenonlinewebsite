@@ -37,7 +37,14 @@ function loadHomeBanner(callback) {
         }
     } catch (e) {}
 
-    // Wait for main.js to load banner data from R2 meta.json files
+    // main.js handles R2 meta loading and triggers changeSlide(0) when ready
+    // Check if data is already available
+    if (bannerData.homeGroups && bannerData.homeGroups.length > 0) {
+        if (callback) callback(true);
+        return;
+    }
+
+    // Poll briefly in case main.js hasn't finished yet
     var attempts = 0;
     function checkReady() {
         if (bannerData.homeGroups && bannerData.homeGroups.length > 0) {
