@@ -143,22 +143,30 @@ BannerPage.initBgVideo();
                 BannerPage.bannerData.bgImage = bannerData.map(function(g) { return g.bgType === 'image' ? (g.banner || '') : ''; });
                 console.log('Banner metas loaded from R2');
                 var meta0 = metas[0] || {};
-                var h2 = document.querySelector('#topicLine h2');
-                var h3 = document.querySelector('#noteLine h3');
-                if (h2) h2.textContent = meta0.topic || '';
-                if (h3) h3.textContent = meta0.note || '';
-                // Ensure msg is visible
-                var msgEl = document.querySelector('#banner .msg');
-                if (msgEl) { msgEl.style.opacity = '1'; msgEl.style.display = ''; }
+
+                // Force banner text visible and persistent
+                function applyBannerText() {
+                    var h2 = document.querySelector('#topicLine h2');
+                    var h3 = document.querySelector('#noteLine h3');
+                    var msgEl = document.querySelector('#banner .msg');
+                    if (h2) { h2.textContent = meta0.topic || ''; h2.style.cssText = (meta0.topicBold ? 'font-weight:bold;' : '') + (meta0.topicItalic ? 'font-style:italic;' : ''); }
+                    if (h3) { h3.textContent = meta0.note || ''; h3.style.cssText = (meta0.noteBold ? 'font-weight:bold;' : '') + (meta0.noteItalic ? 'font-style:italic;' : ''); }
+                    if (msgEl) { msgEl.style.opacity = '1'; msgEl.style.display = ''; msgEl.style.visibility = 'visible'; }
+                }
+                applyBannerText();
+                // Re-apply after potential overwrites
+                setTimeout(applyBannerText, 50);
+                setTimeout(applyBannerText, 300);
+                setTimeout(applyBannerText, 1000);
+
                 var total = BannerPage.bannerData.homeGroups.length;
                 var dots = document.querySelectorAll('#slideDots .dot');
                 dots.forEach(function(dot, i) {
                     dot.style.display = i < total ? '' : 'none';
                 });
-                // delay changeSlide to avoid race with auto-slide startup
                 setTimeout(function() {
                     BannerPage.changeSlide(0);
-                }, 200);
+                }, 1200);
             }).catch(function(e) {
                 console.warn('Failed to load banner metas from R2', e);
             });
