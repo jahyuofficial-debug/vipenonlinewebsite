@@ -10,7 +10,7 @@ function buildDesignWorkGrid() {
     var cards = dwItems.map(function(item, i) {
         var suit = dwSuits[i];
         var rank = dwRanks[i];
-        var cardBg = item.fanCardImage || item.coverImage || item.gradient;
+        var cardBg = item.cardBg ? 'url(' + item.cardBg + ') center/cover' : '#1a1a2e';
         return '<div class="dw-card" data-dw-id="' + i + '" id="dwCard' + i + '">' +
             '<div class="dw-card-img" style="background:' + cardBg + '"></div>' +
             '<div class="dw-card-mask"></div>' +
@@ -45,8 +45,10 @@ function buildDesignWorkGrid() {
 
 function buildDesignWorkDetail(id) {
     var item = dwItems[id];
-    var heroBg = item.coverImage ? item.coverImage : item.gradient;
-    var toolsStr = Array.isArray(item.tools) ? item.tools.join(' / ') : item.tools;
+    var heroBg = item.headerBg ? 'url(' + item.headerBg + ') center/cover' : '#0a0a0a';
+    var toolsStr = item.tools || '';
+    var clientStr = item.client || '';
+    var publishedStr = item.published || '';
 
     var tagsHtml = '';
     var tagsArr = item.tags || [];
@@ -65,14 +67,14 @@ function buildDesignWorkDetail(id) {
         '<span class="dw-detail-like-count">' + likeCount + '</span>' +
         '</button></div>';
 
-    var contentHtml = item.content ? '<div class="dw-detail-content">' + item.content + '</div>' : '';
+    var descHtml = item.desc ? '<div class="dw-detail-desc"><p>' + item.desc + '</p></div>' : '';
 
     var mediaHtml = '';
-    var mediaArr = item.media || [];
-    if (mediaArr.length > 0) {
+    var contentImages = item.contentImages || [];
+    if (contentImages.length > 0) {
         mediaHtml = '<div class="dw-detail-media">';
-        for (var mi = 0; mi < mediaArr.length; mi++) {
-            var src = mediaArr[mi];
+        for (var mi = 0; mi < contentImages.length; mi++) {
+            var src = contentImages[mi];
             if (src.indexOf('data:video') === 0 || src.match(/\.(mp4|webm|ogg)($|\?)/i)) {
                 mediaHtml += '<div class="dw-detail-media-item"><video src="' + src + '" controls></video></div>';
             } else {
@@ -94,14 +96,13 @@ function buildDesignWorkDetail(id) {
         '<p class="dw-detail-hero-cat">' + item.cat + '</p>' +
         '</div></div>' +
         '<div class="dw-detail-body">' +
-        contentHtml +
+        descHtml +
         mediaHtml +
-        '<p class="dw-detail-desc">' + item.desc + '</p>' +
         tagsHtml +
         likeHtml +
         '<div class="dw-detail-meta">' +
-        '<div class="dw-detail-meta-item"><p class="dw-detail-meta-label">Client</p><p class="dw-detail-meta-value">' + item.client + '</p></div>' +
-        '<div class="dw-detail-meta-item"><p class="dw-detail-meta-label">Published</p><p class="dw-detail-meta-value">' + item.year + '</p></div>' +
+        '<div class="dw-detail-meta-item"><p class="dw-detail-meta-label">Client</p><p class="dw-detail-meta-value">' + clientStr + '</p></div>' +
+        '<div class="dw-detail-meta-item"><p class="dw-detail-meta-label">Published</p><p class="dw-detail-meta-value">' + publishedStr + '</p></div>' +
         '<div class="dw-detail-meta-item"><p class="dw-detail-meta-label">Tools</p><p class="dw-detail-meta-value">' + toolsStr + '</p></div>' +
         '</div></div></div>';
 }
@@ -112,14 +113,14 @@ function buildDesignWorkListCards(page) {
     var pageItems = dwItems.slice(start, end);
     return pageItems.map(function(item, i) {
         var realIndex = start + i;
-        var thumbBg = item.listThumbImage || item.coverImage || item.gradient;
+        var thumbBg = item.cardBg ? 'url(' + item.cardBg + ') center/cover' : '#1a1a2e';
         return '<div class="dw-list-card" data-dw-id="' + realIndex + '">' +
             '<div class="dw-list-card-thumb" style="background:' + thumbBg + '"></div>' +
             '<div class="dw-list-card-body">' +
             '<p class="dw-list-card-cat">' + item.cat + '</p>' +
             '<h3 class="dw-list-card-title">' + item.title + '</h3>' +
-            '<p class="dw-list-card-meta">' + item.year + ' &#183; ' + item.client + '</p>' +
-            '<p class="dw-list-card-desc">' + item.desc + '</p>' +
+            '<p class="dw-list-card-meta">' + (item.published || '') + '  ' + (item.client || '') + '</p>' +
+            '<p class="dw-list-card-desc">' + (item.desc || '').substring(0, 120) + '</p>' +
             '</div></div>';
     }).join('');
 }
@@ -269,10 +270,19 @@ function showCardPreview(id) {
     var moreBtn = document.getElementById('dwMoreBtn');
     if (!preview || !bg || !info || !infoTitle || !infoCat || !infoMeta) return;
 
-    bg.style.background = item.gradient;
+    // Fullscreen hover background with 60% opacity + blur
+    if (item.cardHoverBg) {
+        bg.style.background = 'url(' + item.cardHoverBg + ') center/cover';
+        bg.style.opacity = '0.6';
+        bg.style.filter = 'blur(12px)';
+    } else {
+        bg.style.background = '#000';
+        bg.style.opacity = '1';
+        bg.style.filter = 'none';
+    }
     infoTitle.textContent = item.title;
     infoCat.textContent = item.cat;
-    infoMeta.textContent = item.year + '' + item.client;
+    infoMeta.textContent = (item.published || '') + '  ' + (item.client || '');
     preview.classList.add('active');
     info.classList.add('active');
     if (moreBtn) moreBtn.classList.add('hidden');
@@ -282,9 +292,11 @@ function hideCardPreview() {
     var preview = document.getElementById('dwCardPreview');
     var info = document.getElementById('dwCardInfo');
     var moreBtn = document.getElementById('dwMoreBtn');
+    var bg = document.getElementById('dwCardPreviewBg');
     if (preview) preview.classList.remove('active');
     if (info) info.classList.remove('active');
     if (moreBtn) moreBtn.classList.remove('hidden');
+    if (bg) { bg.style.opacity = '1'; bg.style.filter = 'none'; }
 }
 
 function zoomToCard(card, id) {

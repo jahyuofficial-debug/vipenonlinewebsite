@@ -70,22 +70,20 @@ BannerPage.initBgVideo();
 
         applySiteSettings(settings);
 
-        // Design: map from design/index.json format
+        // Design: map from design/index.json format (R2 images)
         if (designData && Array.isArray(designData)) {
             dwItems = designData.map(function(item) {
-                var title = item.folder.replace(/^\d+-/, '');
                 return {
-                    title: title,
+                    title: item.title || item.folder.replace(/^\d+-/, ''),
                     cat: item.cat || '',
-                    gradient: item.gradient || '',
-                    year: item.year || '',
+                    desc: item.description || item.desc || '',
                     client: item.client || '',
+                    published: item.published || item.year || '',
                     tools: item.tools || '',
-                    desc: item.desc || '',
-                    coverImage: '',
-                    fanCardImage: '',
-                    listThumbImage: '',
-                    content: '',
+                    cardBg: item.cardBg || '',
+                    cardHoverBg: item.cardHoverBg || '',
+                    headerBg: item.headerBg || '',
+                    contentImages: item.contentImages || [],
                     tags: item.tags || [],
                     likeCount: item.likeCount || 0
                 };
@@ -203,8 +201,7 @@ BannerPage.initBgVideo();
             }
             if (designData && Array.isArray(designData)) {
                 dwItems = designData.map(function(item) {
-                    var title = item.folder.replace(/^\d+-/, '');
-                    return { title: title, cat: item.cat||'', gradient: item.gradient||'', year: item.year||'', client: item.client||'', tools: item.tools||'', desc: item.desc||'', coverImage:'', fanCardImage:'', listThumbImage:'', content:'', tags: item.tags||[], likeCount: item.likeCount||0 };
+                    return { title: item.title || item.folder.replace(/^\d+-/, ''), cat: item.cat||'', desc: item.description||item.desc||'', client: item.client||'', published: item.published||item.year||'', tools: item.tools||'', cardBg: item.cardBg||'', cardHoverBg: item.cardHoverBg||'', headerBg: item.headerBg||'', contentImages: item.contentImages||[], tags: item.tags||[], likeCount: item.likeCount||0 };
                 });
                 dwSuits = designData.map(function(item) { return item.suit||''; });
                 dwRanks = designData.map(function(item) { return item.rank||''; });

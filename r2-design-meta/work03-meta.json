@@ -1,0 +1,8 @@
+{
+  "title": "Ethereal Wave",
+  "category": "Web Design",
+  "description": "A next-generation web experience for Waveform Audio, featuring real-time 3D audio visualization and an immersive browsing interface. The design pushes the boundaries of web technology while maintaining intuitive navigation and accessibility standards across all devices.",
+  "client": "Waveform Audio",
+  "published": "2025",
+  "tools": "React / Three.js / WebGL"
+}
