@@ -88,24 +88,32 @@ function updateActiveFaceFromRotation() {
     showDieFaceInfo(faceIdx);
 }
 
-function showDieFaceInfo(idx) {
-    if (idx === dieActiveFace) return;
-    dieActiveFace = idx;
+function updateDieFaceText(idx) {
     var item = dwItems[idx];
     if (!item) return;
     var catEl = document.getElementById('dieInfoCat');
     var titleEl = document.getElementById('dieInfoTitle');
-    var dieInfo = document.getElementById('dieInfo');
     if (catEl) catEl.textContent = item.cat;
     if (titleEl) titleEl.textContent = item.title;
-    if (dieInfo) dieInfo.classList.add('active');
+}
 
-    // Background
+function showDieFaceInfo(idx) {
+    if (idx === dieActiveFace) return;
+    dieActiveFace = idx;
+    updateDieFaceText(idx);
+    // Background and text visibility are ONLY toggled on hover (see bindDieInteraction)
+}
+
+function applyDieHoverVisuals(idx) {
+    var item = dwItems[idx];
+    if (!item) return;
     var sceneBg = document.getElementById('dieSceneBg');
+    var dieInfo = document.getElementById('dieInfo');
     if (sceneBg && item.cardHoverBg) {
         sceneBg.style.backgroundImage = 'url(' + item.cardHoverBg + ')';
         sceneBg.classList.add('active');
     }
+    if (dieInfo) dieInfo.classList.add('active');
 }
 
 function bindDieInteraction() {
@@ -117,7 +125,7 @@ function bindDieInteraction() {
     wrap.addEventListener('mouseenter', function() {
         dieIsHovering = true;
         if (dieAutoRotation) dieAutoRotation.pause();
-        document.getElementById('dieInfo').classList.add('active');
+        applyDieHoverVisuals(dieActiveFace);
     });
 
     wrap.addEventListener('mouseleave', function() {
@@ -155,7 +163,10 @@ function bindDieInteraction() {
         else if (ry >= 45 && ry < 135) faceIdx = 2;
         else if (ry >= 135 && ry < 225) faceIdx = 1;
         else faceIdx = 3;
-        showDieFaceInfo(faceIdx);
+        if (faceIdx !== dieActiveFace) {
+            showDieFaceInfo(faceIdx);
+            applyDieHoverVisuals(faceIdx);
+        }
     });
 
     wrap.addEventListener('click', function() {
