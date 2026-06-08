@@ -5,328 +5,170 @@ var dwZoomedCard = null;
 var dwListPageSize = 6;
 var dwListCurrentPage = 1;
 
-// === XP Desktop State ===
-var xpWindows = {};     // { id: { x, y, w, h, minimized, zIndex, dragging } }
-var xpZIndex = 10;
-var xpDragging = null;
-var xpDragOX = 0;
-var xpDragOY = 0;
+// === Poker Deck State ===
+var pokerCards = [];        // Array of card DOM elements
+var pokerBaseAngles = [];   // Original angle for each card
+var pokerBaseY = [];        // Original Y offset
+var pokerActiveIdx = -1;
 
-// Emoji icons per category
-var CAT_ICONS = {
-    'Branding': '\u{1F3A8}',     // 🎨
-    'UI/UX': '\u{1F4F1}',        // 📱
-    'Motion': '\u{1F3AC}',       // 🎬
-    'Web': '\u{1F310}',          // 🌐
-    '3D': '\u{1F4E6}',          // 📦
-    'Print': '\u{1F4F0}',       // 📰
-    'Photo': '\u{1F4F7}',       // 📷
-};
-var FALLBACK_ICONS = ['\u{1F4BB}','\u{1F5A5}','\u{1F4BE}','\u{1F4CE}','\u{2B50}','\u{2728}','\u{1F48E}','\u{1F525}','\u{1F30D}']; // 💻🖥💾📎⭐✨💎🔥🌍
+// Card suits for corner decoration
+var CARD_SUITS = ['\u2660', '\u2663', '\u2665', '\u2666']; // ♠ ♣ ♥ ♦
 
-function iconForItem(item, i) {
-    if (CAT_ICONS[item.cat]) return CAT_ICONS[item.cat];
-    return FALLBACK_ICONS[i % FALLBACK_ICONS.length];
-}
-
-// === Build XP Desktop ===
+// === Build Poker Deck ===
 function buildDesignWorkGrid() {
-    var icons = dwItems.map(function(item, i) {
-        var icon = iconForItem(item, i);
-        return '<div class="xp-icon" data-xp-id="' + i + '">' +
-            '<div class="xp-icon-img"><span>' + icon + '</span></div>' +
-            '<div class="xp-icon-label">' + xpTruncate(item.title, 14) + '</div>' +
+    var total = dwItems.length;
+    var cardsHTML = dwItems.map(function(item, i) {
+        var img = item.cardHoverBg || item.cardBg || item.headerBg || '';
+        var suit = CARD_SUITS[i % 4];
+        return '<div class="poker-card" data-poker-id="' + i + '" style="visibility:hidden">' +
+            '<span class="poker-card-corner poker-card-corner-tl">' + suit + '</span>' +
+            '<span class="poker-card-corner poker-card-corner-br">' + suit + '</span>' +
+            '<div class="poker-card-inner">' +
+            '<div class="poker-card-img" style="background-image:url(' + img + ')"></div>' +
+            '<div class="poker-card-footer">' +
+            '<p class="poker-card-cat">' + (item.cat || '') + '</p>' +
+            '<p class="poker-card-title">' + (item.title || '') + '</p>' +
+            '</div>' +
+            '</div>' +
             '</div>';
     }).join('');
 
-    var now = new Date();
-    var timeStr = padTime(now.getHours()) + ':' + padTime(now.getMinutes());
-
     return '<section id="page-design-work" class="dw-page">' +
-        '<div class="xp-desktop" id="xpDesktop">' +
-        '<div class="xp-icons-grid">' + icons + '</div>' +
-        '</div>' +
-        '<div class="xp-taskbar" id="xpTaskbar">' +
-        '<button class="xp-start-btn" id="xpStartBtn"><span>\u{F0FF}</span> start</button>' +
-        '<div class="xp-taskbar-divider"></div>' +
-        '<div class="xp-taskbar-tasks" id="xpTaskbarTasks"></div>' +
-        '<div class="xp-taskbar-tray">' +
-        '<span class="xp-tray-icon">\u{1F50A}</span>' +
-        '<span class="xp-tray-icon">\u{1F4E1}</span>' +
-        '<span class="xp-tray-time" id="xpTrayTime">' + timeStr + '</span>' +
-        '</div>' +
-        '</div>' +
+        '<div class="poker-felt"></div>' +
+        '<div class="poker-deck" id="pokerDeck">' + cardsHTML + '</div>' +
+        '<p class="poker-hint" id="pokerHint">Hover a card</p>' +
         '</section>';
 }
 
-function padTime(n) { return n < 10 ? '0' + n : '' + n; }
+function initPokerDeck() {
+    pokerCards = Array.from(document.querySelectorAll('.poker-card'));
+    if (!pokerCards.length) return;
 
-function xpTruncate(str, max) {
-    if (!str) return '';
-    var s = str.toString();
-    return s.length > max ? s.substring(0, max - 1) + '..' : s;
+    var total = pokerCards.length;
+    var centerIdx = Math.floor((total - 1) / 2);
+
+    // Fan parameters
+    var totalAngle = total <= 6 ? 35 : 28;
+    var startAngle = -(totalAngle / 2);
+    var angleStep = total > 1 ? totalAngle / (total - 1) : 0;
+
+    // Card spacing (overlap)
+    var xStep = total <= 6 ? .55 : .45;
+    var yCurve = total <= 6 ? .12 : .15;
+
+    pokerCards.forEach(function(card, i) {
+        var angle = startAngle + angleStep * i;
+        var distFromCenter = i - centerIdx;
+        var xOffset = distFromCenter * xStep;
+        var yOffset = Math.abs(distFromCenter) * yCurve;
+
+        pokerBaseAngles[i] = angle;
+        pokerBaseY[i] = yOffset;
+
+        gsap.set(card, {
+            x: xOffset + 'rem',
+            y: yOffset + 'rem',
+            rotation: angle,
+            zIndex: total - Math.abs(distFromCenter),
+            transformOrigin: 'center bottom',
+            autoAlpha: 1
+        });
+    });
 }
 
-// === Windows ===
-function xpOpenWindow(id) {
-    var item = dwItems[id];
-    if (!item) return;
+function bindPokerDeck() {
+    var cards = pokerCards;
+    if (!cards.length) return;
+    var hint = document.getElementById('pokerHint');
+    var total = cards.length;
 
-    if (xpWindows[id]) {
-        xpFocusWindow(id);
-        if (xpWindows[id].minimized) xpRestoreWindow(id);
-        return;
-    }
+    var centerIdx = Math.floor((total - 1) / 2);
+    var xStep = total <= 6 ? .55 : .45;
+    var yCurve = total <= 6 ? .12 : .15;
 
-    var baseX = 0.5 + (Object.keys(xpWindows).length * 0.25);
-    var baseY = 0.3 + (Object.keys(xpWindows).length * 0.2);
+    // Precompute neighbor push amounts
+    var pushAmount = total <= 6 ? .22 : .2;
 
-    xpWindows[id] = { x: baseX, y: baseY, w: 5, minimized: false, zIndex: ++xpZIndex };
-    xpRenderWindow(id);
-    xpFocusWindow(id);
-}
-
-function xpRenderWindow(id) {
-    var item = dwItems[id];
-    if (!item) return;
-    var win = xpWindows[id];
-    if (!win) return;
-
-    var desktop = document.getElementById('xpDesktop');
-    if (!desktop) return;
-
-    // Remove old window
-    var oldWin = document.getElementById('xpWindow' + id);
-    if (oldWin) oldWin.remove();
-
-    var icon = iconForItem(item, id);
-
-    var content = '<div class="xp-detail-title">' + icon + ' ' + item.title + '</div>' +
-        '<div class="xp-detail-cat">' + (item.cat || '') + '</div>' +
-        '<div class="xp-detail-sep"></div>';
-    if (item.desc) content += '<div class="xp-detail-desc">' + item.desc.substring(0, 180) + '</div>';
-    content += '<div class="xp-detail-meta">Published: ' + (item.published || '-') + '</div>';
-    content += '<div class="xp-detail-meta">Client: ' + (item.client || '-') + '</div>';
-    content += '<button class="xp-detail-open" data-xp-full="' + id + '">Open Full Detail</button>';
-
-    var winHTML = '<div class="xp-window" id="xpWindow' + id + '" style="left:' + win.x + 'rem;top:' + win.y + 'rem;width:' + win.w + 'rem;z-index:' + win.zIndex + ';display:none">' +
-        '<div class="xp-titlebar" data-xp-drag="' + id + '">' +
-        '<span class="xp-titlebar-icon">' + icon + '</span>' +
-        '<span class="xp-titlebar-text">' + item.title + '</span>' +
-        '<div class="xp-titlebar-btns">' +
-        '<button class="xp-tb-btn xp-tb-minimize" data-xp-min="' + id + '">_</button>' +
-        '<button class="xp-tb-btn xp-tb-close" data-xp-close="' + id + '">X</button>' +
-        '</div></div>' +
-        '<div class="xp-window-body">' +
-        '<div class="xp-window-content">' + content + '</div>' +
-        '<div class="xp-window-statusbar">' +
-        '<span>' + (item.tools || '') + '</span>' +
-        '</div></div></div>';
-
-    var temp = document.createElement('div');
-    temp.innerHTML = winHTML;
-    var winEl = temp.firstChild;
-    desktop.appendChild(winEl);
-
-    if (!win.minimized) winEl.style.display = '';
-
-    // Drag
-    var titlebar = winEl.querySelector('.xp-titlebar');
-    if (titlebar) {
-        titlebar.addEventListener('mousedown', function(e) {
-            xpDragging = id;
-            xpDragOX = e.clientX - winEl.offsetLeft;
-            xpDragOY = e.clientY - winEl.offsetTop;
-            e.preventDefault();
-        });
-    }
-
-    // Minimize
-    var minBtn = winEl.querySelector('[data-xp-min]');
-    if (minBtn) {
-        minBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            xpMinimizeWindow(id);
-        });
-    }
-
-    // Close
-    var closeBtn = winEl.querySelector('[data-xp-close]');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            xpCloseWindow(id);
-        });
-    }
-
-    // Full detail button
-    var fullBtn = winEl.querySelector('[data-xp-full]');
-    if (fullBtn) {
-        fullBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
+    cards.forEach(function(card, i) {
+        card.addEventListener('click', function() {
+            var id = this.getAttribute('data-poker-id');
             window.location.hash = '#/design-work/detail/' + id;
         });
-    }
 
-    // Focus on click
-    winEl.addEventListener('mousedown', function() {
-        xpFocusWindow(id);
-    });
+        card.addEventListener('mouseenter', function() {
+            if (pokerActiveIdx === i) return;
+            pokerActiveIdx = i;
+            if (hint) hint.classList.add('hidden');
 
-    xpUpdateTaskButtons();
-}
+            // Animate ALL cards
+            cards.forEach(function(c, j) {
+                var dist = j - i;
+                var targetAngle, targetX, targetY, targetZ;
 
-function xpFocusWindow(id) {
-    if (!xpWindows[id]) return;
-    xpWindows[id].zIndex = ++xpZIndex;
-    var winEl = document.getElementById('xpWindow' + id);
-    if (winEl) winEl.style.zIndex = xpWindows[id].zIndex;
-    // Update taskbar active state
-    document.querySelectorAll('.xp-task-btn').forEach(function(btn) {
-        var btnId = parseInt(btn.getAttribute('data-xp-task'), 10);
-        btn.classList.toggle('xp-task-focused', btnId === id);
-    });
-}
+                if (dist === 0) {
+                    // Hovered card: straighten, lift, enlarge
+                    targetAngle = 0;
+                    targetX = 0;
+                    targetY = '-=.15'; // lift up
+                    targetZ = total + 10;
+                    gsap.to(c, {
+                        x: targetX + 'rem',
+                        y: '-=.15rem',
+                        rotation: targetAngle,
+                        scale: 1.08,
+                        zIndex: targetZ,
+                        duration: .4,
+                        ease: 'power2.out'
+                    });
+                } else {
+                    // Neighbor cards: push away from center
+                    var pushDir = dist > 0 ? pushAmount : -pushAmount;
+                    var absDist = Math.abs(dist);
+                    var falloff = 1 / (absDist * 1.2 + 0.5);
+                    var baseRot = pokerBaseAngles[j];
+                    var pushRot = pushDir > 0 ? 3 : -3;
+                    var extraY = absDist * .02;
 
-function xpMinimizeWindow(id) {
-    if (!xpWindows[id]) return;
-    xpWindows[id].minimized = true;
-    var winEl = document.getElementById('xpWindow' + id);
-    if (winEl) winEl.style.display = 'none';
-    xpUpdateTaskButtons();
-}
+                    targetX = (pushDir * falloff) + 'rem';
+                    targetAngle = baseRot + pushRot * falloff;
+                    targetY = pokerBaseY[j] + extraY + 'rem';
+                    targetZ = total - absDist - 1;
 
-function xpRestoreWindow(id) {
-    if (!xpWindows[id]) return;
-    xpWindows[id].minimized = false;
-    var winEl = document.getElementById('xpWindow' + id);
-    if (winEl) winEl.style.display = '';
-    xpFocusWindow(id);
-    xpUpdateTaskButtons();
-}
-
-function xpCloseWindow(id) {
-    var winEl = document.getElementById('xpWindow' + id);
-    if (winEl) winEl.remove();
-    delete xpWindows[id];
-    xpUpdateTaskButtons();
-}
-
-function xpUpdateTaskButtons() {
-    var container = document.getElementById('xpTaskbarTasks');
-    if (!container) return;
-    container.innerHTML = '';
-    Object.keys(xpWindows).forEach(function(k) {
-        var id = parseInt(k, 10);
-        var item = dwItems[id];
-        var win = xpWindows[id];
-        var icon = iconForItem(item, id);
-        var btn = document.createElement('button');
-        btn.className = 'xp-task-btn';
-        if (!win.minimized) btn.classList.add('xp-task-focused');
-        btn.setAttribute('data-xp-task', id);
-        btn.innerHTML = '<span class="xp-task-btn-icon">' + icon + '</span><span class="xp-task-btn-text">' + (item ? item.title : '') + '</span>';
-        btn.addEventListener('click', function() {
-            if (xpWindows[id] && xpWindows[id].minimized) {
-                xpRestoreWindow(id);
-            } else if (!xpWindows[id]) {
-                xpOpenWindow(id);
-            } else {
-                xpMinimizeWindow(id);
-            }
-        });
-        container.appendChild(btn);
-    });
-}
-
-// === Mouse events ===
-function bindXpDesktop() {
-    var page = document.getElementById('page-design-work');
-    if (!page) return;
-
-    // Icon clicks
-    page.addEventListener('click', function(e) {
-        var icon = e.target.closest('.xp-icon');
-        if (!icon) return;
-        var id = parseInt(icon.getAttribute('data-xp-id'), 10);
-        if (!isNaN(id)) xpOpenWindow(id);
-    });
-
-    // Icon double click
-    page.addEventListener('dblclick', function(e) {
-        var icon = e.target.closest('.xp-icon');
-        if (!icon) return;
-        var id = parseInt(icon.getAttribute('data-xp-id'), 10);
-        if (!isNaN(id)) xpOpenWindow(id);
-    });
-
-    // Global mousemove for drag
-    document.addEventListener('mousemove', function(e) {
-        if (xpDragging === null) return;
-        var id = xpDragging;
-        var winEl = document.getElementById('xpWindow' + id);
-        if (!winEl) return;
-        var newX = e.clientX - xpDragOX;
-        var newY = e.clientY - xpDragOY;
-        newX = Math.max(0, newX);
-        newY = Math.max(0, newY);
-        xpWindows[id].x = newX / (window.innerWidth > 0 ? window.innerWidth : 1) * 16; // convert to rem approx
-        xpWindows[id].x = newX / 16;
-        xpWindows[id].y = newY / 16;
-        winEl.style.left = (newX / 16) + 'rem';
-        winEl.style.top = (newY / 16) + 'rem';
-    });
-
-    document.addEventListener('mouseup', function() {
-        xpDragging = null;
-    });
-
-    // Desktop click deselects
-    var desktop = document.getElementById('xpDesktop');
-    if (desktop) {
-        desktop.addEventListener('mousedown', function(e) {
-            if (!e.target.closest('.xp-window')) {
-                xpDragging = null;
-            }
-            if (!e.target.closest('.xp-icon') && !e.target.closest('.xp-window')) {
-                document.querySelectorAll('.xp-icon.selected').forEach(function(ic) {
-                    ic.classList.remove('selected');
-                });
-            }
-        });
-    }
-
-    // Start button - reset all windows
-    var startBtn = document.getElementById('xpStartBtn');
-    if (startBtn) {
-        startBtn.addEventListener('click', function() {
-            Object.keys(xpWindows).forEach(function(k) {
-                var id = parseInt(k, 10);
-                xpCloseWindow(id);
+                    gsap.to(c, {
+                        x: '+=' + (pushDir * falloff) + 'rem',
+                        y: targetY,
+                        rotation: targetAngle,
+                        scale: 1,
+                        zIndex: targetZ,
+                        duration: .4,
+                        ease: 'power2.out'
+                    });
+                }
             });
         });
-    }
 
-    // Keyboard shortcuts
-    page.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            var openIds = Object.keys(xpWindows);
-            if (openIds.length > 0) {
-                xpCloseWindow(parseInt(openIds[openIds.length - 1], 10));
-            }
-        }
+        card.addEventListener('mouseleave', function() {
+            pokerActiveIdx = -1;
+            if (hint) hint.classList.remove('hidden');
+
+            // Reset all cards to original fan position
+            cards.forEach(function(c, j) {
+                var distFromCenter = j - centerIdx;
+                var xOffset = distFromCenter * xStep;
+                var yOffset = Math.abs(distFromCenter) * yCurve;
+
+                gsap.to(c, {
+                    x: xOffset + 'rem',
+                    y: yOffset + 'rem',
+                    rotation: pokerBaseAngles[j],
+                    scale: 1,
+                    zIndex: total - Math.abs(distFromCenter),
+                    duration: .5,
+                    ease: 'power2.inOut'
+                });
+            });
+        });
     });
-
-    // Update clock
-    function updateClock() {
-        var now = new Date();
-        var clock = document.getElementById('xpTrayTime');
-        if (clock && page && page.offsetParent !== null) {
-            clock.textContent = padTime(now.getHours()) + ':' + padTime(now.getMinutes());
-        }
-    }
-    setInterval(updateClock, 30000);
-    updateClock();
 }
 
 // === Detail Page (unchanged) ===
@@ -548,7 +390,10 @@ return {
     buildGrid: function() { return buildDesignWorkGrid(); },
     buildDetail: function(id) { return buildDesignWorkDetail(id); },
     buildList: function() { return buildDesignWorkList(); },
-    bindGrid: function() { bindXpDesktop(); },
+    bindGrid: function() {
+        initPokerDeck();
+        bindPokerDeck();
+    },
     bindList: function() { bindDesignWorkListClicks(); bindDesignWorkListPagination(); },
     resetCards: function() {},
     renderGuard: function() { return renderDesignGuard(); },
