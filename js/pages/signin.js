@@ -427,7 +427,9 @@ var SigninPage = (function() {
             });
         }
 
-        CometTrail.init('signinCometCanvas', '.signin-container, .back-link');
+        if (typeof CometTrail !== 'undefined') {
+            CometTrail.init('signinCometCanvas', '.signin-container, .back-link');
+        }
     }
 
     return {

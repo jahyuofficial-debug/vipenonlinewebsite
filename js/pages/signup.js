@@ -454,7 +454,9 @@ var SignupPage = (function() {
             });
         }
 
-        CometTrail.init('signupCometCanvas', '.signup-container, .back-link');
+        if (typeof CometTrail !== 'undefined') {
+            CometTrail.init('signupCometCanvas', '.signup-container, .back-link');
+        }
     }
 
     return {
