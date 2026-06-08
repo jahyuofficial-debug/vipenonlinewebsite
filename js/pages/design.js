@@ -10,7 +10,7 @@ function buildDesignWorkGrid() {
     var cards = dwItems.map(function(item, i) {
         var suit = dwSuits[i];
         var rank = dwRanks[i];
-        var cardBg = item.cardBg ? 'url(' + item.cardBg + ') center/cover' : '#1a1a2e';
+        var cardBg = item.cardBg ? 'url(' + item.cardBg + ') center/cover, linear-gradient(145deg,#f8f4eb 0%,#ebe3d5 50%,#f0ece0 100%)' : 'linear-gradient(145deg,#f8f4eb 0%,#ebe3d5 50%,#f0ece0 100%)';
         return '<div class="dw-card" data-dw-id="' + i + '" id="dwCard' + i + '">' +
             '<div class="dw-card-img" style="background:' + cardBg + '"></div>' +
             '<div class="dw-card-mask"></div>' +
@@ -113,7 +113,7 @@ function buildDesignWorkListCards(page) {
     var pageItems = dwItems.slice(start, end);
     return pageItems.map(function(item, i) {
         var realIndex = start + i;
-        var thumbBg = item.cardBg ? 'url(' + item.cardBg + ') center/cover' : '#1a1a2e';
+        var thumbBg = item.cardBg ? 'url(' + item.cardBg + ') center/cover, linear-gradient(145deg,#f8f4eb,#ebe3d5)' : 'linear-gradient(145deg,#f8f4eb,#ebe3d5)';
         return '<div class="dw-list-card" data-dw-id="' + realIndex + '">' +
             '<div class="dw-list-card-thumb" style="background:' + thumbBg + '"></div>' +
             '<div class="dw-list-card-body">' +
