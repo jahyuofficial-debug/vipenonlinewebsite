@@ -153,9 +153,8 @@ BannerPage.initBgVideo();
                 dots.forEach(function(dot, i) {
                     dot.style.display = i < total ? '' : 'none';
                 });
-                SlideDots.stopAutoSlide();
+                // changeSlide handles resetAutoSlideInterval internally
                 BannerPage.changeSlide(0);
-                SlideDots.startAutoSlide();
             }).catch(function(e) {
                 console.warn('Failed to load banner metas from R2', e);
             });
