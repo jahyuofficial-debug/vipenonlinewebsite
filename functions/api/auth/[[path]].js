@@ -90,13 +90,12 @@ async function handleSendCode(env, body) {
   }
   const code = generateCode();
   const ts = Date.now();
-  codeStore.set(email, { code, expiresAt: ts + 300000, sentAt: ts });
+  codeStore.set(email, { sentAt: ts }); // rate limiting only
   const hash = await hmacSHA256(AUTH_SECRET, email + '|' + code + '|' + ts);
   try {
     await sendEmail(env, email, code);
     return json({ success: true, hash, ts });
   } catch (e) {
-    codeStore.delete(email);
     return json({ success: false, error: 'Email failed: ' + e.message }, 500);
   }
 }
@@ -104,12 +103,13 @@ async function handleSendCode(env, body) {
 async function handleVerifyCode(env, body) {
   const { email, code, hash, ts } = body;
   if (!email || !code || !hash || !ts) return json({ success: false, error: 'Missing fields' }, 400);
-  const s = codeStore.get(email);
-  if (!s || Date.now() > s.expiresAt) { codeStore.delete(email); return json({ success: false, error: 'Code expired' }, 400); }
-  if (s.code !== String(code).trim()) return json({ success: false, error: 'Invalid code' }, 400);
-  const h = await hmacSHA256(AUTH_SECRET, email + '|' + code + '|' + ts);
-  if (hash !== h) return json({ success: false, error: 'Invalid hash' }, 400);
-  codeStore.delete(email);
+
+  // Expiry: 5 minutes from ts
+  if (Date.now() - ts > 300000) return json({ success: false, error: 'Code expired' }, 400);
+
+  // Verify HMAC signature (no server-side state needed)
+  const expectedHash = await hmacSHA256(AUTH_SECRET, email + '|' + code + '|' + ts);
+  if (hash !== expectedHash) return json({ success: false, error: 'Invalid code' }, 400);
 
   let user = USERS.find(u => u.email === email);
   if (!user) {
