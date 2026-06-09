@@ -8,14 +8,15 @@ var Weather = {
     defaultLon: 121.4737,
     defaultCity: 'Shanghai',
 
+    // 极简线框风格 — stroke-only, 24×24, 统一 1.5px 描边
     icons: {
-        sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2.5M12 19.5V22M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M2 12h2.5M19.5 12H22M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77"/></svg>',
-        cloud: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19c2.5 0 4.5-2 4.5-4.5S20 10 17.5 10c-.3 0-.5 0-.8.1C16 6.1 12.9 4 9.5 4 5.4 4 2 7.4 2 11.5c0 .4 0 .7.1 1.1C.9 13.4 0 14.9 0 16.5 0 19 2 21 4.5 21h13z"/></svg>',
-        partlyCloudy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19c2.5 0 4.5-2 4.5-4.5S20 10 17.5 10c-.3 0-.5 0-.8.1C16 6.1 12.9 4 9.5 4c-2.3 0-4.4 1.1-5.8 2.9"/><circle cx="18" cy="6" r="2.5"/><path d="M4.5 21h13c2.5 0 4.5-2 4.5-4.5S20 10 17.5 10"/></svg>',
-        rain: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19c2.5 0 4.5-2 4.5-4.5S20 10 17.5 10c-.3 0-.5 0-.8.1C16 6.1 12.9 4 9.5 4 5.4 4 2 7.4 2 11.5c0 .4 0 .7.1 1.1C.9 13.4 0 14.9 0 16.5 0 19 2 21 4.5 21h13z"/><path d="M8 22l-1 2M12 22l-1 2M16 22l-1 2"/></svg>',
-        snow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19c2.5 0 4.5-2 4.5-4.5S20 10 17.5 10c-.3 0-.5 0-.8.1C16 6.1 12.9 4 9.5 4 5.4 4 2 7.4 2 11.5c0 .4 0 .7.1 1.1C.9 13.4 0 14.9 0 16.5 0 19 2 21 4.5 21h13z"/><path d="M8 22l.5-1.5.5 1.5-.5 1.5zM12 22l.5-1.5.5 1.5-.5 1.5zM16 22l.5-1.5.5 1.5-.5 1.5z"/></svg>',
-        thunder: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19c2.5 0 4.5-2 4.5-4.5S20 10 17.5 10c-.3 0-.5 0-.8.1C16 6.1 12.9 4 9.5 4 5.4 4 2 7.4 2 11.5c0 .4 0 .7.1 1.1C.9 13.4 0 14.9 0 16.5 0 19 2 21 4.5 21h13z"/><path d="M11 16l-2 4h3l-1 4"/></svg>',
-        fog: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h16M4 18h16M4 10h16"/></svg>'
+        sun:            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2.5M12 18.5v2.5M3 12h2.5M18.5 12H21"/></svg>',
+        partlyCloudy:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="3"/><path d="M7 2.5v1.5M4 8h1.5"/><path d="M5 17a4 4 0 0 1 3-7.5M10 10a5 5 0 0 1 7.5 2.5M19 11a4 4 0 0 1 3.5 5H4.5Z"/></svg>',
+        cloud:          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17a4 4 0 0 1 3-7.5M10 10a5 5 0 0 1 7.5 2.5M19 11a4 4 0 0 1 3.5 5H4.5Z"/></svg>',
+        fog:            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 8h18M5 14h14M2 20h20"/></svg>',
+        rain:           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 17a4 4 0 0 1 3-7.5M10 10a5 5 0 0 1 7.5 2.5M19 11a4 4 0 0 1 3.5 5H4.5Z"/><path d="M7 18v4M10.5 17v5M14 18v4"/></svg>',
+        snow:           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 17a4 4 0 0 1 3-7.5M10 10a5 5 0 0 1 7.5 2.5M19 11a4 4 0 0 1 3.5 5H4.5Z"/><circle cx="7" cy="20" r="1"/><circle cx="11" cy="18.5" r="1"/><circle cx="15" cy="20" r="1"/><circle cx="9" cy="22.5" r="1"/><circle cx="13" cy="22.5" r="1"/></svg>',
+        thunder:        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17a4 4 0 0 1 3-7.5M10 10a5 5 0 0 1 7.5 2.5M19 11a4 4 0 0 1 3.5 5H4.5Z"/><path d="M11.5 15 9 19.5h2.5L10 23"/></svg>'
     },
 
     getIconByCode: function(code) {
@@ -55,6 +56,7 @@ var Weather = {
     render: function(data) {
         var widget = document.getElementById('weatherWidget');
         var iconEl = document.getElementById('weatherIcon');
+        var tipIconEl = document.getElementById('weatherTooltipIcon');
         var dateEl = document.getElementById('weatherDate');
         var tempEl = document.getElementById('weatherTemp');
         var descEl = document.getElementById('weatherDesc');
@@ -63,7 +65,9 @@ var Weather = {
         if (!widget || !iconEl) return;
 
         var code = data.current.weather_code;
-        iconEl.innerHTML = this.getIconByCode(code);
+        var iconSvg = this.getIconByCode(code);
+        iconEl.innerHTML = iconSvg;
+        if (tipIconEl) tipIconEl.innerHTML = iconSvg;
         if (dateEl) dateEl.textContent = this.formatDate();
         if (tempEl) tempEl.textContent = Math.round(data.current.temperature_2m) + '°C';
         if (descEl) descEl.textContent = this.getDescByCode(code);
