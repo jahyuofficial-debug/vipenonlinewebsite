@@ -9,13 +9,13 @@ var Weather = {
     defaultCity: 'Shanghai',
 
     icons: {
-        sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>',
-        cloud: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>',
-        partlyCloudy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><circle cx="18" cy="6" r="2"/></svg>',
-        rain: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><path d="M8 22v-2M12 22v-2M16 22v-2"/></svg>',
-        snow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><path d="M8 22l2-2-2-2M14 22l2-2-2-2M11 22v-4"/></svg>',
-        thunder: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/><path d="M13 16l-2 4h3l-2 4"/></svg>',
-        fog: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h16M4 18h16M4 10h16M8 6h8"/></svg>'
+        sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2.5M12 19.5V22M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M2 12h2.5M19.5 12H22M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77"/></svg>',
+        cloud: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19c2.5 0 4.5-2 4.5-4.5S20 10 17.5 10c-.3 0-.5 0-.8.1C16 6.1 12.9 4 9.5 4 5.4 4 2 7.4 2 11.5c0 .4 0 .7.1 1.1C.9 13.4 0 14.9 0 16.5 0 19 2 21 4.5 21h13z"/></svg>',
+        partlyCloudy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19c2.5 0 4.5-2 4.5-4.5S20 10 17.5 10c-.3 0-.5 0-.8.1C16 6.1 12.9 4 9.5 4c-2.3 0-4.4 1.1-5.8 2.9"/><circle cx="18" cy="6" r="2.5"/><path d="M4.5 21h13c2.5 0 4.5-2 4.5-4.5S20 10 17.5 10"/></svg>',
+        rain: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19c2.5 0 4.5-2 4.5-4.5S20 10 17.5 10c-.3 0-.5 0-.8.1C16 6.1 12.9 4 9.5 4 5.4 4 2 7.4 2 11.5c0 .4 0 .7.1 1.1C.9 13.4 0 14.9 0 16.5 0 19 2 21 4.5 21h13z"/><path d="M8 22l-1 2M12 22l-1 2M16 22l-1 2"/></svg>',
+        snow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19c2.5 0 4.5-2 4.5-4.5S20 10 17.5 10c-.3 0-.5 0-.8.1C16 6.1 12.9 4 9.5 4 5.4 4 2 7.4 2 11.5c0 .4 0 .7.1 1.1C.9 13.4 0 14.9 0 16.5 0 19 2 21 4.5 21h13z"/><path d="M8 22l.5-1.5.5 1.5-.5 1.5zM12 22l.5-1.5.5 1.5-.5 1.5zM16 22l.5-1.5.5 1.5-.5 1.5z"/></svg>',
+        thunder: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19c2.5 0 4.5-2 4.5-4.5S20 10 17.5 10c-.3 0-.5 0-.8.1C16 6.1 12.9 4 9.5 4 5.4 4 2 7.4 2 11.5c0 .4 0 .7.1 1.1C.9 13.4 0 14.9 0 16.5 0 19 2 21 4.5 21h13z"/><path d="M11 16l-2 4h3l-1 4"/></svg>',
+        fog: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h16M4 18h16M4 10h16"/></svg>'
     },
 
     getIconByCode: function(code) {
