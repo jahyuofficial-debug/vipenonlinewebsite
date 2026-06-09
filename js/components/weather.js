@@ -8,15 +8,15 @@ var Weather = {
     defaultLon: 121.4737,
     defaultCity: 'Shanghai',
 
-    // 极简线框风格 — stroke-only, 24×24, 统一 1.5px 描边
+    // iOS 风格纯色填充 — fill only, 24×24, 单色剪影
     icons: {
-        sun:            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2.5M12 18.5v2.5M3 12h2.5M18.5 12H21"/></svg>',
-        partlyCloudy:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="3"/><path d="M7 2.5v1.5M4 8h1.5"/><path d="M5 17a4 4 0 0 1 3-7.5M10 10a5 5 0 0 1 7.5 2.5M19 11a4 4 0 0 1 3.5 5H4.5Z"/></svg>',
-        cloud:          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17a4 4 0 0 1 3-7.5M10 10a5 5 0 0 1 7.5 2.5M19 11a4 4 0 0 1 3.5 5H4.5Z"/></svg>',
-        fog:            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 8h18M5 14h14M2 20h20"/></svg>',
-        rain:           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 17a4 4 0 0 1 3-7.5M10 10a5 5 0 0 1 7.5 2.5M19 11a4 4 0 0 1 3.5 5H4.5Z"/><path d="M7 18v4M10.5 17v5M14 18v4"/></svg>',
-        snow:           '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 17a4 4 0 0 1 3-7.5M10 10a5 5 0 0 1 7.5 2.5M19 11a4 4 0 0 1 3.5 5H4.5Z"/><circle cx="7" cy="20" r="1"/><circle cx="11" cy="18.5" r="1"/><circle cx="15" cy="20" r="1"/><circle cx="9" cy="22.5" r="1"/><circle cx="13" cy="22.5" r="1"/></svg>',
-        thunder:        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17a4 4 0 0 1 3-7.5M10 10a5 5 0 0 1 7.5 2.5M19 11a4 4 0 0 1 3.5 5H4.5Z"/><path d="M11.5 15 9 19.5h2.5L10 23"/></svg>'
+        sun:            '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="3.5"/><rect x="10.5" y="1.5" width="3" height="4" rx="1.5"/><rect x="10.5" y="18.5" width="3" height="4" rx="1.5"/><rect x="1.5" y="10.5" width="4" height="3" rx="1.5"/><rect x="18.5" y="10.5" width="4" height="3" rx="1.5"/></svg>',
+        partlyCloudy:   '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="7" cy="7" r="2.5"/><rect x="5.5" y="2" width="3" height="3" rx="1.5"/><rect x="2" y="5.5" width="3" height="3" rx="1.5"/><circle cx="10" cy="14" r="3.5"/><circle cx="14" cy="13" r="4"/><circle cx="18" cy="14" r="3"/><rect x="6" y="14" width="16" height="7" rx="3.5"/></svg>',
+        cloud:          '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8.5" cy="14" r="4.5"/><circle cx="13.5" cy="13" r="4.5"/><circle cx="17.5" cy="14" r="3.5"/><rect x="4" y="14" width="17" height="7" rx="3.5"/></svg>',
+        fog:            '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="7" width="20" height="3" rx="1.5"/><rect x="3" y="14" width="18" height="3" rx="1.5"/><rect x="1" y="21" width="22" height="3" rx="1.5"/></svg>',
+        rain:           '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8.5" cy="13" r="4"/><circle cx="13" cy="12" r="4.5"/><circle cx="17" cy="13.5" r="3.5"/><rect x="4.5" y="13" width="16" height="7" rx="3.5"/><rect x="7" y="18" width="2.5" height="5" rx="1.25"/><rect x="11" y="17.5" width="2.5" height="6" rx="1.25"/><rect x="15" y="18" width="2.5" height="5" rx="1.25"/></svg>',
+        snow:           '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8.5" cy="13" r="4"/><circle cx="13" cy="12" r="4.5"/><circle cx="17" cy="13.5" r="3.5"/><rect x="4.5" y="13" width="16" height="7" rx="3.5"/><circle cx="7" cy="20" r="1.5"/><circle cx="11" cy="19" r="1.5"/><circle cx="15" cy="20" r="1.5"/><circle cx="9" cy="22.5" r="1.5"/><circle cx="13" cy="22.5" r="1.5"/></svg>',
+        thunder:        '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="8.5" cy="13" r="4"/><circle cx="13" cy="12" r="4.5"/><circle cx="17" cy="13.5" r="3.5"/><rect x="4.5" y="13" width="16" height="7" rx="3.5"/><path d="M11 17l-2.5 4h3l-1.5 2.5h-1l1-2H7.5l3.5-4.5z"/></svg>'
     },
 
     getIconByCode: function(code) {
