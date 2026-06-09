@@ -186,17 +186,10 @@ function isCurrentSlideVideo() {
 function initBgVideo(){
     bgVideo = document.getElementById('bgVideo');
     if(bgVideo){
-        bgVideo.addEventListener('ended', function(){
-            bgVideo.currentTime = 0;
-            bgVideo.play();
-        }, false);
-        bgVideo.addEventListener('waiting', function(){
-            bgVideo.play();
-        }, false);
         var banObs = new IntersectionObserver(function(entries){
             entries.forEach(function(entry){
                 if(entry.isIntersecting){
-                    if(bgVideo.paused && isCurrentSlideVideo()) bgVideo.play();
+                    if(bgVideo.paused && isCurrentSlideVideo()) bgVideo.play().catch(function(){});
                 }
             });
         }, {threshold:0.1});
