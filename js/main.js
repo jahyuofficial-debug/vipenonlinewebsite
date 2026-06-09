@@ -475,6 +475,8 @@ NotificationCenter.init();
 
 CookieConsent.init();
 
+if (window.Weather) { Weather.init(); }
+
 if(signinBtn){
     signinBtn.addEventListener('click', goToSignin);
 }

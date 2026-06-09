@@ -4,6 +4,7 @@
   header.scrolled{padding:.15rem .3rem}
   header .pc-nav .navItems{display:none}
   header .headerActions{display:none}
+  .weather-widget{display:none}
   header .app-nav{display:flex;align-items:center;justify-content:space-between;padding:.2rem .3rem}
   header .app-nav .logo img{height:.3rem}
   .max-wid{padding:0 .2rem}

@@ -110,6 +110,20 @@
                 <li><a href="#/msg" class="navLink" data-nav="msg">MSG</a></li>
             </ul>
         </div>
+        <div class="weather-widget" id="weatherWidget">
+            <div class="weather-icon" id="weatherIcon"></div>
+            <div class="weather-tooltip" id="weatherTooltip">
+                <div class="weather-tooltip-date" id="weatherDate"></div>
+                <div class="weather-tooltip-main">
+                    <span class="weather-tooltip-temp" id="weatherTemp"></span>
+                    <span class="weather-tooltip-desc" id="weatherDesc"></span>
+                </div>
+                <div class="weather-tooltip-meta">
+                    <span id="weatherHumidity"></span>
+                    <span id="weatherWind"></span>
+                </div>
+            </div>
+        </div>
         <div class="headerActions">
             <button id="signinBtn" class="authBtn signin">Sign in</button>
             <button id="signupBtn" class="authBtn signup">Sign up</button>
@@ -179,6 +193,7 @@
 <script src="js/components/loading.js"></script>
 <script src="js/components/slide-dots.js"></script>
 <script src="js/components/mini-player.js"></script>
+<script src="js/components/weather.js"></script>
 <script src="js/pages/fresh.js"></script>
 <script src="js/pages/design.js"></script>
 <script src="js/pages/action.js"></script>
