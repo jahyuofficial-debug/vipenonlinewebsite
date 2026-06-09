@@ -27,7 +27,7 @@ header .headerActions .profile-link svg{width:.22rem;height:.22rem}
 header .headerActions .manager-go-link{background:transparent;border:none;color:rgba(255,255,255,.55);font-size:.1rem;font-weight:900;font-style:italic;font-family:'Brush Script MT','Segoe Script','Comic Sans MS',cursive,sans-serif;text-decoration:none;padding:.04rem .04rem;margin-right:.08rem}
 header .headerActions .manager-go-link:hover{color:#fff}
 
-header.dimmed .navItems{opacity:.25;transition:opacity .45s}
+header.dimmed .navItems a{opacity:.25;transition:opacity .45s}
 header.dimmed .headerActions{opacity:.25;transition:opacity .45s}
 header .navItems{transition:opacity .45s}
 header .headerActions{transition:opacity .45s}
