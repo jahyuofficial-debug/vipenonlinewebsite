@@ -67,58 +67,39 @@ function startTypewriter() {
     if (!h2 || !h3) return;
 
     var textIndex = 0;
-    var phase = 'type'; // 'type' | 'pause' | 'delete' | 'nextPause'
+    var phase = 'pause'; // Start with text visible, then delete
     var charIndex = 0;
     var currentPair = allTexts[0];
-    var typeSpeed = 80;   // ms per character while typing
-    var deleteSpeed = 40; // ms per character while deleting
-    var pauseAfterType = 1800; // ms pause after full text shown
-    var pauseAfterDelete = 400; // ms pause before next text
+    var typeSpeed = 80;
+    var deleteSpeed = 40;
+    var pauseAfterType = 2000;
+    var pauseAfterDelete = 500;
 
-    // Create cursor span (shared across cycles)
     var cursorSpan = document.createElement('span');
     cursorSpan.className = 'cursor-blink';
 
-    // Start with current text visible, cursor at end
+    // Start: keep whatever text is already visible, add cursor, then delete
     function startCycle() {
-        // Clear previous content, add cursor
-        h2.textContent = '';
-        h3.textContent = '';
-        h2.appendChild(cursorSpan);
-        charIndex = 0;
-        phase = 'type';
         currentPair = allTexts[textIndex];
-        tick();
+        // Sync text with currentPair if currently showing different text
+        var currentH2 = (h2.textContent || '').trim();
+        if (currentH2 !== currentPair.topic) {
+            h2.textContent = currentPair.topic;
+            h3.textContent = currentPair.note;
+        }
+        h2.appendChild(cursorSpan);
+        charIndex = currentPair.topic.length + currentPair.note.length;
+        phase = 'pause';
+        bannerData.typewriterTimer = setTimeout(tick, pauseAfterType);
     }
 
     function tick() {
-        if (phase === 'type') {
-            if (charIndex < currentPair.topic.length) {
-                // Still typing topic
-                h2.textContent = currentPair.topic.substring(0, charIndex + 1);
-                h2.appendChild(cursorSpan);
-                charIndex++;
-                bannerData.typewriterTimer = setTimeout(tick, typeSpeed);
-            } else if (charIndex < currentPair.topic.length + currentPair.note.length) {
-                // Typing note
-                var noteIdx = charIndex - currentPair.topic.length;
-                h3.textContent = currentPair.note.substring(0, noteIdx + 1);
-                charIndex++;
-                bannerData.typewriterTimer = setTimeout(tick, typeSpeed);
-            } else {
-                // All done typing, keep cursor
-                h2.appendChild(cursorSpan);
-                phase = 'pause';
-                bannerData.typewriterTimer = setTimeout(tick, pauseAfterType);
-            }
-        } else if (phase === 'pause') {
-            // Start deleting
+        if (phase === 'pause') {
             phase = 'delete';
             charIndex = currentPair.topic.length + currentPair.note.length;
             bannerData.typewriterTimer = setTimeout(tick, deleteSpeed);
         } else if (phase === 'delete') {
             if (charIndex > currentPair.topic.length) {
-                // Deleting note
                 var noteKeep = charIndex - currentPair.topic.length - 1;
                 if (noteKeep > 0) {
                     h3.textContent = currentPair.note.substring(0, noteKeep);
@@ -129,24 +110,36 @@ function startTypewriter() {
                 h2.appendChild(cursorSpan);
                 bannerData.typewriterTimer = setTimeout(tick, deleteSpeed);
             } else if (charIndex > 0) {
-                // Deleting topic
                 h2.textContent = currentPair.topic.substring(0, charIndex - 1);
                 h2.appendChild(cursorSpan);
                 charIndex--;
                 bannerData.typewriterTimer = setTimeout(tick, deleteSpeed);
             } else {
-                // All deleted, move to next text
                 h2.textContent = '';
+                h3.textContent = '';
                 h2.appendChild(cursorSpan);
                 textIndex = (textIndex + 1) % allTexts.length;
+                currentPair = allTexts[textIndex];
                 charIndex = 0;
-                phase = 'nextPause';
+                phase = 'type';
                 bannerData.typewriterTimer = setTimeout(tick, pauseAfterDelete);
             }
-        } else if (phase === 'nextPause') {
-            // Start typing next text
-            phase = 'type';
-            bannerData.typewriterTimer = setTimeout(tick, typeSpeed);
+        } else if (phase === 'type') {
+            if (charIndex < currentPair.topic.length) {
+                h2.textContent = currentPair.topic.substring(0, charIndex + 1);
+                h2.appendChild(cursorSpan);
+                charIndex++;
+                bannerData.typewriterTimer = setTimeout(tick, typeSpeed);
+            } else if (charIndex < currentPair.topic.length + currentPair.note.length) {
+                var noteIdx = charIndex - currentPair.topic.length;
+                h3.textContent = currentPair.note.substring(0, noteIdx + 1);
+                charIndex++;
+                bannerData.typewriterTimer = setTimeout(tick, typeSpeed);
+            } else {
+                h2.appendChild(cursorSpan);
+                phase = 'pause';
+                bannerData.typewriterTimer = setTimeout(tick, pauseAfterType);
+            }
         }
     }
 
