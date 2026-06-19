@@ -118,5 +118,28 @@
     "published": "2024",
     "tools": "Blender / Unreal Engine / PS",
     "tags": []
+  },
+  {
+    "folder": "07-Test Project",
+    "workId": "work07",
+    "cat": "3D Art",
+    "suit": "♦",
+    "rank": "7",
+    "likeCount": 0,
+    "cardBg": "https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/07-Test Project/card-bg.png",
+    "cardHoverBg": "https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/07-Test Project/card-hover.png",
+    "headerBg": "https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/07-Test Project/header-bg.png",
+    "contentImages": [
+      "https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/07-Test Project/content-1.png",
+      "https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/07-Test Project/content-2.png"
+    ],
+    "title": "Test Work",
+    "description": "A minimal test work.",
+    "client": "TestCo",
+    "published": "2026",
+    "tools": "Figma / Blender",
+    "tags": [
+      "test"
+    ]
   }
 ]
