@@ -12,6 +12,18 @@ try { canvas = require('canvas'); } catch (e) { canvas = null; }
 var PORT = process.env.PORT || 3000;
 var ROOT = __dirname;
 
+var { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+var R2_BUCKET_NAME = process.env.R2_DESIGN_BUCKET || 'pub-541a045d0ee14f489c6d0115be4f5a34';
+var R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || '';
+var R2_ACCESS_KEY = process.env.R2_ACCESS_KEY_ID || '';
+var R2_SECRET_KEY = process.env.R2_SECRET_ACCESS_KEY || '';
+var r2Client = (R2_ACCOUNT_ID && R2_ACCESS_KEY) ? new S3Client({
+    region: 'auto',
+    endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+    credentials: { accessKeyId: R2_ACCESS_KEY, secretAccessKey: R2_SECRET_KEY },
+    forcePathStyle: true
+}) : null;
+
 var MANAGER_DATA_DIR = path.join(ROOT, 'data', 'manager');
 var MANAGER_SESSIONS = {};
 var MANAGER_SESSION_TTL = 30 * 60 * 1000;
@@ -473,6 +485,10 @@ function handleAPIRoute(req, res, apiPath) {
 
     if (isMultipart && (apiPath.indexOf('/api/manager/') === 0 || apiPath === '/api/manager')) {
         handleManagerAPI(req, res, apiPath, null);
+        return;
+    }
+    if (isMultipart && apiPath === '/api/design/upload') {
+        handleDesignUpload(req, res);
         return;
     }
 
@@ -1807,6 +1823,94 @@ var MIME = {
     '.wav': 'audio/wav'
 };
 
+
+// ── Design Upload Handler ──────────────────────────────────
+function handleDesignUpload(req, res) {
+    if (!r2Client) {
+        sendJSON(res, 503, { success: false, error: 'R2 not configured' });
+        return;
+    }
+    var session = verifyAuth(req);
+    if (!session || session.role !== 'ManagerGo') {
+        sendJSON(res, 403, { success: false, error: 'Access denied' });
+        return;
+    }
+    parseMultipartUpload(req, function(err, fields, files) {
+        if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
+        if (!files || files.length === 0) { sendJSON(res, 400, { success: false, error: 'No files' }); return; }
+
+        var folderName = fields.folderName || fields.folder;
+        if (!folderName) { sendJSON(res, 400, { success: false, error: 'Missing folderName' }); return; }
+
+        var metaFile = files.find(function(f) { return f.filename === 'meta.txt'; });
+        if (!metaFile) { sendJSON(res, 400, { success: false, error: 'meta.txt missing' }); return; }
+
+        var meta = {};
+        metaFile.body.split('\n').forEach(function(line) {
+            var eq = line.indexOf('=');
+            if (eq > 0) meta[line.slice(0, eq).trim()] = line.slice(eq + 1).trim();
+        });
+        var reqF = ['title', 'cat', 'suit', 'rank', 'desc', 'client', 'year', 'tools'];
+        var miss = reqF.filter(function(k) { return !meta[k]; });
+        if (miss.length) { sendJSON(res, 400, { success: false, error: 'meta.txt missing: ' + miss.join(', ') }); return; }
+
+        var images = files.filter(function(f) {
+            return f.filename !== 'meta.txt' && /\.(png|jpe?g|gif|webp)$/i.test(f.filename);
+        });
+        if (images.length === 0) { sendJSON(res, 400, { success: false, error: 'No images found' }); return; }
+
+        var idxPath = path.join(ROOT, 'design', 'index.json');
+        var existing = [];
+        try { existing = JSON.parse(fs.readFileSync(idxPath, 'utf8')); } catch(e) {}
+        var maxNum = 0;
+        existing.forEach(function(w) {
+            var m = (w.workId || '').match(/work(\d+)/);
+            if (m) maxNum = Math.max(maxNum, +m[1]);
+        });
+        var workId = 'work' + String(maxNum + 1).padStart(2, '0');
+
+        var tasks = images.map(function(img) {
+            var key = folderName + '/' + img.filename;
+            var ct = /\.png$/i.test(img.filename) ? 'image/png' :
+                     /\.jpe?g$/i.test(img.filename) ? 'image/jpeg' :
+                     /\.webp$/i.test(img.filename) ? 'image/webp' : 'image/gif';
+            return r2Client.send(new PutObjectCommand({
+                Bucket: R2_BUCKET_NAME, Key: key,
+                Body: Buffer.from(img.body, 'binary'), ContentType: ct,
+            })).then(function() { return key; });
+        });
+
+        Promise.all(tasks).then(function(keys) {
+            var r2base = 'https://' + R2_BUCKET_NAME + '.r2.dev/' + folderName;
+            var contentImages = images
+                .filter(function(f) { return /^content-\d+/i.test(f.filename); })
+                .sort(function(a, b) { return a.filename.localeCompare(b.filename); })
+                .map(function(f) { return r2base + '/' + f.filename; });
+
+            var entry = {
+                folder: folderName, workId: workId, cat: meta.cat, suit: meta.suit,
+                rank: meta.rank, likeCount: 0,
+                cardBg: r2base + '/card-bg.png',
+                cardHoverBg: r2base + '/card-hover.png',
+                headerBg: r2base + '/header-bg.png',
+                contentImages: contentImages,
+                title: meta.title, description: meta.desc,
+                client: meta.client, published: meta.year, tools: meta.tools,
+                tags: meta.tags ? meta.tags.split(',').map(function(t) { return t.trim(); }) : [],
+            };
+
+            existing.push(entry);
+            fs.writeFileSync(idxPath, JSON.stringify(existing, null, 2), 'utf8');
+            addManagerLog('design_upload', session.username, 'Uploaded ' + entry.title + ' (' + keys.length + ' files)');
+            sendJSON(res, 200, { success: true, entry: entry, files: keys.length });
+            console.log('[design-upload] ' + entry.title + ' — ' + keys.length + ' files');
+        }).catch(function(err) {
+            console.error('[design-upload] fail:', err);
+            sendJSON(res, 500, { success: false, error: 'Upload failed: ' + err.message });
+        });
+    });
+}
+
 http.createServer(function(req, res) {
     var parsedUrl = url.parse(req.url);
     var uri = parsedUrl.pathname;
@@ -1823,6 +1927,9 @@ http.createServer(function(req, res) {
 
     if (uri === '/manager') {
         filePath = path.join(ROOT, 'manager.html');
+    }
+    if (uri === '/design-upload') {
+        filePath = path.join(ROOT, 'design-upload.html');
     }
 
     serveStatic(req, res, filePath);
