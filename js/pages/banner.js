@@ -72,7 +72,7 @@ function startTypewriter() {
     var currentPair = allTexts[0];
     var typeSpeed = 80;
     var deleteSpeed = 40;
-    var pauseAfterType = 2000;
+    var pauseAfterType = 1000;
     var pauseAfterDelete = 500;
 
     var cursorSpan = document.createElement('span');
