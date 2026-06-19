@@ -54,6 +54,7 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
 .content-slot .slot-remove{position:absolute;top:2px;right:2px;width:14px;height:14px;border-radius:50%;background:rgba(239,68,68,.7);color:#fff;font-size:8px;line-height:14px;text-align:center;display:none;cursor:pointer}
 .content-slot.filled .slot-remove{display:block}
 .content-slot input{display:none}
+.add-slot:hover{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.06)}
 
 /* ── Form ── */
 .row{display:flex;gap:12px;margin-bottom:14px}
@@ -138,14 +139,8 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
     </div>
 
     <h2 style="margin-top:18px">Content Images</h2>
-    <div class="content-imgs" id="contentImages">
-      <div class="content-slot" data-idx="1"><img alt=""><span class="add-icon">+</span><div class="slot-remove">✕</div><input type="file" accept="image/*"></div>
-      <div class="content-slot" data-idx="2"><img alt=""><span class="add-icon">+</span><div class="slot-remove">✕</div><input type="file" accept="image/*"></div>
-      <div class="content-slot" data-idx="3"><img alt=""><span class="add-icon">+</span><div class="slot-remove">✕</div><input type="file" accept="image/*"></div>
-      <div class="content-slot" data-idx="4"><img alt=""><span class="add-icon">+</span><div class="slot-remove">✕</div><input type="file" accept="image/*"></div>
-      <div class="content-slot" data-idx="5"><img alt=""><span class="add-icon">+</span><div class="slot-remove">✕</div><input type="file" accept="image/*"></div>
-      <div class="content-slot" data-idx="6"><img alt=""><span class="add-icon">+</span><div class="slot-remove">✕</div><input type="file" accept="image/*"></div>
-    </div>
+    <div class="content-imgs" id="contentImages"></div>
+    <div class="content-slot add-slot" id="addContentSlot" style="width:70px;height:70px;border:1px dashed rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.15);font-size:20px" title="Add more images">+</div>
   </div>
 
   <!-- ── Step 3: Metadata ── -->
@@ -278,6 +273,64 @@ function autoAssign() {
     renderAssigned();
 }
 
+// ── Dynamic content slots ──────────────────────────────────
+var nextContentIdx = 1;
+function ensureContentSlot(idx) {
+    nextContentIdx = Math.max(nextContentIdx, idx + 1);
+    var container = document.getElementById('contentImages');
+    var existing = container.querySelector('.content-slot[data-idx="' + idx + '"]');
+    if (existing) return existing;
+    var div = document.createElement('div');
+    div.className = 'content-slot';
+    div.setAttribute('data-idx', idx);
+    div.innerHTML = '<img alt=""><span class="add-icon">+</span><div class="slot-remove">✕</div><input type="file" accept="image/*">';
+    container.insertBefore(div, document.getElementById('addContentSlot'));
+    bindContentSlot(div, idx);
+    return div;
+}
+
+function renderContentSlot(k) {
+    var cs = document.querySelector('.content-slot[data-idx="' + k + '"]');
+    if (!cs) { cs = ensureContentSlot(k); }
+    var ci = cs.querySelector('img');
+    var f = contentFiles[k];
+    if (f) {
+        cs.classList.add('filled');
+        var reader = new FileReader();
+        reader.onload = function(e) { ci.src = e.target.result; };
+        reader.readAsDataURL(f);
+    } else {
+        cs.classList.remove('filled');
+        ci.src = '';
+    }
+}
+
+function bindContentSlot(slot, idx) {
+    slot.addEventListener('click', function(e) {
+        if (e.target.classList.contains('slot-remove')) return;
+        slot.querySelector('input').click();
+    });
+    slot.querySelector('input').addEventListener('change', function(e) {
+        if (e.target.files.length) {
+            contentFiles[idx] = e.target.files[0];
+            renderContentSlot(idx);
+            checkReady();
+        }
+    });
+    slot.querySelector('.slot-remove').addEventListener('click', function(ev) {
+        ev.stopPropagation();
+        delete contentFiles[idx];
+        renderContentSlot(idx);
+        checkReady();
+    });
+}
+
+// Add-more button
+document.getElementById('addContentSlot').addEventListener('click', function() {
+    ensureContentSlot(nextContentIdx);
+    nextContentIdx++;
+});
+
 // ── Render assigned slots ────────────────────────────────────
 function renderAssigned() {
     ['card-bg', 'card-hover', 'header-bg'].forEach(function(role) {
@@ -302,20 +355,13 @@ function renderAssigned() {
     });
 
     // Content slots
-    for (var k = 1; k <= 6; k++) {
-        var cs = document.querySelector('.content-slot[data-idx="' + k + '"]');
-        var ci = cs.querySelector('img');
-        var add = cs.querySelector('.add-icon');
-        var f = contentFiles[k];
-        if (f) {
-            cs.classList.add('filled');
-            var reader2 = new FileReader();
-            reader2.onload = function(e) { ci.src = e.target.result; };
-            reader2.readAsDataURL(f);
-        } else {
-            cs.classList.remove('filled');
-            ci.src = '';
-        }
+    var nextIdx = 1;
+    // Create initial slots from pool
+    for (var k = 1; k <= Object.keys(contentFiles).length; k++) {
+        ensureContentSlot(k);
+    }
+    for (var k = 1; k <= Object.keys(contentFiles).length; k++) {
+        renderContentSlot(k);
     }
 
     checkReady();
@@ -358,20 +404,7 @@ document.querySelectorAll('.img-slot').forEach(function(slot) {
     });
 });
 
-document.querySelectorAll('.content-slot').forEach(function(slot) {
-    slot.addEventListener('click', function() { slot.querySelector('input').click(); });
-    slot.querySelector('input').addEventListener('change', function(e) {
-        if (e.target.files.length) {
-            contentFiles[+slot.getAttribute('data-idx')] = e.target.files[0];
-            renderAssigned();
-        }
-    });
-    slot.querySelector('.slot-remove').addEventListener('click', function(ev) {
-        ev.stopPropagation();
-        delete contentFiles[+slot.getAttribute('data-idx')];
-        renderAssigned();
-    });
-});
+
 
 // ── Enable upload check ─────────────────────────────────────
 var fields = ['f_folder','f_title','f_cat','f_suit','f_rank','f_desc','f_client','f_tools'];
