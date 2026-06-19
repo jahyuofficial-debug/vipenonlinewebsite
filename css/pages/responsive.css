@@ -8,8 +8,8 @@
   header .app-nav{display:flex;align-items:center;justify-content:space-between;padding:.2rem .3rem}
   header .app-nav .logo img{height:.3rem}
   .max-wid{padding:0 .2rem}
-  .banner-text .topic h2{font-size:.4rem;line-height:.5rem}
-  .banner-text .note h3{font-size:.16rem}
+  .banner-text .topic h2{font-size:.12rem;line-height:.16rem}
+  .banner-text .note h3{font-size:.05rem}
   .slideDots{display:none}
   .fresh-hero-carousel{height:70vh;margin-bottom:-49vh}
   .fresh-hero-content{top:35%;left:.3rem;max-width:70%;transform:translateY(-50%)}
