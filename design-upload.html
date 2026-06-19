@@ -262,13 +262,20 @@ function autoAssign() {
         }
     });
 
-    // Remaining files → content images
-    var ci = 1;
+    // Remaining files → content images (sorted by filename)
+    var remaining = [];
     for (var j = 0; j < pool.length; j++) {
-        if (!used[j]) {
-            contentFiles[ci] = pool[j];
-            ci++;
-        }
+        if (!used[j]) remaining.push(pool[j]);
+    }
+    remaining.sort(function(a, b) {
+        var na = (a.relativePath || a.name).toLowerCase();
+        var nb = (b.relativePath || b.name).toLowerCase();
+        return na.localeCompare(nb);
+    });
+    var ci = 1;
+    for (var r = 0; r < remaining.length; r++) {
+        contentFiles[ci] = remaining[r];
+        ci++;
     }
 
     renderAssigned();
