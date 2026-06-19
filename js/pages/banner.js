@@ -75,6 +75,9 @@ function startTypewriter() {
     var pauseAfterType = 1000;
     var pauseAfterDelete = 500;
 
+    // Remove old cursor if exists, then create fresh one
+    var oldCursor = h2.querySelector('.cursor-blink');
+    if (oldCursor) oldCursor.remove();
     var cursorSpan = document.createElement('span');
     cursorSpan.className = 'cursor-blink';
 
