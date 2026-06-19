@@ -6,62 +6,160 @@
 <title>Design Upload — Vipen</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0f;color:#fff;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center}
-.wrap{width:100%;max-width:520px;padding:40px 24px}
-h1{font-size:28px;font-weight:700;letter-spacing:.02em;margin-bottom:8px}
-.sub{font-size:14px;color:rgba(255,255,255,.4);margin-bottom:32px}
+body{background:#0a0a0f;color:#fff;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:40px 0}
+.wrap{width:100%;max-width:540px;padding:0 24px}
+h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:6px}
+.sub{font-size:13px;color:rgba(255,255,255,.35);margin-bottom:28px}
 
-.dropzone{border:2px dashed rgba(255,255,255,.15);border-radius:16px;padding:48px 24px;text-align:center;cursor:pointer;transition:all .25s;background:rgba(255,255,255,.02);margin-bottom:24px}
-.dropzone:hover,.dropzone.drag{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.04)}
-.dropzone.active{border-color:#d4a853;background:rgba(212,168,83,.06)}
-.dropzone svg{width:40px;height:40px;color:rgba(255,255,255,.2);margin-bottom:12px}
-.dropzone .dz-title{font-size:15px;font-weight:600;margin-bottom:6px}
-.dropzone .dz-hint{font-size:12px;color:rgba(255,255,255,.3)}
+.dropzone{border:2px dashed rgba(255,255,255,.12);border-radius:14px;padding:36px 24px;text-align:center;cursor:pointer;transition:all .25s;background:rgba(255,255,255,.015);margin-bottom:24px}
+.dropzone:hover,.dropzone.drag{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.03)}
+.dropzone.active{border-color:#d4a853;background:rgba(212,168,83,.05)}
+.dropzone svg{width:36px;height:36px;color:rgba(255,255,255,.18);margin-bottom:10px}
+.dropzone .dz-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.dropzone .dz-hint{font-size:11px;color:rgba(255,255,255,.25)}
 .dropzone input{display:none}
 
-.preview{background:rgba(255,255,255,.03);border-radius:12px;padding:20px;margin-bottom:24px;display:none}
-.preview.show{display:block}
-.preview h2{font-size:13px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
-.pv-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid rgba(255,255,255,.05)}
-.pv-row .key{color:rgba(255,255,255,.4)}
-.files-list{margin-top:8px;font-size:12px;color:rgba(255,255,255,.3)}
-.files-list span{display:inline-block;background:rgba(255,255,255,.06);padding:2px 8px;border-radius:4px;margin:2px 4px 2px 0}
+.section{background:rgba(255,255,255,.02);border-radius:12px;padding:20px;margin-bottom:16px}
+.section h2{font-size:11px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
+
+.row{display:flex;gap:12px;margin-bottom:14px}
+.row:last-child{margin-bottom:0}
+.field{flex:1;display:flex;flex-direction:column}
+.field label{font-size:11px;color:rgba(255,255,255,.35);margin-bottom:6px;letter-spacing:.02em}
+.field input,.field textarea,.field select{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:10px 12px;color:#fff;font-size:13px;outline:none;transition:border .2s;font-family:inherit}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:#d4a853}
+.field textarea{resize:vertical;min-height:70px}
+.field select{appearance:none;cursor:pointer}
+.field select option{background:#1a1a2e;color:#fff}
+
+.imgs{margin-top:8px}
+.imgs span{display:inline-block;background:rgba(255,255,255,.04);color:rgba(255,255,255,.45);padding:3px 10px;border-radius:5px;font-size:11px;margin:2px 4px 2px 0}
+.imgs .ok{color:#4ade80}
 
 .btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.02em}
 .btn-upload{background:#d4a853;color:#000}
 .btn-upload:hover{background:#e0b960}
 .btn-upload:disabled{opacity:.3;cursor:not-allowed}
 
-.status{margin-top:16px;padding:12px;border-radius:8px;font-size:13px;text-align:center;display:none}
+.status{margin-top:14px;padding:12px;border-radius:8px;font-size:13px;text-align:center;display:none}
 .status.show{display:block}
 .status.ok{background:rgba(34,197,94,.1);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
 .status.err{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2)}
-.status.info{background:rgba(59,130,246,.1);color:#60a5fa;border:1px solid rgba(59,130,246,.2)}
 
-.progress{height:4px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:16px;overflow:hidden;display:none}
+.progress{height:4px;background:rgba(255,255,255,.06);border-radius:2px;margin-top:14px;overflow:hidden;display:none}
 .progress.show{display:block}
 .progress .bar{height:100%;background:#d4a853;width:0;transition:width .3s}
 
-.back{display:block;text-align:center;margin-top:20px;font-size:12px;color:rgba(255,255,255,.25);text-decoration:none}
-.back:hover{color:rgba(255,255,255,.5)}
+.back{display:block;text-align:center;margin-top:18px;font-size:12px;color:rgba(255,255,255,.2);text-decoration:none}
+.back:hover{color:rgba(255,255,255,.4)}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>🎨 Design Upload</h1>
-  <p class="sub">Select a project folder containing images + meta.txt</p>
+  <h1>Design Upload</h1>
+  <p class="sub">Select image folder, fill in details, one click publish</p>
 
+  <!-- Step 1: Images -->
   <div class="dropzone" id="dropzone">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-    <div class="dz-title">Click to select folder</div>
-    <div class="dz-hint">or drag & drop here</div>
+    <div class="dz-title">Select image folder</div>
+    <div class="dz-hint">or drag &amp; drop here</div>
+    <div class="imgs" id="imgList" style="margin-top:12px"></div>
     <input type="file" id="folderInput" webkitdirectory multiple>
   </div>
 
-  <div class="preview" id="preview">
-    <h2>Preview</h2>
-    <div id="metaPreview"></div>
-    <div class="files-list" id="filesPreview"></div>
+  <!-- Step 2: Metadata -->
+  <div class="section">
+    <h2>Project Info</h2>
+
+    <div class="row">
+      <div class="field" style="flex:2">
+        <label>R2 Folder Name</label>
+        <input type="text" id="f_folder" placeholder="e.g. 07-Neon City">
+      </div>
+      <div class="field" style="flex:1">
+        <label>Year</label>
+        <input type="text" id="f_year" value="2026" maxlength="4">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Title</label>
+        <input type="text" id="f_title" placeholder="Work title">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Category</label>
+        <select id="f_cat">
+          <option value="">—</option>
+          <option>Brand Identity</option>
+          <option>UI Design</option>
+          <option>3D Art</option>
+          <option>Graphic Design</option>
+          <option>Motion Graphics</option>
+          <option>Illustration</option>
+          <option>Typography</option>
+          <option>Photography</option>
+        </select>
+      </div>
+      <div class="field" style="flex:.6">
+        <label>Suit</label>
+        <select id="f_suit">
+          <option value="">—</option>
+          <option>♠</option>
+          <option>♥</option>
+          <option>♦</option>
+          <option>♣</option>
+        </select>
+      </div>
+      <div class="field" style="flex:.6">
+        <label>Rank</label>
+        <select id="f_rank">
+          <option value="">—</option>
+          <option>A</option>
+          <option>K</option>
+          <option>Q</option>
+          <option>J</option>
+          <option>10</option>
+          <option>9</option>
+          <option>8</option>
+          <option>7</option>
+          <option>6</option>
+          <option>5</option>
+          <option>4</option>
+          <option>3</option>
+          <option>2</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Description</label>
+        <textarea id="f_desc" placeholder="Describe your work..."></textarea>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Client</label>
+        <input type="text" id="f_client" placeholder="Client name">
+      </div>
+      <div class="field">
+        <label>Tools</label>
+        <input type="text" id="f_tools" placeholder="Figma / Blender / AE">
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Tags (comma separated)</label>
+        <input type="text" id="f_tags" placeholder="3d, abstract, dark">
+      </div>
+    </div>
   </div>
 
   <button class="btn btn-upload" id="uploadBtn" disabled>Upload to R2</button>
@@ -72,205 +170,144 @@ h1{font-size:28px;font-weight:700;letter-spacing:.02em;margin-bottom:8px}
 
 <script>
 var selectedFiles = [];
+var selFolderName = '';
 
-// Folder picker
+// ── Folder picker ──────────────────────────────────────────
 var dropzone = document.getElementById('dropzone');
 var input = document.getElementById('folderInput');
-
 dropzone.addEventListener('click', function() { input.click(); });
 input.addEventListener('change', handleFiles);
 
-dropzone.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    dropzone.classList.add('drag');
-});
-dropzone.addEventListener('dragleave', function() {
-    dropzone.classList.remove('drag');
-});
+dropzone.addEventListener('dragover', function(e) { e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', function() { dropzone.classList.remove('drag'); });
 dropzone.addEventListener('drop', function(e) {
     e.preventDefault();
     dropzone.classList.remove('drag');
     if (e.dataTransfer.items) {
         var items = e.dataTransfer.items;
-        var files = [];
-        var pending = items.length;
+        var files = [], pending = items.length;
         for (var i = 0; i < items.length; i++) {
             (function(item) {
                 var entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
                 if (entry && entry.isDirectory) {
-                    readDir(entry, '', function(dirFiles) {
-                        files = files.concat(dirFiles);
-                        pending--;
-                        if (pending === 0) processSelection(files);
-                    });
+                    readDir(entry, '', function(df) { files = files.concat(df); pending--; if (pending === 0) processFiles(files); });
                 } else {
                     pending--;
-                    if (pending === 0) processSelection(files);
+                    if (pending === 0) processFiles(files);
                 }
             })(items[i]);
         }
     }
 });
 
-function handleFiles(e) {
-    processSelection(Array.from(e.target.files));
-}
+function handleFiles(e) { processFiles(Array.from(e.target.files)); }
 
 function readDir(dirEntry, prefix, cb) {
     var files = [];
-    var reader = dirEntry.createReader();
-    reader.readEntries(function(entries) {
+    dirEntry.createReader().readEntries(function(entries) {
         var todo = entries.length;
         if (todo === 0) { cb(files); return; }
         entries.forEach(function(entry) {
             if (entry.isFile) {
-                entry.file(function(file) {
-                    file.relativePath = prefix + file.name;
-                    files.push(file);
-                    todo--;
-                    if (todo === 0) cb(files);
-                });
+                entry.file(function(file) { file.relativePath = prefix + file.name; files.push(file); todo--; if (todo === 0) cb(files); });
             } else if (entry.isDirectory) {
-                readDir(entry, prefix + entry.name + '/', function(subFiles) {
-                    files = files.concat(subFiles);
-                    todo--;
-                    if (todo === 0) cb(files);
-                });
-            } else {
-                todo--;
-                if (todo === 0) cb(files);
-            }
+                readDir(entry, prefix + entry.name + '/', function(sf) { files = files.concat(sf); todo--; if (todo === 0) cb(files); });
+            } else { todo--; if (todo === 0) cb(files); }
         });
     });
 }
 
-function processSelection(files) {
+function processFiles(files) {
     if (!files || files.length === 0) return;
-    selectedFiles = files;
+    var images = files.filter(function(f) { return /\.(png|jpe?g|gif|webp)$/i.test(f.name); });
+    if (images.length === 0) return;
+    selectedFiles = images;
     dropzone.classList.add('active');
 
-    // Find meta.txt
-    var metaFile = files.find(function(f) {
-        return f.name === 'meta.txt' || (f.relativePath && f.relativePath.endsWith('meta.txt'));
-    });
+    // Auto-detect folder name from first file's path
+    var p = images[0].webkitRelativePath || images[0].relativePath || '';
+    selFolderName = p.split('/')[0] || 'New Project';
+    var fb = document.getElementById('f_folder');
+    if (fb && !fb.value) fb.value = selFolderName;
 
-    var preview = document.getElementById('preview');
-    var metaPreview = document.getElementById('metaPreview');
-    var filesPreview = document.getElementById('filesPreview');
-    var uploadBtn = document.getElementById('uploadBtn');
+    // Show image list
+    var il = document.getElementById('imgList');
+    il.innerHTML = images.map(function(f) {
+        var name = f.relativePath ? f.relativePath.split('/').pop() : f.name;
+        var cls = /^(card-bg|card-hover|header-bg|content-\d)/i.test(name) ? 'ok' : '';
+        return '<span class="' + cls + '">' + name + '</span>';
+    }).join(' ') + '<span style="color:rgba(255,255,255,.2);font-size:10px">(' + images.length + ' images)</span>';
 
-    // Show file list
-    var imageFiles = files.filter(function(f) { return /\.(png|jpe?g|gif|webp)$/i.test(f.name); });
-    filesPreview.innerHTML = imageFiles.map(function(f) {
-        return '<span>' + (f.relativePath || f.name) + '</span>';
-    }).join(' ');
-
-    if (metaFile) {
-        var reader = new FileReader();
-        reader.onload = function() {
-            var text = reader.result;
-            var lines = text.split('\n');
-            var html = '';
-            var folderName = metaFile.relativePath ? metaFile.relativePath.replace(/\/meta\.txt$/, '') : '';
-            if (!folderName && metaFile.webkitRelativePath) {
-                folderName = metaFile.webkitRelativePath.replace(/\/meta\.txt$/, '');
-            }
-            if (folderName) {
-                html += '<div class="pv-row"><span class="key">Folder</span><span>' + folderName + '</span></div>';
-            }
-            for (var i = 0; i < lines.length; i++) {
-                var eq = lines[i].indexOf('=');
-                if (eq > 0) {
-                    html += '<div class="pv-row"><span class="key">' +
-                        lines[i].slice(0, eq).trim() + '</span><span>' +
-                        lines[i].slice(eq + 1).trim() + '</span></div>';
-                }
-            }
-            metaPreview.innerHTML = html;
-            uploadBtn.disabled = false;
-        };
-        reader.readAsText(metaFile);
-
-        // Store folder name
-        selectedFiles._folderName = metaFile.relativePath ?
-            metaFile.relativePath.replace(/\/meta\.txt$/, '').split('/').pop() :
-            (metaFile.webkitRelativePath || '').replace(/\/meta\.txt$/, '').split('/').pop() ||
-            files[0].webkitRelativePath.split('/')[0];
-
-    } else {
-        metaPreview.innerHTML = '<div style="color:#f87171;font-size:13px">⚠️ meta.txt not found in folder</div>';
-        uploadBtn.disabled = true;
-    }
-
-    preview.classList.add('show');
+    checkReady();
 }
 
-// Upload
+// ── Enable upload when all required filled ──────────────────
+var fields = ['f_folder','f_title','f_cat','f_suit','f_rank','f_desc','f_client','f_tools'];
+fields.forEach(function(id) {
+    document.getElementById(id).addEventListener('input', checkReady);
+    document.getElementById(id).addEventListener('change', checkReady);
+});
+function checkReady() {
+    var ok = selectedFiles.length > 0;
+    fields.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (!el.value.trim()) ok = false;
+    });
+    document.getElementById('uploadBtn').disabled = !ok;
+}
+
+// ── Upload ─────────────────────────────────────────────────
 document.getElementById('uploadBtn').addEventListener('click', function() {
+    var folderName = document.getElementById('f_folder').value.trim();
+    if (!folderName) { alert('Please enter R2 Folder Name'); return; }
+
     var formData = new FormData();
-    // Add folder name
-    var folderName = selectedFiles._folderName || 'Untitled';
     formData.append('folderName', folderName);
+    formData.append('title',   document.getElementById('f_title').value.trim());
+    formData.append('cat',     document.getElementById('f_cat').value);
+    formData.append('suit',    document.getElementById('f_suit').value);
+    formData.append('rank',    document.getElementById('f_rank').value);
+    formData.append('desc',    document.getElementById('f_desc').value.trim());
+    formData.append('client',  document.getElementById('f_client').value.trim());
+    formData.append('year',    document.getElementById('f_year').value.trim());
+    formData.append('tools',   document.getElementById('f_tools').value.trim());
+    formData.append('tags',    document.getElementById('f_tags').value.trim());
 
     for (var i = 0; i < selectedFiles.length; i++) {
         var f = selectedFiles[i];
         var name = f.relativePath ? f.relativePath.split('/').pop() : f.name;
-        // Only send meta.txt + image files
-        if (name === 'meta.txt' || /\.(png|jpe?g|gif|webp)$/i.test(name)) {
-            formData.append('files', f, name);
-        }
+        formData.append('files', f, name);
     }
 
     var btn = document.getElementById('uploadBtn');
-    var progress = document.getElementById('progress');
-    var progressBar = document.getElementById('progressBar');
-    var status = document.getElementById('status');
+    var prog = document.getElementById('progress');
+    var bar = document.getElementById('progressBar');
+    var stat = document.getElementById('status');
 
-    btn.disabled = true;
-    btn.textContent = 'Uploading...';
-    progress.classList.add('show');
-    progressBar.style.width = '0%';
-    status.classList.remove('show', 'ok', 'err', 'info');
+    btn.disabled = true; btn.textContent = 'Uploading...';
+    prog.classList.add('show'); bar.style.width = '0%';
+    stat.classList.remove('show', 'ok', 'err');
 
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/api/design/upload');
-    xhr.withCredentials = true;
-
-    xhr.upload.onprogress = function(e) {
-        if (e.lengthComputable) {
-            var pct = Math.round(e.loaded / e.total * 90);
-            progressBar.style.width = pct + '%';
-        }
-    };
-
+    xhr.open('POST', '/api/design/upload'); xhr.withCredentials = true;
+    xhr.upload.onprogress = function(e) { if (e.lengthComputable) bar.style.width = Math.round(e.loaded/e.total*90) + '%'; };
     xhr.onload = function() {
-        progressBar.style.width = '100%';
-        setTimeout(function() { progress.classList.remove('show'); }, 600);
-
-        var resp;
-        try { resp = JSON.parse(xhr.responseText); } catch(e) {}
-
-        btn.disabled = false;
-        btn.textContent = 'Upload to R2';
-
-        if (xhr.status === 200 && resp && resp.success) {
-            status.textContent = '✅ ' + resp.entry.title + ' uploaded! (' + resp.files + ' files) — index.json updated.';
-            status.className = 'status show ok';
+        bar.style.width = '100%';
+        setTimeout(function() { prog.classList.remove('show'); }, 600);
+        btn.disabled = false; btn.textContent = 'Upload to R2';
+        var r; try { r = JSON.parse(xhr.responseText); } catch(e) {}
+        if (xhr.status === 200 && r && r.success) {
+            stat.textContent = '✅ ' + r.entry.title + ' — ' + r.files + ' files uploaded!';
+            stat.className = 'status show ok';
         } else {
-            var msg = (resp && resp.error) || 'Upload failed';
-            status.textContent = '❌ ' + msg;
-            status.className = 'status show err';
+            stat.textContent = '❌ ' + ((r && r.error) || 'Upload failed');
+            stat.className = 'status show err';
         }
     };
-
     xhr.onerror = function() {
-        progress.classList.remove('show');
-        btn.disabled = false;
-        btn.textContent = 'Upload to R2';
-        status.textContent = '❌ Network error. Check if server is running.';
-        status.className = 'status show err';
+        prog.classList.remove('show'); btn.disabled = false; btn.textContent = 'Upload to R2';
+        stat.textContent = '❌ Network error'; stat.className = 'status show err';
     };
-
     xhr.send(formData);
 });
 </script>

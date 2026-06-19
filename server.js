@@ -1842,20 +1842,24 @@ function handleDesignUpload(req, res) {
         var folderName = fields.folderName || fields.folder;
         if (!folderName) { sendJSON(res, 400, { success: false, error: 'Missing folderName' }); return; }
 
-        var metaFile = files.find(function(f) { return f.filename === 'meta.txt'; });
-        if (!metaFile) { sendJSON(res, 400, { success: false, error: 'meta.txt missing' }); return; }
-
-        var meta = {};
-        metaFile.body.split('\n').forEach(function(line) {
-            var eq = line.indexOf('=');
-            if (eq > 0) meta[line.slice(0, eq).trim()] = line.slice(eq + 1).trim();
-        });
+        // Read metadata from form fields directly (no meta.txt needed)
+        var meta = {
+            title: fields.title || '',
+            cat: fields.cat || '',
+            suit: fields.suit || '',
+            rank: fields.rank || '',
+            desc: fields.desc || '',
+            client: fields.client || '',
+            year: fields.year || '',
+            tools: fields.tools || '',
+            tags: fields.tags || '',
+        };
         var reqF = ['title', 'cat', 'suit', 'rank', 'desc', 'client', 'year', 'tools'];
         var miss = reqF.filter(function(k) { return !meta[k]; });
-        if (miss.length) { sendJSON(res, 400, { success: false, error: 'meta.txt missing: ' + miss.join(', ') }); return; }
+        if (miss.length) { sendJSON(res, 400, { success: false, error: 'Missing fields: ' + miss.join(', ') }); return; }
 
         var images = files.filter(function(f) {
-            return f.filename !== 'meta.txt' && /\.(png|jpe?g|gif|webp)$/i.test(f.filename);
+            return /\.(png|jpe?g|gif|webp)$/i.test(f.filename);
         });
         if (images.length === 0) { sendJSON(res, 400, { success: false, error: 'No images found' }); return; }
 
