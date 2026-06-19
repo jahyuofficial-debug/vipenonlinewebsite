@@ -143,25 +143,18 @@ BannerPage.initBgVideo();
                 console.log('Banner metas loaded from R2');
                 var meta0 = metas[0] || {};
 
-                // Force banner text visible and persistent
-                function applyBannerText() {
+                // Apply initial text once, then let typewriter take over
+                (function applyOnce() {
                     var h2 = document.querySelector('#topicLine h2');
                     var h3 = document.querySelector('#noteLine h3');
-                    var textEl = document.getElementById('bannerText');
-                    if (h2) { h2.textContent = meta0.topic || ''; h2.style.cssText = (meta0.topicBold ? 'font-weight:bold;' : '') + (meta0.topicItalic ? 'font-style:italic;' : ''); }
-                    if (h3) { h3.textContent = meta0.note || ''; h3.style.cssText = (meta0.noteBold ? 'font-weight:bold;' : '') + (meta0.noteItalic ? 'font-style:italic;' : ''); }
-                    if (textEl) { textEl.style.opacity = '1'; textEl.style.display = ''; textEl.style.visibility = 'visible'; }
-                }
-                applyBannerText();
-                // Re-apply after potential overwrites
-                setTimeout(applyBannerText, 50);
-                setTimeout(applyBannerText, 300);
-                setTimeout(applyBannerText, 1000);
+                    var topic = meta0.topic || '';
+                    var note = meta0.note || '';
+                    if (h2 && (h2.textContent || '').trim() !== topic) h2.textContent = topic;
+                    if (h3 && (h3.textContent || '').trim() !== note) h3.textContent = note;
+                })();
 
-                // Start text rotation after data loads
-                setTimeout(function() {
-                    BannerPage.startAnimations();
-                }, 1500);
+                // Start typewriter after data is loaded
+                BannerPage.startAnimations();
             }).catch(function(e) {
                 console.warn('Failed to load banner metas from R2', e);
             });
