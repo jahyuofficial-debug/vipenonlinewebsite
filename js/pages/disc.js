@@ -13,11 +13,69 @@ var discBgCurrentBrightness = 0.55;
 var discBgBaseBrightness = 0.55;
 var discAudioEventsInited = false;
 var discLoadedTrackIndex = -1;
+var discLoadingTrack = false;
+var discNextPreloadAudio = null;
+var discLoadFallbackTimer = null;
 var userBehavior = { likedTracks: [] };
 
 // Disc full preloader — loads all tracks & covers before page entry
 var preloadState = { total: 0, loaded: 0, loading: false, done: false };
 var preloadUIDirty = false;
+var preloadBlockedNav = false;  // true when user tried to enter but was blocked
+
+// Toast shown when user clicks Disc while preload is still running
+var blockedToastId = null;
+function showBlockedToast() {
+    preloadBlockedNav = true;
+    if (blockedToastId) {
+        // Update existing toast
+        var t = document.getElementById('discBlockedToast');
+        if (t) {
+            var pct = preloadState.total > 0 ? Math.round(preloadState.loaded / preloadState.total * 100) : 0;
+            t.textContent = '正在加载曲库... ' + preloadState.loaded + '/' + preloadState.total + ' 首 (' + pct + '%)';
+        }
+        return;
+    }
+    var pct = preloadState.total > 0 ? Math.round(preloadState.loaded / preloadState.total * 100) : 0;
+    var msg = '正在加载曲库... ' + preloadState.loaded + '/' + preloadState.total + ' 首 (' + pct + '%)';
+    var toast = document.createElement('div');
+    toast.className = 'disc-toast';
+    toast.id = 'discBlockedToast';
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.classList.add('show'); }, 10);
+    // Keep the toast visible until preload completes (refresh every 3s)
+    var refreshInterval = setInterval(function() {
+        if (!preloadBlockedNav || !document.getElementById('discBlockedToast')) {
+            clearInterval(refreshInterval);
+            return;
+        }
+        var p = preloadState.total > 0 ? Math.round(preloadState.loaded / preloadState.total * 100) : 0;
+        toast.textContent = '正在加载曲库... ' + preloadState.loaded + '/' + preloadState.total + ' 首 (' + p + '%)';
+    }, 3000);
+    // Cleanup on complete
+    var checkDone = setInterval(function() {
+        if (preloadState.done || !preloadBlockedNav) {
+            clearInterval(checkDone);
+            clearInterval(refreshInterval);
+            var t = document.getElementById('discBlockedToast');
+            if (t) {
+                t.classList.remove('show');
+                setTimeout(function() { if (t.parentNode) t.remove(); }, 400);
+            }
+            blockedToastId = null;
+        }
+    }, 500);
+}
+
+function clearBlockedNav() {
+    if (preloadBlockedNav) {
+        preloadBlockedNav = false;
+        var t = document.getElementById('discBlockedToast');
+        if (t) { t.classList.remove('show'); setTimeout(function() { if (t && t.parentNode) t.remove(); }, 400); }
+        blockedToastId = null;
+    }
+}
 function buildLoadingPage() {
     var pct = preloadState.total > 0 ? Math.round(preloadState.loaded / preloadState.total * 100) : 0;
     return '<section id="page-disc-library" class="disc-page disc-page-loading">' +
@@ -29,7 +87,7 @@ function buildLoadingPage() {
         '<p class="disc-loading-title">Loading disc library</p>' +
         '<div class="disc-loading-bar"><div class="disc-loading-fill" id="discLoadFill" style="width:' + pct + '%"></div></div>' +
         '<p class="disc-loading-status" id="discLoadStatus">' + preloadState.loaded + ' / ' + preloadState.total + ' tracks ready</p>' +
-        '<p class="disc-loading-hint">You can browse other pages while the library loads</p>' +
+        '<p class="disc-loading-hint">曲库加载完成后将自动进入</p>' +
         '</div></div></section>';
 }
 function updateLoadingUI() {
@@ -70,8 +128,9 @@ function onPreloadComplete() {
                     if (typeof MiniPlayer !== 'undefined') MiniPlayer.updateState('disc-library', true, true);
                 }, 100);
             }
-        } else {
-            // User navigated away — bring them back
+        } else if (preloadBlockedNav) {
+            // User was blocked earlier — navigate now
+            preloadBlockedNav = false;
             window.location.hash = '#/disc-library';
         }
     }, 600);
@@ -212,6 +271,7 @@ function buildDiscPage() {
         discAudio.src = currentTape.audio;
         discAudio.load();
         discLoadedTrackIndex = currentIndex;
+        preloadNextTrackInBackground(currentIndex);
     }
     var progressPercent = 0;
     if (discAudio.duration) {
@@ -382,7 +442,66 @@ function showDiscToast(msg) {
     setTimeout(function() { toast.classList.remove('show'); setTimeout(function() { toast.remove(); }, 300); }, 2500);
 }
 
-function loadDiscTrack(index) {
+// Background preload: buffer the next track into a hidden Audio element to warm the cache
+function preloadNextTrackInBackground(currentIndex) {
+    var nextIdx = currentIndex + 1;
+    if (nextIdx >= window.discData.tapes.length) nextIdx = 0;
+    var nextTape = window.discData.tapes[nextIdx];
+    if (!nextTape || !nextTape.audio) return;
+    if (discNextPreloadAudio) {
+        try { discNextPreloadAudio.src = ''; } catch(e) {}
+    }
+    discNextPreloadAudio = new Audio();
+    discNextPreloadAudio.preload = 'auto';
+    discNextPreloadAudio.volume = 0;
+    discNextPreloadAudio.src = nextTape.audio;
+    discNextPreloadAudio.load();
+}
+
+// Visual feedback: indicate the track is still loading
+function showDiscTrackLoading() {
+    discLoadingTrack = true;
+    var bar = document.getElementById('discProgressBar');
+    if (bar) {
+        bar.style.transition = 'none';
+        bar.classList.add('disc-loading-pulse');
+        // Set a minimal width so the pulse animation is visible
+        bar.style.width = '6%';
+    }
+    var cur = document.getElementById('discCurrentTime');
+    if (cur) cur.textContent = '...';
+    var dur = document.getElementById('discDuration');
+    if (dur) dur.textContent = '...';
+    var miniCover = document.getElementById('discGlassMiniCover');
+    if (miniCover) miniCover.classList.add('disc-loading-dim');
+}
+
+function hideDiscTrackLoading() {
+    discLoadingTrack = false;
+    var bar = document.getElementById('discProgressBar');
+    if (bar) {
+        bar.classList.remove('disc-loading-pulse');
+        bar.style.transition = 'width .1s';
+        if (discAudio.duration && isFinite(discAudio.duration)) {
+            bar.style.width = (discAudio.currentTime / discAudio.duration * 100) + '%';
+        } else {
+            bar.style.width = '0%';
+        }
+    }
+    var miniCover = document.getElementById('discGlassMiniCover');
+    if (miniCover) miniCover.classList.remove('disc-loading-dim');
+    // Update duration from metadata
+    var dur = document.getElementById('discDuration');
+    if (dur && discAudio.duration && isFinite(discAudio.duration)) {
+        dur.textContent = formatDiscTime(discAudio.duration);
+    }
+    var cur = document.getElementById('discCurrentTime');
+    if (cur && discAudio.duration && isFinite(discAudio.duration)) {
+        cur.textContent = formatDiscTime(discAudio.currentTime);
+    }
+}
+
+function loadDiscTrack(index, callback) {
     if (index < 0) index = window.discData.tapes.length - 1;
     if (index >= window.discData.tapes.length) index = 0;
     window.discData.currentTapeIndex = index;
@@ -390,6 +509,7 @@ function loadDiscTrack(index) {
     if (!tape || !tape.audio) {
         console.warn('Disc track data missing at index', index);
         showDiscToast('Track data not available');
+        if (typeof callback === 'function') callback();
         return;
     }
     window.discData.nowPlaying = {
@@ -435,10 +555,46 @@ function loadDiscTrack(index) {
 
     var wasPlaying = discIsPlaying;
     discLoadedTrackIndex = index;
+
+    // Clean up previous fallback timer & canplay handler
+    if (discLoadFallbackTimer) { clearTimeout(discLoadFallbackTimer); discLoadFallbackTimer = null; }
+    discAudio.oncanplay = null;
+    discAudio.onloadeddata = null;
+
+    // Show buffering state if we're about to play
+    if (wasPlaying || typeof callback === 'function') {
+        showDiscTrackLoading();
+    }
+
     discAudio.src = tape.audio;
     discAudio.load();
-    if (wasPlaying) {
-        discAudio.play().catch(function(){});
+
+    // Preload the next track silently in the background
+    preloadNextTrackInBackground(index);
+
+    if (wasPlaying || typeof callback === 'function') {
+        var ready = false;
+        var onAudioReady = function() {
+            if (ready) return;
+            ready = true;
+            if (discLoadFallbackTimer) { clearTimeout(discLoadFallbackTimer); discLoadFallbackTimer = null; }
+            discAudio.oncanplay = null;
+            discAudio.onloadeddata = null;
+            hideDiscTrackLoading();
+            if (typeof callback === 'function') {
+                callback();
+            } else if (wasPlaying) {
+                discAudio.play().catch(function(){});
+            }
+        };
+        // canplay: enough data buffered to start playing (more reliable than canplaythrough)
+        discAudio.oncanplay = onAudioReady;
+        // loadeddata: fallback — at minimum the first frame is ready
+        discAudio.onloadeddata = onAudioReady;
+        // Timeout fallback — never leave the UI stuck
+        discLoadFallbackTimer = setTimeout(function() {
+            onAudioReady();
+        }, 12000);
     }
 }
 
@@ -471,7 +627,19 @@ function cleanup() {
         clearInterval(discProgressInterval);
         discProgressInterval = null;
     }
+    if (discLoadFallbackTimer) {
+        clearTimeout(discLoadFallbackTimer);
+        discLoadFallbackTimer = null;
+    }
+    discAudio.oncanplay = null;
+    discAudio.onloadeddata = null;
+    hideDiscTrackLoading();
     stopVisualizer();
+    // Release background preload audio
+    if (discNextPreloadAudio) {
+        try { discNextPreloadAudio.src = ''; } catch(e) {}
+        discNextPreloadAudio = null;
+    }
 }
 
 function initDiscAudioEvents() {
@@ -483,9 +651,10 @@ function initDiscAudioEvents() {
             discAudio.play().catch(function(){});
         } else {
             var nextIndex = getNextTrackIndex();
-            loadDiscTrack(nextIndex);
-            MiniPlayer.syncWithDisc();
-            discAudio.play().catch(function(){});
+            loadDiscTrack(nextIndex, function() {
+                MiniPlayer.syncWithDisc();
+                discAudio.play().catch(function(){});
+            });
         }
     });
     discAudio.addEventListener('loadedmetadata', function() {
@@ -532,9 +701,10 @@ function bindDiscPlayerInteractions() {
             var tapes = window.discData.tapes;
             for (var i = 0; i < tapes.length; i++) {
                 if (tapes[i].id === discId) {
-                    loadDiscTrack(i);
-                    MiniPlayer.syncWithDisc();
-                    discAudio.play().catch(function(){});
+                    loadDiscTrack(i, function() {
+                        MiniPlayer.syncWithDisc();
+                        discAudio.play().catch(function(){});
+                    });
                     break;
                 }
             }
@@ -577,22 +747,20 @@ function bindDiscPlayerInteractions() {
     if (prevBtn) {
         prevBtn.addEventListener('click', function() {
             var idx = getPrevTrackIndex();
-            loadDiscTrack(idx);
-            if (!discIsPlaying) {
+            loadDiscTrack(idx, function() {
                 discAudio.play().catch(function(){});
-            }
-            MiniPlayer.syncWithDisc();
+                MiniPlayer.syncWithDisc();
+            });
         });
     }
 
     if (nextBtn) {
         nextBtn.addEventListener('click', function() {
             var idx = getNextTrackIndex();
-            loadDiscTrack(idx);
-            if (!discIsPlaying) {
+            loadDiscTrack(idx, function() {
                 discAudio.play().catch(function(){});
-            }
-            MiniPlayer.syncWithDisc();
+                MiniPlayer.syncWithDisc();
+            });
         });
     }
 
@@ -753,6 +921,8 @@ return {
     setDiscIsPlaying: function(v) { discIsPlaying = v; },
     startPreload: startPreload,
     isPreloading: isPreloading,
+    showBlockedToast: showBlockedToast,
+    clearBlockedNav: clearBlockedNav,
     getPreloadProgress: function() { return { loaded: preloadState.loaded, total: preloadState.total, done: preloadState.done }; }
 };
 

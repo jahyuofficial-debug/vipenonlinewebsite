@@ -139,7 +139,7 @@
                 "summary": "生成式AI正在从效率工具进化为设计思维过程中的创造性合作者。",
                 "summaryEn": "Generative AI is evolving from an efficiency tool to a creative collaborator in the design thinking process.",
                 "image": "",
-                "body": "<p>设计领域正在经历一场范式转变。生成式AI不再只是加速工作流程的工具——它正在成为一个活跃的创作伙伴，能够提出设计师从未考虑过的方向和可能性。</p><p>从建筑可视化到时装设计，从UI/UX到工业设计，AI辅助的生成式设计正在重新定义\u201c创造力\u201d的边界。重要的不是AI能替代什么，而是它能启发什么。</p>",
+                "body": "<p>设计领域正在经历一场范式转变。生成式AI不再只是加速工作流程的工具——它正在成为一个活跃的创作伙伴，能够提出设计师从未考虑过的方向和可能性。</p><p>从建筑可视化到时装设计，从UI/UX到工业设计，AI辅助的生成式设计正在重新定义“创造力”的边界。重要的不是AI能替代什么，而是它能启发什么。</p>",
                 "bodyEn": "<p>The design world is undergoing a paradigm shift. Generative AI is no longer just a tool to accelerate workflows—it is becoming an active creative partner that can propose directions and possibilities designers had never considered.</p><p>From architectural visualization to fashion design, from UI/UX to industrial design, AI-assisted generative design is redefining the boundaries of creativity. What matters is not what AI can replace, but what it can inspire.</p>",
                 "date": "05/17",
                 "bgColor": "linear-gradient(135deg,#f59e0b 0%,#ef4444 50%,#ec4899 100%)"
@@ -182,12 +182,57 @@
         }
     ],
     "categories": [
-        { "key": "all", "label": "All" },
-        { "key": "ai", "label": "AI" },
-        { "key": "hot", "label": "Hot" },
-        { "key": "music", "label": "Music" },
-        { "key": "culture", "label": "Culture" },
-        { "key": "sports", "label": "Sports" }
+        {
+            "key": "all",
+            "label": "All"
+        },
+        {
+            "key": "blog",
+            "label": "Blog"
+        },
+        {
+            "key": "ai",
+            "label": "AI"
+        },
+        {
+            "key": "hot",
+            "label": "Hot"
+        },
+        {
+            "key": "music",
+            "label": "Music"
+        },
+        {
+            "key": "culture",
+            "label": "Culture"
+        },
+        {
+            "key": "sports",
+            "label": "Sports"
+        }
     ],
-    "items": []
+    "items": [
+        {
+            "id": "from:2026-06-15-ai-era-designer.md",
+            "cat": "blog",
+            "headline": "AI时代的设计师：不是你想象的那样",
+            "headlineEn": "Designers in the AI Era: Not What You Think",
+            "summary": "AI时代的设计师：不是你想象的那样\n最近半年，不管在哪个设计群，总有人在问同一个问题：\n\nAI 都这么强了，设计师是不是快失业了？\n\n我的回答一直没变过：会淘汰不会用 AI 的设计师，但不会淘汰设计师这个职业。\n焦虑的来源\n去年年底我第一次...",
+            "summaryEn": "",
+            "body": "<h1 id=\"ai\">AI时代的设计师：不是你想象的那样</h1>\n<p>最近半年，不管在哪个设计群，总有人在问同一个问题：</p>\n<blockquote>\n<p>AI 都这么强了，设计师是不是快失业了？</p>\n</blockquote>\n<p>我的回答一直没变过：<strong>会淘汰不会用 AI 的设计师，但不会淘汰设计师这个职业。</strong></p>\n<h2 id=\"_1\">焦虑的来源</h2>\n<p>去年年底我第一次用 Midjourney 的时候，说实话也慌了。输入一行字，10 秒钟出 4 张图，质量比很多初级设计师做一整天还好。</p>\n<p>但用多了之后我发现一个规律——<strong>那些真正让我觉得「这图太牛了」的作品，背后一定有一个审美在线的人在控制方向。</strong></p>\n<p><figure><img alt=\"AI 生成的设计概念稿\" src=\"https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&amp;q=80\" /></figure></p>\n<p><em>AI 生成的设计概念稿，prompt 只花了 10 秒，但筛选和修改花了 2 小时</em></p>\n<h3 id=\"ai_1\">AI 是什么</h3>\n<p>AI 不是设计师的替代品，它是一个 <strong>超级加速器</strong>：</p>\n<ol>\n<li><strong>mood board 阶段</strong> — 10 分钟出 50 张风格探索，比之前翻图库快 10 倍</li>\n<li><strong>方案发散</strong> — 给 AI 一个方向，它能给出你想都想不到的变体</li>\n<li><strong>重复劳动</strong> — 批量调色、抠图、格式转换，这些事情 AI 做得比人好</li>\n</ol>\n<p>但有一件事 AI 永远做不了——<em>做审美决策。</em></p>\n<h2 id=\"_2\">真实的变化</h2>\n<p>这半年我观察到的变化是：</p>\n<ul>\n<li><strong>只会软件操作的设计师</strong>确实在焦虑，因为操作本身越来越不值钱</li>\n<li><strong>有想法、审美好、懂策略的设计师</strong>反而更抢手了，因为 AI 放大了他们的产出效率</li>\n</ul>\n<blockquote>\n<p>工具会变，审美不会。这才是护城河。</p>\n</blockquote>\n<h2 id=\"_3\">我的建议</h2>\n<p>如果你也在焦虑，别慌，去做三件事：</p>\n<ol>\n<li><strong>每周花 2 小时玩一个新 AI 工具</strong> — Midjourney、ComfyUI、Figma AI、Suno……都试试</li>\n<li><strong>别只当使用者</strong> — 想想怎么把 AI 融入你的工作流，而不是替代你的工作</li>\n<li><strong>加强审美输入</strong> — 逛美术馆、看优秀作品、研究排版理论，这些东西 AI 教不了你</li>\n</ol>\n<p>AI时代最值钱的设计师，不是会用最多 AI 工具的人，而是<strong>知道什么该由 AI 做、什么该自己亲手做</strong>的人。</p>",
+            "bodyEn": "",
+            "image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80",
+            "date": "06/15",
+            "fullDate": "2026-06-15",
+            "author": "Vipen",
+            "authorInitial": "V",
+            "authorBg": "#22c55e",
+            "readTime": "1 min read",
+            "tags": "AI,设计,思考,趋势",
+            "likeCount": 0,
+            "isLiked": false,
+            "commentCount": 0,
+            "comments": []
+        }
+    ]
 }

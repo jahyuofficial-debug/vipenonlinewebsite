@@ -34,7 +34,22 @@
 
 .disc-glass-center{flex:1;min-width:0;display:flex;flex-direction:column;gap:.06rem;padding:.1rem .14rem;border-radius:.14rem;background:rgba(0,0,0,.25)}
 .disc-glass-track-info{display:flex;align-items:center;gap:.1rem;overflow:hidden}
-.disc-glass-mini-cover{width:.4rem;height:.4rem;border-radius:.08rem;overflow:hidden;flex-shrink:0;background:#1a1a1a;box-shadow:0 .02rem .08rem rgba(0,0,0,.3)}
+.disc-glass-progress-bar.disc-loading-pulse {
+    animation: discLoadingPulse 1.2s ease-in-out infinite;
+    background: rgba(255,255,255,.35);
+}
+@keyframes discLoadingPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.9; }
+}
+.disc-glass-mini-cover.disc-loading-dim {
+    opacity: 0.35;
+    transition: opacity .35s ease;
+}
+.disc-glass-mini-cover {
+    width:.4rem;height:.4rem;border-radius:.08rem;overflow:hidden;flex-shrink:0;background:#1a1a1a;box-shadow:0 .02rem .08rem rgba(0,0,0,.3);
+    transition: opacity .2s ease;
+}
 .disc-glass-mini-cover img{width:100%;height:100%;object-fit:cover;display:block}
 .disc-glass-meta{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:.02rem}
 .disc-glass-title{font-size:.12rem;color:#fff;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}

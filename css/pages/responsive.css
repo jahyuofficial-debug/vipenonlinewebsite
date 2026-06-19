@@ -14,7 +14,7 @@
   .slideDots .dot{width:.32rem;height:.1rem;border-radius:.05rem}
   .slideDots .dot.active{width:.32rem;height:.1rem;border-radius:.05rem}
   .slideDots .dot .dot-progress{border-radius:.05rem}
-  .fresh-hero-carousel{height:70vh}
+  .fresh-hero-carousel{height:70vh;margin-bottom:-49vh}
   .fresh-hero-content{top:35%;left:.3rem;max-width:70%;transform:translateY(-50%)}
   .fresh-hero-main-title{font-size:.7rem}
   .fresh-hero-sub-title{font-size:.13rem;letter-spacing:.03rem}

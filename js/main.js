@@ -853,24 +853,19 @@ function navigateTo(pageName) {
         subPageContainer = document.createElement('div');
         subPageContainer.innerHTML = DiscPage.buildPage();
         app.appendChild(subPageContainer);
-        if (DiscPage.isPreloading && DiscPage.isPreloading()) {
-            // Preload in progress — bind UI but skip auto-play; onPreloadComplete will rebuild
+        setTimeout(function() {
             DiscPage.bindAll();
-        } else {
-            setTimeout(function() {
-                DiscPage.bindAll();
-                DiscPage.syncUIWithAudioState();
-                if (!discAutoPlayed) {
-                    discAutoPlayed = true;
-                    discAudio.play().catch(function(){});
-                }
-                if (discAudio && !discAudio.paused && !DiscPage.getDiscIsPlaying()) {
-                    DiscPage.setDiscIsPlaying(true);
-                    DiscPage.syncPlayPauseUI();
-                }
-                MiniPlayer.updateState(currentPage, DiscPage.getDiscIsPlaying(), discVisited);
-            }, 100);
-        }
+            DiscPage.syncUIWithAudioState();
+            if (!discAutoPlayed) {
+                discAutoPlayed = true;
+                discAudio.play().catch(function(){});
+            }
+            if (discAudio && !discAudio.paused && !DiscPage.getDiscIsPlaying()) {
+                DiscPage.setDiscIsPlaying(true);
+                DiscPage.syncPlayPauseUI();
+            }
+            MiniPlayer.updateState(currentPage, DiscPage.getDiscIsPlaying(), discVisited);
+        }, 100);
         discVisited = true;
         currentPage = 'disc-library';
     } else if (pageName === 'action') {
@@ -1473,6 +1468,13 @@ function handleRoute() {
         }
     } else if (hash === 'design-work-list') {
         navigateTo('design-work-list');
+    } else if (hash === 'disc-library') {
+        if (typeof DiscPage !== 'undefined' && DiscPage.isPreloading && DiscPage.isPreloading()) {
+            DiscPage.showBlockedToast();
+            history.replaceState(null, '', '#/' + (currentPage || 'home'));
+            return;
+        }
+        navigateTo('disc-library');
     } else if (hash === 'signin' || hash === 'signup') {
         navigateTo(hash);
     } else {
@@ -1488,19 +1490,17 @@ MiniPlayer.init({
     callbacks: {
         prevTrack: function() {
             var idx = DiscPage.getPrevTrackIndex();
-            DiscPage.loadTrack(idx);
-            MiniPlayer.syncWithDisc();
-            if (!DiscPage.getDiscIsPlaying()) {
+            DiscPage.loadTrack(idx, function() {
+                MiniPlayer.syncWithDisc();
                 discAudio.play().catch(function(){});
-            }
+            });
         },
         nextTrack: function() {
             var idx = DiscPage.getNextTrackIndex();
-            DiscPage.loadTrack(idx);
-            MiniPlayer.syncWithDisc();
-            if (!DiscPage.getDiscIsPlaying()) {
+            DiscPage.loadTrack(idx, function() {
+                MiniPlayer.syncWithDisc();
                 discAudio.play().catch(function(){});
-            }
+            });
         },
         goToDiscPage: function() {
             window.location.hash = '#/disc-library';
@@ -1535,6 +1535,10 @@ navigateTo = function(pageName) {
     var wasDiscPage = currentPage === 'disc-library';
     if (wasDiscPage) DiscPage.cleanup();
     NotificationCenter.hide();
+    // If user navigates elsewhere after disc was blocked, cancel auto-redirect
+    if (pageName !== 'disc-library' && typeof DiscPage !== 'undefined' && DiscPage.clearBlockedNav) {
+        DiscPage.clearBlockedNav();
+    }
     originalNavigateTo(pageName);
     updateAuthUI();
     if (pageName !== 'disc-library' && discAudio && discAudio.src) {

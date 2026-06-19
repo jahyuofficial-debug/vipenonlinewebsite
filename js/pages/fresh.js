@@ -27,12 +27,21 @@ function buildFreshArticles(activeKey) {
         return '<div class="fresh-empty"><h3 class="fresh-empty-title">No Articles</h3><p class="fresh-empty-desc">Check back soon for updates in this category.</p></div>';
     }
     return filtered.map(function(item) {
-        return '<div class="fresh-article" data-fresh-id="' + item.id + '">' +
-            '<div class="fresh-article-inner">' +
-            '<span class="fresh-article-cat">' + item.cat.toUpperCase() + '</span>' +
+        var hasCover = item.image ? true : false;
+        var coverHtml = hasCover ? '<div class="fresh-article-cover"><img src="' + item.image + '" alt="" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>' : '';
+        var metaParts = [];
+        if (item.date) metaParts.push('<span class="fresh-article-date">' + item.date + '</span>');
+        if (item.readTime) metaParts.push('<span class="fresh-article-readtime">' + item.readTime + '</span>');
+        var metaHtml = metaParts.length > 0 ? '<div class="fresh-article-meta">' + metaParts.join('') + '</div>' : '';
+        return '<div class="fresh-article' + (hasCover ? ' has-cover' : '') + '" data-fresh-id="' + item.id + '">' +
+            coverHtml +
             '<div class="fresh-article-body">' +
-            '<h3 class="fresh-article-headline">' + item.headline + '</h3>' +
+            '<div class="fresh-article-top">' +
+            '<span class="fresh-article-cat">' + item.cat.toUpperCase() + '</span>' +
+            metaHtml +
             '</div>' +
+            '<h3 class="fresh-article-headline">' + item.headline + '</h3>' +
+            (item.summary ? '<p class="fresh-article-summary">' + item.summary + '</p>' : '') +
             '</div></div>';
     }).join('');
 }
@@ -159,9 +168,7 @@ function buildFreshDetail(id) {
         headlineEn: item.headlineEn || '',
         summary: item.summary,
         summaryEn: item.summaryEn || '',
-        body: item.body.replace(/<\/?p>/g, '').split(' ').filter(function(s) { return s.trim(); }).map(function(s) {
-            return '<p>' + s.trim() + '';
-        }).join(''),
+        body: item.body || '',
         bodyEn: item.bodyEn || '',
         image: item.image || '',
         date: item.date,
