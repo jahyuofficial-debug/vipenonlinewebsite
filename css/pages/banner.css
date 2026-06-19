@@ -1,19 +1,20 @@
 #app{background:#000;position:relative}
 .heros-top-bg{display:none}
 
-#banner{position:relative;width:100%;height:100vh;overflow:hidden;background:#000;transform:scale(.3);transform-origin:center 55%;margin-bottom:-30vh}
+.home-wrapper{position:relative}
+#banner{position:relative;width:100%;height:30vh;overflow:hidden;background:#000;margin:15vh 0 0}
 #banner .bannerVideo{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1}
 #banner .banner-img-bg{position:absolute;top:0;left:0;width:100%;height:100%;background-size:cover;background-position:center;z-index:1}
 #banner .mask{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.3) 100%);pointer-events:none}
 
-/* Text inside banner - scaled 30% by parent transform */
-.banner-text{position:absolute;bottom:1.6rem;left:50%;transform:translateX(-50%);z-index:5;text-align:center}
-.banner-text .topic{margin-bottom:.08rem}
-.banner-text .topic h2{font-size:.6rem;color:#fff;font-weight:700;line-height:.7rem;font-style:italic;display:inline-block;min-height:.7rem}
-.banner-text .topic h2 .cursor-blink{display:inline-block;width:.04rem;height:.5rem;background:#fff;margin-left:.04rem;vertical-align:middle;animation:cursorBlink .8s step-end infinite}
+/* Text below banner - 30% of original size since outside scaled banner */
+.banner-text{text-align:center;padding:.3rem .5rem 0}
+.banner-text .topic{margin-bottom:.04rem}
+.banner-text .topic h2{font-size:.18rem;color:#fff;font-weight:700;line-height:.26rem;font-style:italic;display:inline-block;min-height:.26rem}
+.banner-text .topic h2 .cursor-blink{display:inline-block;width:.03rem;height:.16rem;background:#fff;margin-left:.03rem;vertical-align:middle;animation:cursorBlink .8s step-end infinite}
 @keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
-.banner-text .note{height:auto;min-height:.3rem}
-.banner-text .note h3{font-size:.2rem;color:rgba(255,255,255,.55);line-height:.3rem;font-family:'Brush Script MT','Segoe Script','Comic Sans MS',cursive,serif;display:inline-block;min-height:.3rem}
+.banner-text .note{height:auto;min-height:.14rem}
+.banner-text .note h3{font-size:.06rem;color:rgba(255,255,255,.55);line-height:.14rem;font-family:'Brush Script MT','Segoe Script','Comic Sans MS',cursive,serif;display:inline-block;min-height:.14rem}
 
 .slideDots{display:none}
 

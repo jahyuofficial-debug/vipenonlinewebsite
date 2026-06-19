@@ -11,7 +11,7 @@
   .banner-text .topic h2{font-size:.12rem;line-height:.16rem}
   .banner-text .note h3{font-size:.05rem}
   .slideDots{display:none}
-  .fresh-hero-carousel{height:70vh;margin-bottom:-49vh}
+  .fresh-hero-carousel{height:70vh}
   .fresh-hero-content{top:35%;left:.3rem;max-width:70%;transform:translateY(-50%)}
   .fresh-hero-main-title{font-size:.7rem}
   .fresh-hero-sub-title{font-size:.13rem;letter-spacing:.03rem}

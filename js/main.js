@@ -561,6 +561,7 @@ var msgTempImages = [];
 
 window.currentPage = null;
 var banner = document.getElementById('banner');
+var homeWrapper = document.getElementById('homeWrapper');
 var subPageContainer = null;
 var freshActiveTab = 'all';
 
@@ -751,6 +752,8 @@ function navigateTo(pageName) {
         DesignPage.bindGuard();
         if (herosTopBg) herosTopBg.classList.remove('hidden');
         banner.style.display = 'none';
+    homeWrapper.style.display = 'none';
+        homeWrapper.style.display = 'none';
         header.classList.remove('dimmed');
         currentPage = 'design-work';
         return;
@@ -758,6 +761,7 @@ function navigateTo(pageName) {
 
     if (pageName === '' || pageName === 'home') {
         banner.style.display = 'block';
+        homeWrapper.style.display = 'block';
         BannerPage.startAnimations();
         header.classList.add('dimmed');
         if (herosTopBg) herosTopBg.classList.add('hidden');
@@ -766,6 +770,8 @@ function navigateTo(pageName) {
     } else if (pageName === 'fresh') {
         if (herosTopBg) herosTopBg.classList.remove('hidden');
         banner.style.display = 'none';
+    homeWrapper.style.display = 'none';
+        homeWrapper.style.display = 'none';
         header.classList.remove('dimmed');
         subPageContainer = document.createElement('div');
         var mergedItems = freshItems.slice();
@@ -798,6 +804,8 @@ function navigateTo(pageName) {
     } else if (pageName === 'design-work') {
         if (herosTopBg) herosTopBg.classList.remove('hidden');
         banner.style.display = 'none';
+    homeWrapper.style.display = 'none';
+        homeWrapper.style.display = 'none';
         header.classList.remove('dimmed');
         subPageContainer = document.createElement('div');
         subPageContainer.innerHTML = DesignPage.buildGrid();
@@ -809,6 +817,8 @@ function navigateTo(pageName) {
     } else if (pageName === 'design-work-list') {
         if (herosTopBg) herosTopBg.classList.remove('hidden');
         banner.style.display = 'none';
+    homeWrapper.style.display = 'none';
+        homeWrapper.style.display = 'none';
         header.classList.remove('dimmed');
         subPageContainer = document.createElement('div');
         subPageContainer.innerHTML = DesignPage.buildList();
@@ -824,6 +834,8 @@ function navigateTo(pageName) {
     } else if (pageName === 'disc-library') {
         if (herosTopBg) herosTopBg.classList.remove('hidden');
         banner.style.display = 'none';
+    homeWrapper.style.display = 'none';
+        homeWrapper.style.display = 'none';
         header.classList.remove('dimmed');
         subPageContainer = document.createElement('div');
         subPageContainer.innerHTML = DiscPage.buildPage();
@@ -846,6 +858,8 @@ function navigateTo(pageName) {
     } else if (pageName === 'action') {
         if (herosTopBg) herosTopBg.classList.remove('hidden');
         banner.style.display = 'none';
+    homeWrapper.style.display = 'none';
+        homeWrapper.style.display = 'none';
         header.classList.remove('dimmed');
         var globalActions = Utils.getGlobalData('actions') || [];
         globalActions.forEach(function(ga) {
@@ -876,6 +890,8 @@ function navigateTo(pageName) {
     } else if (pageName === 'msg') {
         if (herosTopBg) herosTopBg.classList.remove('hidden');
         banner.style.display = 'none';
+    homeWrapper.style.display = 'none';
+        homeWrapper.style.display = 'none';
         header.classList.remove('dimmed');
         subPageContainer = document.createElement('div');
         subPageContainer.innerHTML = buildMsgPage();
@@ -885,6 +901,8 @@ function navigateTo(pageName) {
     } else if (pageTemplates[pageName]) {
         if (herosTopBg) herosTopBg.classList.remove('hidden');
         banner.style.display = 'none';
+    homeWrapper.style.display = 'none';
+        homeWrapper.style.display = 'none';
         header.classList.remove('dimmed');
         subPageContainer = document.createElement('div');
         subPageContainer.innerHTML = pageTemplates[pageName];
@@ -893,6 +911,8 @@ function navigateTo(pageName) {
     } else if (pageName === 'signin') {
         if (herosTopBg) herosTopBg.classList.remove('hidden');
         banner.style.display = 'none';
+    homeWrapper.style.display = 'none';
+        homeWrapper.style.display = 'none';
         header.classList.remove('dimmed');
         subPageContainer = document.createElement('div');
         subPageContainer.innerHTML = SigninPage.buildPage();
@@ -902,6 +922,8 @@ function navigateTo(pageName) {
     } else if (pageName === 'signup') {
         if (herosTopBg) herosTopBg.classList.remove('hidden');
         banner.style.display = 'none';
+    homeWrapper.style.display = 'none';
+        homeWrapper.style.display = 'none';
         header.classList.remove('dimmed');
         subPageContainer = document.createElement('div');
         subPageContainer.innerHTML = SignupPage.buildPage();
@@ -911,6 +933,8 @@ function navigateTo(pageName) {
     } else if (pageName === 'profile') {
         if (herosTopBg) herosTopBg.classList.remove('hidden');
         banner.style.display = 'none';
+    homeWrapper.style.display = 'none';
+        homeWrapper.style.display = 'none';
         header.classList.remove('dimmed');
         subPageContainer = document.createElement('div');
         subPageContainer.innerHTML = ProfilePage.buildPage();
@@ -1098,6 +1122,7 @@ function navigateToFreshHeroDetail(groupIdx) {
         subPageContainer = null;
     }
     banner.style.display = 'none';
+    homeWrapper.style.display = 'none';
     header.classList.remove('dimmed');
     subPageContainer = document.createElement('div');
     subPageContainer.innerHTML = FreshPage.buildHeroDetail(groupIdx);
@@ -1120,6 +1145,7 @@ function navigateToFreshSpotDetail(groupIdx) {
         subPageContainer = null;
     }
     banner.style.display = 'none';
+    homeWrapper.style.display = 'none';
     header.classList.remove('dimmed');
     subPageContainer = document.createElement('div');
     subPageContainer.innerHTML = FreshPage.buildSpotDetail(groupIdx);
@@ -1142,6 +1168,7 @@ function navigateToFreshHotDetail(groupIdx, newsIdx) {
         subPageContainer = null;
     }
     banner.style.display = 'none';
+    homeWrapper.style.display = 'none';
     header.classList.remove('dimmed');
     subPageContainer = document.createElement('div');
     subPageContainer.innerHTML = FreshPage.buildHotNewsDetail(groupIdx, newsIdx);
@@ -1164,6 +1191,7 @@ function navigateToFreshDetail(id) {
         subPageContainer = null;
     }
     banner.style.display = 'none';
+    homeWrapper.style.display = 'none';
     header.classList.remove('dimmed');
     subPageContainer = document.createElement('div');
     subPageContainer.innerHTML = FreshPage.buildDetail(id);
@@ -1294,6 +1322,7 @@ function navigateToDesignWorkDetail(id) {
         subPageContainer = null;
     }
     banner.style.display = 'none';
+    homeWrapper.style.display = 'none';
     header.classList.remove('dimmed');
     subPageContainer = document.createElement('div');
     subPageContainer.innerHTML = DesignPage.buildDetail(id);
