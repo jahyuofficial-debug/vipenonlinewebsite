@@ -147,10 +147,10 @@ BannerPage.initBgVideo();
                 function applyBannerText() {
                     var h2 = document.querySelector('#topicLine h2');
                     var h3 = document.querySelector('#noteLine h3');
-                    var msgEl = document.querySelector('#banner .msg');
+                    var textEl = document.getElementById('bannerText');
                     if (h2) { h2.textContent = meta0.topic || ''; h2.style.cssText = (meta0.topicBold ? 'font-weight:bold;' : '') + (meta0.topicItalic ? 'font-style:italic;' : ''); }
                     if (h3) { h3.textContent = meta0.note || ''; h3.style.cssText = (meta0.noteBold ? 'font-weight:bold;' : '') + (meta0.noteItalic ? 'font-style:italic;' : ''); }
-                    if (msgEl) { msgEl.style.opacity = '1'; msgEl.style.display = ''; msgEl.style.visibility = 'visible'; }
+                    if (textEl) { textEl.style.opacity = '1'; textEl.style.display = ''; textEl.style.visibility = 'visible'; }
                 }
                 applyBannerText();
                 // Re-apply after potential overwrites

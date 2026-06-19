@@ -13,7 +13,8 @@ var bannerData = {
     textSlideIndex: 0,
     homeGroups: null,
     homeTextSlideIndices: [0, 0, 0, 0],
-    textInterval: null
+    typewriterTimer: null,
+    typewriterState: null
 };
 
 var bgVideo = null;
@@ -40,81 +41,112 @@ function loadHomeBanner(callback) {
     if (callback) callback(true);
 }
 
-function getTotalSlides() {
+// Collect all text pairs from homeGroups
+function collectAllTexts() {
+    var all = [];
     if (bannerData.homeGroups && bannerData.homeGroups.length > 0) {
-        return bannerData.homeGroups.length;
-    }
-    return bannerData.bgType.length;
-}
-
-// Only rotate text - no background switching
-function rotateTextOnly() {
-    var topicLine = document.getElementById('topicLine');
-    var noteLine = document.getElementById('noteLine');
-    var h2 = topicLine ? topicLine.querySelector('h2') : null;
-    var h3 = noteLine ? noteLine.querySelector('h3') : null;
-    var msgEl = document.querySelector('#banner .msg');
-
-    if (!h2 || !h3) return;
-
-    // Collect all texts from homeGroups
-    var allTexts = [];
-    if (bannerData.homeGroups && bannerData.homeGroups.length > 0) {
-        bannerData.homeGroups.forEach(function(group, gi) {
+        bannerData.homeGroups.forEach(function(group) {
             var texts = group.carouselTexts || [];
             texts.forEach(function(t) {
-                allTexts.push({ topic: t.topic || '', note: t.note || '', topicStyle: t.topicStyle || '', noteStyle: t.noteStyle || '' });
+                all.push({ topic: t.topic || '', note: t.note || '' });
             });
         });
     }
+    return all;
+}
 
-    if (allTexts.length === 0) {
-        // Fallback to legacy text arrays
-        if (bannerData.topics.length > 0) {
-            bannerData.textSlideIndex = (bannerData.textSlideIndex + 1) % bannerData.topics.length;
-            h2.textContent = bannerData.topics[bannerData.textSlideIndex];
-            h3.textContent = bannerData.notes[bannerData.textSlideIndex] || '';
+// Typewriter animation state machine
+function startTypewriter() {
+    stopTypewriter();
+
+    var allTexts = collectAllTexts();
+    if (allTexts.length === 0) return;
+
+    var h2 = document.querySelector('#topicLine h2');
+    var h3 = document.querySelector('#noteLine h3');
+    if (!h2 || !h3) return;
+
+    var textIndex = 0;
+    var phase = 'type'; // 'type' | 'pause' | 'delete' | 'nextPause'
+    var charIndex = 0;
+    var currentPair = allTexts[0];
+    var typeSpeed = 80;   // ms per character while typing
+    var deleteSpeed = 40; // ms per character while deleting
+    var pauseAfterType = 1800; // ms pause after full text shown
+    var pauseAfterDelete = 400; // ms pause before next text
+
+    // Insert blinking cursor
+    var cursorSpan = document.createElement('span');
+    cursorSpan.className = 'cursor-blink';
+    h2.textContent = '';
+    h3.textContent = '';
+    h2.appendChild(cursorSpan);
+
+    function tick() {
+        if (phase === 'type') {
+            if (charIndex < currentPair.topic.length) {
+                // Still typing topic
+                h2.textContent = currentPair.topic.substring(0, charIndex + 1);
+                h2.appendChild(cursorSpan);
+                charIndex++;
+                bannerData.typewriterTimer = setTimeout(tick, typeSpeed);
+            } else if (charIndex < currentPair.topic.length + currentPair.note.length) {
+                // Typing note
+                var noteIdx = charIndex - currentPair.topic.length;
+                h3.textContent = currentPair.note.substring(0, noteIdx + 1);
+                charIndex++;
+                bannerData.typewriterTimer = setTimeout(tick, typeSpeed);
+            } else {
+                // All done typing
+                phase = 'pause';
+                bannerData.typewriterTimer = setTimeout(tick, pauseAfterType);
+            }
+        } else if (phase === 'pause') {
+            // Start deleting
+            phase = 'delete';
+            charIndex = currentPair.topic.length + currentPair.note.length;
+            bannerData.typewriterTimer = setTimeout(tick, deleteSpeed);
+        } else if (phase === 'delete') {
+            if (charIndex > currentPair.topic.length) {
+                // Deleting note
+                var noteKeep = charIndex - currentPair.topic.length - 1;
+                h3.textContent = currentPair.note.substring(0, noteKeep);
+                charIndex--;
+                bannerData.typewriterTimer = setTimeout(tick, deleteSpeed);
+            } else if (charIndex > 0) {
+                // Deleting topic
+                h2.textContent = currentPair.topic.substring(0, charIndex - 1);
+                h2.appendChild(cursorSpan);
+                charIndex--;
+                bannerData.typewriterTimer = setTimeout(tick, deleteSpeed);
+            } else {
+                // All deleted, move to next text
+                textIndex = (textIndex + 1) % allTexts.length;
+                currentPair = allTexts[textIndex];
+                charIndex = 0;
+                phase = 'nextPause';
+                bannerData.typewriterTimer = setTimeout(tick, pauseAfterDelete);
+            }
+        } else if (phase === 'nextPause') {
+            // Start typing next text
+            phase = 'type';
+            bannerData.typewriterTimer = setTimeout(tick, typeSpeed);
         }
-        return;
     }
 
-    // Fade out
-    if (msgEl) msgEl.style.opacity = '0';
-    h2.style.opacity = '0';
-    h3.style.opacity = '0';
-
-    setTimeout(function() {
-        bannerData.textSlideIndex = (bannerData.textSlideIndex + 1) % allTexts.length;
-        var t = allTexts[bannerData.textSlideIndex];
-        h2.textContent = t.topic;
-        h3.textContent = t.note;
-        if (t.topicStyle) h2.setAttribute('style', t.topicStyle);
-        else h2.removeAttribute('style');
-        if (t.noteStyle) h3.setAttribute('style', t.noteStyle);
-        else h3.removeAttribute('style');
-
-        // Fade in
-        if (msgEl) msgEl.style.opacity = '1';
-        h2.style.opacity = '1';
-        h3.style.opacity = '1';
-    }, 400);
+    tick();
 }
 
-function startTextRotation() {
-    stopTextRotation();
-    bannerData.textInterval = setInterval(rotateTextOnly, 4000);
-}
-
-function stopTextRotation() {
-    if (bannerData.textInterval) {
-        clearInterval(bannerData.textInterval);
-        bannerData.textInterval = null;
+function stopTypewriter() {
+    if (bannerData.typewriterTimer) {
+        clearTimeout(bannerData.typewriterTimer);
+        bannerData.typewriterTimer = null;
     }
+    bannerData.typewriterState = null;
 }
 
-// Keep changeSlide for compatibility but simplified - only rotates text now
 function changeSlide(index){
-    rotateTextOnly();
+    // Ignored - no background switching
 }
 
 function isCurrentSlideVideo() {
@@ -140,22 +172,21 @@ function initBgVideo(){
 }
 
 function startBannerAnimations(){
-    startTextRotation();
+    startTypewriter();
     if (bgVideo && bgVideo.paused) bgVideo.play();
 }
 
 function stopBannerAnimations(){
-    stopTextRotation();
+    stopTypewriter();
 }
 
-// Apply the first text when data loads
 function applyInitialText(texts) {
     if (!texts || texts.length === 0) return;
     var t = texts[0];
     var h2 = document.querySelector('#topicLine h2');
     var h3 = document.querySelector('#noteLine h3');
-    if (h2) { h2.textContent = t.topic || ''; if (t.topicStyle) h2.setAttribute('style', t.topicStyle); }
-    if (h3) { h3.textContent = t.note || ''; if (t.noteStyle) h3.setAttribute('style', t.noteStyle); }
+    if (h2) h2.textContent = t.topic || '';
+    if (h3) h3.textContent = t.note || '';
 }
 
 return {
