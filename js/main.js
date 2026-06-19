@@ -9,7 +9,7 @@ var discAudio;
 Cursor.init('cursor');
 
 Loading.init(function() {
-    SlideDots.startAutoSlide();
+    // Banner text rotation will start after data loads
 });
 
 BannerPage.initBgVideo();
@@ -158,14 +158,10 @@ BannerPage.initBgVideo();
                 setTimeout(applyBannerText, 300);
                 setTimeout(applyBannerText, 1000);
 
-                var total = BannerPage.bannerData.homeGroups.length;
-                var dots = document.querySelectorAll('#slideDots .dot');
-                dots.forEach(function(dot, i) {
-                    dot.style.display = i < total ? '' : 'none';
-                });
+                // Start text rotation after data loads
                 setTimeout(function() {
-                    BannerPage.changeSlide(0);
-                }, 1200);
+                    BannerPage.startAnimations();
+                }, 1500);
             }).catch(function(e) {
                 console.warn('Failed to load banner metas from R2', e);
             });
@@ -377,20 +373,6 @@ var freshHeroItems = [];
 var freshCategories = [];
 
 var freshItems = [];
-
-SlideDots.init({
-    dotSelector: '#slideDots .dot',
-    slideDuration: 5000,
-    totalSlides: BannerPage.bannerData.bgType.length,
-    changeSlide: function(idx) {
-        if (idx === 'next') {
-            var bgTotal = BannerPage.bannerData.homeGroups && BannerPage.bannerData.homeGroups.length > 0 ? BannerPage.bannerData.homeGroups.length : BannerPage.bannerData.bgType.length;
-            BannerPage.changeSlide((BannerPage.bannerData.current + 1 + bgTotal) % bgTotal);
-        } else if (typeof idx === 'number') {
-            BannerPage.changeSlide(idx);
-        }
-    }
-});
 
 var header = document.querySelector('header');
 var headerTicking = false;

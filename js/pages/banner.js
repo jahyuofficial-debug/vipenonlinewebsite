@@ -12,12 +12,12 @@ var bannerData = {
     bgVideoSrc: [],
     textSlideIndex: 0,
     homeGroups: null,
-    homeTextSlideIndices: [0, 0, 0, 0]
+    homeTextSlideIndices: [0, 0, 0, 0],
+    textInterval: null
 };
 
 var bgVideo = null;
-var isAnimating = false;
-var videoLoadedSrc = ''; // track loaded video URL to skip redundant load()/play()
+var videoLoadedSrc = '';
 
 function filterVisibleGroups(groups) {
     if (!groups || !groups.length) return groups;
@@ -25,7 +25,6 @@ function filterVisibleGroups(groups) {
 }
 
 function loadHomeBanner(callback) {
-    // Check if ManagerGo cached data exists in localStorage
     try {
         var cached = localStorage.getItem('vipen_mgr_home_banner');
         if (cached) {
@@ -38,9 +37,6 @@ function loadHomeBanner(callback) {
             }
         }
     } catch (e) {}
-
-    // main.js handles R2 meta loading and triggers changeSlide when ready
-    // Just return success to not block the caller
     if (callback) callback(true);
 }
 
@@ -51,131 +47,74 @@ function getTotalSlides() {
     return bannerData.bgType.length;
 }
 
-function changeSlide(index){
-    if(isAnimating) return;
-    var bgTotal = getTotalSlides();
-    var newIndex = (typeof index === 'number') ? index : ((bannerData.current + index + bgTotal) % bgTotal);
-    if(newIndex === bannerData.current) return;
-    isAnimating = true;
-
-    SlideDots.stopProgress();
-    bannerData.current = newIndex;
-    SlideDots.updateDots(newIndex);
-    SlideDots.startProgress();
-
-    SlideDots.resetAutoSlideInterval();
-
-    var msgEl = document.querySelector('#banner .msg');
+// Only rotate text - no background switching
+function rotateTextOnly() {
     var topicLine = document.getElementById('topicLine');
     var noteLine = document.getElementById('noteLine');
     var h2 = topicLine ? topicLine.querySelector('h2') : null;
     var h3 = noteLine ? noteLine.querySelector('h3') : null;
-    var bgVideoEl = document.getElementById('bgVideo');
-    var bannerImgBg = document.getElementById('bannerImgBg');
+    var msgEl = document.querySelector('#banner .msg');
 
-    if (msgEl) msgEl.style.opacity = '0';
+    if (!h2 || !h3) return;
 
-    SlideDots.setSlideChangeTimeout(setTimeout(function(){
-        if (bannerData.homeGroups && bannerData.homeGroups.length > 0) {
-            var group = bannerData.homeGroups[bannerData.current];
+    // Collect all texts from homeGroups
+    var allTexts = [];
+    if (bannerData.homeGroups && bannerData.homeGroups.length > 0) {
+        bannerData.homeGroups.forEach(function(group, gi) {
             var texts = group.carouselTexts || [];
-            if (texts.length > 0) {
-                bannerData.homeTextSlideIndices[bannerData.current] = (bannerData.homeTextSlideIndices[bannerData.current] + 1) % texts.length;
-                var ti = bannerData.homeTextSlideIndices[bannerData.current];
-                if (h2) { h2.textContent = texts[ti].topic || ''; h2.setAttribute('style', texts[ti].topicStyle || ''); }
-                if (h3) { h3.textContent = texts[ti].note || ''; h3.setAttribute('style', texts[ti].noteStyle || ''); }
-                if (msgEl) msgEl.style.display = '';
-            } else {
-                if (msgEl) msgEl.style.display = 'none';
-            }
+            texts.forEach(function(t) {
+                allTexts.push({ topic: t.topic || '', note: t.note || '', topicStyle: t.topicStyle || '', noteStyle: t.noteStyle || '' });
+            });
+        });
+    }
 
-            var bgType = group.bgType || 'image';
-            if (bgType === 'video' && group.bgVideo) {
-                if (bgVideoEl) {
-                    var newSrc = group.bgVideo;
-                    if (videoLoadedSrc !== newSrc) {
-                        videoLoadedSrc = newSrc;
-                        bgVideoEl.src = newSrc;
-                        bgVideoEl.load();
-                    }
-                    bgVideoEl.style.display = '';
-                    var playPromise = bgVideoEl.play();
-                    if (playPromise !== undefined) {
-                        playPromise.catch(function() {});
-                    }
-                }
-                if (bannerImgBg) bannerImgBg.style.display = 'none';
-            } else if (bgType === 'image' && group.bgImage) {
-                if (bgVideoEl) {
-                    bgVideoEl.pause();
-                    bgVideoEl.style.display = 'none';
-                }
-                if (bannerImgBg) {
-                    bannerImgBg.style.backgroundImage = group.bgImage ? 'url(' + group.bgImage + ')' : 'none';
-                    bannerImgBg.style.display = group.bgImage ? '' : 'none';
-                }
-            } else {
-                if (bgVideoEl) {
-                    bgVideoEl.pause();
-                    bgVideoEl.style.display = 'none';
-                }
-                if (bannerImgBg) bannerImgBg.style.display = 'none';
-            }
-
-            if (msgEl) msgEl.style.opacity = '1';
-        } else {
-            if(bannerData.current === 0){
-                bannerData.textSlideIndex = (bannerData.textSlideIndex + 1) % bannerData.topics.length;
-                if (h2) h2.textContent = bannerData.topics[bannerData.textSlideIndex];
-                if (h3) h3.textContent = bannerData.notes[bannerData.textSlideIndex];
-                if (msgEl) msgEl.style.display = '';
-            } else {
-                if (msgEl) msgEl.style.display = 'none';
-            }
-
-            var type = bannerData.bgType[bannerData.current];
-            if(type === 'video'){
-                if(bgVideoEl){
-                    var newSrc = bannerData.bgVideoSrc[bannerData.current];
-                    if(videoLoadedSrc !== newSrc){
-                        videoLoadedSrc = newSrc;
-                        bgVideoEl.src = newSrc;
-                        bgVideoEl.load();
-                    }
-                    bgVideoEl.style.display = '';
-                    var playPromise = bgVideoEl.play();
-                    if(playPromise !== undefined){
-                        playPromise.catch(function(){});
-                    }
-                }
-                if(bannerImgBg) bannerImgBg.style.display = 'none';
-            } else if(type === 'image'){
-                if(bgVideoEl){
-                    bgVideoEl.pause();
-                    bgVideoEl.style.display = 'none';
-                }
-                if(bannerImgBg){
-                    bannerImgBg.style.backgroundImage = 'url(' + bannerData.bgImage[bannerData.current] + ')';
-                    bannerImgBg.style.display = '';
-                }
-            } else {
-                if(bgVideoEl){
-                    bgVideoEl.pause();
-                    bgVideoEl.style.display = 'none';
-                }
-                if(bannerImgBg) bannerImgBg.style.display = 'none';
-            }
-
-            if(bannerData.current === 0){
-                if (msgEl) msgEl.style.opacity = '1';
-            }
+    if (allTexts.length === 0) {
+        // Fallback to legacy text arrays
+        if (bannerData.topics.length > 0) {
+            bannerData.textSlideIndex = (bannerData.textSlideIndex + 1) % bannerData.topics.length;
+            h2.textContent = bannerData.topics[bannerData.textSlideIndex];
+            h3.textContent = bannerData.notes[bannerData.textSlideIndex] || '';
         }
+        return;
+    }
 
-        SlideDots.setSlideChangeTimeout(setTimeout(function(){
-            isAnimating = false;
-            SlideDots.setSlideChangeTimeout(null);
-        }, 50));
-    }, 200));
+    // Fade out
+    if (msgEl) msgEl.style.opacity = '0';
+    h2.style.opacity = '0';
+    h3.style.opacity = '0';
+
+    setTimeout(function() {
+        bannerData.textSlideIndex = (bannerData.textSlideIndex + 1) % allTexts.length;
+        var t = allTexts[bannerData.textSlideIndex];
+        h2.textContent = t.topic;
+        h3.textContent = t.note;
+        if (t.topicStyle) h2.setAttribute('style', t.topicStyle);
+        else h2.removeAttribute('style');
+        if (t.noteStyle) h3.setAttribute('style', t.noteStyle);
+        else h3.removeAttribute('style');
+
+        // Fade in
+        if (msgEl) msgEl.style.opacity = '1';
+        h2.style.opacity = '1';
+        h3.style.opacity = '1';
+    }, 400);
+}
+
+function startTextRotation() {
+    stopTextRotation();
+    bannerData.textInterval = setInterval(rotateTextOnly, 4000);
+}
+
+function stopTextRotation() {
+    if (bannerData.textInterval) {
+        clearInterval(bannerData.textInterval);
+        bannerData.textInterval = null;
+    }
+}
+
+// Keep changeSlide for compatibility but simplified - only rotates text now
+function changeSlide(index){
+    rotateTextOnly();
 }
 
 function isCurrentSlideVideo() {
@@ -192,7 +131,7 @@ function initBgVideo(){
         var banObs = new IntersectionObserver(function(entries){
             entries.forEach(function(entry){
                 if(entry.isIntersecting){
-                    if(bgVideo.paused && isCurrentSlideVideo()) bgVideo.play().catch(function(){});
+                    if(bgVideo.paused) bgVideo.play().catch(function(){});
                 }
             });
         }, {threshold:0.1});
@@ -201,12 +140,22 @@ function initBgVideo(){
 }
 
 function startBannerAnimations(){
-    SlideDots.startAutoSlide();
-    if (bgVideo && bgVideo.paused && isCurrentSlideVideo()) bgVideo.play();
+    startTextRotation();
+    if (bgVideo && bgVideo.paused) bgVideo.play();
 }
 
 function stopBannerAnimations(){
-    SlideDots.stopAutoSlide();
+    stopTextRotation();
+}
+
+// Apply the first text when data loads
+function applyInitialText(texts) {
+    if (!texts || texts.length === 0) return;
+    var t = texts[0];
+    var h2 = document.querySelector('#topicLine h2');
+    var h3 = document.querySelector('#noteLine h3');
+    if (h2) { h2.textContent = t.topic || ''; if (t.topicStyle) h2.setAttribute('style', t.topicStyle); }
+    if (h3) { h3.textContent = t.note || ''; if (t.noteStyle) h3.setAttribute('style', t.noteStyle); }
 }
 
 return {
@@ -216,7 +165,8 @@ return {
     stopAnimations: stopBannerAnimations,
     loadHomeBanner: loadHomeBanner,
     filterVisibleGroups: filterVisibleGroups,
-    bannerData: bannerData
+    bannerData: bannerData,
+    applyInitialText: applyInitialText
 };
 
 })();

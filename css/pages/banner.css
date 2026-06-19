@@ -1,20 +1,16 @@
 #app{background:#000;position:relative}
 .heros-top-bg{display:none}
 
-#banner{position:relative;width:100%;height:100vh;overflow:hidden;background:#000;transform:scale(.3);transform-origin:top center;margin-bottom:-70vh}
+#banner{position:relative;width:100%;height:100vh;overflow:hidden;background:#000}
 #banner .bannerVideo{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1}
 #banner .banner-img-bg{position:absolute;top:0;left:0;width:100%;height:100%;background-size:cover;background-position:center;z-index:1}
 #banner .mask{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.3) 100%);pointer-events:none}
-#banner .msg{position:absolute;bottom:1.5rem;left:0;width:100%;z-index:5;padding:0 .5rem;transition:opacity .35s ease;text-align:left}
-#banner .msg .topic{overflow:hidden;height:.7rem;margin-bottom:.1rem}
-#banner .msg .topic h2{font-size:.6rem;color:#d4a853;font-weight:700;line-height:.7rem;transition:transform .6s cubic-bezier(.25,.46,.45,.94);white-space:nowrap;font-style:italic}
+#banner .msg{position:absolute;top:58%;left:50%;transform:translate(-50%,0);z-index:5;text-align:center;transition:opacity .35s ease}
+#banner .msg .topic{overflow:hidden;height:.7rem;margin-bottom:.04rem}
+#banner .msg .topic h2{font-size:.6rem;color:#d4a853;font-weight:700;line-height:.7rem;transition:opacity .5s ease,transform .5s ease;white-space:nowrap;font-style:italic}
 #banner .msg .note{overflow:hidden;height:.3rem}
-#banner .msg .note h3{font-size:.2rem;color:#999;line-height:.3rem;transition:transform .6s cubic-bezier(.25,.46,.45,.94);font-family:'Brush Script MT','Segoe Script','Comic Sans MS',cursive,serif}
-.slideDots{position:absolute;bottom:.3rem;left:.5rem;z-index:5;display:flex;gap:.12rem;align-items:center}
-.slideDots .dot{position:relative;width:.4rem;height:.12rem;border-radius:.06rem;background:rgba(255,255,255,.2);transition:all .4s cubic-bezier(.25,.46,.45,.94);cursor:none;overflow:hidden}
-.slideDots .dot.active{width:.4rem;height:.12rem;border-radius:.06rem;background:rgba(255,255,255,.2)}
-.slideDots .dot:hover:not(.active){background:rgba(255,255,255,.4)}
-.slideDots .dot .dot-progress{position:absolute;top:0;left:0;height:100%;width:0%;background:#fff;border-radius:.06rem;transition:none}
+#banner .msg .note h3{font-size:.2rem;color:#999;line-height:.3rem;transition:opacity .5s ease,transform .5s ease;font-family:'Brush Script MT','Segoe Script','Comic Sans MS',cursive,serif}
+.slideDots{display:none}
 
 .sub-page{min-height:100vh;background:#000;position:relative;z-index:1}
 
