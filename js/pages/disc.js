@@ -15,6 +15,110 @@ var discAudioEventsInited = false;
 var discLoadedTrackIndex = -1;
 var userBehavior = { likedTracks: [] };
 
+// Disc full preloader — loads all tracks & covers before page entry
+var preloadState = { total: 0, loaded: 0, loading: false, done: false };
+var preloadUIDirty = false;
+function buildLoadingPage() {
+    var pct = preloadState.total > 0 ? Math.round(preloadState.loaded / preloadState.total * 100) : 0;
+    return '<section id="page-disc-library" class="disc-page disc-page-loading">' +
+        '<div class="disc-bg disc-bg-static"></div>' +
+        '<div class="disc-bg-overlay"></div>' +
+        '<div class="disc-loading-overlay">' +
+        '<div class="disc-loading-wrap">' +
+        '<div class="disc-loading-icon">&#x1F3B5;</div>' +
+        '<p class="disc-loading-title">Loading disc library</p>' +
+        '<div class="disc-loading-bar"><div class="disc-loading-fill" id="discLoadFill" style="width:' + pct + '%"></div></div>' +
+        '<p class="disc-loading-status" id="discLoadStatus">' + preloadState.loaded + ' / ' + preloadState.total + ' tracks ready</p>' +
+        '<p class="disc-loading-hint">You can browse other pages while the library loads</p>' +
+        '</div></div></section>';
+}
+function updateLoadingUI() {
+    if (window.currentPage !== 'disc-library') { preloadUIDirty = true; return; }
+    preloadUIDirty = false;
+    var pct = preloadState.total > 0 ? Math.round(preloadState.loaded / preloadState.total * 100) : 0;
+    var fill = document.getElementById('discLoadFill');
+    var status = document.getElementById('discLoadStatus');
+    if (fill) fill.style.width = pct + '%';
+    if (status) status.textContent = preloadState.loaded + ' / ' + preloadState.total + ' tracks ready';
+    if (preloadState.done) {
+        var txt = document.querySelector('.disc-loading-title');
+        if (txt) txt.textContent = 'Library ready \u2014 enjoy!';
+        var hint = document.querySelector('.disc-loading-hint');
+        if (hint) hint.textContent = 'Loading complete. Switching to player...';
+    }
+}
+function onPreloadComplete() {
+    updateLoadingUI();
+    setTimeout(function() {
+        if (window.currentPage === 'disc-library') {
+            // Rebuild the disc page with full content
+            var sub = document.getElementById('page-disc-library');
+            if (sub && sub.parentNode) {
+                var container = document.createElement('div');
+                container.innerHTML = buildDiscPage();
+                var newPage = container.firstChild;
+                sub.parentNode.replaceChild(newPage, sub);
+                setTimeout(function() {
+                    DiscPage.bindAll();
+                    DiscPage.syncUIWithAudioState();
+                    if (!discAutoPlayed) {
+                        discAutoPlayed = true;
+                        discAudio.play().catch(function(){});
+                    }
+                    DiscPage.setDiscIsPlaying(true);
+                    DiscPage.syncPlayPauseUI();
+                    if (typeof MiniPlayer !== 'undefined') MiniPlayer.updateState('disc-library', true, true);
+                }, 100);
+            }
+        } else {
+            // User navigated away — bring them back
+            window.location.hash = '#/disc-library';
+        }
+    }, 600);
+}
+function startPreload() {
+    var tapes = window.discData.tapes || [];
+    if (tapes.length === 0 || preloadState.loading || preloadState.done) return;
+    preloadState.total = tapes.length;
+    preloadState.loaded = 0;
+    preloadState.loading = true;
+    preloadState.done = false;
+    tapes.forEach(function(tape) {
+        var trackDone = false;
+        var markDone = function() {
+            if (trackDone) return;
+            trackDone = true;
+            preloadState.loaded++;
+            updateLoadingUI();
+            if (preloadState.loaded >= preloadState.total) {
+                preloadState.loading = false;
+                preloadState.done = true;
+                onPreloadComplete();
+            }
+        };
+        // Fire a timeout fallback so stuck tracks don't block progress forever
+        var fallbackTimer = setTimeout(function() { markDone(); }, 12000);
+        var audioOk = false, imgOk = false;
+        var tryMark = function() { if (audioOk && imgOk) { clearTimeout(fallbackTimer); markDone(); } };
+        if (tape.cover) {
+            var img = new Image();
+            img.onload = function() { imgOk = true; tryMark(); };
+            img.onerror = function() { imgOk = true; tryMark(); };
+            img.src = tape.cover;
+        } else { imgOk = true; }
+        if (tape.audio) {
+            var a = new Audio();
+            a.preload = 'auto';
+            a.addEventListener('canplaythrough', function() { audioOk = true; tryMark(); }, { once: true });
+            a.addEventListener('loadedmetadata', function() { audioOk = true; tryMark(); }, { once: true });
+            a.addEventListener('error', function() { audioOk = true; tryMark(); }, { once: true });
+            a.src = tape.audio;
+            a.load();
+        } else { audioOk = true; tryMark(); }
+    });
+}
+function isPreloading() { return preloadState.loading || (!preloadState.done && preloadState.total > 0); }
+
 function buildVisualizerBars() {
     var bars = '';
     for (var i = 0; i < discVisualizerBars; i++) {
@@ -91,6 +195,8 @@ function syncCarousel() {
 }
 
 function buildDiscPage() {
+    if (isPreloading()) return buildLoadingPage();
+
     var tapes = window.discData.tapes || [];
     var currentIndex = window.discData.currentTapeIndex || 0;
     var currentTape = tapes[currentIndex] || {};
@@ -644,7 +750,10 @@ return {
     },
     getDiscData: function() { return window.discData; },
     getDiscIsPlaying: function() { return discIsPlaying; },
-    setDiscIsPlaying: function(v) { discIsPlaying = v; }
+    setDiscIsPlaying: function(v) { discIsPlaying = v; },
+    startPreload: startPreload,
+    isPreloading: isPreloading,
+    getPreloadProgress: function() { return { loaded: preloadState.loaded, total: preloadState.total, done: preloadState.done }; }
 };
 
 })();

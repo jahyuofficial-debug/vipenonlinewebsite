@@ -1788,15 +1788,9 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = 'signin.html';
         return;
     }
+    // Profile data loaded exclusively from per-user localStorage (Utils.getUserData),
+    // NOT from the shared data/profile.json — absolute user isolation.
     if (typeof ProfilePage !== 'undefined' && ProfilePage.bindAll) {
-        fetch('data/profile.json')
-            .then(function(r) { return r.json(); })
-            .then(function(d) {
-                ProfilePage.setData(d);
-                ProfilePage.bindAll();
-            })
-            .catch(function() {
-                ProfilePage.bindAll();
-            });
+        ProfilePage.bindAll();
     }
 });

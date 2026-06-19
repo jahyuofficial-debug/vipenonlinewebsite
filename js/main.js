@@ -66,6 +66,7 @@ BannerPage.initBgVideo();
                 playMode: 'sequence',
                 currentTapeIndex: 0
             };
+            if (typeof DiscPage !== 'undefined' && DiscPage.startPreload) DiscPage.startPreload();
         }
 
         applySiteSettings(settings);
@@ -198,6 +199,7 @@ BannerPage.initBgVideo();
                     }),
                     playMode: 'sequence', currentTapeIndex: 0
                 };
+                if (typeof DiscPage !== 'undefined' && DiscPage.startPreload) DiscPage.startPreload();
             }
             if (designData && Array.isArray(designData)) {
                 dwItems = designData.map(function(item) {
@@ -851,19 +853,24 @@ function navigateTo(pageName) {
         subPageContainer = document.createElement('div');
         subPageContainer.innerHTML = DiscPage.buildPage();
         app.appendChild(subPageContainer);
-        setTimeout(function() {
+        if (DiscPage.isPreloading && DiscPage.isPreloading()) {
+            // Preload in progress — bind UI but skip auto-play; onPreloadComplete will rebuild
             DiscPage.bindAll();
-            DiscPage.syncUIWithAudioState();
-            if (!discAutoPlayed) {
-                discAutoPlayed = true;
-                discAudio.play().catch(function(){});
-            }
-            if (discAudio && !discAudio.paused && !DiscPage.getDiscIsPlaying()) {
-                DiscPage.setDiscIsPlaying(true);
-                DiscPage.syncPlayPauseUI();
-            }
-            MiniPlayer.updateState(currentPage, DiscPage.getDiscIsPlaying(), discVisited);
-        }, 100);
+        } else {
+            setTimeout(function() {
+                DiscPage.bindAll();
+                DiscPage.syncUIWithAudioState();
+                if (!discAutoPlayed) {
+                    discAutoPlayed = true;
+                    discAudio.play().catch(function(){});
+                }
+                if (discAudio && !discAudio.paused && !DiscPage.getDiscIsPlaying()) {
+                    DiscPage.setDiscIsPlaying(true);
+                    DiscPage.syncPlayPauseUI();
+                }
+                MiniPlayer.updateState(currentPage, DiscPage.getDiscIsPlaying(), discVisited);
+            }, 100);
+        }
         discVisited = true;
         currentPage = 'disc-library';
     } else if (pageName === 'action') {
