@@ -17,6 +17,7 @@ var bannerData = {
 
 var bgVideo = null;
 var isAnimating = false;
+var videoLoadedSrc = ''; // track loaded video URL to skip redundant load()/play()
 
 function filterVisibleGroups(groups) {
     if (!groups || !groups.length) return groups;
@@ -92,7 +93,8 @@ function changeSlide(index){
             if (bgType === 'video' && group.bgVideo) {
                 if (bgVideoEl) {
                     var newSrc = group.bgVideo;
-                    if (bgVideoEl.src.indexOf(newSrc) === -1 && bgVideoEl.currentSrc.indexOf(newSrc) === -1) {
+                    if (videoLoadedSrc !== newSrc) {
+                        videoLoadedSrc = newSrc;
                         bgVideoEl.src = newSrc;
                         bgVideoEl.load();
                     }
@@ -135,7 +137,8 @@ function changeSlide(index){
             if(type === 'video'){
                 if(bgVideoEl){
                     var newSrc = bannerData.bgVideoSrc[bannerData.current];
-                    if(bgVideoEl.src.indexOf(newSrc) === -1 && bgVideoEl.currentSrc.indexOf(newSrc) === -1){
+                    if(videoLoadedSrc !== newSrc){
+                        videoLoadedSrc = newSrc;
                         bgVideoEl.src = newSrc;
                         bgVideoEl.load();
                     }
