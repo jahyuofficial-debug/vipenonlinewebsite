@@ -6,22 +6,56 @@
 <title>Design Upload — Vipen</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a0f;color:#fff;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:40px 0}
-.wrap{width:100%;max-width:540px;padding:0 24px}
-h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:6px}
-.sub{font-size:13px;color:rgba(255,255,255,.35);margin-bottom:28px}
+body{background:#0a0a0f;color:#fff;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:40px 0 80px}
+.wrap{width:100%;max-width:600px;padding:0 24px}
+h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
+.sub{font-size:13px;color:rgba(255,255,255,.3);margin-bottom:28px}
 
-.dropzone{border:2px dashed rgba(255,255,255,.12);border-radius:14px;padding:36px 24px;text-align:center;cursor:pointer;transition:all .25s;background:rgba(255,255,255,.015);margin-bottom:24px}
+/* ── Dropzone ── */
+.dropzone{border:2px dashed rgba(255,255,255,.12);border-radius:14px;padding:30px 24px;text-align:center;cursor:pointer;transition:all .25s;background:rgba(255,255,255,.015);margin-bottom:24px}
 .dropzone:hover,.dropzone.drag{border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.03)}
-.dropzone.active{border-color:#d4a853;background:rgba(212,168,83,.05)}
-.dropzone svg{width:36px;height:36px;color:rgba(255,255,255,.18);margin-bottom:10px}
+.dropzone.active{border-color:#d4a853;background:rgba(212,168,83,.04)}
+.dropzone svg{width:36px;height:36px;color:rgba(255,255,255,.15);margin-bottom:8px}
 .dropzone .dz-title{font-size:14px;font-weight:600;margin-bottom:4px}
-.dropzone .dz-hint{font-size:11px;color:rgba(255,255,255,.25)}
+.dropzone .dz-hint{font-size:11px;color:rgba(255,255,255,.22)}
 .dropzone input{display:none}
+.dropzone .dz-count{margin-top:8px;font-size:11px;color:rgba(255,255,255,.25)}
 
+/* ── Sections ── */
 .section{background:rgba(255,255,255,.02);border-radius:12px;padding:20px;margin-bottom:16px}
-.section h2{font-size:11px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px}
+.section h2{font-size:11px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
 
+/* ── Image slots ── */
+.img-slots{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.img-slots{grid-template-columns:1fr}}
+.img-slot{background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.1);border-radius:10px;padding:14px;text-align:center;cursor:pointer;transition:all .2s;position:relative;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.img-slot:hover{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.05)}
+.img-slot.filled{border-style:solid;border-color:rgba(255,255,255,.08);background:rgba(255,255,255,.04)}
+.img-slot.warn{border-color:#f59e0b;background:rgba(245,158,11,.06)}
+.img-slot .slot-label{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.img-slot .slot-img{max-width:100%;max-height:80px;border-radius:6px;display:none}
+.img-slot.filled .slot-img{display:block}
+.img-slot .slot-name{font-size:10px;color:rgba(255,255,255,.4);margin-top:6px;word-break:break-all}
+.img-slot .slot-empty{font-size:11px;color:rgba(255,255,255,.15)}
+.img-slot.filled .slot-empty{display:none}
+.img-slot input{display:none}
+.img-slot .slot-remove{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:rgba(239,68,68,.7);color:#fff;font-size:10px;line-height:18px;text-align:center;display:none;cursor:pointer}
+.img-slot.filled .slot-remove{display:block}
+
+/* ── Content images ── */
+.content-imgs{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.content-slot{width:70px;height:70px;background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:all .2s}
+.content-slot:hover{border-color:rgba(255,255,255,.25)}
+.content-slot.filled{border-style:solid;border-color:rgba(255,255,255,.08)}
+.content-slot img{width:100%;height:100%;object-fit:cover;border-radius:6px;display:none}
+.content-slot.filled img{display:block}
+.content-slot .add-icon{font-size:20px;color:rgba(255,255,255,.15)}
+.content-slot.filled .add-icon{display:none}
+.content-slot .slot-remove{position:absolute;top:2px;right:2px;width:14px;height:14px;border-radius:50%;background:rgba(239,68,68,.7);color:#fff;font-size:8px;line-height:14px;text-align:center;display:none;cursor:pointer}
+.content-slot.filled .slot-remove{display:block}
+.content-slot input{display:none}
+
+/* ── Form ── */
 .row{display:flex;gap:12px;margin-bottom:14px}
 .row:last-child{margin-bottom:0}
 .field{flex:1;display:flex;flex-direction:column}
@@ -31,10 +65,6 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:6px}
 .field textarea{resize:vertical;min-height:70px}
 .field select{appearance:none;cursor:pointer}
 .field select option{background:#1a1a2e;color:#fff}
-
-.imgs{margin-top:8px}
-.imgs span{display:inline-block;background:rgba(255,255,255,.04);color:rgba(255,255,255,.45);padding:3px 10px;border-radius:5px;font-size:11px;margin:2px 4px 2px 0}
-.imgs .ok{color:#4ade80}
 
 .btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.02em}
 .btn-upload{background:#d4a853;color:#000}
@@ -50,28 +80,77 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:6px}
 .progress.show{display:block}
 .progress .bar{height:100%;background:#d4a853;width:0;transition:width .3s}
 
-.back{display:block;text-align:center;margin-top:18px;font-size:12px;color:rgba(255,255,255,.2);text-decoration:none}
-.back:hover{color:rgba(255,255,255,.4)}
+.back{display:block;text-align:center;margin-top:18px;font-size:12px;color:rgba(255,255,255,.18);text-decoration:none}
+.back:hover{color:rgba(255,255,255,.35)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Design Upload</h1>
-  <p class="sub">Select image folder, fill in details, one click publish</p>
+  <p class="sub">Select images folder, assign each image its role, fill details, publish</p>
 
-  <!-- Step 1: Images -->
+  <!-- ── Step 1: Select folder ── -->
   <div class="dropzone" id="dropzone">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-    <div class="dz-title">Select image folder</div>
-    <div class="dz-hint">or drag &amp; drop here</div>
-    <div class="imgs" id="imgList" style="margin-top:12px"></div>
+    <div class="dz-title">Choose image folder</div>
+    <div class="dz-hint">or drag &amp; drop</div>
+    <div class="dz-count" id="dzCount"></div>
     <input type="file" id="folderInput" webkitdirectory multiple>
   </div>
 
-  <!-- Step 2: Metadata -->
+  <!-- ── Step 2: Assign images to roles ── -->
+  <div class="section" id="imgSection" style="display:none">
+    <h2>Assign Images</h2>
+
+    <div class="img-slots">
+      <div class="img-slot" data-role="card-bg">
+        <div class="slot-label">Card Cover</div>
+        <img class="slot-img" alt="">
+        <div class="slot-empty">click to pick</div>
+        <div class="slot-name"></div>
+        <div class="slot-remove" title="Remove">✕</div>
+        <input type="file" accept="image/*">
+      </div>
+      <div class="img-slot" data-role="card-hover">
+        <div class="slot-label">Card Hover</div>
+        <img class="slot-img" alt="">
+        <div class="slot-empty">click to pick</div>
+        <div class="slot-name"></div>
+        <div class="slot-remove" title="Remove">✕</div>
+        <input type="file" accept="image/*">
+      </div>
+      <div class="img-slot" data-role="header-bg">
+        <div class="slot-label">Header BG</div>
+        <img class="slot-img" alt="">
+        <div class="slot-empty">click to pick</div>
+        <div class="slot-name"></div>
+        <div class="slot-remove" title="Remove">✕</div>
+        <input type="file" accept="image/*">
+      </div>
+      <div class="img-slot" id="fallbackSlot" style="grid-column:1/-1" hidden>
+        <div class="slot-label">Manual Upload (no folder match)</div>
+        <img class="slot-img" alt="">
+        <div class="slot-empty">click to pick</div>
+        <div class="slot-name"></div>
+        <div class="slot-remove" title="Remove">✕</div>
+        <input type="file" accept="image/*">
+      </div>
+    </div>
+
+    <h2 style="margin-top:18px">Content Images</h2>
+    <div class="content-imgs" id="contentImages">
+      <div class="content-slot" data-idx="1"><img alt=""><span class="add-icon">+</span><div class="slot-remove">✕</div><input type="file" accept="image/*"></div>
+      <div class="content-slot" data-idx="2"><img alt=""><span class="add-icon">+</span><div class="slot-remove">✕</div><input type="file" accept="image/*"></div>
+      <div class="content-slot" data-idx="3"><img alt=""><span class="add-icon">+</span><div class="slot-remove">✕</div><input type="file" accept="image/*"></div>
+      <div class="content-slot" data-idx="4"><img alt=""><span class="add-icon">+</span><div class="slot-remove">✕</div><input type="file" accept="image/*"></div>
+      <div class="content-slot" data-idx="5"><img alt=""><span class="add-icon">+</span><div class="slot-remove">✕</div><input type="file" accept="image/*"></div>
+      <div class="content-slot" data-idx="6"><img alt=""><span class="add-icon">+</span><div class="slot-remove">✕</div><input type="file" accept="image/*"></div>
+    </div>
+  </div>
+
+  <!-- ── Step 3: Metadata ── -->
   <div class="section">
     <h2>Project Info</h2>
-
     <div class="row">
       <div class="field" style="flex:2">
         <label>R2 Folder Name</label>
@@ -82,84 +161,32 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:6px}
         <input type="text" id="f_year" value="2026" maxlength="4">
       </div>
     </div>
-
     <div class="row">
-      <div class="field">
-        <label>Title</label>
-        <input type="text" id="f_title" placeholder="Work title">
+      <div class="field"><label>Title</label><input type="text" id="f_title" placeholder="Work title"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label>Category</label>
+        <select id="f_cat"><option value="">Choose...</option>
+          <option>Brand Identity</option><option>UI Design</option><option>3D Art</option>
+          <option>Graphic Design</option><option>Motion Graphics</option><option>Illustration</option>
+          <option>Typography</option><option>Photography</option></select>
+      </div>
+      <div class="field" style="flex:.5"><label>Suit</label>
+        <select id="f_suit"><option value="">—</option><option>♠</option><option>♥</option><option>♦</option><option>♣</option></select>
+      </div>
+      <div class="field" style="flex:.5"><label>Rank</label>
+        <select id="f_rank"><option value="">—</option>
+          <option>A</option><option>K</option><option>Q</option><option>J</option>
+          <option>10</option><option>9</option><option>8</option><option>7</option>
+          <option>6</option><option>5</option><option>4</option><option>3</option><option>2</option></select>
       </div>
     </div>
-
+    <div class="row"><div class="field"><label>Description</label><textarea id="f_desc" placeholder="Describe your work..."></textarea></div></div>
     <div class="row">
-      <div class="field">
-        <label>Category</label>
-        <select id="f_cat">
-          <option value="">—</option>
-          <option>Brand Identity</option>
-          <option>UI Design</option>
-          <option>3D Art</option>
-          <option>Graphic Design</option>
-          <option>Motion Graphics</option>
-          <option>Illustration</option>
-          <option>Typography</option>
-          <option>Photography</option>
-        </select>
-      </div>
-      <div class="field" style="flex:.6">
-        <label>Suit</label>
-        <select id="f_suit">
-          <option value="">—</option>
-          <option>♠</option>
-          <option>♥</option>
-          <option>♦</option>
-          <option>♣</option>
-        </select>
-      </div>
-      <div class="field" style="flex:.6">
-        <label>Rank</label>
-        <select id="f_rank">
-          <option value="">—</option>
-          <option>A</option>
-          <option>K</option>
-          <option>Q</option>
-          <option>J</option>
-          <option>10</option>
-          <option>9</option>
-          <option>8</option>
-          <option>7</option>
-          <option>6</option>
-          <option>5</option>
-          <option>4</option>
-          <option>3</option>
-          <option>2</option>
-        </select>
-      </div>
+      <div class="field"><label>Client</label><input type="text" id="f_client" placeholder="Client name"></div>
+      <div class="field"><label>Tools</label><input type="text" id="f_tools" placeholder="Figma / Blender / AE"></div>
     </div>
-
-    <div class="row">
-      <div class="field">
-        <label>Description</label>
-        <textarea id="f_desc" placeholder="Describe your work..."></textarea>
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="field">
-        <label>Client</label>
-        <input type="text" id="f_client" placeholder="Client name">
-      </div>
-      <div class="field">
-        <label>Tools</label>
-        <input type="text" id="f_tools" placeholder="Figma / Blender / AE">
-      </div>
-    </div>
-
-    <div class="row">
-      <div class="field">
-        <label>Tags (comma separated)</label>
-        <input type="text" id="f_tags" placeholder="3d, abstract, dark">
-      </div>
-    </div>
+    <div class="row"><div class="field"><label>Tags (comma separated)</label><input type="text" id="f_tags" placeholder="3d, abstract, dark"></div></div>
   </div>
 
   <button class="btn btn-upload" id="uploadBtn" disabled>Upload to R2</button>
@@ -169,10 +196,13 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:6px}
 </div>
 
 <script>
-var selectedFiles = [];
+// ── State ────────────────────────────────────────────────────
+var pool = [];             // all image files from folder
+var assigned = {};         // { 'card-bg': file, 'card-hover': file, 'header-bg': file }
+var contentFiles = {};     // { 1: file, 2: file, ... }
 var selFolderName = '';
 
-// ── Folder picker ──────────────────────────────────────────
+// ── Folder picker ────────────────────────────────────────────
 var dropzone = document.getElementById('dropzone');
 var input = document.getElementById('folderInput');
 dropzone.addEventListener('click', function() { input.click(); });
@@ -181,20 +211,15 @@ input.addEventListener('change', handleFiles);
 dropzone.addEventListener('dragover', function(e) { e.preventDefault(); dropzone.classList.add('drag'); });
 dropzone.addEventListener('dragleave', function() { dropzone.classList.remove('drag'); });
 dropzone.addEventListener('drop', function(e) {
-    e.preventDefault();
-    dropzone.classList.remove('drag');
+    e.preventDefault(); dropzone.classList.remove('drag');
     if (e.dataTransfer.items) {
-        var items = e.dataTransfer.items;
-        var files = [], pending = items.length;
+        var items = e.dataTransfer.items, files = [], pending = items.length;
         for (var i = 0; i < items.length; i++) {
             (function(item) {
                 var entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
                 if (entry && entry.isDirectory) {
-                    readDir(entry, '', function(df) { files = files.concat(df); pending--; if (pending === 0) processFiles(files); });
-                } else {
-                    pending--;
-                    if (pending === 0) processFiles(files);
-                }
+                    readDir(entry, '', function(df) { files = files.concat(df); pending--; if (!pending) processFiles(files); });
+                } else { pending--; if (!pending) processFiles(files); }
             })(items[i]);
         }
     }
@@ -206,97 +231,202 @@ function readDir(dirEntry, prefix, cb) {
     var files = [];
     dirEntry.createReader().readEntries(function(entries) {
         var todo = entries.length;
-        if (todo === 0) { cb(files); return; }
+        if (!todo) return cb(files);
         entries.forEach(function(entry) {
             if (entry.isFile) {
-                entry.file(function(file) { file.relativePath = prefix + file.name; files.push(file); todo--; if (todo === 0) cb(files); });
+                entry.file(function(file) { file.relativePath = prefix + file.name; files.push(file); todo--; if (!todo) cb(files); });
             } else if (entry.isDirectory) {
-                readDir(entry, prefix + entry.name + '/', function(sf) { files = files.concat(sf); todo--; if (todo === 0) cb(files); });
-            } else { todo--; if (todo === 0) cb(files); }
+                readDir(entry, prefix + entry.name + '/', function(sf) { files = files.concat(sf); todo--; if (!todo) cb(files); });
+            } else { todo--; if (!todo) cb(files); }
         });
     });
 }
 
-function processFiles(files) {
-    if (!files || files.length === 0) return;
-    var images = files.filter(function(f) { return /\.(png|jpe?g|gif|webp)$/i.test(f.name); });
-    if (images.length === 0) return;
-    selectedFiles = images;
-    dropzone.classList.add('active');
+// ── Auto-assign images by filename pattern ──────────────────
+var ROLE_PATTERNS = {
+    'card-bg':    [/card-bg/i, /card_cover/i, /card.*bg/i, /cover/i],
+    'card-hover': [/card-hover/i, /card_hover/i, /hover/i],
+    'header-bg':  [/header-bg/i, /header_bg/i, /header/i, /hero/i],
+};
 
-    // Auto-detect folder name from first file's path
-    var p = images[0].webkitRelativePath || images[0].relativePath || '';
-    selFolderName = p.split('/')[0] || 'New Project';
-    var fb = document.getElementById('f_folder');
-    if (fb && !fb.value) fb.value = selFolderName;
+function autoAssign() {
+    assigned = {}; contentFiles = {};
+    var used = {};
 
-    // Show image list
-    var il = document.getElementById('imgList');
-    il.innerHTML = images.map(function(f) {
-        var name = f.relativePath ? f.relativePath.split('/').pop() : f.name;
-        var cls = /^(card-bg|card-hover|header-bg|content-\d)/i.test(name) ? 'ok' : '';
-        return '<span class="' + cls + '">' + name + '</span>';
-    }).join(' ') + '<span style="color:rgba(255,255,255,.2);font-size:10px">(' + images.length + ' images)</span>';
+    // Try to match each role
+    Object.keys(ROLE_PATTERNS).forEach(function(role) {
+        for (var i = 0; i < pool.length; i++) {
+            if (used[i]) continue;
+            var name = (pool[i].relativePath || pool[i].name).toLowerCase();
+            if (ROLE_PATTERNS[role].some(function(re) { return re.test(name); })) {
+                assigned[role] = pool[i];
+                used[i] = true;
+                break;
+            }
+        }
+    });
+
+    // Remaining files → content images
+    var ci = 1;
+    for (var j = 0; j < pool.length; j++) {
+        if (!used[j]) {
+            contentFiles[ci] = pool[j];
+            ci++;
+        }
+    }
+
+    renderAssigned();
+}
+
+// ── Render assigned slots ────────────────────────────────────
+function renderAssigned() {
+    ['card-bg', 'card-hover', 'header-bg'].forEach(function(role) {
+        var slot = document.querySelector('.img-slot[data-role="' + role + '"]');
+        var img = slot.querySelector('.slot-img');
+        var name = slot.querySelector('.slot-name');
+        var f = assigned[role];
+        if (f) {
+            slot.classList.add('filled');
+            slot.classList.remove('warn');
+            var fname = f.relativePath ? f.relativePath.split('/').pop() : f.name;
+            name.textContent = fname;
+            var reader = new FileReader();
+            reader.onload = function(e) { img.src = e.target.result; };
+            reader.readAsDataURL(f);
+        } else {
+            slot.classList.remove('filled');
+            slot.classList.add('warn');
+            img.src = '';
+            name.textContent = '';
+        }
+    });
+
+    // Content slots
+    for (var k = 1; k <= 6; k++) {
+        var cs = document.querySelector('.content-slot[data-idx="' + k + '"]');
+        var ci = cs.querySelector('img');
+        var add = cs.querySelector('.add-icon');
+        var f = contentFiles[k];
+        if (f) {
+            cs.classList.add('filled');
+            var reader2 = new FileReader();
+            reader2.onload = function(e) { ci.src = e.target.result; };
+            reader2.readAsDataURL(f);
+        } else {
+            cs.classList.remove('filled');
+            ci.src = '';
+        }
+    }
 
     checkReady();
 }
 
-// ── Enable upload when all required filled ──────────────────
+// ── Process files from folder ────────────────────────────────
+function processFiles(files) {
+    if (!files || !files.length) return;
+    pool = files.filter(function(f) { return /\.(png|jpe?g|gif|webp)$/i.test(f.name); });
+    if (!pool.length) return;
+
+    dropzone.classList.add('active');
+    document.getElementById('dzCount').textContent = pool.length + ' images found';
+    document.getElementById('imgSection').style.display = '';
+
+    // Auto-detect folder name
+    var p = pool[0].webkitRelativePath || pool[0].relativePath || '';
+    selFolderName = p.split('/')[0] || '';
+    var fb = document.getElementById('f_folder');
+    if (fb && !fb.value) fb.value = selFolderName;
+
+    autoAssign();
+}
+
+// ── Manual slot assignment ──────────────────────────────────
+document.querySelectorAll('.img-slot').forEach(function(slot) {
+    slot.addEventListener('click', function() { slot.querySelector('input').click(); });
+    slot.querySelector('input').addEventListener('change', function(e) {
+        if (e.target.files.length) {
+            var role = slot.getAttribute('data-role');
+            if (role) assigned[role] = e.target.files[0];
+            renderAssigned();
+        }
+    });
+    slot.querySelector('.slot-remove').addEventListener('click', function(ev) {
+        ev.stopPropagation();
+        var role = slot.getAttribute('data-role');
+        if (role) delete assigned[role];
+        renderAssigned();
+    });
+});
+
+document.querySelectorAll('.content-slot').forEach(function(slot) {
+    slot.addEventListener('click', function() { slot.querySelector('input').click(); });
+    slot.querySelector('input').addEventListener('change', function(e) {
+        if (e.target.files.length) {
+            contentFiles[+slot.getAttribute('data-idx')] = e.target.files[0];
+            renderAssigned();
+        }
+    });
+    slot.querySelector('.slot-remove').addEventListener('click', function(ev) {
+        ev.stopPropagation();
+        delete contentFiles[+slot.getAttribute('data-idx')];
+        renderAssigned();
+    });
+});
+
+// ── Enable upload check ─────────────────────────────────────
 var fields = ['f_folder','f_title','f_cat','f_suit','f_rank','f_desc','f_client','f_tools'];
 fields.forEach(function(id) {
     document.getElementById(id).addEventListener('input', checkReady);
     document.getElementById(id).addEventListener('change', checkReady);
 });
 function checkReady() {
-    var ok = selectedFiles.length > 0;
-    fields.forEach(function(id) {
-        var el = document.getElementById(id);
-        if (!el.value.trim()) ok = false;
-    });
+    var ok = !!assigned['card-bg'] && !!assigned['card-hover'] && !!assigned['header-bg'] && Object.keys(contentFiles).length > 0;
+    fields.forEach(function(id) { if (!document.getElementById(id).value.trim()) ok = false; });
     document.getElementById('uploadBtn').disabled = !ok;
 }
 
-// ── Upload ─────────────────────────────────────────────────
+// ── Upload ───────────────────────────────────────────────────
 document.getElementById('uploadBtn').addEventListener('click', function() {
     var folderName = document.getElementById('f_folder').value.trim();
-    if (!folderName) { alert('Please enter R2 Folder Name'); return; }
+    if (!folderName) return alert('Enter R2 Folder Name');
 
-    var formData = new FormData();
-    formData.append('folderName', folderName);
-    formData.append('title',   document.getElementById('f_title').value.trim());
-    formData.append('cat',     document.getElementById('f_cat').value);
-    formData.append('suit',    document.getElementById('f_suit').value);
-    formData.append('rank',    document.getElementById('f_rank').value);
-    formData.append('desc',    document.getElementById('f_desc').value.trim());
-    formData.append('client',  document.getElementById('f_client').value.trim());
-    formData.append('year',    document.getElementById('f_year').value.trim());
-    formData.append('tools',   document.getElementById('f_tools').value.trim());
-    formData.append('tags',    document.getElementById('f_tags').value.trim());
+    var fd = new FormData();
+    fd.append('folderName', folderName);
+    fd.append('title',   document.getElementById('f_title').value.trim());
+    fd.append('cat',     document.getElementById('f_cat').value);
+    fd.append('suit',    document.getElementById('f_suit').value);
+    fd.append('rank',    document.getElementById('f_rank').value);
+    fd.append('desc',    document.getElementById('f_desc').value.trim());
+    fd.append('client',  document.getElementById('f_client').value.trim());
+    fd.append('year',    document.getElementById('f_year').value.trim());
+    fd.append('tools',   document.getElementById('f_tools').value.trim());
+    fd.append('tags',    document.getElementById('f_tags').value.trim());
 
-    for (var i = 0; i < selectedFiles.length; i++) {
-        var f = selectedFiles[i];
-        var name = f.relativePath ? f.relativePath.split('/').pop() : f.name;
-        formData.append('files', f, name);
-    }
+    // Named image files
+    if (assigned['card-bg'])    fd.append('files', assigned['card-bg'],    'card-bg.png');
+    if (assigned['card-hover']) fd.append('files', assigned['card-hover'], 'card-hover.png');
+    if (assigned['header-bg'])  fd.append('files', assigned['header-bg'],  'header-bg.png');
+    Object.keys(contentFiles).sort().forEach(function(k) {
+        fd.append('files', contentFiles[k], 'content-' + k + '.png');
+    });
 
     var btn = document.getElementById('uploadBtn');
     var prog = document.getElementById('progress');
-    var bar = document.getElementById('progressBar');
+    var bar  = document.getElementById('progressBar');
     var stat = document.getElementById('status');
 
     btn.disabled = true; btn.textContent = 'Uploading...';
     prog.classList.add('show'); bar.style.width = '0%';
-    stat.classList.remove('show', 'ok', 'err');
+    stat.classList.remove('show','ok','err');
 
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/api/design/upload'); xhr.withCredentials = true;
-    xhr.upload.onprogress = function(e) { if (e.lengthComputable) bar.style.width = Math.round(e.loaded/e.total*90) + '%'; };
+    xhr.upload.onprogress = function(e) { if (e.lengthComputable) bar.style.width = Math.round(e.loaded/e.total*90)+'%'; };
     xhr.onload = function() {
-        bar.style.width = '100%';
-        setTimeout(function() { prog.classList.remove('show'); }, 600);
+        bar.style.width = '100%'; setTimeout(function(){prog.classList.remove('show')},600);
         btn.disabled = false; btn.textContent = 'Upload to R2';
         var r; try { r = JSON.parse(xhr.responseText); } catch(e) {}
-        if (xhr.status === 200 && r && r.success) {
+        if (xhr.status===200 && r && r.success) {
             stat.textContent = '✅ ' + r.entry.title + ' — ' + r.files + ' files uploaded!';
             stat.className = 'status show ok';
         } else {
@@ -308,7 +438,7 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
         prog.classList.remove('show'); btn.disabled = false; btn.textContent = 'Upload to R2';
         stat.textContent = '❌ Network error'; stat.className = 'status show err';
     };
-    xhr.send(formData);
+    xhr.send(fd);
 });
 </script>
 </body>
