@@ -729,6 +729,9 @@ function navigateTo(pageName) {
 
     BannerPage.stopAnimations();
 
+    var bannerText = document.getElementById('bannerText');
+    if (bannerText) bannerText.style.display = 'none';
+
     var herosTopBg = document.getElementById('herosTopBg');
 
     if (pageName === 'design-work' || pageName === 'design-work-list') {
@@ -758,6 +761,8 @@ function navigateTo(pageName) {
 
     if (pageName === '' || pageName === 'home') {
         banner.style.display = 'block';
+        var bannerText = document.getElementById('bannerText');
+        if (bannerText) bannerText.style.display = '';
         BannerPage.startAnimations();
         header.classList.add('dimmed');
         if (herosTopBg) herosTopBg.classList.add('hidden');
