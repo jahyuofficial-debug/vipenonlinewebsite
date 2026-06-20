@@ -79,6 +79,8 @@ var Loading = (function() {
             requestAnimationFrame(smoothTick);
         } else if (targetPct >= 100) {
             checkComplete();
+        } else {
+            smoothing = false; // loop paused, allow restart on next update
         }
     }
 
