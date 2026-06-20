@@ -1,10 +1,8 @@
 body{overflow-x:hidden}
 
-/* Custom cursor system: hide native cursor on all elements, keep form UI cursors.
-   Strategy: body hides cursor, all children inherit (with !important), form elements get auto back. */
-body{cursor:none}
-body *{cursor:inherit!important}
-body input,body textarea,body select,body [contenteditable="true"]{cursor:auto!important}
+/* Custom cursor: hide native cursor everywhere, keep form cursors */
+html,html *,html *::before,html *::after{cursor:none!important}
+html input,html textarea,html select,html [contenteditable="true"]{cursor:auto!important}
 
 #cursor{position:fixed;pointer-events:none;z-index:9998;width:32px;height:32px;transition:none;opacity:0}
 #cursor .inner{position:absolute;top:50%;left:50%;width:8px;height:8px;border-radius:50%;background:#fff;transform:translate(-50%,-50%)}
