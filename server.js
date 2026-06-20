@@ -1845,13 +1845,14 @@ function handleDesignUpload(req, res) {
     }
     parseMultipartUpload(req, function(err, fields, files) {
         if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
-        if (!files || files.length === 0) { sendJSON(res, 400, { success: false, error: 'No files' }); return; }
 
         // Auth via ManagerGo session token (passed as form field)
         var sessionToken = fields.sessionToken;
         if (!sessionToken) { sendJSON(res, 401, { success: false, error: 'Not logged in' }); return; }
         var session = MANAGER_SESSIONS[sessionToken];
         if (!session) { sendJSON(res, 401, { success: false, error: 'Session expired' }); return; }
+
+        if (!files || files.length === 0) { sendJSON(res, 400, { success: false, error: 'No files' }); return; }
 
         var folderName = fields.folderName || fields.folder;
         if (!folderName) { sendJSON(res, 400, { success: false, error: 'Missing folderName' }); return; }
