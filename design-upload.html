@@ -72,6 +72,7 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
 .btn-upload{background:#d4a853;color:#000}
 .btn-upload:hover{background:#e0b960}
 .btn-upload:disabled{opacity:.3;cursor:not-allowed}
+.ready-hint{margin-top:10px;font-size:11px;color:rgba(255,255,255,.2);text-align:center;min-height:16px}
 
 .status{margin-top:14px;padding:12px;border-radius:8px;font-size:13px;text-align:center;display:none}
 .status.show{display:block}
@@ -187,6 +188,7 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
   </div>
 
   <button class="btn btn-upload" id="uploadBtn" disabled>Upload to R2</button>
+  <div class="ready-hint" id="readyHint"></div>
   <div class="progress" id="progress"><div class="bar" id="progressBar"></div></div>
   <div class="status" id="status"></div>
   <a class="back" href="/">← Back to site</a>
@@ -417,14 +419,32 @@ document.querySelectorAll('.img-slot').forEach(function(slot) {
 
 // ── Enable upload check ─────────────────────────────────────
 var fields = ['f_folder','f_title','f_cat','f_suit','f_rank','f_desc','f_client','f_tools'];
+var fieldLabels = {
+    f_folder: 'Folder Name', f_title: 'Title', f_cat: 'Category',
+    f_suit: 'Suit', f_rank: 'Rank', f_desc: 'Description',
+    f_client: 'Client', f_tools: 'Tools'
+};
 fields.forEach(function(id) {
     document.getElementById(id).addEventListener('input', checkReady);
     document.getElementById(id).addEventListener('change', checkReady);
 });
+checkReady(); // show initial missing hint
+
 function checkReady() {
-    var ok = !!assigned['card-bg'] && !!assigned['card-hover'] && !!assigned['header-bg'] && Object.keys(contentFiles).length > 0;
-    fields.forEach(function(id) { if (!document.getElementById(id).value.trim()) ok = false; });
+    var missing = [];
+    if (!assigned['card-bg']) missing.push('Card Cover');
+    if (!assigned['card-hover']) missing.push('Card Hover');
+    if (!assigned['header-bg']) missing.push('Header BG');
+    if (Object.keys(contentFiles).length === 0) missing.push('at least 1 Content image');
+    fields.forEach(function(id) {
+        if (!document.getElementById(id).value.trim()) {
+            missing.push(fieldLabels[id] || id);
+        }
+    });
+    var ok = missing.length === 0;
     document.getElementById('uploadBtn').disabled = !ok;
+    var hint = document.getElementById('readyHint');
+    hint.textContent = ok ? '' : 'Missing: ' + missing.join(', ');
 }
 
 // ── Upload ───────────────────────────────────────────────────
