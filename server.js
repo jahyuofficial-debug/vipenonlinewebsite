@@ -1846,11 +1846,12 @@ function handleDesignUpload(req, res) {
     parseMultipartUpload(req, function(err, fields, files) {
         if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
 
-        // Auth via ManagerGo session token (passed as form field)
-        var sessionToken = fields.sessionToken;
-        if (!sessionToken) { sendJSON(res, 401, { success: false, error: 'Not logged in' }); return; }
-        var session = MANAGER_SESSIONS[sessionToken];
-        if (!session) { sendJSON(res, 401, { success: false, error: 'Session expired' }); return; }
+        // Localhost-only access (no ManagerGo login required on dev machine)
+        var remoteIP = req.socket.remoteAddress || '';
+        if (remoteIP !== '127.0.0.1' && remoteIP !== '::1' && remoteIP !== '::ffff:127.0.0.1') {
+            sendJSON(res, 403, { success: false, error: 'Design upload only available from localhost' });
+            return;
+        }
 
         if (!files || files.length === 0) { sendJSON(res, 400, { success: false, error: 'No files' }); return; }
 
@@ -1920,7 +1921,7 @@ function handleDesignUpload(req, res) {
 
             existing.push(entry);
             fs.writeFileSync(idxPath, JSON.stringify(existing, null, 2), 'utf8');
-            addManagerLog('design_upload', session.username || session.email, 'Uploaded ' + entry.title + ' (' + keys.length + ' files)');
+            addManagerLog('design_upload', 'localhost', 'Uploaded ' + entry.title + ' (' + keys.length + ' files)');
             sendJSON(res, 200, { success: true, entry: entry, files: keys.length });
             console.log('[design-upload] ' + entry.title + ' — ' + keys.length + ' files');
         }).catch(function(err) {
