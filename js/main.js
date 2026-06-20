@@ -8,9 +8,39 @@ var discAudio;
 
 Cursor.init('cursor');
 
+// ── Real loading: track video buffer + JSON fetch + disc preload ─────
+Loading.addTask('data', 15);   // JSON fetches
+Loading.addTask('video', 40);  // banner video buffer
+Loading.addTask('disc', 45);   // disc tracks & covers
+
 Loading.init(function() {
     // Banner text rotation will start after data loads
 });
+
+// ── Video preloading ─────
+(function preloadVideo() {
+    var v = document.getElementById('bgVideo');
+    if (!v) return Loading.markDone('video');
+    v.preload = 'auto';
+    // Track buffer progress
+    function checkBuffered() {
+        if (v.buffered && v.buffered.length > 0) {
+            var end = v.buffered.end(v.buffered.length - 1);
+            var dur = v.duration || 1;
+            var pct = Math.min(100, Math.round(end / dur * 100));
+            Loading.updateTask('video', pct);
+            if (pct >= 100) { Loading.markDone('video'); return; }
+        }
+        if (v.readyState >= 4) { Loading.markDone('video'); return; }
+        requestAnimationFrame(checkBuffered);
+    }
+    v.addEventListener('canplaythrough', function() { Loading.markDone('video'); }, { once: true });
+    v.addEventListener('loadeddata', function() { checkBuffered(); }, { once: true });
+    v.addEventListener('error', function() { Loading.markDone('video'); }, { once: true });
+    // Fallback: if nothing happens after 8s, mark as done
+    setTimeout(function() { Loading.markDone('video'); }, 8000);
+    v.load();
+})();
 
 BannerPage.initBgVideo();
 
@@ -67,6 +97,18 @@ BannerPage.initBgVideo();
                 currentTapeIndex: 0
             };
             if (typeof DiscPage !== 'undefined' && DiscPage.startPreload) DiscPage.startPreload();
+
+            // Bridge disc preload progress → loading bar
+            (function bridgeDiscProgress() {
+                if (typeof DiscPage === 'undefined' || !DiscPage.getPreloadProgress) return;
+                var iv = setInterval(function() {
+                    var prog = DiscPage.getPreloadProgress();
+                    if (!prog || prog.total === 0) return;
+                    var pct = Math.round(prog.loaded / prog.total * 100);
+                    Loading.updateTask('disc', pct);
+                    if (prog.done) { Loading.markDone('disc'); clearInterval(iv); }
+                }, 200);
+            })();
         }
 
         applySiteSettings(settings);
@@ -164,6 +206,9 @@ BannerPage.initBgVideo();
         resolveDiscTapes();
 
         console.log('Data loaded from ManagerGo data files');
+
+        // Mark JSON data loading as complete
+        Loading.markDone('data');
     }).catch(function(err) {
         console.warn('Primary load failed: ' + err + ', trying index.json files individually');
         // Try loading each index.json individually as fallback
@@ -189,6 +234,17 @@ BannerPage.initBgVideo();
                     playMode: 'sequence', currentTapeIndex: 0
                 };
                 if (typeof DiscPage !== 'undefined' && DiscPage.startPreload) DiscPage.startPreload();
+                // Bridge disc preload → loading bar
+                (function() {
+                    if (typeof DiscPage === 'undefined' || !DiscPage.getPreloadProgress) return;
+                    var iv = setInterval(function() {
+                        var prog = DiscPage.getPreloadProgress();
+                        if (!prog || prog.total === 0) return;
+                        var pct = Math.round(prog.loaded / prog.total * 100);
+                        Loading.updateTask('disc', pct);
+                        if (prog.done) { Loading.markDone('disc'); clearInterval(iv); }
+                    }, 200);
+                })();
             }
             if (designData && Array.isArray(designData)) {
                 dwItems = designData.map(function(item) {
@@ -209,8 +265,10 @@ BannerPage.initBgVideo();
             window.actionFeed = actionData;
             resolveDiscTapes();
             console.log('Data loaded from individual index.json files');
+            Loading.markDone('data');
         }).catch(function() {
             console.log('All loading failed, using embedded defaults');
+            Loading.markDone('data');
         });
     });
 

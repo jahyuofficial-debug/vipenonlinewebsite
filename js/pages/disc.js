@@ -20,122 +20,19 @@ var userBehavior = { likedTracks: [] };
 
 // Disc full preloader — loads all tracks & covers before page entry
 var preloadState = { total: 0, loaded: 0, loading: false, done: false };
-var preloadUIDirty = false;
-var preloadBlockedNav = false;  // true when user tried to enter but was blocked
 
-// Toast shown when user clicks Disc while preload is still running
-var blockedToastId = null;
-function showBlockedToast() {
-    preloadBlockedNav = true;
-    if (blockedToastId) {
-        // Update existing toast
-        var t = document.getElementById('discBlockedToast');
-        if (t) {
-            var pct = preloadState.total > 0 ? Math.round(preloadState.loaded / preloadState.total * 100) : 0;
-            t.textContent = '正在加载曲库... ' + preloadState.loaded + '/' + preloadState.total + ' 首 (' + pct + '%)';
-        }
-        return;
-    }
-    var pct = preloadState.total > 0 ? Math.round(preloadState.loaded / preloadState.total * 100) : 0;
-    var msg = '正在加载曲库... ' + preloadState.loaded + '/' + preloadState.total + ' 首 (' + pct + '%)';
-    var toast = document.createElement('div');
-    toast.className = 'disc-toast';
-    toast.id = 'discBlockedToast';
-    toast.textContent = msg;
-    document.body.appendChild(toast);
-    setTimeout(function() { toast.classList.add('show'); }, 10);
-    // Keep the toast visible until preload completes (refresh every 3s)
-    var refreshInterval = setInterval(function() {
-        if (!preloadBlockedNav || !document.getElementById('discBlockedToast')) {
-            clearInterval(refreshInterval);
-            return;
-        }
-        var p = preloadState.total > 0 ? Math.round(preloadState.loaded / preloadState.total * 100) : 0;
-        toast.textContent = '正在加载曲库... ' + preloadState.loaded + '/' + preloadState.total + ' 首 (' + p + '%)';
-    }, 3000);
-    // Cleanup on complete
-    var checkDone = setInterval(function() {
-        if (preloadState.done || !preloadBlockedNav) {
-            clearInterval(checkDone);
-            clearInterval(refreshInterval);
-            var t = document.getElementById('discBlockedToast');
-            if (t) {
-                t.classList.remove('show');
-                setTimeout(function() { if (t.parentNode) t.remove(); }, 400);
-            }
-            blockedToastId = null;
-        }
-    }, 500);
-}
+// Disc page loading now handled by main loading.js — preload runs in bg, no blocking UI
+function showBlockedToast() { return; } // removed — loading handled by main loading.js
 
-function clearBlockedNav() {
-    if (preloadBlockedNav) {
-        preloadBlockedNav = false;
-        var t = document.getElementById('discBlockedToast');
-        if (t) { t.classList.remove('show'); setTimeout(function() { if (t && t.parentNode) t.remove(); }, 400); }
-        blockedToastId = null;
-    }
-}
-function buildLoadingPage() {
-    var pct = preloadState.total > 0 ? Math.round(preloadState.loaded / preloadState.total * 100) : 0;
-    return '<section id="page-disc-library" class="disc-page disc-page-loading">' +
-        '<div class="disc-bg disc-bg-static"></div>' +
-        '<div class="disc-bg-overlay"></div>' +
-        '<div class="disc-loading-overlay">' +
-        '<div class="disc-loading-wrap">' +
-        '<div class="disc-loading-icon">&#x1F3B5;</div>' +
-        '<p class="disc-loading-title">Loading disc library</p>' +
-        '<div class="disc-loading-bar"><div class="disc-loading-fill" id="discLoadFill" style="width:' + pct + '%"></div></div>' +
-        '<p class="disc-loading-status" id="discLoadStatus">' + preloadState.loaded + ' / ' + preloadState.total + ' tracks ready</p>' +
-        '<p class="disc-loading-hint">曲库加载完成后将自动进入</p>' +
-        '</div></div></section>';
-}
+function clearBlockedNav() { return; } // removed
+function buildLoadingPage() { return buildDiscPage(); } // skip disc loading screen
 function updateLoadingUI() {
-    if (window.currentPage !== 'disc-library') { preloadUIDirty = true; return; }
-    preloadUIDirty = false;
-    var pct = preloadState.total > 0 ? Math.round(preloadState.loaded / preloadState.total * 100) : 0;
-    var fill = document.getElementById('discLoadFill');
-    var status = document.getElementById('discLoadStatus');
-    if (fill) fill.style.width = pct + '%';
-    if (status) status.textContent = preloadState.loaded + ' / ' + preloadState.total + ' tracks ready';
-    if (preloadState.done) {
-        var txt = document.querySelector('.disc-loading-title');
-        if (txt) txt.textContent = 'Library ready \u2014 enjoy!';
-        var hint = document.querySelector('.disc-loading-hint');
-        if (hint) hint.textContent = 'Loading complete. Switching to player...';
-    }
+    return; // removed — main loading.js handles all preload UI
 }
 function onPreloadComplete() {
-    updateLoadingUI();
-    setTimeout(function() {
-        if (window.currentPage === 'disc-library') {
-            // Rebuild the disc page with full content
-            var sub = document.getElementById('page-disc-library');
-            if (sub && sub.parentNode) {
-                var container = document.createElement('div');
-                container.innerHTML = buildDiscPage();
-                var newPage = container.firstChild;
-                sub.parentNode.replaceChild(newPage, sub);
-                setTimeout(function() {
-                    DiscPage.bindAll();
-                    DiscPage.syncUIWithAudioState();
-                    if (!discAutoPlayed) {
-                        discAutoPlayed = true;
-                        discAudio.play().catch(function(){});
-                    }
-                    DiscPage.setDiscIsPlaying(true);
-                    DiscPage.syncPlayPauseUI();
-                    if (typeof MiniPlayer !== 'undefined') MiniPlayer.updateState('disc-library', true, true);
-                }, 100);
-            }
-        } else if (preloadBlockedNav) {
-            // User was blocked earlier — navigate now
-            preloadBlockedNav = false;
-            window.location.hash = '#/disc-library';
-        }
-    }, 600);
+    preloadState.done = true;
+    preloadState.loading = false;
 }
-function startPreload() {
     var tapes = window.discData.tapes || [];
     if (tapes.length === 0 || preloadState.loading || preloadState.done) return;
     preloadState.total = tapes.length;
@@ -254,7 +151,7 @@ function syncCarousel() {
 }
 
 function buildDiscPage() {
-    if (isPreloading()) return buildLoadingPage();
+    // always build full page — preload handled by main loading screen
 
     var tapes = window.discData.tapes || [];
     var currentIndex = window.discData.currentTapeIndex || 0;
@@ -921,7 +818,6 @@ return {
     setDiscIsPlaying: function(v) { discIsPlaying = v; },
     startPreload: startPreload,
     isPreloading: isPreloading,
-    showBlockedToast: showBlockedToast,
     clearBlockedNav: clearBlockedNav,
     getPreloadProgress: function() { return { loaded: preloadState.loaded, total: preloadState.total, done: preloadState.done }; }
 };
