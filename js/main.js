@@ -106,6 +106,7 @@ BannerPage.initBgVideo();
                     if (!prog || prog.total === 0) return;
                     var pct = Math.round(prog.loaded / prog.total * 100);
                     Loading.updateTask('disc', pct);
+                    Loading.setDiscProgress(prog.loaded, prog.total);
                     if (prog.done) { Loading.markDone('disc'); clearInterval(iv); }
                 }, 200);
             })();
@@ -242,6 +243,7 @@ BannerPage.initBgVideo();
                         if (!prog || prog.total === 0) return;
                         var pct = Math.round(prog.loaded / prog.total * 100);
                         Loading.updateTask('disc', pct);
+                        Loading.setDiscProgress(prog.loaded, prog.total);
                         if (prog.done) { Loading.markDone('disc'); clearInterval(iv); }
                     }, 200);
                 })();

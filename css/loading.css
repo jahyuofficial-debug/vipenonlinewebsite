@@ -9,5 +9,6 @@ html.loading-skip #loading{display:none}
 #loading .progressBar{width:2.4rem;height:.02rem;background:rgba(255,255,255,.1);border-radius:.01rem;overflow:hidden;display:block}
 #loading .progressBar .fill{height:100%;width:0%;background:#fff;transition:width .1s linear;border-radius:.01rem}
 #loading .progressNum{font-size:.24rem;color:rgba(255,255,255,.5);margin-top:.06rem;font-family:Helvetica,Arial,sans-serif;font-weight:300}
+#loading .progressStatus{font-size:.11rem;color:rgba(255,255,255,.25);margin-top:.04rem;font-family:Helvetica,Arial,sans-serif;font-weight:300;letter-spacing:.01em}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes zoomFade{0%{transform:scale(1);opacity:1}100%{transform:scale(4);opacity:0}}
