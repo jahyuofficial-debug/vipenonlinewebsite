@@ -12,6 +12,19 @@ try { canvas = require('canvas'); } catch (e) { canvas = null; }
 var PORT = process.env.PORT || 3000;
 var ROOT = __dirname;
 
+// Load .env file if present (simpler than environment variables for local dev)
+try {
+    var dotenv = fs.readFileSync(path.join(ROOT, '.env'), 'utf8');
+    dotenv.split('\n').forEach(function(line) {
+        var eq = line.indexOf('=');
+        if (eq > 0) {
+            var key = line.slice(0, eq).trim();
+            var val = line.slice(eq + 1).trim();
+            if (!process.env[key]) process.env[key] = val;
+        }
+    });
+} catch(e) {}
+
 var { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 var R2_BUCKET_NAME = process.env.R2_DESIGN_BUCKET || 'pub-541a045d0ee14f489c6d0115be4f5a34';
 var R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || '';
@@ -1830,14 +1843,15 @@ function handleDesignUpload(req, res) {
         sendJSON(res, 503, { success: false, error: 'R2 not configured' });
         return;
     }
-    var session = verifyAuth(req);
-    if (!session || session.role !== 'ManagerGo') {
-        sendJSON(res, 403, { success: false, error: 'Access denied' });
-        return;
-    }
     parseMultipartUpload(req, function(err, fields, files) {
         if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
         if (!files || files.length === 0) { sendJSON(res, 400, { success: false, error: 'No files' }); return; }
+
+        // Auth via ManagerGo session token (passed as form field)
+        var sessionToken = fields.sessionToken;
+        if (!sessionToken) { sendJSON(res, 401, { success: false, error: 'Not logged in' }); return; }
+        var session = MANAGER_SESSIONS[sessionToken];
+        if (!session) { sendJSON(res, 401, { success: false, error: 'Session expired' }); return; }
 
         var folderName = fields.folderName || fields.folder;
         if (!folderName) { sendJSON(res, 400, { success: false, error: 'Missing folderName' }); return; }
@@ -1905,7 +1919,7 @@ function handleDesignUpload(req, res) {
 
             existing.push(entry);
             fs.writeFileSync(idxPath, JSON.stringify(existing, null, 2), 'utf8');
-            addManagerLog('design_upload', session.username, 'Uploaded ' + entry.title + ' (' + keys.length + ' files)');
+            addManagerLog('design_upload', session.username || session.email, 'Uploaded ' + entry.title + ' (' + keys.length + ' files)');
             sendJSON(res, 200, { success: true, entry: entry, files: keys.length });
             console.log('[design-upload] ' + entry.title + ' — ' + keys.length + ' files');
         }).catch(function(err) {
@@ -1933,7 +1947,10 @@ http.createServer(function(req, res) {
         filePath = path.join(ROOT, 'manager.html');
     }
     if (uri === '/design-upload') {
-        filePath = path.join(ROOT, 'design-upload.html');
+        filePath = path.join(ROOT, 'design-upload-v2.html');
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
     }
 
     serveStatic(req, res, filePath);

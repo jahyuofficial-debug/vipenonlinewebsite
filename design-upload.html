@@ -444,6 +444,10 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
     fd.append('tools',   document.getElementById('f_tools').value.trim());
     fd.append('tags',    document.getElementById('f_tags').value.trim());
 
+    // ManagerGo auth token
+    var sessionToken = sessionStorage.getItem('manager_session');
+    if (sessionToken) fd.append('sessionToken', sessionToken);
+
     // Named image files
     if (assigned['card-bg'])    fd.append('files', assigned['card-bg'],    'card-bg.png');
     if (assigned['card-hover']) fd.append('files', assigned['card-hover'], 'card-hover.png');
