@@ -5,7 +5,7 @@ var Loading = (function() {
     var tasks = {};         // { name: { weight, pct, done, label } }
     var displayPct = 0;     // smoothed display percentage
     var targetPct = 0;
-    var smoothTimer = null;
+    var smoothing = false;
     var onCompleteCallback = null;
     var completed = false;
     var STORAGE_KEY = 'vipen_loading_shown';
@@ -59,21 +59,24 @@ var Loading = (function() {
         return w > 0 ? Math.min(100, Math.round(p / w * 100)) : 0;
     }
 
-    // Smoothly animate progress (increments of 1-2, every 80ms)
-    function smoothToTarget() {
+    // Smoothly animate progress using requestAnimationFrame for butter-smooth updates
+    function smoothTick() {
         if (completed) return;
-        if (displayPct < targetPct) {
-            var step = Math.max(1, Math.ceil((targetPct - displayPct) / 8));
-            displayPct = Math.min(targetPct, displayPct + step);
-        } else {
+        var gap = targetPct - displayPct;
+        if (gap > 0.05) {
+            // Exponential ease: move 25% closer each frame (fast at first, then decelerate)
+            displayPct += Math.max(0.1, gap * 0.25);
+            if (displayPct >= targetPct) displayPct = targetPct;
+        } else if (gap > 0) {
             displayPct = targetPct;
         }
-        if (progressFill) progressFill.style.width = displayPct + '%';
-        if (progressNum) progressNum.textContent = displayPct + '%';
+        var rounded = Math.round(displayPct);
+        if (progressFill) progressFill.style.width = rounded + '%';
+        if (progressNum) progressNum.textContent = rounded + '%';
         if (progressStatus) progressStatus.textContent = buildStatusText();
 
-        if (displayPct < targetPct) {
-            smoothTimer = setTimeout(smoothToTarget, 80);
+        if (displayPct < targetPct || rounded < targetPct) {
+            requestAnimationFrame(smoothTick);
         } else if (targetPct >= 100) {
             checkComplete();
         }
@@ -81,7 +84,10 @@ var Loading = (function() {
 
     function updateUI() {
         targetPct = calcOverall();
-        if (!smoothTimer) smoothToTarget();
+        if (!smoothing) {
+            smoothing = true;
+            requestAnimationFrame(smoothTick);
+        }
     }
 
     function checkComplete() {
@@ -93,7 +99,7 @@ var Loading = (function() {
         }
         if (allDone) {
             completed = true;
-            if (smoothTimer) { clearTimeout(smoothTimer); smoothTimer = null; }
+            smoothing = false;
             if (progressStatus) progressStatus.textContent = 'Ready. Enjoy!';
             if (loadImg) loadImg.classList.add('zoomOut');
             setTimeout(function() {
@@ -148,7 +154,7 @@ var Loading = (function() {
             completed = false;
             displayPct = 0;
             targetPct = 0;
-            if (smoothTimer) { clearTimeout(smoothTimer); smoothTimer = null; }
+            smoothing = false;
         },
         start: function() {
             updateUI();
