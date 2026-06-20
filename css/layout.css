@@ -1,7 +1,8 @@
 body{overflow-x:hidden}
 
-/* Force hide native cursor - only custom #cursor dot should be visible */
-*,*::before,*::after{cursor:none!important}
+/* Force hide native cursor - only custom #cursor dot should be visible.
+   Uses transparent 1x1 PNG as custom cursor + none fallback (more reliable than cursor:none alone). */
+*,*::before,*::after{cursor:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==") 1 1, none!important}
 input,textarea,select,[contenteditable="true"]{cursor:auto!important}
 
 #cursor{position:fixed;pointer-events:none;z-index:9998;width:32px;height:32px;transition:none;opacity:0}
