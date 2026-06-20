@@ -10,23 +10,13 @@ var Cursor = (function() {
             cursorEl = document.getElementById(cursorId || 'cursor');
             if (!cursorEl) {
                 // Fallback: restore native cursor if custom element missing
-                document.body.style.cursor = 'auto';
+                document.documentElement.classList.remove('cursor-custom-active');
                 return;
             }
 
             initialized = true;
 
-            // Global rule to hide the native cursor so only the custom one shows.
-            // Exclude form elements and contenteditable so text editing still works.
-            var style = document.createElement('style');
-            style.id = 'cursor-hide-native';
-            style.textContent = [
-                'html.cursor-custom-active,',
-                'html.cursor-custom-active body,',
-                'html.cursor-custom-active *:not(input):not(textarea):not(select):not([contenteditable="true"])',
-                '{ cursor: none !important; }'
-            ].join('');
-            document.head.appendChild(style);
+            // Activate the global cursor:hide rule (static <style> in <head>)
             document.documentElement.classList.add('cursor-custom-active');
 
             document.addEventListener('mousemove', function(e) {
