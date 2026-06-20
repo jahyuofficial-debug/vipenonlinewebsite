@@ -12,6 +12,14 @@ var Cursor = (function() {
 
             initialized = true;
 
+            // Hide native cursor globally — single injected style, runs after all CSS
+            if (!document.getElementById('cursor-hide-native')) {
+                var s = document.createElement('style');
+                s.id = 'cursor-hide-native';
+                s.textContent = '*,*::before,*::after{cursor:none!important}input,textarea,select,[contenteditable=true]{cursor:auto!important}';
+                document.head.appendChild(s);
+            }
+
             document.addEventListener('mousemove', function(e) {
                 cursorEl.style.opacity = '1';
                 cursorEl.style.transform = 'translate3d(' + (e.clientX - halfSize) + 'px,' + (e.clientY - halfSize) + 'px,0)';
