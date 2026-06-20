@@ -26,7 +26,7 @@ try {
 } catch(e) {}
 
 var { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
-var R2_BUCKET_NAME = process.env.R2_DESIGN_BUCKET || 'pub-541a045d0ee14f489c6d0115be4f5a34';
+var R2_BUCKET_NAME = process.env.R2_DESIGN_BUCKET || 'vipen-design';
 var R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || '';
 var R2_ACCESS_KEY = process.env.R2_ACCESS_KEY_ID || '';
 var R2_SECRET_KEY = process.env.R2_SECRET_ACCESS_KEY || '';

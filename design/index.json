@@ -141,5 +141,44 @@
     "tags": [
       "test"
     ]
+  },
+  {
+    "folder": "Magsafe Power Bank",
+    "workId": "work08",
+    "cat": "Graphic Design",
+    "suit": "â",
+    "rank": "A",
+    "likeCount": 0,
+    "cardBg": "https://vipen-design.r2.dev/Magsafe Power Bank/card-bg.png",
+    "cardHoverBg": "https://vipen-design.r2.dev/Magsafe Power Bank/card-hover.png",
+    "headerBg": "https://vipen-design.r2.dev/Magsafe Power Bank/header-bg.png",
+    "contentImages": [
+      "https://vipen-design.r2.dev/Magsafe Power Bank/content-1.png",
+      "https://vipen-design.r2.dev/Magsafe Power Bank/content-10.png",
+      "https://vipen-design.r2.dev/Magsafe Power Bank/content-11.png",
+      "https://vipen-design.r2.dev/Magsafe Power Bank/content-12.png",
+      "https://vipen-design.r2.dev/Magsafe Power Bank/content-13.png",
+      "https://vipen-design.r2.dev/Magsafe Power Bank/content-14.png",
+      "https://vipen-design.r2.dev/Magsafe Power Bank/content-15.png",
+      "https://vipen-design.r2.dev/Magsafe Power Bank/content-2.png",
+      "https://vipen-design.r2.dev/Magsafe Power Bank/content-3.png",
+      "https://vipen-design.r2.dev/Magsafe Power Bank/content-4.png",
+      "https://vipen-design.r2.dev/Magsafe Power Bank/content-5.png",
+      "https://vipen-design.r2.dev/Magsafe Power Bank/content-6.png",
+      "https://vipen-design.r2.dev/Magsafe Power Bank/content-7.png",
+      "https://vipen-design.r2.dev/Magsafe Power Bank/content-8.png",
+      "https://vipen-design.r2.dev/Magsafe Power Bank/content-9.png"
+    ],
+    "title": "Magsafe Power Bank",
+    "description": "seamlessly merges advanced engineering with a bold avant garde aesthetic.",
+    "client": "Jah72",
+    "published": "2026",
+    "tools": "PS/AI/Figma/Nano/GPT",
+    "tags": [
+      "Graphic",
+      "Product",
+      "Visual",
+      "EC"
+    ]
   }
 ]
