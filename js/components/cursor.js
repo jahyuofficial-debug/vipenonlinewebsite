@@ -8,16 +8,9 @@ var Cursor = (function() {
     return {
         init: function(cursorId) {
             cursorEl = document.getElementById(cursorId || 'cursor');
-            if (!cursorEl) {
-                // Fallback: restore native cursor if custom element missing
-                document.documentElement.classList.remove('cursor-custom-active');
-                return;
-            }
+            if (!cursorEl) return;
 
             initialized = true;
-
-            // Activate the global cursor:hide rule (static <style> in <head>)
-            document.documentElement.classList.add('cursor-custom-active');
 
             document.addEventListener('mousemove', function(e) {
                 cursorEl.style.opacity = '1';
