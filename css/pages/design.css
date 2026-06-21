@@ -1,4 +1,4 @@
-/* === Flat Grid Design Work page === */
+/* === Flat Grid Design Work page (legacy, kept for compatibility) === */
 .dw-page{position:relative;width:100%;min-height:100vh;background:#000;display:flex;align-items:center;justify-content:center;padding:.8rem 1rem}
 
 /* Grid container */
@@ -21,11 +21,57 @@
 .dw-card:hover .dw-card-info{opacity:1;transform:translateY(0)}
 .dw-card-title{font-size:.14rem;font-weight:600;color:rgba(255,255,255,.8);letter-spacing:.01rem;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* Responsive: tighter grid on small screens (mobile-block prevents actual mobile use) */
+/* Responsive: tighter grid on small screens */
 @media(max-width:900px){
     .dw-grid{grid-template-columns:repeat(auto-fill,minmax(2.4rem,1fr));gap:.12rem}
     .dw-page{padding:.6rem .4rem}
 }
+
+/* ============================================================
+   FAN LAYOUT — Premium Fashion Card Fan
+   ============================================================ */
+.dw-fan-page{position:relative;width:100%;min-height:100vh;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:1rem}
+
+/* Subtle radial glow behind fan */
+.dw-fan-page::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:12rem;height:12rem;background:radial-gradient(ellipse at center,rgba(255,255,255,.025) 0%,transparent 70%);pointer-events:none}
+
+/* Fan stage — the positioning container */
+.dw-fan-stage{position:relative;width:10rem;height:7rem;display:flex;align-items:center;justify-content:center}
+
+/* Single fan card */
+.dw-fan-card{position:absolute;width:2.6rem;aspect-ratio:3/4;border-radius:.24rem;overflow:hidden;cursor:pointer;background:#111;border:1px solid rgba(255,255,255,.06);box-shadow:0 .04rem .2rem rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.03);will-change:transform;transform-origin:center bottom;transition:box-shadow .4s ease, border-color .4s ease}
+.dw-fan-card::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;transition:box-shadow .4s ease}
+.dw-fan-card:hover{border-color:rgba(255,255,255,.18);box-shadow:0 .12rem .4rem rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.08)}
+.dw-fan-card:hover::after{box-shadow:inset 0 0 .4rem rgba(255,255,255,.03)}
+
+/* Fan card background image */
+.dw-fan-card-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .6s cubic-bezier(.25,.46,.45,.94)}
+.dw-fan-card:hover .dw-fan-card-bg{transform:scale(1.05)}
+
+/* Fan card overlay gradient — darker at bottom for text readability */
+.dw-fan-card-overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,rgba(0,0,0,.5) 70%,rgba(0,0,0,.88) 100%);z-index:1;pointer-events:none;transition:opacity .4s ease;opacity:.7}
+.dw-fan-card:hover .dw-fan-card-overlay{opacity:1}
+
+/* Fan card info strip */
+.dw-fan-card-info{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:.12rem .16rem .16rem;opacity:0;transform:translateY(.1rem);transition:opacity .4s ease,transform .4s ease}
+.dw-fan-card:hover .dw-fan-card-info{opacity:1;transform:translateY(0)}
+
+.dw-fan-card-number{font-size:.09rem;font-weight:500;color:rgba(255,255,255,.35);letter-spacing:.06rem;text-transform:uppercase;margin-bottom:.02rem}
+.dw-fan-card-title{font-size:.15rem;font-weight:600;color:#fff;letter-spacing:.01rem;line-height:1.2}
+.dw-fan-card-client{font-size:.1rem;color:rgba(255,255,255,.4);margin-top:.02rem;font-family:'Segoe Script','Brush Script MT','Apple Chancery',cursive;font-style:italic}
+
+/* Fan card decorative corner accent */
+.dw-fan-card-accent{position:absolute;top:.12rem;right:.12rem;z-index:3;width:.06rem;height:.06rem;border-radius:50%;background:rgba(255,255,255,.25);transition:all .4s ease}
+.dw-fan-card:hover .dw-fan-card-accent{background:rgba(255,255,255,.5);box-shadow:0 0 .12rem rgba(255,255,255,.15)}
+
+/* Responsive fan adjustments */
+@media(max-width:900px){
+    .dw-fan-stage{width:7rem;height:6rem}
+    .dw-fan-card{width:2rem;border-radius:.18rem}
+}
+
+/* Empty fan state */
+.dw-fan-empty{color:rgba(255,255,255,.2);font-size:.16rem;letter-spacing:.04rem;text-transform:uppercase}
 
 /* === Detail Page === */
 .dw-detail{position:fixed;top:0;left:0;width:100%;height:100%;z-index:150;background:#000;overflow-y:auto;animation:dwFadeIn .4s ease}

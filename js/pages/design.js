@@ -18,22 +18,144 @@ var dwZoomedCard = null;
 var dwListPageSize = 6;
 var dwListCurrentPage = 1;
 
-// === Build Flat Grid ===
+// === Fan Layout Engine ===
+// Calculate fan positions for N cards spread in an arc
+function calcFanPositions(count) {
+    var positions = [];
+    var centerIndex = (count - 1) / 2;
+    var angleStep = count <= 1 ? 0 : Math.min(14, 60 / (count + 1)); // degrees per card
+
+    for (var i = 0; i < count; i++) {
+        var offset = i - centerIndex; // negative = left, 0 = center, positive = right
+        var rotation = offset * angleStep;
+        // Arc: cards form a gentle U-shaped curve
+        var absOffset = Math.abs(offset);
+        var y = absOffset * absOffset * 0.025; // y drops down quadratically from center
+        var x = offset * 0.65; // horizontal spread
+        var zIndex = count - absOffset; // center card on top
+        positions.push({ rotation: rotation, x: x, y: y, zIndex: zIndex, offset: offset });
+    }
+    return positions;
+}
+
+// === Build Fan Layout ===
 function buildDesignWorkGrid() {
+    var count = dwItems.length;
+    if (count === 0) {
+        return '<section id="page-design-work" class="dw-fan-page"><div class="dw-fan-empty">No design works yet.</div></section>';
+    }
+    var positions = calcFanPositions(count);
+
     var cardsHTML = dwItems.map(function(item, i) {
         var img = item.cardBg || item.headerBg || '';
-        return '<div class="dw-card" data-design-id="' + i + '">' +
-            '<div class="dw-card-img" style="background-image:url(' + img + ')"></div>' +
-            '<div class="dw-card-overlay"></div>' +
-            '<div class="dw-card-info">' +
-            '<p class="dw-card-title">' + (item.title || '') + '</p>' +
+        var pos = positions[i];
+        var numStr = String(i + 1).padStart(2, '0');
+        // Inline target transform as data attributes for GSAP to read
+        // Also set as inline transform fallback (no-GSAP graceful degradation)
+        var inlineTransform = 'translate(' + pos.x.toFixed(2) + 'rem, ' + pos.y.toFixed(2) + 'rem) rotate(' + pos.rotation.toFixed(2) + 'deg)';
+        return '<div class="dw-fan-card" ' +
+            'data-design-id="' + i + '" ' +
+            'data-fan-rotation="' + pos.rotation.toFixed(2) + '" ' +
+            'data-fan-x="' + pos.x.toFixed(2) + '" ' +
+            'data-fan-y="' + pos.y.toFixed(2) + '" ' +
+            'data-fan-z="' + pos.zIndex + '" ' +
+            'style="z-index:' + pos.zIndex + ';transform:' + inlineTransform + '">' +
+            '<div class="dw-fan-card-bg" style="background-image:url(' + img + ')"></div>' +
+            '<div class="dw-fan-card-overlay"></div>' +
+            '<div class="dw-fan-card-accent"></div>' +
+            '<div class="dw-fan-card-info">' +
+            '<p class="dw-fan-card-number">' + numStr + ' / ' + (count < 10 ? '0' + count : count) + '</p>' +
+            '<p class="dw-fan-card-title">' + (item.title || 'Untitled') + '</p>' +
+            (item.client ? '<p class="dw-fan-card-client">' + item.client + '</p>' : '') +
             '</div>' +
             '</div>';
     }).join('');
 
-    return '<section id="page-design-work" class="dw-page">' +
-        '<div class="dw-grid" id="designGrid">' + cardsHTML + '</div>' +
+    return '<section id="page-design-work" class="dw-fan-page">' +
+        '<div class="dw-fan-stage" id="designFanStage">' + cardsHTML + '</div>' +
         '</section>';
+}
+
+// === GSAP Fan Entrance Animation ===
+function animateFanEntrance() {
+    var cards = document.querySelectorAll('.dw-fan-card');
+    if (!cards.length) return;
+    if (typeof gsap === 'undefined') return;
+
+    // 1. Set initial state: all cards stacked at center
+    gsap.set(cards, {
+        x: 0,
+        y: 0,
+        rotation: 0,
+        scale: 0.7,
+        opacity: 0
+    });
+
+    // 2. Animate to fan positions with stagger
+    gsap.to(cards, {
+        x: function(i, el) { return parseFloat(el.getAttribute('data-fan-x')) + 'rem'; },
+        y: function(i, el) { return parseFloat(el.getAttribute('data-fan-y')) + 'rem'; },
+        rotation: function(i, el) { return parseFloat(el.getAttribute('data-fan-rotation')); },
+        scale: 1,
+        opacity: 1,
+        duration: 0.7,
+        stagger: 0.08,
+        ease: 'power3.out',
+        delay: 0.2
+    });
+}
+
+// === Fan Hover Interactions ===
+function bindFanHover() {
+    var cards = document.querySelectorAll('.dw-fan-card');
+    if (!cards.length) return;
+    if (typeof gsap === 'undefined') return;
+
+    cards.forEach(function(card) {
+        var z = parseInt(card.getAttribute('data-fan-z'), 10) || 0;
+        var baseRotation = parseFloat(card.getAttribute('data-fan-rotation')) || 0;
+        var baseX = card.getAttribute('data-fan-x') || '0';
+        var baseY = card.getAttribute('data-fan-y') || '0';
+
+        card.addEventListener('mouseenter', function() {
+            // Lift, straighten, bring to front
+            gsap.to(card, {
+                rotation: 0,
+                y: '-=0.12rem',
+                scale: 1.04,
+                zIndex: 200,
+                duration: 0.45,
+                ease: 'power2.out',
+                overwrite: 'auto'
+            });
+            // Dim other cards slightly
+            cards.forEach(function(other) {
+                if (other !== card) {
+                    gsap.to(other, { opacity: 0.5, duration: 0.35, ease: 'power2.out', overwrite: 'auto' });
+                }
+            });
+        });
+
+        card.addEventListener('mouseleave', function() {
+            // Return to fan position
+            gsap.to(card, {
+                rotation: baseRotation,
+                y: baseY + 'rem',
+                x: baseX + 'rem',
+                scale: 1,
+                zIndex: z,
+                duration: 0.55,
+                ease: 'power2.out',
+                overwrite: 'auto'
+            });
+            // Restore other cards
+            cards.forEach(function(other) {
+                if (other !== card) {
+                    gsap.to(other, { opacity: 1, duration: 0.35, ease: 'power2.out', overwrite: 'auto' });
+                }
+            });
+        });
+    });
 }
 
 // === Detail Page (unchanged) ===
@@ -274,12 +396,25 @@ return {
     buildDetail: function(id) { return buildDesignWorkDetail(id); },
     buildList: function() { return buildDesignWorkList(); },
     bindGrid: function() {
+        // Bind fan card clicks
+        document.querySelectorAll('.dw-fan-card').forEach(function(card) {
+            card.addEventListener('click', function() {
+                var id = this.getAttribute('data-design-id');
+                window.location.hash = '#/design-work/detail/' + id;
+            });
+        });
+        // Legacy flat card clicks
         document.querySelectorAll('.dw-card').forEach(function(card) {
             card.addEventListener('click', function() {
                 var id = this.getAttribute('data-design-id');
                 window.location.hash = '#/design-work/detail/' + id;
             });
         });
+        // Trigger GSAP fan entrance + hover
+        if (document.querySelector('.dw-fan-stage')) {
+            animateFanEntrance();
+            bindFanHover();
+        }
     },
     bindList: function() { bindDesignWorkListClicks(); bindDesignWorkListPagination(); },
     resetCards: function() {},
