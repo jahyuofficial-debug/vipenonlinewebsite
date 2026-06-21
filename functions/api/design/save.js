@@ -36,7 +36,7 @@ export async function onRequest(context) {
       httpMetadata: { contentType: 'application/json; charset=utf-8' }
     });
 
-    // 2. Upload any replaced image files
+    // 2. Upload any replaced image/video files
     let uploadedCount = 0;
     for (const [key, value] of formData.entries()) {
       if (!key.startsWith('img_') || !(value instanceof File)) continue;
@@ -44,14 +44,18 @@ export async function onRequest(context) {
       const pi = parseInt(parts[1]);
       const imgKey = parts.slice(2).join('_');
       const folder = (projects[pi] && projects[pi].folder) || `project-${pi}`;
-      const safeName = imgKey.replace(/[^a-zA-Z0-9-_.]/g, '_');
-      const r2Path = `${folder}/${safeName}-${Date.now()}.png`;
+      const safeBase = imgKey.replace(/[^a-zA-Z0-9-_.]/g, '_');
+      // Preserve original file extension
+      const extMatch = (value.name || '').match(/\.([a-zA-Z0-9]+)$/);
+      const ext = extMatch ? '.' + extMatch[1].toLowerCase() : '.png';
+      const ts = Date.now();
+      const r2Path = `${folder}/${safeBase}-${ts}${ext}`;
 
       await env.DESIGN_BUCKET.put(r2Path, value.stream(), {
-        httpMetadata: { contentType: value.type || 'image/png' }
+        httpMetadata: { contentType: value.type || 'application/octet-stream' }
       });
 
-      const newUrl = `${r2Base}/${encodeURIComponent(folder)}/${encodeURIComponent(safeName)}-${Date.now()}.png`;
+      const newUrl = `${r2Base}/${safeBase}-${ts}${ext}`;
 
       // Update URL in projects data
       if (projects[pi]) {

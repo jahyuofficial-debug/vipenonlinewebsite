@@ -78,7 +78,7 @@ function buildDesignWorkDetail(id) {
             var ytId = extractYouTubeId(src);
             if (ytId) {
                 mediaHtml += '<div class="dw-detail-media-item dw-detail-media-youtube"><div class="yt-embed"><iframe src="https://www.youtube.com/embed/' + ytId + '?rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div></div>';
-            } else if (src.indexOf('data:video') === 0 || src.match(/\.(mp4|webm|ogg)($|\?)/i)) {
+            } else if (src.indexOf('data:video') === 0 || src.match(/\.(mp4|webm|ogg|mov|avi|mkv)($|\?)/i)) {
                 mediaHtml += '<div class="dw-detail-media-item"><video src="' + src + '" controls></video></div>';
             } else {
                 mediaHtml += '<div class="dw-detail-media-item"><img src="' + src + '" alt=""></div>';
