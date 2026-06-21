@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="js/core/mobile-block.js"></script>
-<title>Design Upload — Vipen</title>
+<title>Design Studio — Vipen</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0a0a0f;color:#fff;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:40px 0 80px}
@@ -85,12 +85,70 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
 
 .back{display:block;text-align:center;margin-top:18px;font-size:12px;color:rgba(255,255,255,.18);text-decoration:none}
 .back:hover{color:rgba(255,255,255,.35)}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:0;margin-bottom:24px;border-bottom:1px solid rgba(255,255,255,.08)}
+.tab-btn{flex:1;padding:10px 0;text-align:center;font-size:13px;color:rgba(255,255,255,.3);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all .25s;font-family:inherit;letter-spacing:.02em}
+.tab-btn:hover{color:rgba(255,255,255,.6)}
+.tab-btn.active{color:#d4a853;border-bottom-color:#d4a853}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── Manager cards ── */
+.mgr-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px;margin-bottom:12px}
+.mgr-card h3{font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.mgr-card h3 input{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;padding:6px 10px;border-radius:6px;font-size:14px}
+.mgr-card h3 .idx{font-size:10px;color:rgba(255,255,255,.2);min-width:40px}
+.mgr-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.mgr-field{display:flex;flex-direction:column}
+.mgr-field label{font-size:9px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.mgr-field input,.mgr-field textarea,.mgr-field select{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:#fff;padding:6px 8px;font-size:11px;font-family:inherit;outline:none}
+.mgr-field input:focus,.mgr-field textarea:focus,.mgr-field select:focus{border-color:#d4a853}
+.mgr-field textarea{resize:vertical;min-height:40px}
+.mgr-field.full{grid-column:1/-1}
+.mgr-field select{appearance:none;cursor:pointer}
+.mgr-field select option{background:#1a1a2e;color:#fff}
+.mgr-label{font-size:9px;color:rgba(255,255,255,.2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;margin-top:12px}
+.mgr-main-imgs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.mgr-main-slot{width:90px;position:relative}
+.mgr-main-slot .sl{font-size:8px;color:rgba(255,255,255,.2);margin-bottom:3px;text-align:center}
+.mgr-main-slot img{width:90px;height:68px;border-radius:4px;border:1px solid rgba(255,255,255,.06);object-fit:cover;cursor:pointer}
+.mgr-main-slot img:hover{border-color:rgba(255,255,255,.2)}
+.mgr-main-slot input{display:none}
+.mgr-sortable{display:flex;flex-wrap:wrap;gap:6px;min-height:50px;padding:6px;border:1px dashed rgba(255,255,255,.06);border-radius:6px;background:rgba(255,255,255,.01);margin-bottom:6px}
+.mgr-sort-item{width:70px;cursor:grab;position:relative;transition:transform .12s}
+.mgr-sort-item:active{cursor:grabbing}
+.mgr-sort-item.drag-over{transform:scale(1.06);box-shadow:0 0 0 2px #d4a853}
+.mgr-sort-item img{width:70px;height:52px;border-radius:3px;object-fit:cover;border:1px solid rgba(255,255,255,.08);pointer-events:none}
+.mgr-sort-item .badge{position:absolute;top:1px;left:1px;background:rgba(0,0,0,.7);color:rgba(255,255,255,.5);font-size:8px;padding:0 4px;border-radius:2px}
+.mgr-sort-item .del{position:absolute;top:1px;right:1px;width:14px;height:14px;border-radius:50%;background:rgba(239,68,68,.7);color:#fff;font-size:8px;line-height:14px;text-align:center;cursor:pointer;display:none}
+.mgr-sort-item:hover .del{display:block}
+.mgr-sort-item .repl{position:absolute;bottom:1px;right:1px;width:14px;height:14px;border-radius:50%;background:rgba(212,168,83,.7);color:#000;font-size:8px;line-height:14px;text-align:center;cursor:pointer;display:none}
+.mgr-sort-item:hover .repl{display:block}
+.mgr-sort-item input{display:none}
+.mgr-add-img{width:70px;height:52px;border:1px dashed rgba(255,255,255,.08);border-radius:3px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.12);font-size:18px;transition:all .2s}
+.mgr-add-img:hover{border-color:rgba(255,255,255,.25);color:rgba(255,255,255,.35)}
+.mgr-toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.mgr-toolbar button{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;padding:7px 14px;border-radius:7px;cursor:pointer;font-size:12px;transition:all .2s}
+.mgr-toolbar button:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2)}
+.mgr-toolbar .btn-gold{background:#d4a853;color:#000;border-color:#d4a853}
+.mgr-toolbar .btn-gold:hover{background:#e0b960}
+.status-toast{position:fixed;bottom:20px;right:20px;padding:10px 18px;border-radius:8px;font-size:12px;z-index:999;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none}
+.status-toast.show{opacity:1;transform:translateY(0)}
+.status-toast.ok{background:rgba(34,197,94,.9);color:#fff}
+.status-toast.err{background:rgba(239,68,68,.9);color:#fff}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Design Upload</h1>
-  <p class="sub">Select images folder, assign each image its role, fill details, publish</p>
+  <h1>Design Studio</h1>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="upload">Upload New</button>
+    <button class="tab-btn" data-tab="manage">Manage Existing</button>
+  </div>
+
+  <!-- ═══ Upload Tab ═══ -->
+  <div class="tab-panel active" id="tab-upload">
 
   <!-- ── Step 1: Select folder ── -->
   <div class="dropzone" id="dropzone">
@@ -184,7 +242,21 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
   <div class="progress" id="progress"><div class="bar" id="progressBar"></div></div>
   <div class="status" id="status"></div>
   <a class="back" href="/">← Back to site</a>
-</div>
+
+  </div><!-- /tab-upload -->
+
+  <!-- ═══ Manage Tab ═══ -->
+  <div class="tab-panel" id="tab-manage">
+    <div class="mgr-toolbar">
+      <button id="mgrLoadLive" class="btn-gold">Load from Live Site</button>
+      <button id="mgrLoadLocal">Load Local JSON</button>
+      <button id="mgrDownload" style="display:none">Download JSON</button>
+      <span style="font-size:10px;color:rgba(255,255,255,.2);display:flex;align-items:center;margin-left:4px" id="mgrCount"></span>
+    </div>
+    <div id="mgrProjects"></div>
+  </div><!-- /tab-manage -->
+
+</div><!-- /wrap -->
 
 <script>
 // ── State ────────────────────────────────────────────────────
@@ -491,6 +563,217 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
     };
     xhr.send(fd);
 });
+// ── Manager JS ────────────────────────────────────────────
+(function(){
+'use strict';
+var mgrProjects = [];
+function toast(msg,t){var s=document.getElementById('statusToast');s.textContent=msg;s.className='status-toast show '+(t||'ok');setTimeout(function(){s.classList.remove('show')},3000);}
+
+// Tabs
+document.querySelectorAll('.tab-btn').forEach(function(b){
+    b.addEventListener('click',function(){
+        document.querySelectorAll('.tab-btn').forEach(function(x){x.classList.remove('active')});
+        document.querySelectorAll('.tab-panel').forEach(function(x){x.classList.remove('active')});
+        b.classList.add('active');
+        document.getElementById('tab-'+b.getAttribute('data-tab')).classList.add('active');
+    });
+});
+
+// Load live
+document.getElementById('mgrLoadLive').addEventListener('click',function(){
+    fetch('https://vipenonline.com/design/index.json?'+Date.now())
+        .then(function(r){return r.json();})
+        .then(function(d){mgrProjects=d;renderMgr();toast('Loaded '+d.length+' projects');})
+        .catch(function(){toast('Failed to load','err');});
+});
+
+// Load local
+document.getElementById('mgrLoadLocal').addEventListener('click',function(){
+    var inp=document.createElement('input');inp.type='file';inp.accept='.json';
+    inp.addEventListener('change',function(){
+        var r=new FileReader();
+        r.onload=function(e){
+            try{mgrProjects=JSON.parse(e.target.result);renderMgr();toast('Loaded local JSON');}
+            catch(ex){toast('Invalid JSON','err');}
+        };
+        r.readAsText(inp.files[0]);
+    });
+    inp.click();
+});
+
+// Download
+document.getElementById('mgrDownload').addEventListener('click',function(){
+    var j=JSON.stringify(mgrProjects,null,2);
+    var b=new Blob([j],{type:'application/json'});
+    var u=URL.createObjectURL(b);
+    var a=document.createElement('a');a.href=u;a.download='design-index.json';a.click();
+    URL.revokeObjectURL(u);
+    toast('Downloaded! Replace design/index.json & deploy.');
+});
+
+function renderMgr(){
+    var c=document.getElementById('mgrProjects');
+    document.getElementById('mgrCount').textContent=mgrProjects.length+' projects';
+    document.getElementById('mgrDownload').style.display='';
+    var h='';
+    mgrProjects.forEach(function(p,pi){
+        h+=buildMgrCard(p,pi);
+    });
+    c.innerHTML=h;
+    mgrProjects.forEach(function(p,pi){bindMgrCard(pi);});
+}
+
+function buildMgrCard(p,pi){
+    return '<div class="mgr-card" data-pi="'+pi+'">'+
+        '<h3><span class="idx">#'+(pi+1)+'</span>'+
+        '<input value="'+esc(p.title||'')+'" data-mgr-field="title" data-pi="'+pi+'" placeholder="Title">'+
+        '</h3>'+
+        '<div class="mgr-fields">'+
+        '<div class="mgr-field full"><label>Description</label><textarea data-mgr-field="description" data-pi="'+pi+'">'+esc(p.description||'')+'</textarea></div>'+
+        '<div class="mgr-field"><label>Client</label><input value="'+esc(p.client||'')+'" data-mgr-field="client" data-pi="'+pi+'">'+
+        '<div class="mgr-field"><label>Published</label><input value="'+esc(p.published||'')+'" data-mgr-field="published" data-pi="'+pi+'">'+
+        '<div class="mgr-field"><label>Tools</label><input value="'+esc(p.tools||'')+'" data-mgr-field="tools" data-pi="'+pi+'">'+
+        '<div class="mgr-field"><label>Folder</label><input value="'+esc(p.folder||'')+'" data-mgr-field="folder" data-pi="'+pi+'">'+
+        '<div class="mgr-field"><label>Tags</label><input value="'+esc((p.tags||[]).join(', '))+'" data-mgr-field="tags" data-pi="'+pi+'">'+
+        '<div class="mgr-field"><label>Spacing</label><select data-mgr-field="spacing" data-pi="'+pi+'">'+
+        '<option value="small"'+(p.spacing==='small'?' selected':'')+'>Small</option>'+
+        '<option value="medium"'+(p.spacing==='medium'?' selected':'')+'>Medium</option>'+
+        '<option value="large"'+(p.spacing==='large'?' selected':'')+'>Large</option></select></div>'+
+        '<div class="mgr-field"><label>Desc Position</label><select data-mgr-field="descPosition" data-pi="'+pi+'">'+
+        '<option value="top"'+(p.descPosition==='top'?' selected':'')+'>Top</option>'+
+        '<option value="bottom"'+(p.descPosition==='bottom'?' selected':'')+'>Bottom</option></select></div>'+
+        '</div>'+
+        '<div class="mgr-label">Main Images</div>'+
+        '<div class="mgr-main-imgs">'+
+        mgrMainSlot('card-bg','Cover',p.cardBg,pi)+
+        mgrMainSlot('card-hover','Hover',p.cardHoverBg,pi)+
+        mgrMainSlot('header-bg','Header',p.headerBg,pi)+
+        '</div>'+
+        '<div class="mgr-label">Content Images — drag to reorder</div>'+
+        '<div class="mgr-sortable" id="mgrSort-'+pi+'">'+
+        mgrSortSlots(p.contentImages||[],pi)+
+        '<div class="mgr-add-img" data-mgr-add-pi="'+pi+'" title="Add image URL">+</div>'+
+        '</div>'+
+        '</div>';
+}
+
+function mgrMainSlot(k,label,url,pi){
+    return '<div class="mgr-main-slot"><div class="sl">'+label+'</div>'+
+        '<img src="'+(url||'')+'" alt="" title="Click to replace" '+(url?'':'style="background:#222"')+'>'+
+        '<input type="file" accept="image/*" data-mgr-img="'+k+'" data-pi="'+pi+'"></div>';
+}
+
+function mgrSortSlots(imgs,pi){
+    var h='';
+    imgs.forEach(function(u,i){
+        h+='<div class="mgr-sort-item" draggable="true" data-pi="'+pi+'" data-mi="'+i+'">'+
+            '<span class="badge">'+(i+1)+'</span>'+
+            '<img src="'+u+'" alt="">'+
+            '<div class="del" title="Remove">✕</div>'+
+            '<div class="repl" title="Replace">↻</div>'+
+            '<input type="file" accept="image/*" data-pi="'+pi+'" data-mi="'+i+'">'+
+            '</div>';
+    });
+    return h;
+}
+
+function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function bindMgrCard(pi){
+    // Text fields
+    document.querySelectorAll('[data-pi="'+pi+'"][data-mgr-field]').forEach(function(el){
+        el.addEventListener('change',function(){
+            var f=el.getAttribute('data-mgr-field'),v=el.value;
+            if(f==='tags'){mgrProjects[pi].tags=v.split(',').map(function(s){return s.trim()}).filter(Boolean);}
+            else{mgrProjects[pi][f]=v;}
+        });
+    });
+    // Main image replace
+    document.querySelectorAll('input[data-mgr-img][data-pi="'+pi+'"]').forEach(function(inp){
+        inp.addEventListener('change',function(){
+            if(!inp.files.length)return;
+            var k=inp.getAttribute('data-mgr-img');
+            var r=new FileReader();
+            r.onload=function(e){
+                mgrProjects[pi][k]=e.target.result;
+                var img=inp.parentNode.querySelector('img');
+                if(img)img.src=e.target.result;
+            };
+            r.readAsDataURL(inp.files[0]);
+        });
+    });
+    document.querySelectorAll('.mgr-main-slot img').forEach(function(img){
+        img.addEventListener('click',function(){img.parentNode.querySelector('input').click();});
+    });
+
+    // Sortable
+    var ct=document.getElementById('mgrSort-'+pi);
+    if(!ct)return;
+    mgrBindSort(ct,pi);
+
+    // Replace
+    ct.querySelectorAll('.repl').forEach(function(b){
+        b.addEventListener('click',function(e){e.stopPropagation();b.parentNode.querySelector('input').click();});
+    });
+    ct.querySelectorAll('input[type="file"]').forEach(function(inp){
+        inp.addEventListener('change',function(){
+            if(!inp.files.length)return;
+            var mi=parseInt(inp.getAttribute('data-mi'));
+            var r=new FileReader();
+            r.onload=function(e){
+                mgrProjects[pi].contentImages[mi]=e.target.result;
+                renderMgr();
+            };
+            r.readAsDataURL(inp.files[0]);
+        });
+    });
+    // Delete
+    ct.querySelectorAll('.del').forEach(function(b){
+        b.addEventListener('click',function(e){
+            e.stopPropagation();
+            var mi=parseInt(b.parentNode.getAttribute('data-mi'));
+            mgrProjects[pi].contentImages.splice(mi,1);
+            renderMgr();
+        });
+    });
+    // Add image
+    var addBtn=ct.querySelector('.mgr-add-img');
+    if(addBtn){
+        addBtn.addEventListener('click',function(){
+            var url=prompt('Enter image URL:');
+            if(url&&url.trim()){mgrProjects[pi].contentImages.push(url.trim());renderMgr();}
+        });
+    }
+}
+
+function mgrBindSort(ct,pi){
+    var dr=null;
+    ct.querySelectorAll('.mgr-sort-item').forEach(function(item){
+        item.addEventListener('dragstart',function(e){
+            dr=parseInt(item.getAttribute('data-mi'));
+            item.style.opacity='0.5';
+            e.dataTransfer.effectAllowed='move';
+        });
+        item.addEventListener('dragend',function(){
+            item.style.opacity='1';
+            ct.querySelectorAll('.mgr-sort-item').forEach(function(s){s.classList.remove('drag-over')});
+            dr=null;
+        });
+        item.addEventListener('dragover',function(e){e.preventDefault();e.dataTransfer.dropEffect='move';item.classList.add('drag-over')});
+        item.addEventListener('dragleave',function(){item.classList.remove('drag-over')});
+        item.addEventListener('drop',function(e){
+            e.preventDefault();item.classList.remove('drag-over');
+            var di=parseInt(item.getAttribute('data-mi'));
+            if(dr!==null&&dr!==di){
+                var arr=mgrProjects[pi].contentImages;
+                var it=arr.splice(dr,1)[0];
+                arr.splice(di,0,it);
+                renderMgr();
+            }
+        });
+    });
+}
+})();
 </script>
 </body>
 </html>
