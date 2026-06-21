@@ -33,6 +33,7 @@ function onPreloadComplete() {
     preloadState.done = true;
     preloadState.loading = false;
 }
+function startPreload() {
     var tapes = window.discData.tapes || [];
     if (tapes.length === 0 || preloadState.loading || preloadState.done) return;
     preloadState.total = tapes.length;
