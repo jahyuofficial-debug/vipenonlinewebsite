@@ -27,6 +27,7 @@ try {
 
 var { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 var R2_BUCKET_NAME = process.env.R2_DESIGN_BUCKET || 'vipen-design';
+var R2_PUBLIC_URL = process.env.R2_PUBLIC_URL || 'https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev';
 var R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID || '';
 var R2_ACCESS_KEY = process.env.R2_ACCESS_KEY_ID || '';
 var R2_SECRET_KEY = process.env.R2_SECRET_ACCESS_KEY || '';
@@ -1901,7 +1902,7 @@ function handleDesignUpload(req, res) {
         });
 
         Promise.all(tasks).then(function(keys) {
-            var r2base = 'https://' + R2_BUCKET_NAME + '.r2.dev/' + folderName;
+            var r2base = R2_PUBLIC_URL + '/' + folderName;
             var contentImages = images
                 .filter(function(f) { return /^content-\d+/i.test(f.filename); })
                 .sort(function(a, b) { return a.filename.localeCompare(b.filename); })
