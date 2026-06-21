@@ -1,5 +1,6 @@
 // Cloudflare Pages Function: /api/design/save
-// Saves updated design/index.json to R2 and uploads replaced images
+// Saves updated design/index.json + replaced images to R2
+// Requires R2 binding named "DESIGN_BUCKET" in Cloudflare Pages dashboard
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -18,6 +19,10 @@ export async function onRequest(context) {
     return json({ success: false, error: 'Method not allowed' }, 405);
   }
 
+  if (!env.DESIGN_BUCKET) {
+    return json({ success: false, error: 'R2 bucket not configured. Add DESIGN_BUCKET binding in Cloudflare Pages.' }, 500);
+  }
+
   try {
     const formData = await request.formData();
     const jsonStr = formData.get('json');
@@ -26,65 +31,50 @@ export async function onRequest(context) {
     const projects = JSON.parse(jsonStr);
     const r2Base = 'https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev';
 
-    // Process image replacements (upload new images to R2)
-    const imageFiles = [];
+    // 1. Upload the JSON first
+    await env.DESIGN_BUCKET.put('design/index.json', JSON.stringify(projects, null, 2), {
+      httpMetadata: { contentType: 'application/json; charset=utf-8' }
+    });
+
+    // 2. Upload any replaced image files
+    let uploadedCount = 0;
     for (const [key, value] of formData.entries()) {
-      if (key.startsWith('img_') && value instanceof File) {
-        imageFiles.push({ key, file: value });
-      }
-    }
-
-    // Upload replaced images to R2
-    const uploadedUrls = {};
-    for (const { key, file } of imageFiles) {
-      // key format: img_{projectIndex}_{imageKey}
-      // e.g. img_0_cardBg, img_0_content_3
-      const parts = key.split('_');
-      const pi = parts[1];
-      const imgKey = parts.slice(2).join('_');
-      const folder = projects[pi]?.folder || `project-${pi}`;
-      const safeName = imgKey.replace(/[^a-zA-Z0-9-_.]/g, '_');
-      const r2Path = `${folder}/${safeName}-${Date.now()}.png`;
-
-      if (env.DESIGN_BUCKET) {
-        await env.DESIGN_BUCKET.put(r2Path, file.stream(), {
-          httpMetadata: { contentType: file.type || 'image/png' }
-        });
-        uploadedUrls[key] = `${r2Base}/${encodeURIComponent(folder)}/${encodeURIComponent(safeName)}-${Date.now()}.png`;
-      }
-    }
-
-    // Update image URLs in projects data
-    for (const [key, url] of Object.entries(uploadedUrls)) {
+      if (!key.startsWith('img_') || !(value instanceof File)) continue;
       const parts = key.split('_');
       const pi = parseInt(parts[1]);
       const imgKey = parts.slice(2).join('_');
+      const folder = (projects[pi] && projects[pi].folder) || `project-${pi}`;
+      const safeName = imgKey.replace(/[^a-zA-Z0-9-_.]/g, '_');
+      const r2Path = `${folder}/${safeName}-${Date.now()}.png`;
 
+      await env.DESIGN_BUCKET.put(r2Path, value.stream(), {
+        httpMetadata: { contentType: value.type || 'image/png' }
+      });
+
+      const newUrl = `${r2Base}/${encodeURIComponent(folder)}/${encodeURIComponent(safeName)}-${Date.now()}.png`;
+
+      // Update URL in projects data
       if (projects[pi]) {
         if (imgKey === 'cardBg' || imgKey === 'cardHoverBg' || imgKey === 'headerBg') {
-          projects[pi][imgKey] = url;
+          projects[pi][imgKey] = newUrl;
         } else if (imgKey.startsWith('content-')) {
           const ci = parseInt(imgKey.replace('content-', ''));
           if (projects[pi].contentImages && projects[pi].contentImages[ci] !== undefined) {
-            projects[pi].contentImages[ci] = url;
+            projects[pi].contentImages[ci] = newUrl;
           }
         }
       }
+      uploadedCount++;
     }
 
-    // Upload updated JSON to R2
-    const jsonContent = JSON.stringify(projects, null, 2);
-    if (env.DESIGN_BUCKET) {
-      await env.DESIGN_BUCKET.put('design/index.json', jsonContent, {
+    // 3. Re-save JSON with updated image URLs
+    if (uploadedCount > 0) {
+      await env.DESIGN_BUCKET.put('design/index.json', JSON.stringify(projects, null, 2), {
         httpMetadata: { contentType: 'application/json; charset=utf-8' }
       });
     }
 
-    return json({
-      success: true,
-      uploaded: Object.keys(uploadedUrls).length,
-      urls: uploadedUrls
-    });
+    return json({ success: true, uploaded: uploadedCount });
   } catch (e) {
     return json({ success: false, error: e.message }, 500);
   }
