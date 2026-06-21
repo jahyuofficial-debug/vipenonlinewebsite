@@ -1492,8 +1492,10 @@ function handleRoute() {
     }
     // Skip transition on initial load (loading screen covers it)
     var skipTrans = !currentPage;
+    // Only play transition for Fresh/Design detail pages
+    var isDetail = hash.indexOf('fresh/detail/') === 0 || hash.indexOf('design-work/detail/') === 0;
     function proceed() { handleRouteInner(hash); }
-    if (!skipTrans && typeof PageTransition !== 'undefined') {
+    if (!skipTrans && isDetail && typeof PageTransition !== 'undefined') {
         PageTransition.play(proceed);
     } else {
         proceed();
