@@ -1544,11 +1544,6 @@ function handleRoute() {
     } else if (hash === 'design-work-list') {
         navigateTo('design-work-list');
     } else if (hash === 'disc-library') {
-        if (typeof DiscPage !== 'undefined' && DiscPage.isPreloading && DiscPage.isPreloading()) {
-            DiscPage.showBlockedToast();
-            history.replaceState(null, '', '#/' + (currentPage || 'home'));
-            return;
-        }
         navigateTo('disc-library');
     } else if (hash === 'signin' || hash === 'signup') {
         navigateTo(hash);
@@ -1611,9 +1606,7 @@ navigateTo = function(pageName) {
     if (wasDiscPage) DiscPage.cleanup();
     NotificationCenter.hide();
     // If user navigates elsewhere after disc was blocked, cancel auto-redirect
-    if (pageName !== 'disc-library' && typeof DiscPage !== 'undefined' && DiscPage.clearBlockedNav) {
-        DiscPage.clearBlockedNav();
-    }
+    if (pageName !== 'disc-library') {}
     originalNavigateTo(pageName);
     updateAuthUI();
     if (pageName !== 'disc-library' && discAudio && discAudio.src) {
