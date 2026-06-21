@@ -108,7 +108,6 @@ function buildDesignWorkDetail(id) {
         '<div class="dw-detail-head">' +
         '<h2 class="dw-detail-hero-title">' + item.title + '</h2>' +
         subtitleHtml +
-        '<div class="dw-detail-hero-divider"></div>' +
         '</div>' +
         '<div class="dw-detail-body">' +
         bodyTop + bodyBottom +

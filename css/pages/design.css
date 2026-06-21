@@ -37,10 +37,10 @@
 .dw-detail-hero-bg{position:absolute;inset:0;z-index:0}
 .dw-detail-hero-mask{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.85) 100%);z-index:1}
 .dw-detail-hero-content{display:none}
-.dw-detail-head{max-width:9rem;margin:0 auto;padding:.6rem .5rem 0;text-align:center}
-.dw-detail-hero-title{font-size:.6rem;font-weight:800;color:#fff;letter-spacing:.04rem;line-height:1.15}
-.dw-detail-hero-sub{font-size:.16rem;font-weight:300;color:rgba(255,255,255,.35);letter-spacing:.04rem;margin-top:.16rem;font-family:'Segoe UI',system-ui,sans-serif}
-.dw-detail-hero-divider{width:.6rem;height:.01rem;background:rgba(255,255,255,.15);margin:.24rem auto 0;border-radius:.005rem}
+.dw-detail-head{max-width:9rem;margin:0;padding:.6rem .5rem 0;text-align:left}
+.dw-detail-hero-title{font-size:.18rem;font-weight:800;color:#fff;letter-spacing:.04rem;line-height:1.15}
+.dw-detail-hero-sub{font-size:.048rem;font-weight:400;color:rgba(255,255,255,.35);letter-spacing:.02rem;margin-top:.04rem;font-family:'Segoe UI',system-ui,sans-serif}
+/* divider removed */
 .dw-detail-body{max-width:9rem;margin:0 auto;padding:.5rem .5rem .6rem}
 .dw-detail-desc{font-size:.16rem;color:rgba(255,255,255,.6);line-height:1.8;margin-bottom:.5rem;text-align:center;max-width:8rem;margin-left:auto;margin-right:auto}
 .dw-detail-media{display:flex;flex-direction:column;align-items:center;gap:var(--dw-media-gap,.16rem);margin-bottom:.5rem}
