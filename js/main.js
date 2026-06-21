@@ -70,8 +70,7 @@ BannerPage.initBgVideo();
     var loadAction = loadJSON('data/action.json');
     var loadBanner = loadJSON('home/index.json');
     var loadDisc = loadJSON('https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/disc/index.json')
-        .then(function(d){ return d; })
-        .catch(function(){ return loadJSON('disc/index.json'); });
+        .then(function(d){ return d || loadJSON('disc/index.json'); });
 
     Promise.all([loadSettings, loadFresh, loadDesign, loadAction, loadBanner, loadDisc]).then(function(results) {
         var settings = results[0];
