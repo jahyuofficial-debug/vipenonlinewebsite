@@ -53,25 +53,14 @@ function startPreload() {
                 onPreloadComplete();
             }
         };
-        // Fire a timeout fallback so stuck tracks don't block progress forever
         var fallbackTimer = setTimeout(function() { markDone(); }, 6000);
-        var audioOk = false, imgOk = false;
-        var tryMark = function() { if (audioOk && imgOk) { clearTimeout(fallbackTimer); markDone(); } };
+        // Only preload cover images — audio buffering on demand when user plays
         if (tape.cover) {
             var img = new Image();
-            img.onload = function() { imgOk = true; tryMark(); };
-            img.onerror = function() { imgOk = true; tryMark(); };
+            img.onload = function() { clearTimeout(fallbackTimer); markDone(); };
+            img.onerror = function() { clearTimeout(fallbackTimer); markDone(); };
             img.src = tape.cover;
-        } else { imgOk = true; }
-        if (tape.audio) {
-            var a = new Audio();
-            a.preload = 'auto';
-            a.addEventListener('canplaythrough', function() { audioOk = true; tryMark(); }, { once: true });
-            a.addEventListener('loadedmetadata', function() { audioOk = true; tryMark(); }, { once: true });
-            a.addEventListener('error', function() { audioOk = true; tryMark(); }, { once: true });
-            a.src = tape.audio;
-            a.load();
-        } else { audioOk = true; tryMark(); }
+        } else { markDone(); }
     });
 }
 function isPreloading() { return preloadState.loading || (!preloadState.done && preloadState.total > 0); }
