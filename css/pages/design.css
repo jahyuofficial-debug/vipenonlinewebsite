@@ -28,7 +28,7 @@
 }
 
 /* === Detail Page === */
-.dw-detail{position:fixed;top:0;left:0;width:100%;height:100%;z-index:150;background:#000;overflow-y:auto;animation:dwFadeIn .4s ease}
+.dw-detail{position:fixed;top:0;left:0;width:100%;height:100%;z-index:150;overflow-y:auto;animation:dwFadeIn .4s ease}
 @keyframes dwFadeIn{from{opacity:0}to{opacity:1}}
 .dw-detail-back{position:fixed;top:.3rem;left:.5rem;z-index:160;display:flex;align-items:center;gap:.08rem;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:.14rem;padding:.08rem .2rem;border-radius:.2rem;cursor:pointer;transition:all .35s}
 .dw-detail-back:hover{background:rgba(0,0,0,.85);border-color:rgba(255,255,255,.3)}
@@ -37,10 +37,8 @@
 .dw-detail-hero-bg{position:absolute;inset:0;z-index:0}
 .dw-detail-hero-mask{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.85) 100%);z-index:1}
 
-/* WebGL shader canvas — full page background */
-.dw-shader-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
-/* Ensure .dw-detail content sits above shader */
-.dw-detail{z-index:150}
+/* WebGL shader canvas — full page background behind content */
+.dw-shader-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none}
 .dw-detail>*{position:relative;z-index:1}
 .dw-detail .dw-detail-hero-mask{position:absolute;z-index:1}
 .dw-detail .dw-detail-hero-bg{position:absolute;z-index:0}
