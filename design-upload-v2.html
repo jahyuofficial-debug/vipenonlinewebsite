@@ -682,7 +682,7 @@ function isVideo(name){ return /\.(mp4|webm|mov|avi|mkv|ogg)$/i.test(name||''); 
 
 function buildPreview(file, fallbackUrl){
     if(file && isVideo(file.name)){
-        return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 60"><rect fill="%23111" width="80" height="60" rx="4"/><polygon points="30,18 30,42 55,30" fill="%23d4a853" opacity=".6"/></svg>';
+        return 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 60"><rect fill="#111" width="80" height="60" rx="4"/><polygon points="30,18 30,42 55,30" fill="#d4a853" opacity=".6"/></svg>');
     }
     if(file) return URL.createObjectURL(file);
     return fallbackUrl || '';
@@ -840,7 +840,7 @@ function mgrSortSlots(imgs,pi){
         }
         h+='<div class="mgr-sort-item'+(isYt?' yt-item':'')+'" draggable="true" data-pi="'+pi+'" data-mi="'+i+'">'+
             '<span class="badge">'+(i+1)+'</span>'+
-            '<img src="'+thumbSrc+'" alt="" onerror="this.style.display=\'none\'">'+
+            '<img src=\''+thumbSrc+'\' alt=""'+(isYt?' onerror="this.style.display=\'none\'"':'')+'>'+
             (isYt ? '<div class="yt-icon">▶</div>' : '')+
             '<div class="del" title="Remove">✕</div>'+
             '<div class="repl" title="Replace">↻</div>'+
