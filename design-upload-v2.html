@@ -589,7 +589,7 @@ document.querySelectorAll('.tab-btn').forEach(function(b){
 
 // Load live
 document.getElementById('mgrLoadLive').addEventListener('click',function(){
-    fetch('https://vipenonline.com/design/index.json?'+Date.now())
+    fetch('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/design/index.json?'+Date.now())
         .then(function(r){return r.json();})
         .then(function(d){mgrProjects=d;renderMgr();toast('Loaded '+d.length+' projects');})
         .catch(function(){toast('Failed to load','err');});
