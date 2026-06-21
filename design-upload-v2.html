@@ -692,6 +692,14 @@ var mgrProjects = [];
 var mgrImageFiles = {};
 var MAX_FILE_MB = 100;
 
+function checkFileSize(file, label) {
+    if (file.size > MAX_FILE_MB * 1024 * 1024) {
+        toast((label || 'File') + ' exceeds ' + MAX_FILE_MB + 'MB limit.', 'err');
+        return false;
+    }
+    return true;
+}
+
 function isVideo(name){ return /\.(mp4|webm|mov|avi|mkv|ogg)$/i.test(name||''); }
 
 function buildPreview(file, fallbackUrl){
