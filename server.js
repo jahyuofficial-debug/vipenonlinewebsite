@@ -505,6 +505,10 @@ function handleAPIRoute(req, res, apiPath) {
         handleDesignUpload(req, res);
         return;
     }
+    if (isMultipart && apiPath === '/api/design/save') {
+        handleDesignSave(req, res);
+        return;
+    }
 
     parseBody(req, function(err, body) {
         if (err) {
@@ -1838,6 +1842,125 @@ var MIME = {
 };
 
 
+// ── Design Save Handler (Manager edit mode) ────────────────
+function handleDesignSave(req, res) {
+    if (!r2Client) {
+        sendJSON(res, 503, { success: false, error: 'R2 not configured' });
+        return;
+    }
+    parseMultipartUpload(req, function(err, fields, files) {
+        if (err) { sendJSON(res, 400, { success: false, error: err.message }); return; }
+        if (!fields.json) { sendJSON(res, 400, { success: false, error: 'No json field' }); return; }
+
+        var projects;
+        try { projects = JSON.parse(fields.json); } catch(e) {
+            sendJSON(res, 400, { success: false, error: 'Invalid JSON' }); return;
+        }
+        if (!Array.isArray(projects)) { sendJSON(res, 400, { success: false, error: 'JSON is not an array' }); return; }
+
+        // Map img files: key format "img_{pi}_{k}" where k is "card-bg", "card-hover", etc.
+        // Or "img_{pi}_content-{mi}"
+        var imgMap = {};
+        files.forEach(function(f) {
+            var m = f.name.match(/^img_(.+)$/);
+            if (m) imgMap[m[1]] = f;
+        });
+
+        // Build upload tasks
+        var uploadTasks = [];
+        var urlUpdates = []; // { pi, field, r2url }
+
+        Object.keys(imgMap).forEach(function(key) {
+            var f = imgMap[key];
+            // Parse key: "{pi}_{field}" where field can be "card-bg", "card-hover", "header-bg", "content-{mi}"
+            var parts = key.split('_');
+            var pi = parseInt(parts[0], 10);
+            var fieldRest = parts.slice(1).join('_'); // "card-bg", "content-0", etc.
+
+            if (isNaN(pi) || !projects[pi]) return;
+
+            var project = projects[pi];
+            var folder = (project.folder || '').trim();
+            if (!folder) folder = 'project-' + pi;
+
+            // Determine R2 key and JSON field
+            var r2Key, jsonField;
+            var ext = (f.filename.split('.').pop() || 'png').toLowerCase();
+            if (fieldRest.indexOf('content-') === 0) {
+                // Content image
+                var mi = parseInt(fieldRest.replace('content-', ''), 10);
+                if (isNaN(mi)) return;
+                r2Key = folder + '/content-' + (mi + 1) + '.' + ext;
+                jsonField = { pi: pi, type: 'content', idx: mi };
+            } else {
+                // Main image: card-bg → cardBg, card-hover → cardHoverBg, header-bg → headerBg
+                var camelField = fieldRest.replace(/-([a-z])/g, function(_, c) { return c.toUpperCase(); });
+                if (camelField === 'cardBg' || camelField === 'cardHoverBg' || camelField === 'headerBg') {
+                    r2Key = folder + '/' + fieldRest + '.' + ext;
+                    jsonField = { pi: pi, type: 'main', field: camelField };
+                } else {
+                    return; // Unknown field
+                }
+            }
+
+            var ct = /\.png$/i.test(f.filename) ? 'image/png' :
+                     /\.jpe?g$/i.test(f.filename) ? 'image/jpeg' :
+                     /\.webp$/i.test(f.filename) ? 'image/webp' : 'image/gif';
+
+            uploadTasks.push(r2Client.send(new PutObjectCommand({
+                Bucket: R2_BUCKET_NAME, Key: r2Key,
+                Body: Buffer.from(f.body, 'binary'), ContentType: ct,
+            })).then(function() {
+                var r2url = R2_PUBLIC_URL + '/' + r2Key;
+                urlUpdates.push({ jsonField: jsonField, url: r2url });
+                return r2Key;
+            }));
+        });
+
+        if (uploadTasks.length === 0) {
+            // No images to upload, just save the JSON
+            saveDesignJSON(projects, res, 0);
+            return;
+        }
+
+        Promise.all(uploadTasks).then(function() {
+            // Apply URL updates to projects JSON
+            urlUpdates.forEach(function(upd) {
+                var jf = upd.jsonField;
+                if (jf.type === 'main') {
+                    projects[jf.pi][jf.field] = upd.url;
+                } else if (jf.type === 'content') {
+                    if (!projects[jf.pi].contentImages) projects[jf.pi].contentImages = [];
+                    projects[jf.pi].contentImages[jf.idx] = upd.url;
+                }
+            });
+
+            saveDesignJSON(projects, res, uploadTasks.length);
+        }).catch(function(putErr) {
+            console.error('[design-save] R2 upload failed:', putErr.message);
+            sendJSON(res, 500, { success: false, error: 'Upload failed: ' + putErr.message });
+        });
+    });
+}
+
+function saveDesignJSON(projects, res, uploadedCount) {
+    var idxPath = path.join(ROOT, 'design', 'index.json');
+    var json = JSON.stringify(projects, null, 2);
+    fs.writeFileSync(idxPath, json, 'utf8');
+
+    // Also upload to R2
+    r2Client.send(new PutObjectCommand({
+        Bucket: R2_BUCKET_NAME, Key: 'design/index.json',
+        Body: json, ContentType: 'application/json',
+    })).then(function() {
+        console.log('[design-save] Saved ' + projects.length + ' projects, ' + uploadedCount + ' images → R2');
+        sendJSON(res, 200, { success: true, uploaded: uploadedCount });
+    }).catch(function(putErr) {
+        console.warn('[design-save] index.json R2 sync failed:', putErr.message);
+        sendJSON(res, 200, { success: true, uploaded: uploadedCount, warning: 'R2 sync failed, saved locally' });
+    });
+}
+
 // ── Design Upload Handler ──────────────────────────────────
 function handleDesignUpload(req, res) {
     if (!r2Client) {
@@ -1922,6 +2045,17 @@ function handleDesignUpload(req, res) {
 
             existing.push(entry);
             fs.writeFileSync(idxPath, JSON.stringify(existing, null, 2), 'utf8');
+
+            // Also upload the updated index.json to R2 so production stays in sync
+            var idxJson = JSON.stringify(existing, null, 2);
+            r2Client.send(new PutObjectCommand({
+                Bucket: R2_BUCKET_NAME, Key: 'design/index.json',
+                Body: idxJson, ContentType: 'application/json',
+            })).then(function() {
+                console.log('[design-upload] index.json synced to R2');
+            }).catch(function(putErr) {
+                console.warn('[design-upload] index.json R2 sync failed:', putErr.message);
+            });
             addManagerLog('design_upload', 'localhost', 'Uploaded ' + entry.title + ' (' + keys.length + ' files)');
             sendJSON(res, 200, { success: true, entry: entry, files: keys.length });
             console.log('[design-upload] ' + entry.title + ' — ' + keys.length + ' files');
@@ -1959,4 +2093,22 @@ http.createServer(function(req, res) {
     serveStatic(req, res, filePath);
 }).listen(PORT, function() {
     console.log('Server running at http://localhost:' + PORT);
+
+    // Sync local design/index.json to R2 on startup (fixes stale/corrupted R2 data)
+    if (r2Client) {
+        var designIdxPath = path.join(ROOT, 'design', 'index.json');
+        try {
+            var designIdx = fs.readFileSync(designIdxPath, 'utf8');
+            r2Client.send(new PutObjectCommand({
+                Bucket: R2_BUCKET_NAME, Key: 'design/index.json',
+                Body: designIdx, ContentType: 'application/json',
+            })).then(function() {
+                console.log('[startup] design/index.json synced to R2');
+            }).catch(function(putErr) {
+                console.warn('[startup] design/index.json R2 sync failed:', putErr.message);
+            });
+        } catch(e) {
+            console.warn('[startup] Could not read design/index.json for R2 sync:', e.message);
+        }
+    }
 });

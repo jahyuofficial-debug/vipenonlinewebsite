@@ -47,6 +47,9 @@
 /* Fan card background image */
 .dw-fan-card-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .6s cubic-bezier(.25,.46,.45,.94)}
 .dw-fan-card:hover .dw-fan-card-bg{transform:scale(1.05)}
+/* Fan card bg as <img> with onerror fallback */
+.dw-fan-card-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;transition:transform .6s cubic-bezier(.25,.46,.45,.94)}
+.dw-fan-card:hover .dw-fan-card-bg-img{transform:scale(1.05)}
 
 /* Fan card overlay gradient — darker at bottom for text readability */
 .dw-fan-card-overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,rgba(0,0,0,.5) 70%,rgba(0,0,0,.88) 100%);z-index:1;pointer-events:none;transition:opacity .4s ease;opacity:.7}

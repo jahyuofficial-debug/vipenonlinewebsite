@@ -47,12 +47,17 @@ function buildDesignWorkGrid() {
     var positions = calcFanPositions(count);
 
     var cardsHTML = dwItems.map(function(item, i) {
-        var img = item.cardBg || item.headerBg || '';
+        var img = item.cardBg || '';
+        var fallback = item.cardHoverBg || item.headerBg || '';
         var pos = positions[i];
         var numStr = String(i + 1).padStart(2, '0');
         // Inline target transform as data attributes for GSAP to read
         // Also set as inline transform fallback (no-GSAP graceful degradation)
         var inlineTransform = 'translate(' + pos.x.toFixed(2) + 'rem, ' + pos.y.toFixed(2) + 'rem) rotate(' + pos.rotation.toFixed(2) + 'deg)';
+        // Build image with onerror fallback chain: cardBg → cardHoverBg → headerBg → hidden
+        var imgTag = img
+            ? '<img class="dw-fan-card-bg-img" src="' + img + '"' + (fallback ? ' onerror="var t=this;if(t.src!==\'' + fallback + '\'){t.src=\'' + fallback + '\'}else{t.style.display=\'none\'}"' : ' onerror="this.style.display=\'none\'"') + '>'
+            : (fallback ? '<img class="dw-fan-card-bg-img" src="' + fallback + '" onerror="this.style.display=\'none\'">' : '');
         return '<div class="dw-fan-card" ' +
             'data-design-id="' + i + '" ' +
             'data-fan-rotation="' + pos.rotation.toFixed(2) + '" ' +
@@ -60,7 +65,7 @@ function buildDesignWorkGrid() {
             'data-fan-y="' + pos.y.toFixed(2) + '" ' +
             'data-fan-z="' + pos.zIndex + '" ' +
             'style="z-index:' + pos.zIndex + ';transform:' + inlineTransform + '">' +
-            '<div class="dw-fan-card-bg" style="background-image:url(' + img + ')"></div>' +
+            imgTag +
             '<div class="dw-fan-card-overlay"></div>' +
             '<div class="dw-fan-card-accent"></div>' +
             '<div class="dw-fan-card-info">' +

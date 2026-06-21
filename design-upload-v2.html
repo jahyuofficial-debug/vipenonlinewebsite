@@ -685,20 +685,27 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
     };
     xhr.send(fd);
 });
+// ── Shared file-size check (global, used by Manager & Disc) ─
+function checkFileSize(file, label, maxMB) {
+    maxMB = maxMB || 100;
+    if (file.size > maxMB * 1024 * 1024) {
+        var s = document.getElementById('statusToast');
+        if (s) {
+            s.textContent = (label || 'File') + ' exceeds ' + maxMB + 'MB limit.';
+            s.className = 'status-toast show err';
+            setTimeout(function(){ s.classList.remove('show'); }, 3000);
+        }
+        return false;
+    }
+    return true;
+}
+
 // ── Manager JS ────────────────────────────────────────────
 (function(){
 'use strict';
 var mgrProjects = [];
 var mgrImageFiles = {};
 var MAX_FILE_MB = 100;
-
-function checkFileSize(file, label) {
-    if (file.size > MAX_FILE_MB * 1024 * 1024) {
-        toast((label || 'File') + ' exceeds ' + MAX_FILE_MB + 'MB limit.', 'err');
-        return false;
-    }
-    return true;
-}
 
 function isVideo(name){ return /\.(mp4|webm|mov|avi|mkv|ogg)$/i.test(name||''); }
 
@@ -889,7 +896,7 @@ function bindMgrCard(pi){
             if(!inp.files.length)return;
             var k=inp.getAttribute('data-mgr-img');
             var file=inp.files[0];
-            if(!checkFileSize(file,k)){inp.value='';return;}
+            if(!checkFileSize(file,k,MAX_FILE_MB)){inp.value='';return;}
             mgrImageFiles[pi+'_'+k]=file;
             var preview=buildPreview(file);
             // Map to camelCase field name (card-bg → cardBg)

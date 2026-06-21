@@ -58,7 +58,7 @@ export async function onRequest(context) {
         httpMetadata: { contentType: value.type || 'application/octet-stream' }
       });
 
-      const newUrl = `${r2Base}/${safeBase}-${ts}${ext}`;
+      const newUrl = `${r2Base}/${r2Path}`;
 
       // Update URL in projects data
       if (projects[pi]) {
