@@ -86,8 +86,7 @@ BannerPage.initBgVideo();
     var loadDesign = loadJSON('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/design/index.json');
     var loadAction = loadJSON('data/action.json');
     var loadBanner = loadJSON('home/index.json');
-    var loadDisc = loadJSONWithTimeout('https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/disc/index.json', 5000)
-        .then(function(d){ return d || loadJSON('disc/index.json'); });
+    var loadDisc = loadJSONWithTimeout('https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/disc/index.json', 5000);
 
     Promise.all([loadSettings, loadFresh, loadDesign, loadAction, loadBanner, loadDisc]).then(function(results) {
         var settings = results[0];
@@ -237,7 +236,7 @@ BannerPage.initBgVideo();
             return fetch(path).then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; });
         };
         Promise.all([
-            tryLoad('disc/index.json'),
+            tryLoad('https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/disc/index.json'),
             tryLoad('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/design/index.json'),
             tryLoad('home/index.json'),
             loadJSON('data/fresh.json'),
