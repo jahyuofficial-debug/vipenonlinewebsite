@@ -262,10 +262,9 @@ function autoAssign() {
     for (var j = 0; j < pool.length; j++) {
         if (!used[j]) remaining.push(pool[j]);
     }
+    var collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
     remaining.sort(function(a, b) {
-        var na = (a.relativePath || a.name).toLowerCase();
-        var nb = (b.relativePath || b.name).toLowerCase();
-        return na.localeCompare(nb);
+        return collator.compare(a.relativePath || a.name, b.relativePath || b.name);
     });
     var ci = 1;
     for (var r = 0; r < remaining.length; r++) {
