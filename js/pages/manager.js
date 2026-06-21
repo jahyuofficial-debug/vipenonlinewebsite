@@ -2293,9 +2293,10 @@
             '<div class="manager-design-preview-fan-card">' +
             '<div class="manager-design-preview-card-img" style="background:' + cardBg + '"></div>' +
             '<div class="manager-design-preview-card-mask"></div>' +
-            '<span class="manager-design-preview-card-corner">A&spades;</span>' +
-            '<span class="manager-design-preview-card-corner-bottom">A&spades;</span>' +
-            '<span class="manager-design-preview-card-suit">&spades;</span>' +
+            '<div class="manager-design-preview-card-info">' +
+            '<p class="manager-design-preview-card-cat">' + (work.cat || '') + '</p>' +
+            '<p class="manager-design-preview-card-title">' + (work.title || 'Untitled') + '</p>' +
+            '</div>' +
             '</div>' +
             '</div>' +
             '<div class="manager-design-preview-section-label">List Card Preview</div>' +

@@ -1,52 +1,30 @@
-/* === Poker Card Deck (Design Work page) === */
-.dw-page{position:relative;width:100%;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#1a3a1a 0%,#0d1f0d 40%,#050f05 100%)}
-.dw-page::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='4' height='4' viewBox='0 0 4 4' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='2' cy='2' r='.3' fill='%23ffffff' fill-opacity='.02'/%3E%3C/svg%3E");opacity:.5;pointer-events:none}
-.dw-page::after{content:'';position:absolute;inset:0;border:.15rem solid rgba(80,50,20,.25);border-radius:0;pointer-events:none;box-shadow:inset 0 0 3rem rgba(0,0,0,.6),inset 0 0 1rem rgba(0,0,0,.4);margin:.3rem}
+/* === Flat Grid Design Work page === */
+.dw-page{position:relative;width:100%;min-height:100vh;background:#000;display:flex;align-items:center;justify-content:center;padding:1.2rem .5rem}
 
-/* Deck container */
-.poker-deck{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;perspective:1200px}
+/* Grid container */
+.dw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(2.6rem,1fr));gap:.24rem;width:100%;max-width:14rem;align-content:center}
 
-/* Poker card */
-.poker-card{position:absolute;width:1.8rem;height:2.6rem;border-radius:.12rem;cursor:pointer;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 .08rem .25rem rgba(0,0,0,.45),0 .02rem .06rem rgba(0,0,0,.3);transition:box-shadow .35s ease;will-change:transform;background:#ede4d3}
-.poker-card::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='60' height='60' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");z-index:2;pointer-events:none;border-radius:.12rem}
-/* Paper border highlight */
-.poker-card::after{content:'';position:absolute;inset:.04rem;border-radius:.1rem;border:1px solid rgba(0,0,0,.06);pointer-events:none;z-index:1}
+/* Flat card */
+.dw-card{position:relative;border-radius:.08rem;overflow:hidden;cursor:pointer;background:#111;border:1px solid rgba(255,255,255,.04);transition:transform .35s cubic-bezier(.25,.46,.45,.94),box-shadow .35s, border-color .35s;aspect-ratio:3/4}
+.dw-card:hover{transform:translateY(-.04rem);box-shadow:0 .12rem .4rem rgba(0,0,0,.6);border-color:rgba(255,255,255,.12)}
+.dw-card:active{transform:scale(.98)}
 
-/* Card: white border inner frame */
-.poker-card-inner{margin:.06rem;border:2px solid #fff;border-radius:.08rem;flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;z-index:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+/* Card image */
+.dw-card-img{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .5s cubic-bezier(.25,.46,.45,.94)}
+.dw-card:hover .dw-card-img{transform:scale(1.06)}
 
-/* Card image area */
-.poker-card-img{flex:1;background-size:cover;background-position:center;position:relative;min-height:0}
-.poker-card-img::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.15) 100%)}
+/* Gradient overlay */
+.dw-card-overlay{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.85) 100%);z-index:1;pointer-events:none}
 
-/* Card bottom text area */
-.poker-card-footer{background:linear-gradient(180deg,rgba(255,255,255,.85) 0%,#f5f0e0 100%);padding:.08rem .1rem .1rem;text-align:center;border-top:1px solid rgba(0,0,0,.06);position:relative;z-index:1}
-.poker-card-footer::before{content:'';position:absolute;top:0;left:.2rem;right:.2rem;height:1px;background:rgba(255,255,255,.6)}
-.poker-card-footer .poker-card-cat{font-size:.09rem;color:rgba(0,0,0,.35);letter-spacing:.06rem;text-transform:uppercase;margin-bottom:.02rem;font-family:Georgia,serif}
-.poker-card-footer .poker-card-title{font-size:.09rem;color:rgba(0,0,0,.7);font-weight:600;letter-spacing:.01rem;font-family:Georgia,'Times New Roman',serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Card info at bottom */
+.dw-card-info{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:.16rem .18rem}
+.dw-card-cat{font-size:.09rem;color:rgba(255,255,255,.35);letter-spacing:.06rem;text-transform:uppercase;margin-bottom:.04rem}
+.dw-card-title{font-size:.12rem;font-weight:600;color:rgba(255,255,255,.8);letter-spacing:.01rem;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* Corner suits (small decorations) */
-.poker-card-corner{position:absolute;z-index:3;font-size:.1rem;color:rgba(0,0,0,.25);font-family:Georgia,serif;pointer-events:none}
-.poker-card-corner-tl{top:.1rem;left:.1rem}
-.poker-card-corner-br{bottom:.1rem;right:.1rem;transform:rotate(180deg)}
-
-/* Card hover effect: the GSAP handles transforms, this is for shadow */
-.poker-card:hover{box-shadow:0 .15rem .4rem rgba(0,0,0,.55),0 .04rem .1rem rgba(0,0,0,.35)}
-
-/* Hover overlay */
-.poker-hint{position:absolute;bottom:.5rem;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.25);font-size:.12rem;font-family:Georgia,serif;letter-spacing:.04rem;z-index:5;pointer-events:none;transition:opacity .3s}
-.poker-hint.hidden{opacity:0}
-
-/* Deck "felt" texture overlay */
-.poker-felt{position:absolute;inset:0;pointer-events:none;z-index:1;background:radial-gradient(ellipse 70% 50% at 50% 50%,transparent 30%,rgba(0,0,0,.3) 100%)}
-
-/* Responsive */
-@media(max-width:640px){
-    .poker-card{width:1.4rem;height:2.1rem}
-    .poker-card-footer{padding:.05rem .08rem .06rem}
-    .poker-card-footer .poker-card-title{font-size:.07rem}
-    .poker-card-footer .poker-card-cat{font-size:.07rem}
-    .dw-page::after{border-width:.08rem;margin:.15rem}
+/* Responsive: tighter grid on small screens (mobile-block prevents actual mobile use) */
+@media(max-width:900px){
+    .dw-grid{grid-template-columns:repeat(auto-fill,minmax(2.2rem,1fr));gap:.16rem}
+    .dw-page{padding:.8rem .4rem}
 }
 
 /* === Detail Page === */

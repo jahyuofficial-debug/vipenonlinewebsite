@@ -5,170 +5,23 @@ var dwZoomedCard = null;
 var dwListPageSize = 6;
 var dwListCurrentPage = 1;
 
-// === Poker Deck State ===
-var pokerCards = [];        // Array of card DOM elements
-var pokerBaseAngles = [];   // Original angle for each card
-var pokerBaseY = [];        // Original Y offset
-var pokerActiveIdx = -1;
-
-// Card suits for corner decoration
-var CARD_SUITS = ['\u2660', '\u2663', '\u2665', '\u2666']; // ♠ ♣ ♥ ♦
-
-// === Build Poker Deck ===
+// === Build Flat Grid ===
 function buildDesignWorkGrid() {
-    var total = dwItems.length;
     var cardsHTML = dwItems.map(function(item, i) {
-        var img = item.cardHoverBg || item.cardBg || item.headerBg || '';
-        var suit = CARD_SUITS[i % 4];
-        return '<div class="poker-card" data-poker-id="' + i + '" style="visibility:hidden">' +
-            '<span class="poker-card-corner poker-card-corner-tl">' + suit + '</span>' +
-            '<span class="poker-card-corner poker-card-corner-br">' + suit + '</span>' +
-            '<div class="poker-card-inner">' +
-            '<div class="poker-card-img" style="background-image:url(' + img + ')"></div>' +
-            '<div class="poker-card-footer">' +
-            '<p class="poker-card-cat">' + (item.cat || '') + '</p>' +
-            '<p class="poker-card-title">' + (item.title || '') + '</p>' +
-            '</div>' +
+        var img = item.cardBg || item.headerBg || '';
+        return '<div class="dw-card" data-design-id="' + i + '">' +
+            '<div class="dw-card-img" style="background-image:url(' + img + ')"></div>' +
+            '<div class="dw-card-overlay"></div>' +
+            '<div class="dw-card-info">' +
+            '<p class="dw-card-cat">' + (item.cat || '') + '</p>' +
+            '<p class="dw-card-title">' + (item.title || '') + '</p>' +
             '</div>' +
             '</div>';
     }).join('');
 
     return '<section id="page-design-work" class="dw-page">' +
-        '<div class="poker-felt"></div>' +
-        '<div class="poker-deck" id="pokerDeck">' + cardsHTML + '</div>' +
-        '<p class="poker-hint" id="pokerHint">Hover a card</p>' +
+        '<div class="dw-grid" id="designGrid">' + cardsHTML + '</div>' +
         '</section>';
-}
-
-function initPokerDeck() {
-    pokerCards = Array.from(document.querySelectorAll('.poker-card'));
-    if (!pokerCards.length) return;
-
-    var total = pokerCards.length;
-    var centerIdx = Math.floor((total - 1) / 2);
-
-    // Fan parameters
-    var totalAngle = total <= 6 ? 35 : 28;
-    var startAngle = -(totalAngle / 2);
-    var angleStep = total > 1 ? totalAngle / (total - 1) : 0;
-
-    // Card spacing (overlap)
-    var xStep = total <= 6 ? .55 : .45;
-    var yCurve = total <= 6 ? .12 : .15;
-
-    pokerCards.forEach(function(card, i) {
-        var angle = startAngle + angleStep * i;
-        var distFromCenter = i - centerIdx;
-        var xOffset = distFromCenter * xStep;
-        var yOffset = Math.abs(distFromCenter) * yCurve;
-
-        pokerBaseAngles[i] = angle;
-        pokerBaseY[i] = yOffset;
-
-        gsap.set(card, {
-            x: xOffset + 'rem',
-            y: yOffset + 'rem',
-            rotation: angle,
-            zIndex: total - Math.abs(distFromCenter),
-            transformOrigin: 'center bottom',
-            autoAlpha: 1
-        });
-    });
-}
-
-function bindPokerDeck() {
-    var cards = pokerCards;
-    if (!cards.length) return;
-    var hint = document.getElementById('pokerHint');
-    var total = cards.length;
-
-    var centerIdx = Math.floor((total - 1) / 2);
-    var xStep = total <= 6 ? .55 : .45;
-    var yCurve = total <= 6 ? .12 : .15;
-
-    // Precompute neighbor push amounts
-    var pushAmount = total <= 6 ? .22 : .2;
-
-    cards.forEach(function(card, i) {
-        card.addEventListener('click', function() {
-            var id = this.getAttribute('data-poker-id');
-            window.location.hash = '#/design-work/detail/' + id;
-        });
-
-        card.addEventListener('mouseenter', function() {
-            if (pokerActiveIdx === i) return;
-            pokerActiveIdx = i;
-            if (hint) hint.classList.add('hidden');
-
-            // Animate ALL cards
-            cards.forEach(function(c, j) {
-                var dist = j - i;
-                var targetAngle, targetX, targetY, targetZ;
-
-                if (dist === 0) {
-                    // Hovered card: straighten, lift, enlarge
-                    targetAngle = 0;
-                    targetX = 0;
-                    targetY = '-=.15'; // lift up
-                    targetZ = total + 10;
-                    gsap.to(c, {
-                        x: targetX + 'rem',
-                        y: '-=.15rem',
-                        rotation: targetAngle,
-                        scale: 1.08,
-                        zIndex: targetZ,
-                        duration: .4,
-                        ease: 'power2.out'
-                    });
-                } else {
-                    // Neighbor cards: push away from center
-                    var pushDir = dist > 0 ? pushAmount : -pushAmount;
-                    var absDist = Math.abs(dist);
-                    var falloff = 1 / (absDist * 1.2 + 0.5);
-                    var baseRot = pokerBaseAngles[j];
-                    var pushRot = pushDir > 0 ? 3 : -3;
-                    var extraY = absDist * .02;
-
-                    targetX = (pushDir * falloff) + 'rem';
-                    targetAngle = baseRot + pushRot * falloff;
-                    targetY = pokerBaseY[j] + extraY + 'rem';
-                    targetZ = total - absDist - 1;
-
-                    gsap.to(c, {
-                        x: '+=' + (pushDir * falloff) + 'rem',
-                        y: targetY,
-                        rotation: targetAngle,
-                        scale: 1,
-                        zIndex: targetZ,
-                        duration: .4,
-                        ease: 'power2.out'
-                    });
-                }
-            });
-        });
-
-        card.addEventListener('mouseleave', function() {
-            pokerActiveIdx = -1;
-            if (hint) hint.classList.remove('hidden');
-
-            // Reset all cards to original fan position
-            cards.forEach(function(c, j) {
-                var distFromCenter = j - centerIdx;
-                var xOffset = distFromCenter * xStep;
-                var yOffset = Math.abs(distFromCenter) * yCurve;
-
-                gsap.to(c, {
-                    x: xOffset + 'rem',
-                    y: yOffset + 'rem',
-                    rotation: pokerBaseAngles[j],
-                    scale: 1,
-                    zIndex: total - Math.abs(distFromCenter),
-                    duration: .5,
-                    ease: 'power2.inOut'
-                });
-            });
-        });
-    });
 }
 
 // === Detail Page (unchanged) ===
@@ -391,8 +244,12 @@ return {
     buildDetail: function(id) { return buildDesignWorkDetail(id); },
     buildList: function() { return buildDesignWorkList(); },
     bindGrid: function() {
-        initPokerDeck();
-        bindPokerDeck();
+        document.querySelectorAll('.dw-card').forEach(function(card) {
+            card.addEventListener('click', function() {
+                var id = this.getAttribute('data-design-id');
+                window.location.hash = '#/design-work/detail/' + id;
+            });
+        });
     },
     bindList: function() { bindDesignWorkListClicks(); bindDesignWorkListPagination(); },
     resetCards: function() {},

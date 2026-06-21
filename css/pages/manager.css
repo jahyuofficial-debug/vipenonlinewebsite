@@ -3686,11 +3686,12 @@
     position: relative;
     width: 2.6rem;
     height: 3.6rem;
-    border-radius: .16rem;
+    border-radius: .12rem;
     overflow: hidden;
-    border: 1px solid rgba(255,255,255,.12);
-    box-shadow: 0 .1rem .4rem rgba(0,0,0,.5);
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: 0 .08rem .3rem rgba(0,0,0,.4);
     flex-shrink: 0;
+    background: #111;
 }
 
 .manager-design-preview-card-img {
@@ -3706,34 +3707,31 @@
     background: linear-gradient(180deg,transparent 35%,rgba(0,0,0,.75) 100%);
 }
 
-.manager-design-preview-card-corner {
+.manager-design-preview-card-info {
     position: absolute;
-    top: .1rem;
-    left: .1rem;
-    font-size: .28rem;
-    color: rgba(255,255,255,.15);
-    font-family: Georgia,serif;
-    line-height: 1;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: .16rem .18rem;
+    z-index: 1;
 }
 
-.manager-design-preview-card-corner-bottom {
-    position: absolute;
-    bottom: .1rem;
-    right: .1rem;
-    font-size: .28rem;
-    color: rgba(255,255,255,.15);
-    font-family: Georgia,serif;
-    line-height: 1;
-    transform: rotate(180deg);
+.manager-design-preview-card-cat {
+    font-size: .09rem;
+    color: rgba(255,255,255,.4);
+    letter-spacing: .06rem;
+    text-transform: uppercase;
+    margin-bottom: .03rem;
 }
 
-.manager-design-preview-card-suit {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%,-50%);
-    font-size: 1rem;
-    color: rgba(255,255,255,.06);
+.manager-design-preview-card-title {
+    font-size: .12rem;
+    color: rgba(255,255,255,.7);
+    font-weight: 600;
+    letter-spacing: .01rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .manager-design-preview-list-card {
