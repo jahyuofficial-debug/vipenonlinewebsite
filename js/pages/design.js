@@ -51,16 +51,6 @@ function buildDesignWorkDetail(id) {
 
     var descHtml = item.desc ? '<div class="dw-detail-desc"><p>' + item.desc + '</p></div>' : '';
 
-    // Build body content based on descPosition
-    var bodyTop = '', bodyBottom = '';
-    if (item.descPosition === 'bottom') {
-        bodyTop = mediaHtml + tagsHtml + likeHtml;
-        bodyBottom = descHtml;
-    } else {
-        bodyTop = descHtml + mediaHtml;
-        bodyBottom = tagsHtml + likeHtml;
-    }
-
     var mediaHtml = '';
     var contentImages = item.contentImages || [];
     var spacingMap = { small: '.08rem', medium: '.16rem', large: '.32rem' };
@@ -76,6 +66,16 @@ function buildDesignWorkDetail(id) {
             }
         }
         mediaHtml += '</div>';
+    }
+
+    // Build body content based on descPosition
+    var bodyTop = '', bodyBottom = '';
+    if (item.descPosition === 'bottom') {
+        bodyTop = mediaHtml + tagsHtml + likeHtml;
+        bodyBottom = descHtml;
+    } else {
+        bodyTop = descHtml + mediaHtml;
+        bodyBottom = tagsHtml + likeHtml;
     }
 
     return '<div class="dw-detail" id="dwDetail">' +
