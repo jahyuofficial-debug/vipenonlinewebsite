@@ -1,0 +1,37 @@
+name: Convert & Deploy Articles
+
+on:
+  push:
+    paths:
+      - 'articles/*.md'
+    branches: [master]
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install markdown pyyaml
+
+      - name: Convert articles
+        run: |
+          python scripts/convert-article.py
+
+      - name: Commit & push changes
+        run: |
+          git config user.name "Vipen Bot"
+          git config user.email "bot@vipenonline.com"
+          git add data/fresh.json articles/.processed.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "auto: convert articles for deployment"
+          git push

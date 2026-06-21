@@ -15,3 +15,4 @@ home/02-disctrack/banner.png
 .codebuddy/
 *.plan.md
 *.summary.md
+.env

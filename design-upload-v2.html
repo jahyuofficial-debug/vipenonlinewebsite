@@ -1108,6 +1108,10 @@ function bindDiscRows(){
                 discFiles[ti+'_'+type]=f;
                 // Update preview
                 if(type==='cover'){
+                    // Revoke old blob if exists
+                    if(discTracks[ti].coverUrl && discTracks[ti].coverUrl.indexOf('blob:')===0){
+                        URL.revokeObjectURL(discTracks[ti].coverUrl);
+                    }
                     discTracks[ti].coverUrl=URL.createObjectURL(f);
                 }else{
                     discTracks[ti].audio=f.name;

@@ -1,5 +1,19 @@
 [
   {
+    "id": "log1781991215261",
+    "action": "design_upload",
+    "admin": "localhost",
+    "detail": "Uploaded Magsafe Power Bank (18 files)",
+    "timestamp": "2026-06-20T21:33:35.261Z"
+  },
+  {
+    "id": "log1781991098113",
+    "action": "design_upload",
+    "admin": "localhost",
+    "detail": "Uploaded Test Work (4 files)",
+    "timestamp": "2026-06-20T21:31:38.115Z"
+  },
+  {
     "id": "log1780607604400",
     "action": "admin_login",
     "admin": "Jah72",

@@ -29,14 +29,17 @@ export async function onRequest(context) {
     if (!jsonStr) return json({ success: false, error: 'Missing json field' }, 400);
 
     const projects = JSON.parse(jsonStr);
+    // Strip any blob URLs (only valid on upload page, not on main site)
+    projects.forEach(function(p) {
+        if (p.contentImages) {
+            p.contentImages = p.contentImages.map(function(u) {
+                return (typeof u === 'string' && /^blob:/.test(u)) ? '' : u;
+            }).filter(function(u) { return u !== ''; });
+        }
+    });
     const r2Base = 'https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev';
 
-    // 1. Upload the JSON first
-    await env.DESIGN_BUCKET.put('design/index.json', JSON.stringify(projects, null, 2), {
-      httpMetadata: { contentType: 'application/json; charset=utf-8' }
-    });
-
-    // 2. Upload any replaced image/video files
+    // 1. Upload replaced image/video files
     let uploadedCount = 0;
     for (const [key, value] of formData.entries()) {
       if (!key.startsWith('img_') || !(value instanceof File)) continue;
@@ -71,12 +74,10 @@ export async function onRequest(context) {
       uploadedCount++;
     }
 
-    // 3. Re-save JSON with updated image URLs
-    if (uploadedCount > 0) {
-      await env.DESIGN_BUCKET.put('design/index.json', JSON.stringify(projects, null, 2), {
-        httpMetadata: { contentType: 'application/json; charset=utf-8' }
-      });
-    }
+    // 2. Save JSON (always — metadata/order may have changed)
+    await env.DESIGN_BUCKET.put('design/index.json', JSON.stringify(projects, null, 2), {
+      httpMetadata: { contentType: 'application/json; charset=utf-8' }
+    });
 
     return json({ success: true, uploaded: uploadedCount });
   } catch (e) {
