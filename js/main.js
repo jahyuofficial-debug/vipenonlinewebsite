@@ -1,6 +1,4 @@
 var dwItems = [];
-var dwSuits = ['&#9824;','&#9827;','&#9829;','&#9830;','&#9824;','&#9827;'];
-var dwRanks = ['A','2','3','4','5','6'];
 var discAudio;
 
 (function(){
@@ -140,8 +138,6 @@ BannerPage.initBgVideo();
                     likeCount: item.likeCount || 0
                 };
             });
-            dwSuits = designData.map(function(item) { return item.suit || ''; });
-            dwRanks = designData.map(function(item) { return item.rank || ''; });
         }
 
         // Design: localStorage > static file
@@ -264,8 +260,6 @@ BannerPage.initBgVideo();
                 dwItems = designData.map(function(item) {
                     return { title: item.title || item.folder.replace(/^\d+-/, ''), cat: item.cat||'', desc: item.description||item.desc||'', client: item.client||'', published: item.published||item.year||'', tools: item.tools||'', cardBg: item.cardBg||'', cardHoverBg: item.cardHoverBg||'', headerBg: item.headerBg||'', contentImages: item.contentImages||[], tags: item.tags||[], likeCount: item.likeCount||0 };
                 });
-                dwSuits = designData.map(function(item) { return item.suit||''; });
-                dwRanks = designData.map(function(item) { return item.rank||''; });
             }
             if (bannerData && Array.isArray(bannerData)) {
                 var hg = bannerData.map(function(g) {

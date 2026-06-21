@@ -163,17 +163,6 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
       <div class="field"><label>Title</label><input type="text" id="f_title" placeholder="Work title"></div>
     </div>
     <div class="row">
-      <div class="field" style="flex:.5"><label>Suit</label>
-        <select id="f_suit"><option value="">—</option><option>♠</option><option>♥</option><option>♦</option><option>♣</option></select>
-      </div>
-      <div class="field" style="flex:.5"><label>Rank</label>
-        <select id="f_rank"><option value="">—</option>
-          <option>A</option><option>K</option><option>Q</option><option>J</option>
-          <option>10</option><option>9</option><option>8</option><option>7</option>
-          <option>6</option><option>5</option><option>4</option><option>3</option><option>2</option></select>
-      </div>
-    </div>
-    <div class="row">
       <div class="field" style="flex:.5"><label>Content Spacing</label>
         <select id="f_spacing"><option value="small">Small (8px)</option><option value="medium" selected>Medium (16px)</option><option value="large">Large (32px)</option></select>
       </div>
@@ -418,10 +407,9 @@ document.querySelectorAll('.img-slot').forEach(function(slot) {
 
 
 // ── Enable upload check ─────────────────────────────────────
-var fields = ['f_folder','f_title','f_suit','f_rank','f_desc','f_client','f_tools'];
+var fields = ['f_folder','f_title','f_desc','f_client','f_tools'];
 var fieldLabels = {
-    f_folder: 'Folder Name', f_title: 'Title',
-    f_suit: 'Suit', f_rank: 'Rank', f_desc: 'Description',
+    f_folder: 'Folder Name', f_title: 'Title', f_desc: 'Description',
     f_client: 'Client', f_tools: 'Tools'
 };
 fields.forEach(function(id) {
@@ -455,8 +443,6 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
     var fd = new FormData();
     fd.append('folderName', folderName);
     fd.append('title',   document.getElementById('f_title').value.trim());
-    fd.append('suit',    document.getElementById('f_suit').value);
-    fd.append('rank',    document.getElementById('f_rank').value);
     fd.append('desc',    document.getElementById('f_desc').value.trim());
     fd.append('client',  document.getElementById('f_client').value.trim());
     fd.append('year',    document.getElementById('f_year').value.trim());
