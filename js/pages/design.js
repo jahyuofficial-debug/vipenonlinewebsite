@@ -88,11 +88,12 @@ function buildDesignWorkDetail(id) {
         '<div class="dw-detail-hero">' +
         '<div class="dw-detail-hero-bg" style="background:' + heroBg + '"></div>' +
         '<div class="dw-detail-hero-mask"></div>' +
-        '<div class="dw-detail-hero-content">' +
+        '</div>' +
+        '<div class="dw-detail-head">' +
         '<h2 class="dw-detail-hero-title">' + item.title + '</h2>' +
         subtitleHtml +
         '<div class="dw-detail-hero-divider"></div>' +
-        '</div></div>' +
+        '</div>' +
         '<div class="dw-detail-body">' +
         bodyTop + bodyBottom +
         '<div class="dw-detail-meta">' +
