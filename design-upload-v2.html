@@ -357,7 +357,7 @@ function ensureContentSlot(idx) {
     var div = document.createElement('div');
     div.className = 'content-slot';
     div.setAttribute('data-idx', idx);
-    div.innerHTML = '<img alt=""><span class="add-icon">+</span><div class="slot-remove">✕</div><input type="file" accept="image/*">';
+    div.innerHTML = '<img alt=""><span class="add-icon">+</span><div class="slot-remove">✕</div><input type="file" accept="image/*,video/*">';
     container.insertBefore(div, document.getElementById('addContentSlot'));
     bindContentSlot(div, idx);
     return div;
@@ -444,7 +444,7 @@ function renderAssigned() {
 // ── Process files from folder ────────────────────────────────
 function processFiles(files) {
     if (!files || !files.length) return;
-    pool = files.filter(function(f) { return /\.(png|jpe?g|gif|webp)$/i.test(f.name); });
+    pool = files.filter(function(f) { return /\.(png|jpe?g|gif|webp|mp4|webm|mov|avi|mkv)$/i.test(f.name); });
     if (!pool.length) return;
 
     dropzone.classList.add('active');
@@ -530,7 +530,9 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
     if (assigned['card-hover']) fd.append('files', assigned['card-hover'], 'card-hover.png');
     if (assigned['header-bg'])  fd.append('files', assigned['header-bg'],  'header-bg.png');
     Object.keys(contentFiles).sort(function(a,b){return a-b;}).forEach(function(k) {
-        fd.append('files', contentFiles[k], 'content-' + k + '.png');
+        var f = contentFiles[k];
+        var ext = (f.name || '').split('.').pop().toLowerCase() || 'png';
+        fd.append('files', f, 'content-' + k + '.' + ext);
     });
 
     var btn = document.getElementById('uploadBtn');
@@ -685,7 +687,7 @@ function mgrSortSlots(imgs,pi){
             '<img src="'+u+'" alt="">'+
             '<div class="del" title="Remove">✕</div>'+
             '<div class="repl" title="Replace">↻</div>'+
-            '<input type="file" accept="image/*" data-pi="'+pi+'" data-mi="'+i+'">'+
+            '<input type="file" accept="image/*,video/*" data-pi="'+pi+'" data-mi="'+i+'">'+
             '</div>';
     });
     return h;
