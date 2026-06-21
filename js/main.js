@@ -38,13 +38,15 @@ Loading.init(function() {
     v.addEventListener('loadeddata', function() { checkBuffered(); }, { once: true });
     v.addEventListener('error', function() { Loading.markDone('video'); }, { once: true });
     // Fallback: if nothing happens after 8s, mark as done
-    setTimeout(function() { Loading.markDone('video'); }, 8000);
+    setTimeout(function() { Loading.markDone('video'); }, 5000);
     v.load();
 })();
 
 BannerPage.initBgVideo();
 
 (function loadData(){
+    // Safety fallback: don't let data loading stall forever
+    setTimeout(function() { Loading.markDone('data'); }, 6000);
     var loadJSON = function(url) {
         return fetch(url).then(function(r) {
             if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -100,10 +102,15 @@ BannerPage.initBgVideo();
 
             // Bridge disc preload progress → loading bar
             (function bridgeDiscProgress() {
-                if (typeof DiscPage === 'undefined' || !DiscPage.getPreloadProgress) return;
+                if (typeof DiscPage === 'undefined' || !DiscPage.getPreloadProgress) { Loading.markDone('disc'); return; }
+                var started = Date.now();
                 var iv = setInterval(function() {
                     var prog = DiscPage.getPreloadProgress();
-                    if (!prog || prog.total === 0) return;
+                    if (!prog || prog.total === 0) {
+                        // If disc data hasn't arrived after 8s, mark done
+                        if (Date.now() - started > 8000) { Loading.markDone('disc'); clearInterval(iv); }
+                        return;
+                    }
                     var pct = Math.round(prog.loaded / prog.total * 100);
                     Loading.updateTask('disc', pct);
                     Loading.setDiscProgress(prog.loaded, prog.total);
@@ -237,10 +244,14 @@ BannerPage.initBgVideo();
                 if (typeof DiscPage !== 'undefined' && DiscPage.startPreload) DiscPage.startPreload();
                 // Bridge disc preload → loading bar
                 (function() {
-                    if (typeof DiscPage === 'undefined' || !DiscPage.getPreloadProgress) return;
+                    if (typeof DiscPage === 'undefined' || !DiscPage.getPreloadProgress) { Loading.markDone('disc'); return; }
+                    var started2 = Date.now();
                     var iv = setInterval(function() {
                         var prog = DiscPage.getPreloadProgress();
-                        if (!prog || prog.total === 0) return;
+                        if (!prog || prog.total === 0) {
+                            if (Date.now() - started2 > 8000) { Loading.markDone('disc'); clearInterval(iv); }
+                            return;
+                        }
                         var pct = Math.round(prog.loaded / prog.total * 100);
                         Loading.updateTask('disc', pct);
                         Loading.setDiscProgress(prog.loaded, prog.total);

@@ -53,7 +53,7 @@ function onPreloadComplete() {
             }
         };
         // Fire a timeout fallback so stuck tracks don't block progress forever
-        var fallbackTimer = setTimeout(function() { markDone(); }, 12000);
+        var fallbackTimer = setTimeout(function() { markDone(); }, 6000);
         var audioOk = false, imgOk = false;
         var tryMark = function() { if (audioOk && imgOk) { clearTimeout(fallbackTimer); markDone(); } };
         if (tape.cover) {
