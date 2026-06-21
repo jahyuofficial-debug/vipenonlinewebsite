@@ -1061,7 +1061,8 @@ function renderDisc(){
     discTracks.forEach(function(t,i){
         var audioName=t.audio?decodeURIComponent(t.audio.split('/').pop()||''):'';
         var coverName=t.coverUrl?decodeURIComponent(t.coverUrl.split('/').pop()||''):'';
-        h+='<div class="disc-track-row" data-ti="'+i+'">'+
+        h+='<div class="disc-track-row" draggable="true" data-ti="'+i+'">'+
+            '<span class="disc-drag-handle" title="Drag to reorder">⋮⋮</span>'+
             '<span class="disc-idx">#'+(i+1)+'</span>'+
             '<input class="disc-folder" value="'+esc(t.folder||'')+'" placeholder="folder name" data-ti="'+i+'" data-field="folder">'+
             '<div class="disc-file-slot">'+
@@ -1126,11 +1127,50 @@ function bindDiscRows(){
             renderDisc();
         });
     });
+    // Drag to reorder
+    var dr=null;
+    document.querySelectorAll('.disc-track-row').forEach(function(row){
+        row.addEventListener('dragstart',function(e){
+            dr=parseInt(row.getAttribute('data-ti'));
+            row.style.opacity='0.4';
+            e.dataTransfer.effectAllowed='move';
+        });
+        row.addEventListener('dragend',function(){
+            row.style.opacity='1';
+            document.querySelectorAll('.disc-track-row').forEach(function(r){r.classList.remove('disc-drag-over')});
+            dr=null;
+        });
+        row.addEventListener('dragover',function(e){e.preventDefault();e.dataTransfer.dropEffect='move';row.classList.add('disc-drag-over')});
+        row.addEventListener('dragleave',function(){row.classList.remove('disc-drag-over')});
+        row.addEventListener('drop',function(e){
+            e.preventDefault();row.classList.remove('disc-drag-over');
+            var di=parseInt(row.getAttribute('data-ti'));
+            if(dr!==null&&dr!==di){
+                var it=discTracks.splice(dr,1)[0];
+                discTracks.splice(di,0,it);
+                // Re-key discFiles
+                var newFiles={};
+                Object.keys(discFiles).forEach(function(k){
+                    var p=k.split('_');var oldTi=parseInt(p[0]);var field=p[1];
+                    if(oldTi===dr)newFiles[di+'_'+field]=discFiles[k];
+                    else if(dr<di&&oldTi>dr&&oldTi<=di)newFiles[(oldTi-1)+'_'+field]=discFiles[k];
+                    else if(dr>di&&oldTi>=di&&oldTi<dr)newFiles[(oldTi+1)+'_'+field]=discFiles[k];
+                    else newFiles[k]=discFiles[k];
+                });
+                discFiles=newFiles;
+                renderDisc();
+            }
+        });
+    });
 }
 
 // Add some CSS inline for disc
 var ds=document.createElement('style');
-ds.textContent='.disc-track-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)}'+
+ds.textContent='.disc-track-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);cursor:grab}'+
+    '.disc-track-row:active{cursor:grabbing}'+
+    '.disc-track-row.disc-drag-over{border-color:rgba(212,168,83,.4);background:rgba(212,168,83,.06);transform:scale(1.01)}'+
+    '.disc-drag-handle{color:rgba(255,255,255,.12);font-size:12px;cursor:grab;flex-shrink:0;letter-spacing:-2px;user-select:none}'+
+    '.disc-drag-handle:hover{color:rgba(255,255,255,.3)}'+
     '.disc-idx{width:24px;font-size:10px;color:rgba(255,255,255,.2);text-align:center;flex-shrink:0}'+
     '.disc-folder{flex:1;min-width:80px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:4px;color:#fff;padding:6px 8px;font-size:11px}'+
     '.disc-file-slot{display:flex;align-items:center;gap:4px;min-width:0}'+
