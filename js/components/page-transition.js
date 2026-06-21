@@ -8,47 +8,42 @@ var overlay, timer;
 
 function initOverlay() {
     if (overlay) return;
-    overlay = document.getElementById('pageTransition');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'pageTransition';
-        overlay.className = 'pt-overlay';
-        overlay.innerHTML = '<div class="pt-logo-wrap">' +
-            '<div class="pt-half pt-top-left"><img src="images/vipen-logo.png" alt=""></div>' +
-            '<div class="pt-half pt-bottom-right"><img src="images/vipen-logo.png" alt=""></div>' +
-            '</div>';
-        document.body.appendChild(overlay);
-    }
+    var el = document.getElementById('pageTransition');
+    if (el) { overlay = el; return; }
+    overlay = document.createElement('div');
+    overlay.id = 'pageTransition';
+    overlay.className = 'pt-overlay';
+    overlay.innerHTML = '<div class="pt-logo-wrap">' +
+        '<div class="pt-half pt-top-left"><img src="images/vipen-logo.png" alt=""></div>' +
+        '<div class="pt-half pt-bottom-right"><img src="images/vipen-logo.png" alt=""></div>' +
+        '</div>';
+    document.body.appendChild(overlay);
 }
 
 function play(callback) {
     initOverlay();
     if (timer) clearTimeout(timer);
 
-    // Reset
-    overlay.classList.remove('slicing','hiding','active');
+    // Reset classes
+    overlay.classList.remove('anim','fadeout','show');
 
-    // Force reflow so reset takes effect
+    // Force reflow
     void overlay.offsetWidth;
 
-    // Show
-    overlay.classList.add('active');
+    // Show overlay immediately
+    overlay.classList.add('show');
 
-    // Start slice after a tiny delay for visual impact
+    // Start slice animation after brief pause
     timer = setTimeout(function() {
-        overlay.classList.add('slicing');
+        overlay.classList.add('anim');
+        overlay.classList.add('fadeout');
 
-        // After slice, fade out the whole overlay
+        // After animations complete, hide and call back
         timer = setTimeout(function() {
-            overlay.classList.add('hiding');
-            overlay.classList.remove('active');
-
-            timer = setTimeout(function() {
-                overlay.classList.remove('slicing','hiding');
-                if (callback) callback();
-            }, 350);
-        }, 650);
-    }, 150);
+            overlay.classList.remove('anim','fadeout','show');
+            if (callback) callback();
+        }, 900); // .55s slice + .3s fade
+    }, 120);
 }
 
 return { play: play };
