@@ -884,7 +884,9 @@ function bindMgrCard(pi){
             if(!checkFileSize(file,k)){inp.value='';return;}
             mgrImageFiles[pi+'_'+k]=file;
             var preview=buildPreview(file);
-            mgrProjects[pi][k]=preview;
+            // Map to camelCase field name (card-bg → cardBg)
+            var field = k.replace(/-([a-z])/g, function(_,c){ return c.toUpperCase(); });
+            mgrProjects[pi][field]=preview;
             var img=inp.parentNode.querySelector('img');
             if(img)img.src=preview;
         });

@@ -62,8 +62,11 @@ export async function onRequest(context) {
 
       // Update URL in projects data
       if (projects[pi]) {
-        if (imgKey === 'cardBg' || imgKey === 'cardHoverBg' || imgKey === 'headerBg') {
-          projects[pi][imgKey] = newUrl;
+        if (imgKey === 'cardBg' || imgKey === 'cardHoverBg' || imgKey === 'headerBg' ||
+            imgKey === 'card-bg' || imgKey === 'card-hover' || imgKey === 'header-bg') {
+          // Normalize to camelCase
+          var normKey = imgKey.replace(/-([a-z])/g, function(_,c){ return c.toUpperCase(); });
+          projects[pi][normKey] = newUrl;
         } else if (imgKey.startsWith('content-')) {
           const ci = parseInt(imgKey.replace('content-', ''));
           if (projects[pi].contentImages && projects[pi].contentImages[ci] !== undefined) {
