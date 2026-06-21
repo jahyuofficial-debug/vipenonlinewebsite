@@ -171,6 +171,7 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
   <div class="tabs">
     <button class="tab-btn active" data-tab="upload">Upload New</button>
     <button class="tab-btn" data-tab="manage">Manage Existing</button>
+    <button class="tab-btn" data-tab="disc">Disc</button>
   </div>
 
   <!-- ═══ Upload Tab ═══ -->
@@ -284,6 +285,19 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
     </div>
     <div id="mgrProjects"></div>
   </div><!-- /tab-manage -->
+
+  <!-- ═══ Disc Tab ═══ -->
+  <div class="tab-panel" id="tab-disc">
+    <div class="mgr-toolbar">
+      <button id="discLoadLive" class="btn-gold">Load from R2</button>
+      <button id="discSave" class="btn-gold">Save Changes</button>
+      <span style="font-size:10px;color:rgba(255,255,255,.2);display:flex;align-items:center;margin-left:4px" id="discCount"></span>
+    </div>
+    <div id="discTracks"></div>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.06)">
+      <button id="discAddTrack" class="btn-gold" style="width:auto;padding:10px 20px">+ Add Track</button>
+    </div>
+  </div><!-- /tab-disc -->
 
 </div><!-- /wrap -->
 <div class="status-toast" id="statusToast"></div>
@@ -967,6 +981,160 @@ function mgrBindSort(ct,pi){
         });
     });
 }
+})();
+
+// ── Disc JS ───────────────────────────────────────────────
+(function(){
+'use strict';
+var discTracks = [];
+var discFiles = {};
+var MAX_FILE_MB_DISC = 100;
+
+function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function toast(msg,t){var s=document.getElementById('statusToast');s.textContent=msg;s.className='status-toast show '+(t||'ok');setTimeout(function(){s.classList.remove('show')},3000);}
+
+function checkDiscFileSize(file,label){
+    if(file.size > MAX_FILE_MB_DISC * 1024 * 1024){
+        toast((label||'File')+' exceeds '+MAX_FILE_MB_DISC+'MB limit.','err');
+        return false;
+    }
+    return true;
+}
+
+// Load from R2
+document.getElementById('discLoadLive').addEventListener('click',function(){
+    fetch('https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/disc/index.json?'+Date.now())
+        .then(function(r){return r.json();})
+        .then(function(d){discTracks=d;discFiles={};renderDisc();toast('Loaded '+d.length+' tracks');})
+        .catch(function(){toast('Failed to load from R2. Check CORS and DISC_BUCKET.','err');});
+});
+
+// Save
+document.getElementById('discSave').addEventListener('click',function(){
+    var btn=document.getElementById('discSave');btn.disabled=true;btn.textContent='Saving...';
+    var totalBytes=0;
+    Object.keys(discFiles).forEach(function(k){totalBytes+=discFiles[k].size;});
+    if(totalBytes > MAX_FILE_MB_DISC * 1024 * 1024){
+        btn.disabled=false;btn.textContent='Save Changes';
+        toast('Total upload exceeds '+MAX_FILE_MB_DISC+'MB limit.','err');return;
+    }
+    var fd=new FormData();
+    fd.append('json',JSON.stringify(discTracks));
+    Object.keys(discFiles).forEach(function(key){fd.append('img_'+key,discFiles[key]);});
+
+    var xhr=new XMLHttpRequest();xhr.open('POST','/api/disc/save');xhr.timeout=180000;
+    var overlay=document.getElementById('mgrProgressOverlay');
+    var circle=document.getElementById('mgrProgressCircle');
+    var pctEl=document.getElementById('mgrProgressPct');
+    var labelEl=document.getElementById('mgrProgressLabel');
+    var circLen=213.6;
+    overlay.classList.add('show');circle.style.strokeDashoffset=circLen;pctEl.textContent='0%';labelEl.textContent='Uploading...';
+    xhr.upload.onprogress=function(e){
+        if(e.lengthComputable){var p=Math.round(e.loaded/e.total*100);circle.style.strokeDashoffset=circLen-(circLen*p/100);pctEl.textContent=p+'%';}
+    };
+    xhr.onload=function(){
+        overlay.classList.remove('show');btn.disabled=false;btn.textContent='Save Changes';
+        try{var r=JSON.parse(xhr.responseText);
+            if(r.success){discFiles={};toast('Saved! '+(r.uploaded||0)+' files uploaded to R2.');}
+            else{toast(r.error||'Save failed','err');}
+        }catch(e){toast('Save failed','err');}
+    };
+    xhr.onerror=function(){overlay.classList.remove('show');btn.disabled=false;btn.textContent='Save Changes';toast('Network error','err');};
+    xhr.send(fd);
+});
+
+// Add track
+document.getElementById('discAddTrack').addEventListener('click',function(){
+    discTracks.push({folder:'',audio:'',coverFile:'',coverUrl:''});
+    renderDisc();
+});
+
+function renderDisc(){
+    document.getElementById('discCount').textContent=discTracks.length+' tracks';
+    var h='';
+    discTracks.forEach(function(t,i){
+        var audioName=t.audio?decodeURIComponent(t.audio.split('/').pop()||''):'';
+        var coverName=t.coverUrl?decodeURIComponent(t.coverUrl.split('/').pop()||''):'';
+        h+='<div class="disc-track-row" data-ti="'+i+'">'+
+            '<span class="disc-idx">#'+(i+1)+'</span>'+
+            '<input class="disc-folder" value="'+esc(t.folder||'')+'" placeholder="folder name" data-ti="'+i+'" data-field="folder">'+
+            '<div class="disc-file-slot">'+
+                '<span class="disc-file-label" title="'+esc(audioName)+'">'+(audioName||'no audio')+'</span>'+
+                '<button class="disc-repl" data-ti="'+i+'" data-type="audio" title="Replace audio">↻</button>'+
+            '</div>'+
+            '<div class="disc-file-slot">'+
+                (t.coverUrl?'<img src="'+t.coverUrl+'" alt="" style="width:36px;height:36px;object-fit:cover;border-radius:4px;border:1px solid rgba(255,255,255,.08)">':'<span class="disc-file-label">no cover</span>')+
+                '<button class="disc-repl" data-ti="'+i+'" data-type="cover" title="Replace cover">↻</button>'+
+            '</div>'+
+            '<button class="disc-del" data-ti="'+i+'" title="Delete track">✕</button>'+
+            '</div>';
+    });
+    document.getElementById('discTracks').innerHTML=h;
+    bindDiscRows();
+}
+
+function bindDiscRows(){
+    // Folder name change
+    document.querySelectorAll('.disc-folder').forEach(function(inp){
+        inp.addEventListener('change',function(){
+            var ti=parseInt(this.getAttribute('data-ti'));
+            discTracks[ti].folder=this.value;
+        });
+    });
+    // Replace audio/cover
+    document.querySelectorAll('.disc-repl').forEach(function(btn){
+        btn.addEventListener('click',function(){
+            var ti=parseInt(this.getAttribute('data-ti'));
+            var type=this.getAttribute('data-type');
+            var inp=document.createElement('input');inp.type='file';
+            inp.accept=type==='audio'?'audio/*':'image/*';
+            inp.addEventListener('change',function(){
+                if(!inp.files.length)return;
+                var f=inp.files[0];
+                if(!checkDiscFileSize(f,type)){return;}
+                discFiles[ti+'_'+type]=f;
+                // Update preview
+                if(type==='cover'){
+                    discTracks[ti].coverUrl=URL.createObjectURL(f);
+                }else{
+                    discTracks[ti].audio=f.name;
+                }
+                renderDisc();
+            });
+            inp.click();
+        });
+    });
+    // Delete track
+    document.querySelectorAll('.disc-del').forEach(function(btn){
+        btn.addEventListener('click',function(){
+            var ti=parseInt(this.getAttribute('data-ti'));
+            discTracks.splice(ti,1);
+            // Re-key discFiles
+            var newFiles={};
+            Object.keys(discFiles).forEach(function(k){
+                var p=k.split('_');var oldTi=parseInt(p[0]);var field=p[1];
+                if(oldTi>ti)newFiles[(oldTi-1)+'_'+field]=discFiles[k];
+                else if(oldTi<ti)newFiles[k]=discFiles[k];
+            });
+            discFiles=newFiles;
+            renderDisc();
+        });
+    });
+}
+
+// Add some CSS inline for disc
+var ds=document.createElement('style');
+ds.textContent='.disc-track-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)}'+
+    '.disc-idx{width:24px;font-size:10px;color:rgba(255,255,255,.2);text-align:center;flex-shrink:0}'+
+    '.disc-folder{flex:1;min-width:80px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:4px;color:#fff;padding:6px 8px;font-size:11px}'+
+    '.disc-file-slot{display:flex;align-items:center;gap:4px;min-width:0}'+
+    '.disc-file-label{font-size:10px;color:rgba(255,255,255,.25);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100px}'+
+    '.disc-repl{background:none;border:1px solid rgba(212,168,83,.3);border-radius:50%;color:#d4a853;width:20px;height:20px;font-size:10px;cursor:pointer;flex-shrink:0;padding:0;line-height:18px;text-align:center}'+
+    '.disc-repl:hover{background:rgba(212,168,83,.15)}'+
+    '.disc-del{background:none;border:1px solid rgba(239,68,68,.3);border-radius:50%;color:rgba(239,68,68,.6);width:20px;height:20px;font-size:10px;cursor:pointer;flex-shrink:0;padding:0;line-height:18px;text-align:center}'+
+    '.disc-del:hover{background:rgba(239,68,68,.15)}';
+document.head.appendChild(ds);
 })();
 </script>
 </body>
