@@ -1,6 +1,19 @@
 var DesignPage = (function() {
 'use strict';
 
+// Extract YouTube video ID from various URL formats
+function extractYouTubeId(url) {
+    if (!url) return null;
+    var m;
+    // youtube.com/watch?v=VIDEO_ID
+    m = url.match(/(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
+    if (m) return m[1];
+    // youtu.be/VIDEO_ID
+    m = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+    if (m) return m[1];
+    return null;
+}
+
 var dwZoomedCard = null;
 var dwListPageSize = 6;
 var dwListCurrentPage = 1;
@@ -62,7 +75,10 @@ function buildDesignWorkDetail(id) {
         mediaHtml = '<div class="dw-detail-media" style="--dw-media-gap:' + mediaGap + '">';
         for (var mi = 0; mi < contentImages.length; mi++) {
             var src = contentImages[mi];
-            if (src.indexOf('data:video') === 0 || src.match(/\.(mp4|webm|ogg)($|\?)/i)) {
+            var ytId = extractYouTubeId(src);
+            if (ytId) {
+                mediaHtml += '<div class="dw-detail-media-item dw-detail-media-youtube"><div class="yt-embed"><iframe src="https://www.youtube.com/embed/' + ytId + '?rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div></div>';
+            } else if (src.indexOf('data:video') === 0 || src.match(/\.(mp4|webm|ogg)($|\?)/i)) {
                 mediaHtml += '<div class="dw-detail-media-item"><video src="' + src + '" controls></video></div>';
             } else {
                 mediaHtml += '<div class="dw-detail-media-item"><img src="' + src + '" alt=""></div>';

@@ -57,6 +57,21 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
 .content-slot input{display:none}
 .add-slot:hover{border-color:rgba(255,255,255,.35);background:rgba(255,255,255,.06)}
 
+/* YouTube slot */
+.content-slot.yt-slot{border-color:rgba(255,0,0,.25)}
+.content-slot.yt-slot .add-icon{color:rgba(255,0,0,.4)}
+.content-slot.yt-slot.filled{border-color:rgba(255,0,0,.2)}
+.content-slot.yt-slot .yt-badge{position:absolute;bottom:3px;right:3px;background:rgba(255,0,0,.85);color:#fff;font-size:8px;padding:1px 4px;border-radius:2px;display:none;font-weight:600;letter-spacing:.03em}
+.content-slot.yt-slot.filled .yt-badge{display:block}
+.content-slot.yt-slot img{object-fit:cover}
+.yt-add-btn{width:70px;height:70px;border:1px dashed rgba(255,0,0,.3);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,0,0,.5);font-size:12px;font-weight:700;transition:all .2s;background:rgba(255,0,0,.02)}
+.yt-add-btn:hover{border-color:rgba(255,0,0,.6);color:rgba(255,0,0,.8);background:rgba(255,0,0,.06)}
+
+/* Manager YT slot */
+.mgr-sort-item.yt-item{border-color:rgba(255,0,0,.25)}
+.mgr-sort-item .yt-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px;color:rgba(255,0,0,.6);background:rgba(0,0,0,.4);pointer-events:none}
+.mgr-sort-item.yt-item img{filter:brightness(.6)}
+
 /* ── Form ── */
 .row{display:flex;gap:12px;margin-bottom:14px}
 .row:last-child{margin-bottom:0}
@@ -128,6 +143,7 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
 .mgr-sort-item input{display:none}
 .mgr-add-img{width:70px;height:52px;border:1px dashed rgba(255,255,255,.08);border-radius:3px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.12);font-size:18px;transition:all .2s}
 .mgr-add-img:hover{border-color:rgba(255,255,255,.25);color:rgba(255,255,255,.35)}
+.mgr-add-yt:hover{border-color:rgba(255,0,0,.5)!important;color:rgba(255,0,0,.7)!important;background:rgba(255,0,0,.04)}
 .mgr-toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
 .mgr-toolbar button{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;padding:7px 14px;border-radius:7px;cursor:pointer;font-size:12px;transition:all .2s}
 .mgr-toolbar button:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2)}
@@ -211,6 +227,7 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
     <h2 style="margin-top:18px">Content Images <span style="font-weight:400;font-size:10px;color:rgba(255,255,255,.18);text-transform:none">— all remaining images from folder</span></h2>
     <div class="content-imgs" id="contentImages">
       <div class="content-slot add-slot" id="addContentSlot" style="width:70px;height:70px;border:1px dashed rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.15);font-size:20px" title="Add more images">+</div>
+      <div class="yt-add-btn" id="addYoutubeSlot" title="Add YouTube video">▶ YT</div>
     </div>
   </div>
 
@@ -286,6 +303,7 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
 var pool = [];             // all image files from folder
 var assigned = {};         // { 'card-bg': file, 'card-hover': file, 'header-bg': file }
 var contentFiles = {};     // { 1: file, 2: file, ... }
+var youtubeSlots = {};     // { idx: 'https://www.youtube.com/watch?v=...' }
 var selFolderName = '';
 
 // ── Folder picker ────────────────────────────────────────────
@@ -428,6 +446,65 @@ document.getElementById('addContentSlot').addEventListener('click', function() {
     nextContentIdx++;
 });
 
+// ── YouTube slots ─────────────────────────────────────────────
+document.getElementById('addYoutubeSlot').addEventListener('click', function() {
+    var url = prompt('Enter YouTube URL:\ne.g. https://www.youtube.com/watch?v=VIDEO_ID\nor https://youtu.be/VIDEO_ID');
+    if (!url || !url.trim()) return;
+    url = url.trim();
+    var ytId = extractYtId(url);
+    if (!ytId) { toast('Invalid YouTube URL. Use a watch, share, or embed link.','err'); return; }
+    var idx = nextContentIdx;
+    nextContentIdx++;
+    youtubeSlots[idx] = url;
+    ensureYoutubeSlot(idx);
+    checkReady();
+});
+
+function extractYtId(url) {
+    var m;
+    m = url.match(/(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/);
+    if (m) return m[1];
+    m = url.match(/youtu\.be\/([a-zA-Z0-9_-]{11})/);
+    if (m) return m[1];
+    return null;
+}
+
+function ensureYoutubeSlot(idx) {
+    var container = document.getElementById('contentImages');
+    var existing = container.querySelector('.content-slot.yt-slot[data-idx="' + idx + '"]');
+    if (existing) return existing;
+    var div = document.createElement('div');
+    div.className = 'content-slot yt-slot filled';
+    div.setAttribute('data-idx', idx);
+    var ytId = extractYtId(youtubeSlots[idx]);
+    var thumb = ytId ? 'https://img.youtube.com/vi/' + ytId + '/default.jpg' : '';
+    div.innerHTML = '<img src="' + thumb + '" alt="" onerror="this.style.display=\'none\'"><span class="add-icon" style="display:none">▶</span><span class="yt-badge">YT</span><div class="slot-remove" style="display:block">✕</div>';
+    var addBtn = document.getElementById('addYoutubeSlot');
+    container.insertBefore(div, addBtn);
+    bindYoutubeSlot(div, idx);
+    return div;
+}
+
+function bindYoutubeSlot(slot, idx) {
+    slot.querySelector('.slot-remove').addEventListener('click', function(ev) {
+        ev.stopPropagation();
+        delete youtubeSlots[idx];
+        slot.remove();
+        checkReady();
+    });
+    // Click to replace URL
+    slot.addEventListener('click', function(e) {
+        if (e.target.classList.contains('slot-remove')) return;
+        var newUrl = prompt('Replace YouTube URL:', youtubeSlots[idx] || '');
+        if (!newUrl || !newUrl.trim()) return;
+        var ytId = extractYtId(newUrl.trim());
+        if (!ytId) { toast('Invalid YouTube URL','err'); return; }
+        youtubeSlots[idx] = newUrl.trim();
+        var img = slot.querySelector('img');
+        if (img) img.src = 'https://img.youtube.com/vi/' + ytId + '/default.jpg';
+    });
+}
+
 // ── Render assigned slots ────────────────────────────────────
 function renderAssigned() {
     ['card-bg', 'card-hover', 'header-bg'].forEach(function(role) {
@@ -520,7 +597,7 @@ function checkReady() {
     if (!assigned['card-bg']) missing.push('Card Cover');
     if (!assigned['card-hover']) missing.push('Card Hover');
     if (!assigned['header-bg']) missing.push('Header BG');
-    if (Object.keys(contentFiles).length === 0) missing.push('at least 1 Content image');
+    if (Object.keys(contentFiles).length === 0 && Object.keys(youtubeSlots).length === 0) missing.push('at least 1 Content image or YouTube video');
     fields.forEach(function(id) {
         if (!document.getElementById(id).value.trim()) {
             missing.push(fieldLabels[id] || id);
@@ -558,6 +635,11 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
         var ext = (f.name || '').split('.').pop().toLowerCase() || 'png';
         fd.append('files', f, 'content-' + k + '.' + ext);
     });
+    // YouTube URLs
+    var ytKeys = Object.keys(youtubeSlots).sort(function(a,b){return a-b;});
+    if (ytKeys.length > 0) {
+        fd.append('youtubeUrls', JSON.stringify(ytKeys.map(function(k){ return youtubeSlots[k]; })));
+    }
 
     var btn = document.getElementById('uploadBtn');
     var prog = document.getElementById('progress');
@@ -735,7 +817,8 @@ function buildMgrCard(p,pi){
         '<div class="mgr-label">Content Images — drag to reorder</div>'+
         '<div class="mgr-sortable" id="mgrSort-'+pi+'">'+
         mgrSortSlots(p.contentImages||[],pi)+
-        '<div class="mgr-add-img" data-mgr-add-pi="'+pi+'" title="Add image URL">+</div>'+
+        '<div class="mgr-add-img" data-mgr-add-pi="'+pi+'" title="Add image / video file">+</div>'+
+        '<div class="mgr-add-img mgr-add-yt" data-mgr-add-yt="'+pi+'" title="Add YouTube video" style="color:rgba(255,0,0,.4);border-color:rgba(255,0,0,.2)">▶</div>'+
         '</div>'+
         '</div>';
 }
@@ -749,9 +832,16 @@ function mgrMainSlot(k,label,url,pi){
 function mgrSortSlots(imgs,pi){
     var h='';
     imgs.forEach(function(u,i){
-        h+='<div class="mgr-sort-item" draggable="true" data-pi="'+pi+'" data-mi="'+i+'">'+
+        var isYt = /(youtube\.com|youtu\.be)/i.test(u||'');
+        var thumbSrc = u;
+        if (isYt) {
+            var ytm = (u||'').match(/(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtube\.com\/shorts\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+            if (ytm) thumbSrc = 'https://img.youtube.com/vi/' + ytm[1] + '/default.jpg';
+        }
+        h+='<div class="mgr-sort-item'+(isYt?' yt-item':'')+'" draggable="true" data-pi="'+pi+'" data-mi="'+i+'">'+
             '<span class="badge">'+(i+1)+'</span>'+
-            '<img src="'+u+'" alt="">'+
+            '<img src="'+thumbSrc+'" alt="" onerror="this.style.display=\'none\'">'+
+            (isYt ? '<div class="yt-icon">▶</div>' : '')+
             '<div class="del" title="Remove">✕</div>'+
             '<div class="repl" title="Replace">↻</div>'+
             '<input type="file" accept="image/*,video/*" data-pi="'+pi+'" data-mi="'+i+'">'+
@@ -833,6 +923,19 @@ function bindMgrCard(pi){
                 renderMgr();
             });
             inp.click();
+        });
+    }
+    // Add YouTube
+    var ytBtn=ct.querySelector('.mgr-add-yt');
+    if(ytBtn){
+        ytBtn.addEventListener('click',function(e){
+            e.stopPropagation();
+            var url=prompt('Enter YouTube URL:\ne.g. https://www.youtube.com/watch?v=VIDEO_ID\nor https://youtu.be/VIDEO_ID');
+            if(!url||!url.trim())return;
+            url=url.trim();
+            if(!/(youtube\.com|youtu\.be)/i.test(url)){toast('Invalid YouTube URL','err');return;}
+            mgrProjects[pi].contentImages.push(url);
+            renderMgr();
         });
     }
 }
