@@ -54,8 +54,10 @@ function buildDesignWorkDetail(id) {
 
     var mediaHtml = '';
     var contentImages = item.contentImages || [];
+    var spacingMap = { small: '.08rem', medium: '.16rem', large: '.32rem' };
+    var mediaGap = spacingMap[item.spacing] || '.16rem';
     if (contentImages.length > 0) {
-        mediaHtml = '<div class="dw-detail-media">';
+        mediaHtml = '<div class="dw-detail-media" style="--dw-media-gap:' + mediaGap + '">';
         for (var mi = 0; mi < contentImages.length; mi++) {
             var src = contentImages[mi];
             if (src.indexOf('data:video') === 0 || src.match(/\.(mp4|webm|ogg)($|\?)/i)) {

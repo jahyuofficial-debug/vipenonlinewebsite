@@ -136,6 +136,7 @@ BannerPage.initBgVideo();
                     headerBg: item.headerBg || '',
                     contentImages: item.contentImages || [],
                     tags: item.tags || [],
+                    spacing: item.spacing || 'medium',
                     likeCount: item.likeCount || 0
                 };
             });

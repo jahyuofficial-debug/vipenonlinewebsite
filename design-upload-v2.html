@@ -72,6 +72,7 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
 .btn-upload{background:#d4a853;color:#000}
 .btn-upload:hover{background:#e0b960}
 .btn-upload:disabled{opacity:.3;cursor:not-allowed}
+.ready-hint{margin-top:10px;font-size:11px;color:rgba(255,255,255,.2);text-align:center;min-height:16px}
 
 .status{margin-top:14px;padding:12px;border-radius:8px;font-size:13px;text-align:center;display:none}
 .status.show{display:block}
@@ -102,11 +103,11 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
 
   <!-- ── Step 2: Assign images to roles ── -->
   <div class="section" id="imgSection" style="display:none">
-    <h2>Assign Images</h2>
+    <h2>Assign Images <span style="font-weight:400;font-size:10px;color:rgba(255,255,255,.18);text-transform:none">— pick 3 main images, rest auto-fill content</span></h2>
 
     <div class="img-slots">
       <div class="img-slot" data-role="card-bg">
-        <div class="slot-label">Card Cover</div>
+        <div class="slot-label">Card Cover <em style="font-style:normal;color:rgba(255,255,255,.15);font-size:9px">3:4 · 600×800</em></div>
         <img class="slot-img" alt="">
         <div class="slot-empty">click to pick</div>
         <div class="slot-name"></div>
@@ -114,7 +115,7 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
         <input type="file" accept="image/*">
       </div>
       <div class="img-slot" data-role="card-hover">
-        <div class="slot-label">Card Hover</div>
+        <div class="slot-label">Card Hover <em style="font-style:normal;color:rgba(255,255,255,.15);font-size:9px">3:4 · 600×800</em></div>
         <img class="slot-img" alt="">
         <div class="slot-empty">click to pick</div>
         <div class="slot-name"></div>
@@ -122,7 +123,7 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
         <input type="file" accept="image/*">
       </div>
       <div class="img-slot" data-role="header-bg">
-        <div class="slot-label">Header BG</div>
+        <div class="slot-label">Header BG <em style="font-style:normal;color:rgba(255,255,255,.15);font-size:9px">16:9 · 1920×1080</em></div>
         <img class="slot-img" alt="">
         <div class="slot-empty">click to pick</div>
         <div class="slot-name"></div>
@@ -139,9 +140,10 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
       </div>
     </div>
 
-    <h2 style="margin-top:18px">Content Images</h2>
-    <div class="content-imgs" id="contentImages"></div>
-    <div class="content-slot add-slot" id="addContentSlot" style="width:70px;height:70px;border:1px dashed rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.15);font-size:20px" title="Add more images">+</div>
+    <h2 style="margin-top:18px">Content Images <span style="font-weight:400;font-size:10px;color:rgba(255,255,255,.18);text-transform:none">— all remaining images from folder</span></h2>
+    <div class="content-imgs" id="contentImages">
+      <div class="content-slot add-slot" id="addContentSlot" style="width:70px;height:70px;border:1px dashed rgba(255,255,255,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,.15);font-size:20px" title="Add more images">+</div>
+    </div>
   </div>
 
   <!-- ── Step 3: Metadata ── -->
@@ -177,6 +179,12 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
           <option>6</option><option>5</option><option>4</option><option>3</option><option>2</option></select>
       </div>
     </div>
+    <div class="row">
+      <div class="field" style="flex:.5"><label>Content Spacing</label>
+        <select id="f_spacing"><option value="small">Small (8px)</option><option value="medium" selected>Medium (16px)</option><option value="large">Large (32px)</option></select>
+      </div>
+      <div class="field" style="flex:1.5"></div>
+    </div>
     <div class="row"><div class="field"><label>Description</label><textarea id="f_desc" placeholder="Describe your work..."></textarea></div></div>
     <div class="row">
       <div class="field"><label>Client</label><input type="text" id="f_client" placeholder="Client name"></div>
@@ -186,6 +194,7 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
   </div>
 
   <button class="btn btn-upload" id="uploadBtn" disabled>Upload to R2</button>
+  <div class="ready-hint" id="readyHint"></div>
   <div class="progress" id="progress"><div class="bar" id="progressBar"></div></div>
   <div class="status" id="status"></div>
   <a class="back" href="/">← Back to site</a>
@@ -262,13 +271,20 @@ function autoAssign() {
         }
     });
 
-    // Remaining files → content images
-    var ci = 1;
+    // Remaining files → content images (sorted by filename)
+    var remaining = [];
     for (var j = 0; j < pool.length; j++) {
-        if (!used[j]) {
-            contentFiles[ci] = pool[j];
-            ci++;
-        }
+        if (!used[j]) remaining.push(pool[j]);
+    }
+    remaining.sort(function(a, b) {
+        var na = (a.relativePath || a.name).toLowerCase();
+        var nb = (b.relativePath || b.name).toLowerCase();
+        return na.localeCompare(nb);
+    });
+    var ci = 1;
+    for (var r = 0; r < remaining.length; r++) {
+        contentFiles[ci] = remaining[r];
+        ci++;
     }
 
     renderAssigned();
@@ -409,14 +425,32 @@ document.querySelectorAll('.img-slot').forEach(function(slot) {
 
 // ── Enable upload check ─────────────────────────────────────
 var fields = ['f_folder','f_title','f_cat','f_suit','f_rank','f_desc','f_client','f_tools'];
+var fieldLabels = {
+    f_folder: 'Folder Name', f_title: 'Title', f_cat: 'Category',
+    f_suit: 'Suit', f_rank: 'Rank', f_desc: 'Description',
+    f_client: 'Client', f_tools: 'Tools'
+};
 fields.forEach(function(id) {
     document.getElementById(id).addEventListener('input', checkReady);
     document.getElementById(id).addEventListener('change', checkReady);
 });
+checkReady(); // show initial missing hint
+
 function checkReady() {
-    var ok = !!assigned['card-bg'] && !!assigned['card-hover'] && !!assigned['header-bg'] && Object.keys(contentFiles).length > 0;
-    fields.forEach(function(id) { if (!document.getElementById(id).value.trim()) ok = false; });
+    var missing = [];
+    if (!assigned['card-bg']) missing.push('Card Cover');
+    if (!assigned['card-hover']) missing.push('Card Hover');
+    if (!assigned['header-bg']) missing.push('Header BG');
+    if (Object.keys(contentFiles).length === 0) missing.push('at least 1 Content image');
+    fields.forEach(function(id) {
+        if (!document.getElementById(id).value.trim()) {
+            missing.push(fieldLabels[id] || id);
+        }
+    });
+    var ok = missing.length === 0;
     document.getElementById('uploadBtn').disabled = !ok;
+    var hint = document.getElementById('readyHint');
+    hint.textContent = ok ? '' : 'Missing: ' + missing.join(', ');
 }
 
 // ── Upload ───────────────────────────────────────────────────
@@ -435,12 +469,13 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
     fd.append('year',    document.getElementById('f_year').value.trim());
     fd.append('tools',   document.getElementById('f_tools').value.trim());
     fd.append('tags',    document.getElementById('f_tags').value.trim());
+    fd.append('spacing', document.getElementById('f_spacing').value);
 
     // Named image files
     if (assigned['card-bg'])    fd.append('files', assigned['card-bg'],    'card-bg.png');
     if (assigned['card-hover']) fd.append('files', assigned['card-hover'], 'card-hover.png');
     if (assigned['header-bg'])  fd.append('files', assigned['header-bg'],  'header-bg.png');
-    Object.keys(contentFiles).sort().forEach(function(k) {
+    Object.keys(contentFiles).sort(function(a,b){return a-b;}).forEach(function(k) {
         fd.append('files', contentFiles[k], 'content-' + k + '.png');
     });
 
