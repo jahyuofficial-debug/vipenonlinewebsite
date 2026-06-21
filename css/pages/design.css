@@ -35,8 +35,15 @@
 .dw-detail-back svg{width:.16rem;height:.16rem;fill:none;stroke:currentColor;stroke-width:2}
 .dw-detail-hero{width:100%;height:55vh;position:relative;display:flex;align-items:center;justify-content:center}
 .dw-detail-hero-bg{position:absolute;inset:0;z-index:0}
-.dw-shader-canvas{position:absolute;inset:0;z-index:0;width:100%;height:100%;pointer-events:none}
 .dw-detail-hero-mask{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(0,0,0,.85) 100%);z-index:1}
+
+/* WebGL shader canvas — full page background */
+.dw-shader-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+/* Ensure .dw-detail content sits above shader */
+.dw-detail{z-index:150}
+.dw-detail>*{position:relative;z-index:1}
+.dw-detail .dw-detail-hero-mask{position:absolute;z-index:1}
+.dw-detail .dw-detail-hero-bg{position:absolute;z-index:0}
 .dw-detail-hero-content{display:none}
 .dw-detail-head{max-width:9rem;margin:0 auto;padding:.6rem .5rem 0;text-align:left}
 .dw-detail-hero-title{font-size:.18rem;font-weight:800;color:#fff;letter-spacing:.02rem;line-height:1.15}

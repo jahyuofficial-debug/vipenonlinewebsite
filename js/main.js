@@ -1396,10 +1396,10 @@ function navigateToDesignWorkDetail(id) {
     app.appendChild(subPageContainer);
     currentPage = 'design-work-detail';
 
-    // Init WebGL shader background
-    var hero = document.querySelector('.dw-detail-hero');
-    if (hero && typeof DesignShader !== 'undefined') {
-        DesignShader.init(hero);
+    // Init WebGL shader background — full page
+    var detail = document.querySelector('.dw-detail');
+    if (detail && typeof DesignShader !== 'undefined') {
+        DesignShader.init(detail);
     }
     updateNavActiveState(currentPage);
 
