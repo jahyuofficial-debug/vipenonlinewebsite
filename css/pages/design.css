@@ -2,7 +2,7 @@
 .dw-page{position:relative;width:100%;min-height:100vh;background:#000;display:flex;align-items:center;justify-content:center;padding:1.2rem .5rem}
 
 /* Grid container */
-.dw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(1.8rem,1fr));gap:.16rem;width:100%;max-width:14rem;align-content:center}
+.dw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(1.2rem,1fr));gap:.1rem;width:100%;max-width:14rem;align-content:center}
 
 /* Flat card */
 .dw-card{position:relative;border-radius:.08rem;overflow:hidden;cursor:pointer;background:#111;border:1px solid rgba(255,255,255,.04);transition:transform .35s cubic-bezier(.25,.46,.45,.94),box-shadow .35s, border-color .35s;aspect-ratio:3/4}
@@ -23,7 +23,7 @@
 
 /* Responsive: tighter grid on small screens (mobile-block prevents actual mobile use) */
 @media(max-width:900px){
-    .dw-grid{grid-template-columns:repeat(auto-fill,minmax(1.5rem,1fr));gap:.12rem}
+    .dw-grid{grid-template-columns:repeat(auto-fill,minmax(1.1rem,1fr));gap:.08rem}
     .dw-page{padding:.8rem .4rem}
 }
 
