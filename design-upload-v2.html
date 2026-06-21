@@ -1002,12 +1002,17 @@ function checkDiscFileSize(file,label){
     return true;
 }
 
-// Load from R2
+// Load from R2, fallback to local file
 document.getElementById('discLoadLive').addEventListener('click',function(){
     fetch('https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/disc/index.json?'+Date.now())
-        .then(function(r){return r.json();})
-        .then(function(d){discTracks=d;discFiles={};renderDisc();toast('Loaded '+d.length+' tracks');})
-        .catch(function(){toast('Failed to load from R2. Check CORS and DISC_BUCKET.','err');});
+        .then(function(r){if(!r.ok)throw new Error('not found');return r.json();})
+        .then(function(d){discTracks=d;discFiles={};renderDisc();toast('Loaded '+d.length+' tracks from R2');})
+        .catch(function(){
+            fetch('../disc/index.json')
+                .then(function(r){return r.json();})
+                .then(function(d){discTracks=d;discFiles={};renderDisc();toast('Loaded '+d.length+' tracks (local fallback)');})
+                .catch(function(){toast('Failed to load.','err');});
+        });
 });
 
 // Save
