@@ -249,8 +249,7 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
   <div class="tab-panel" id="tab-manage">
     <div class="mgr-toolbar">
       <button id="mgrLoadLive" class="btn-gold">Load from Live Site</button>
-      <button id="mgrLoadLocal">Load Local JSON</button>
-      <button id="mgrDownload" style="display:none" class="btn-gold">Save Changes</button>
+      <button id="mgrDownload" class="btn-gold">Save Changes</button>
       <span style="font-size:10px;color:rgba(255,255,255,.2);display:flex;align-items:center;margin-left:4px" id="mgrCount"></span>
     </div>
     <div id="mgrProjects"></div>
@@ -590,81 +589,46 @@ document.getElementById('mgrLoadLive').addEventListener('click',function(){
         .catch(function(){toast('Failed to load','err');});
 });
 
-// Load local
-document.getElementById('mgrLoadLocal').addEventListener('click',function(){
-    var inp=document.createElement('input');inp.type='file';inp.accept='.json';
-    inp.addEventListener('change',function(){
-        var r=new FileReader();
-        r.onload=function(e){
-            try{mgrProjects=JSON.parse(e.target.result);renderMgr();toast('Loaded local JSON');}
-            catch(ex){toast('Invalid JSON','err');}
-        };
-        r.readAsText(inp.files[0]);
-    });
-    inp.click();
-});
-
-// Save changes — try R2 API first, fallback to local file
+// Save changes → upload to R2 via API
 document.getElementById('mgrDownload').addEventListener('click',function(){
     var btn=document.getElementById('mgrDownload');
     btn.disabled=true; btn.textContent='Saving...';
 
-    var clean=JSON.parse(JSON.stringify(mgrProjects));
     var fd=new FormData();
-    fd.append('json', JSON.stringify(clean));
+    fd.append('json', JSON.stringify(mgrProjects));
     Object.keys(mgrImageFiles).forEach(function(key){
         fd.append('img_'+key, mgrImageFiles[key]);
     });
 
     var xhr=new XMLHttpRequest();
-    xhr.open('POST','/api/design/save'); xhr.withCredentials=true;
+    xhr.open('POST','/api/design/save');
+    xhr.timeout=30000;
     xhr.onload=function(){
-        if(xhr.status===200){
-            try{
-                var r=JSON.parse(xhr.responseText);
-                if(r.success){
-                    mgrImageFiles={};
-                    btn.disabled=false; btn.textContent='Save Changes';
-                    toast('Saved to R2! '+(r.uploaded||0)+' images uploaded.');
-                    return;
-                }
-            }catch(e){}
-        }
-        // R2 save failed — fallback to local file
-        saveLocal();
-    };
-    xhr.onerror=function(){ saveLocal(); };
-    xhr.timeout=5000; xhr.ontimeout=function(){ saveLocal(); };
-
-    function saveLocal(){
-        var j=JSON.stringify(mgrProjects,null,2);
-        var b=new Blob([j],{type:'application/json'});
-        if(window.showSaveFilePicker){
-            window.showSaveFilePicker({
-                suggestedName:'design-index.json',
-                types:[{description:'JSON',accept:{'application/json':['.json']}}]
-            }).then(function(h){
-                h.createWritable().then(function(w){w.write(b);w.close();
-                    btn.disabled=false; btn.textContent='Save Changes';
-                    mgrImageFiles={};
-                    toast('Saved locally! Replace design/index.json & deploy.');
-                }).catch(function(){btn.disabled=false; btn.textContent='Save Changes';});
-            }).catch(function(){fallbackDownload(b);});
-        }else{fallbackDownload(b);}
-    }
-    function fallbackDownload(blob){
-        var u=URL.createObjectURL(blob); var a=document.createElement('a');
-        a.href=u;a.download='design-index.json';a.click();URL.revokeObjectURL(u);
         btn.disabled=false; btn.textContent='Save Changes';
-        mgrImageFiles={};
-        toast('Downloaded! Replace design/index.json & deploy.');
-    }
+        try{
+            var r=JSON.parse(xhr.responseText);
+            if(r.success){
+                mgrImageFiles={};
+                toast('Saved! '+(r.uploaded||0)+' images uploaded to R2.');
+            }else{
+                toast('Error: '+(r.error||'unknown'),'err');
+            }
+        }catch(e){toast('Invalid response from server','err');}
+    };
+    xhr.onerror=function(){
+        btn.disabled=false; btn.textContent='Save Changes';
+        toast('Cannot reach server. Open this tool via https://vipenonline.com/design-upload-v2.html','err');
+    };
+    xhr.ontimeout=function(){
+        btn.disabled=false; btn.textContent='Save Changes';
+        toast('Request timed out. Try again.','err');
+    };
+    xhr.send(fd);
 });
 
 function renderMgr(){
     var c=document.getElementById('mgrProjects');
     document.getElementById('mgrCount').textContent=mgrProjects.length+' projects';
-    document.getElementById('mgrDownload').style.display='';
     var h='';
     mgrProjects.forEach(function(p,pi){
         h+=buildMgrCard(p,pi);
