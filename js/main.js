@@ -141,10 +141,6 @@ BannerPage.initBgVideo();
             });
         }
 
-        // Design: localStorage > static file
-        var mgrDesign = localStorage.getItem('vipen_mgr_design_dwItems');
-        if (mgrDesign) { try { dwItems = JSON.parse(mgrDesign); } catch (e) {} }
-
         freshHeroItems = freshData.heroGroups || freshData.heroItems || [];
         freshCategories = freshData.categories;
         freshItems = freshData.items;
