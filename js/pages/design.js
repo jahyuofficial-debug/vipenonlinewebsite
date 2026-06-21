@@ -31,6 +31,9 @@ function buildDesignWorkDetail(id) {
     var toolsStr = item.tools || '';
     var clientStr = item.client || '';
     var publishedStr = item.published || '';
+    var subtitleStr = item.subtitle || '';
+
+    var subtitleHtml = subtitleStr ? '<p class="dw-detail-hero-sub">' + subtitleStr + '</p>' : '';
 
     var tagsHtml = '';
     var tagsArr = item.tags || [];
@@ -87,6 +90,8 @@ function buildDesignWorkDetail(id) {
         '<div class="dw-detail-hero-mask"></div>' +
         '<div class="dw-detail-hero-content">' +
         '<h2 class="dw-detail-hero-title">' + item.title + '</h2>' +
+        subtitleHtml +
+        '<div class="dw-detail-hero-divider"></div>' +
         '</div></div>' +
         '<div class="dw-detail-body">' +
         bodyTop + bodyBottom +

@@ -124,6 +124,7 @@ BannerPage.initBgVideo();
             dwItems = designData.map(function(item) {
                 return {
                     title: item.title || item.folder.replace(/^\d+-/, ''),
+                    subtitle: item.subtitle || '',
                     cat: item.cat || '',
                     desc: item.description || item.desc || '',
                     client: item.client || '',

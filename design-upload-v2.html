@@ -221,6 +221,9 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
       <div class="field"><label>Title</label><input type="text" id="f_title" placeholder="Work title"></div>
     </div>
     <div class="row">
+      <div class="field"><label>Subtitle</label><input type="text" id="f_subtitle" placeholder="Short subtitle (optional)"></div>
+    </div>
+    <div class="row">
       <div class="field" style="flex:.5"><label>Content Spacing</label>
         <select id="f_spacing"><option value="small">Small (8px)</option><option value="medium" selected>Medium (16px)</option><option value="large">Large (32px)</option></select>
       </div>
@@ -517,6 +520,7 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
     var fd = new FormData();
     fd.append('folderName', folderName);
     fd.append('title',   document.getElementById('f_title').value.trim());
+    fd.append('subtitle',document.getElementById('f_subtitle').value.trim());
     fd.append('desc',    document.getElementById('f_desc').value.trim());
     fd.append('client',  document.getElementById('f_client').value.trim());
     fd.append('year',    document.getElementById('f_year').value.trim());
