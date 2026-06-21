@@ -55,6 +55,23 @@ BannerPage.initBgVideo();
         });
     };
 
+    function loadJSONWithTimeout(url, timeoutMs) {
+        return new Promise(function(resolve) {
+            var timer = setTimeout(function() {
+                resolve(null);
+            }, timeoutMs);
+            fetch(url).then(function(r) {
+                clearTimeout(timer);
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            }).then(function(d) {
+                resolve(d);
+            }).catch(function() {
+                resolve(null);
+            });
+        });
+    }
+
     function resolveDiscTapes() {
         var tapes = window.discData.tapes || [];
         var idx = window.discData.currentTapeIndex || 0;
@@ -69,7 +86,8 @@ BannerPage.initBgVideo();
     var loadDesign = loadJSON('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/design/index.json');
     var loadAction = loadJSON('data/action.json');
     var loadBanner = loadJSON('home/index.json');
-    var loadDisc = loadJSON('disc/index.json');
+    var loadDisc = loadJSONWithTimeout('https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/disc/index.json', 5000)
+        .then(function(d){ return d || loadJSON('disc/index.json'); });
 
     Promise.all([loadSettings, loadFresh, loadDesign, loadAction, loadBanner, loadDisc]).then(function(results) {
         var settings = results[0];
