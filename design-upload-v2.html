@@ -1025,7 +1025,13 @@ document.getElementById('discSave').addEventListener('click',function(){
         toast('Total upload exceeds '+MAX_FILE_MB_DISC+'MB limit.','err');return;
     }
     var fd=new FormData();
-    fd.append('json',JSON.stringify(discTracks));
+    // Strip blob URLs — only valid on this page, would break on main site
+    var cleanTracks = JSON.parse(JSON.stringify(discTracks));
+    cleanTracks.forEach(function(t){
+        if(t.coverUrl && t.coverUrl.indexOf('blob:')===0) t.coverUrl='';
+        if(t.audio && t.audio.indexOf('blob:')===0) t.audio='';
+    });
+    fd.append('json',JSON.stringify(cleanTracks));
     Object.keys(discFiles).forEach(function(key){fd.append('img_'+key,discFiles[key]);});
 
     var xhr=new XMLHttpRequest();xhr.open('POST','/api/disc/save');xhr.timeout=180000;

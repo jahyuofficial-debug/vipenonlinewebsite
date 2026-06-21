@@ -29,14 +29,14 @@ export async function onRequest(context) {
     if (!jsonStr) return json({ success: false, error: 'Missing json field' }, 400);
 
     const tracks = JSON.parse(jsonStr);
+    // Strip any blob URLs (only valid on upload page, not on main site)
+    tracks.forEach(function(t) {
+        if (t.coverUrl && /^blob:/.test(t.coverUrl)) t.coverUrl = '';
+        if (t.audio && /^blob:/.test(t.audio)) t.audio = '';
+    });
     const r2Base = 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev';
 
-    // 1. Upload JSON first
-    await env.DISC_BUCKET.put('disc/index.json', JSON.stringify(tracks, null, 2), {
-      httpMetadata: { contentType: 'application/json; charset=utf-8' }
-    });
-
-    // 2. Upload new/replaced audio & cover files
+    // 1. Upload new/replaced audio & cover files
     let uploadedCount = 0;
     for (const [key, value] of formData.entries()) {
       if (!key.startsWith('img_') || !(value instanceof File)) continue;
@@ -70,12 +70,10 @@ export async function onRequest(context) {
       uploadedCount++;
     }
 
-    // 3. Re-save JSON with updated URLs
-    if (uploadedCount > 0) {
-      await env.DISC_BUCKET.put('disc/index.json', JSON.stringify(tracks, null, 2), {
-        httpMetadata: { contentType: 'application/json; charset=utf-8' }
-      });
-    }
+    // 2. Save JSON (always, even if no files changed — order/metadata may have changed)
+    await env.DISC_BUCKET.put('disc/index.json', JSON.stringify(tracks, null, 2), {
+      httpMetadata: { contentType: 'application/json; charset=utf-8' }
+    });
 
     return json({ success: true, uploaded: uploadedCount });
   } catch (e) {
