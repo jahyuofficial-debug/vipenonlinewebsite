@@ -1488,6 +1488,21 @@ function handleRoute() {
     var hash = window.location.hash.replace('#/', '');
     if (!hash) {
         navigateTo('home');
+        return;
+    }
+    // Skip transition on initial load (loading screen covers it)
+    var skipTrans = !currentPage;
+    function proceed() { handleRouteInner(hash); }
+    if (!skipTrans && typeof PageTransition !== 'undefined') {
+        PageTransition.play(proceed);
+    } else {
+        proceed();
+    }
+}
+
+function handleRouteInner(hash) {
+    if (!hash) {
+        navigateTo('home');
     } else if (hash.indexOf('fresh/detail/s/') === 0) {
         var gIdx = parseInt(hash.replace('fresh/detail/s/', ''), 10);
         if (!isNaN(gIdx)) {
