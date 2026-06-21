@@ -596,12 +596,14 @@ var mgrProjects = [];
 var mgrImageFiles = {};
 var MAX_FILE_MB = 100;
 
-function checkFileSize(file, label){
-    if(file.size > MAX_FILE_MB * 1024 * 1024){
-        toast(label+' exceeds ' + MAX_FILE_MB + 'MB limit! Use a smaller file.','err');
-        return false;
+function isVideo(name){ return /\.(mp4|webm|mov|avi|mkv|ogg)$/i.test(name||''); }
+
+function buildPreview(file, fallbackUrl){
+    if(file && isVideo(file.name)){
+        return 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 60"><rect fill="%23111" width="80" height="60" rx="4"/><polygon points="30,18 30,42 55,30" fill="%23d4a853" opacity=".6"/></svg>';
     }
-    return true;
+    if(file) return URL.createObjectURL(file);
+    return fallbackUrl || '';
 } // key: "pi_field" → File object for replaced images
 
 function toast(msg,t){var s=document.getElementById('statusToast');s.textContent=msg;s.className='status-toast show '+(t||'ok');setTimeout(function(){s.classList.remove('show')},3000);}
@@ -777,10 +779,10 @@ function bindMgrCard(pi){
             var file=inp.files[0];
             if(!checkFileSize(file,k)){inp.value='';return;}
             mgrImageFiles[pi+'_'+k]=file;
-            var url=URL.createObjectURL(file);
-            mgrProjects[pi][k]=url;
+            var preview=buildPreview(file);
+            mgrProjects[pi][k]=preview;
             var img=inp.parentNode.querySelector('img');
-            if(img)img.src=url;
+            if(img)img.src=preview;
         });
     });
     document.querySelectorAll('.mgr-main-slot img').forEach(function(img){
@@ -802,7 +804,7 @@ function bindMgrCard(pi){
             var mi=parseInt(inp.getAttribute('data-mi'));
             var file=inp.files[0];
             mgrImageFiles[pi+'_content-'+mi]=file;
-            mgrProjects[pi].contentImages[mi]=URL.createObjectURL(file);
+            mgrProjects[pi].contentImages[mi]=buildPreview(file);
             renderMgr();
         });
     });
@@ -827,7 +829,7 @@ function bindMgrCard(pi){
                 var f=inp.files[0];
                 var idx=mgrProjects[pi].contentImages.length;
                 mgrImageFiles[pi+'_content-'+idx]=f;
-                mgrProjects[pi].contentImages.push(URL.createObjectURL(f));
+                mgrProjects[pi].contentImages.push(buildPreview(f));
                 renderMgr();
             });
             inp.click();
