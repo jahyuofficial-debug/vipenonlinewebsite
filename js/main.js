@@ -788,9 +788,6 @@ function bindMsgInteractions() {
 
 function navigateTo(pageName) {
     if (subPageContainer) {
-        if (typeof DesignShader !== 'undefined') {
-            DesignShader.destroy();
-        }
         subPageContainer.remove();
         subPageContainer = null;
     }
@@ -1395,12 +1392,6 @@ function navigateToDesignWorkDetail(id) {
     subPageContainer.innerHTML = DesignPage.buildDetail(id);
     app.appendChild(subPageContainer);
     currentPage = 'design-work-detail';
-
-    // Init WebGL shader background
-    var hero = document.querySelector('.dw-detail-hero');
-    if (hero && typeof DesignShader !== 'undefined') {
-        DesignShader.init(hero);
-    }
     updateNavActiveState(currentPage);
 
     var backBtn = document.getElementById('dwDetailBack');
