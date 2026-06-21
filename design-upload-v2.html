@@ -761,12 +761,26 @@ function bindMgrCard(pi){
             renderMgr();
         });
     });
-    // Add image
+    // Add image — file upload
     var addBtn=ct.querySelector('.mgr-add-img');
     if(addBtn){
         addBtn.addEventListener('click',function(){
-            var url=prompt('Enter image URL:');
-            if(url&&url.trim()){mgrProjects[pi].contentImages.push(url.trim());renderMgr();}
+            var inp=document.createElement('input');
+            inp.type='file';
+            inp.accept='image/*,video/*';
+            inp.addEventListener('change',function(){
+                if(!inp.files.length)return;
+                var f=inp.files[0];
+                var idx=mgrProjects[pi].contentImages.length;
+                mgrImageFiles[pi+'_content-'+idx]=f;
+                var r=new FileReader();
+                r.onload=function(e){
+                    mgrProjects[pi].contentImages.push(e.target.result);
+                    renderMgr();
+                };
+                r.readAsDataURL(f);
+            });
+            inp.click();
         });
     }
 }
