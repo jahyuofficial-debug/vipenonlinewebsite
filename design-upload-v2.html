@@ -593,7 +593,16 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
 (function(){
 'use strict';
 var mgrProjects = [];
-var mgrImageFiles = {}; // key: "pi_field" → File object for replaced images
+var mgrImageFiles = {};
+var MAX_FILE_MB = 100;
+
+function checkFileSize(file, label){
+    if(file.size > MAX_FILE_MB * 1024 * 1024){
+        toast(label+' exceeds ' + MAX_FILE_MB + 'MB limit! Use a smaller file.','err');
+        return false;
+    }
+    return true;
+} // key: "pi_field" → File object for replaced images
 
 function toast(msg,t){var s=document.getElementById('statusToast');s.textContent=msg;s.className='status-toast show '+(t||'ok');setTimeout(function(){s.classList.remove('show')},3000);}
 
@@ -619,6 +628,15 @@ document.getElementById('mgrLoadLive').addEventListener('click',function(){
 document.getElementById('mgrDownload').addEventListener('click',function(){
     var btn=document.getElementById('mgrDownload');
     btn.disabled=true; btn.textContent='Saving...';
+
+    // Check total file size before upload
+    var totalBytes=0;
+    Object.keys(mgrImageFiles).forEach(function(k){totalBytes+=mgrImageFiles[k].size;});
+    if(totalBytes > MAX_FILE_MB * 1024 * 1024){
+        btn.disabled=false; btn.textContent='Save Changes';
+        toast('Total upload exceeds '+MAX_FILE_MB+'MB limit. Use smaller files.','err');
+        return;
+    }
 
     var fd=new FormData();
     fd.append('json', JSON.stringify(mgrProjects));
@@ -757,6 +775,7 @@ function bindMgrCard(pi){
             if(!inp.files.length)return;
             var k=inp.getAttribute('data-mgr-img');
             var file=inp.files[0];
+            if(!checkFileSize(file,k)){inp.value='';return;}
             mgrImageFiles[pi+'_'+k]=file;
             var url=URL.createObjectURL(file);
             mgrProjects[pi][k]=url;
