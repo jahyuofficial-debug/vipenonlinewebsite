@@ -88,8 +88,8 @@ var fragmentShader = [
     '      lineColor = mix(lineColor, vec3(0.1, 0.55, 0.15), 0.4);',
     '    }',
     '',
-    '    float lineAlpha = l1 * 0.5 + l2 * 0.3;',
-    '    lineAlpha *= 0.5 + fi * 0.08;',
+    '    float lineAlpha = l1 * 0.25 + l2 * 0.15;',
+    '    lineAlpha *= 0.3 + fi * 0.06;',
     '',
     '    color += lineColor * lineAlpha;',
     '    alpha += lineAlpha;',
@@ -99,10 +99,8 @@ var fragmentShader = [
     '  float bgNoise = noise(uv * 3.0 + t * 0.02) * 0.03;',
     '  color += vec3(0.02, 0.08, 0.02) * bgNoise;',
     '',
-    '  // Dark background base so shader works standalone',
-    '  color += vec3(0.03, 0.03, 0.04);',
     '  alpha = clamp(alpha, 0.0, 0.7);',
-    '  gl_FragColor = vec4(color, 1.0);',
+    '  gl_FragColor = vec4(color, alpha);',
     '}'
 ].join('\n');
 
@@ -120,7 +118,6 @@ function init(container) {
 
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setClearColor(0x0a0a0f, 1);
 
     container.appendChild(canvas);
 
