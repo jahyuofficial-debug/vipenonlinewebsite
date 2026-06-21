@@ -137,6 +137,16 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
 .status-toast.show{opacity:1;transform:translateY(0)}
 .status-toast.ok{background:rgba(34,197,94,.9);color:#fff}
 .status-toast.err{background:rgba(239,68,68,.9);color:#fff}
+
+/* Circular progress */
+.mgr-progress-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;flex-direction:column}
+.mgr-progress-overlay.show{display:flex}
+.mgr-progress-ring{width:80px;height:80px;position:relative}
+.mgr-progress-ring svg{transform:rotate(-90deg)}
+.mgr-progress-ring .track{fill:none;stroke:rgba(255,255,255,.1);stroke-width:4}
+.mgr-progress-ring .fill{fill:none;stroke:#d4a853;stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .3s}
+.mgr-progress-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#d4a853}
+.mgr-progress-label{margin-top:16px;font-size:13px;color:rgba(255,255,255,.4)}
 </style>
 </head>
 <body>
@@ -260,6 +270,16 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
 
 </div><!-- /wrap -->
 <div class="status-toast" id="statusToast"></div>
+<div class="mgr-progress-overlay" id="mgrProgressOverlay">
+  <div class="mgr-progress-ring">
+    <svg viewBox="0 0 80 80" width="80" height="80">
+      <circle class="track" cx="40" cy="40" r="34"/>
+      <circle class="fill" id="mgrProgressCircle" cx="40" cy="40" r="34" stroke-dasharray="213.6" stroke-dashoffset="213.6"/>
+    </svg>
+    <div class="mgr-progress-text" id="mgrProgressPct">0%</div>
+  </div>
+  <div class="mgr-progress-label" id="mgrProgressLabel">Uploading...</div>
+</div>
 
 <script>
 // ── State ────────────────────────────────────────────────────
@@ -608,8 +628,28 @@ document.getElementById('mgrDownload').addEventListener('click',function(){
 
     var xhr=new XMLHttpRequest();
     xhr.open('POST','/api/design/save');
-    xhr.timeout=30000;
+    xhr.timeout=60000;
+
+    // Circular progress
+    var overlay=document.getElementById('mgrProgressOverlay');
+    var circle=document.getElementById('mgrProgressCircle');
+    var pctEl=document.getElementById('mgrProgressPct');
+    var labelEl=document.getElementById('mgrProgressLabel');
+    var circLen=213.6;
+    overlay.classList.add('show');
+    circle.style.strokeDashoffset=circLen;
+    pctEl.textContent='0%';
+    labelEl.textContent='Uploading...';
+
+    xhr.upload.onprogress=function(e){
+        if(e.lengthComputable){
+            var p=Math.round(e.loaded/e.total*100);
+            circle.style.strokeDashoffset=circLen-(circLen*p/100);
+            pctEl.textContent=p+'%';
+        }
+    };
     xhr.onload=function(){
+        overlay.classList.remove('show');
         btn.disabled=false; btn.textContent='Save Changes';
         try{
             var r=JSON.parse(xhr.responseText);
@@ -622,10 +662,12 @@ document.getElementById('mgrDownload').addEventListener('click',function(){
         }catch(e){toast('Invalid response from server','err');}
     };
     xhr.onerror=function(){
+        overlay.classList.remove('show');
         btn.disabled=false; btn.textContent='Save Changes';
         toast('Cannot reach server. Open this tool via https://vipenonline.com/design-upload-v2.html','err');
     };
     xhr.ontimeout=function(){
+        overlay.classList.remove('show');
         btn.disabled=false; btn.textContent='Save Changes';
         toast('Request timed out. Try again.','err');
     };
@@ -715,14 +757,11 @@ function bindMgrCard(pi){
             if(!inp.files.length)return;
             var k=inp.getAttribute('data-mgr-img');
             var file=inp.files[0];
-            mgrImageFiles[pi+'_'+k]=file; // store for upload
-            var r=new FileReader();
-            r.onload=function(e){
-                mgrProjects[pi][k]=e.target.result;
-                var img=inp.parentNode.querySelector('img');
-                if(img)img.src=e.target.result;
-            };
-            r.readAsDataURL(file);
+            mgrImageFiles[pi+'_'+k]=file;
+            var url=URL.createObjectURL(file);
+            mgrProjects[pi][k]=url;
+            var img=inp.parentNode.querySelector('img');
+            if(img)img.src=url;
         });
     });
     document.querySelectorAll('.mgr-main-slot img').forEach(function(img){
@@ -743,13 +782,9 @@ function bindMgrCard(pi){
             if(!inp.files.length)return;
             var mi=parseInt(inp.getAttribute('data-mi'));
             var file=inp.files[0];
-            mgrImageFiles[pi+'_content-'+mi]=file; // store for upload
-            var r=new FileReader();
-            r.onload=function(e){
-                mgrProjects[pi].contentImages[mi]=e.target.result;
-                renderMgr();
-            };
-            r.readAsDataURL(file);
+            mgrImageFiles[pi+'_content-'+mi]=file;
+            mgrProjects[pi].contentImages[mi]=URL.createObjectURL(file);
+            renderMgr();
         });
     });
     // Delete
@@ -773,12 +808,8 @@ function bindMgrCard(pi){
                 var f=inp.files[0];
                 var idx=mgrProjects[pi].contentImages.length;
                 mgrImageFiles[pi+'_content-'+idx]=f;
-                var r=new FileReader();
-                r.onload=function(e){
-                    mgrProjects[pi].contentImages.push(e.target.result);
-                    renderMgr();
-                };
-                r.readAsDataURL(f);
+                mgrProjects[pi].contentImages.push(URL.createObjectURL(f));
+                renderMgr();
             });
             inp.click();
         });
