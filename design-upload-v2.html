@@ -250,7 +250,7 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
     <div class="mgr-toolbar">
       <button id="mgrLoadLive" class="btn-gold">Load from Live Site</button>
       <button id="mgrLoadLocal">Load Local JSON</button>
-      <button id="mgrDownload" style="display:none">Download JSON</button>
+      <button id="mgrDownload" style="display:none" class="btn-gold">Save Changes</button>
       <span style="font-size:10px;color:rgba(255,255,255,.2);display:flex;align-items:center;margin-left:4px" id="mgrCount"></span>
     </div>
     <div id="mgrProjects"></div>
@@ -601,14 +601,28 @@ document.getElementById('mgrLoadLocal').addEventListener('click',function(){
     inp.click();
 });
 
-// Download
+// Save changes
 document.getElementById('mgrDownload').addEventListener('click',function(){
     var j=JSON.stringify(mgrProjects,null,2);
     var b=new Blob([j],{type:'application/json'});
-    var u=URL.createObjectURL(b);
-    var a=document.createElement('a');a.href=u;a.download='design-index.json';a.click();
-    URL.revokeObjectURL(u);
-    toast('Downloaded! Replace design/index.json & deploy.');
+    // Try File System Access API (direct save to disk)
+    if(window.showSaveFilePicker){
+        window.showSaveFilePicker({
+            suggestedName:'design-index.json',
+            types:[{description:'JSON',accept:{'application/json':['.json']}}]
+        }).then(function(h){
+            h.createWritable().then(function(w){
+                w.write(b);w.close();toast('Saved!');
+            }).catch(function(){fallbackDownload(b);});
+        }).catch(function(){fallbackDownload(b);});
+    }else{fallbackDownload(b);}
+
+    function fallbackDownload(blob){
+        var u=URL.createObjectURL(blob);
+        var a=document.createElement('a');a.href=u;a.download='design-index.json';a.click();
+        URL.revokeObjectURL(u);
+        toast('Downloaded! Replace design/index.json and deploy.');
+    }
 });
 
 function renderMgr(){
