@@ -1461,12 +1461,14 @@ function navigateToDesignWorkDetail(id) {
 
 
 discAudio = new Audio();
+if (window.discData && window.discData.tapes) {
 var initDiscTapes = window.discData.tapes || [];
 var initDiscIdx = window.discData.currentTapeIndex || 0;
 if (initDiscTapes[initDiscIdx] && initDiscTapes[initDiscIdx].audio) {
     discAudio.src = initDiscTapes[initDiscIdx].audio;
     discAudio.load();
 }
+} // end if(window.discData)
 
 
 

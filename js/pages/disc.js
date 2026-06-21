@@ -151,9 +151,11 @@ function syncCarousel() {
 }
 
 function buildDiscPage() {
-    // always build full page — preload handled by main loading screen
+    // Guard: ensure discData exists even if JSON hasn't loaded yet
+    if (!window.discData) window.discData = { tapes: [], playMode: 'sequence', currentTapeIndex: 0 };
+    if (!window.discData.tapes) window.discData.tapes = [];
 
-    var tapes = window.discData.tapes || [];
+    var tapes = window.discData.tapes;
     var currentIndex = window.discData.currentTapeIndex || 0;
     var currentTape = tapes[currentIndex] || {};
     window.discData.nowPlaying = {
