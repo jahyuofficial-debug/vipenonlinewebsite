@@ -135,6 +135,7 @@ BannerPage.initBgVideo();
                     contentImages: item.contentImages || [],
                     tags: item.tags || [],
                     spacing: item.spacing || 'medium',
+                    descPosition: item.descPosition || 'top',
                     likeCount: item.likeCount || 0
                 };
             });

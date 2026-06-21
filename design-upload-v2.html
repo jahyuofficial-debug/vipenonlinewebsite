@@ -166,7 +166,10 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
       <div class="field" style="flex:.5"><label>Content Spacing</label>
         <select id="f_spacing"><option value="small">Small (8px)</option><option value="medium" selected>Medium (16px)</option><option value="large">Large (32px)</option></select>
       </div>
-      <div class="field" style="flex:1.5"></div>
+      <div class="field" style="flex:.5"><label>Desc Position</label>
+        <select id="f_descPos"><option value="top" selected>Top</option><option value="bottom">Bottom</option></select>
+      </div>
+      <div class="field" style="flex:1"></div>
     </div>
     <div class="row"><div class="field"><label>Description</label><textarea id="f_desc" placeholder="Describe your work..."></textarea></div></div>
     <div class="row">
@@ -449,6 +452,7 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
     fd.append('tools',   document.getElementById('f_tools').value.trim());
     fd.append('tags',    document.getElementById('f_tags').value.trim());
     fd.append('spacing', document.getElementById('f_spacing').value);
+    fd.append('descPos',  document.getElementById('f_descPos').value);
 
     // Named image files
     if (assigned['card-bg'])    fd.append('files', assigned['card-bg'],    'card-bg.png');

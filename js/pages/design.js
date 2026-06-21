@@ -51,6 +51,16 @@ function buildDesignWorkDetail(id) {
 
     var descHtml = item.desc ? '<div class="dw-detail-desc"><p>' + item.desc + '</p></div>' : '';
 
+    // Build body content based on descPosition
+    var bodyTop = '', bodyBottom = '';
+    if (item.descPosition === 'bottom') {
+        bodyTop = mediaHtml + tagsHtml + likeHtml;
+        bodyBottom = descHtml;
+    } else {
+        bodyTop = descHtml + mediaHtml;
+        bodyBottom = tagsHtml + likeHtml;
+    }
+
     var mediaHtml = '';
     var contentImages = item.contentImages || [];
     var spacingMap = { small: '.08rem', medium: '.16rem', large: '.32rem' };
@@ -79,7 +89,7 @@ function buildDesignWorkDetail(id) {
         '<h2 class="dw-detail-hero-title">' + item.title + '</h2>' +
         '</div></div>' +
         '<div class="dw-detail-body">' +
-        descHtml + mediaHtml + tagsHtml + likeHtml +
+        bodyTop + bodyBottom +
         '<div class="dw-detail-meta">' +
         '<div class="dw-detail-meta-item"><p class="dw-detail-meta-label">Client</p><p class="dw-detail-meta-value">' + clientStr + '</p></div>' +
         '<div class="dw-detail-meta-item"><p class="dw-detail-meta-label">Published</p><p class="dw-detail-meta-value">' + publishedStr + '</p></div>' +
