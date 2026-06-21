@@ -567,6 +567,8 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
 (function(){
 'use strict';
 var mgrProjects = [];
+var mgrImageFiles = {}; // key: "pi_field" → File object for replaced images
+
 function toast(msg,t){var s=document.getElementById('statusToast');s.textContent=msg;s.className='status-toast show '+(t||'ok');setTimeout(function(){s.classList.remove('show')},3000);}
 
 // Tabs
@@ -601,28 +603,45 @@ document.getElementById('mgrLoadLocal').addEventListener('click',function(){
     inp.click();
 });
 
-// Save changes
+// Save changes → upload to R2 via API
 document.getElementById('mgrDownload').addEventListener('click',function(){
-    var j=JSON.stringify(mgrProjects,null,2);
-    var b=new Blob([j],{type:'application/json'});
-    // Try File System Access API (direct save to disk)
-    if(window.showSaveFilePicker){
-        window.showSaveFilePicker({
-            suggestedName:'design-index.json',
-            types:[{description:'JSON',accept:{'application/json':['.json']}}]
-        }).then(function(h){
-            h.createWritable().then(function(w){
-                w.write(b);w.close();toast('Saved!');
-            }).catch(function(){fallbackDownload(b);});
-        }).catch(function(){fallbackDownload(b);});
-    }else{fallbackDownload(b);}
+    var btn=document.getElementById('mgrDownload');
+    btn.disabled=true; btn.textContent='Saving...';
 
-    function fallbackDownload(blob){
-        var u=URL.createObjectURL(blob);
-        var a=document.createElement('a');a.href=u;a.download='design-index.json';a.click();
-        URL.revokeObjectURL(u);
-        toast('Downloaded! Replace design/index.json and deploy.');
-    }
+    // Strip base64 data URIs from text fields (keep only R2 URLs)
+    var clean=JSON.parse(JSON.stringify(mgrProjects));
+    clean.forEach(function(p){
+        ['cardBg','cardHoverBg','headerBg'].forEach(function(k){
+            if(p[k] && p[k].startsWith('data:')) { /* keep, will be replaced by uploaded file */ }
+        });
+    });
+
+    var fd=new FormData();
+    fd.append('json', JSON.stringify(clean));
+
+    // Collect replaced image files
+    Object.keys(mgrImageFiles).forEach(function(key){
+        fd.append('img_'+key, mgrImageFiles[key]);
+    });
+
+    var xhr=new XMLHttpRequest();
+    xhr.open('POST','/api/design/save'); xhr.withCredentials=true;
+    xhr.onload=function(){
+        btn.disabled=false; btn.textContent='Save Changes';
+        if(xhr.status===200){
+            try{
+                var r=JSON.parse(xhr.responseText);
+                if(r.success){
+                    mgrImageFiles={};
+                    toast('Saved! '+r.uploaded+' images uploaded to R2.');
+                }else{
+                    toast('Error: '+(r.error||'unknown'),'err');
+                }
+            }catch(e){toast('Saved but could not parse response','err');}
+        }else{toast('Server error: '+xhr.status,'err');}
+    };
+    xhr.onerror=function(){btn.disabled=false; btn.textContent='Save Changes'; toast('Network error','err');};
+    xhr.send(fd);
 });
 
 function renderMgr(){
@@ -707,13 +726,15 @@ function bindMgrCard(pi){
         inp.addEventListener('change',function(){
             if(!inp.files.length)return;
             var k=inp.getAttribute('data-mgr-img');
+            var file=inp.files[0];
+            mgrImageFiles[pi+'_'+k]=file; // store for upload
             var r=new FileReader();
             r.onload=function(e){
                 mgrProjects[pi][k]=e.target.result;
                 var img=inp.parentNode.querySelector('img');
                 if(img)img.src=e.target.result;
             };
-            r.readAsDataURL(inp.files[0]);
+            r.readAsDataURL(file);
         });
     });
     document.querySelectorAll('.mgr-main-slot img').forEach(function(img){
@@ -733,12 +754,14 @@ function bindMgrCard(pi){
         inp.addEventListener('change',function(){
             if(!inp.files.length)return;
             var mi=parseInt(inp.getAttribute('data-mi'));
+            var file=inp.files[0];
+            mgrImageFiles[pi+'_content-'+mi]=file; // store for upload
             var r=new FileReader();
             r.onload=function(e){
                 mgrProjects[pi].contentImages[mi]=e.target.result;
                 renderMgr();
             };
-            r.readAsDataURL(inp.files[0]);
+            r.readAsDataURL(file);
         });
     });
     // Delete
