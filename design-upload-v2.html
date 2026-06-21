@@ -163,12 +163,6 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
       <div class="field"><label>Title</label><input type="text" id="f_title" placeholder="Work title"></div>
     </div>
     <div class="row">
-      <div class="field"><label>Category</label>
-        <select id="f_cat"><option value="">Choose...</option>
-          <option>Brand Identity</option><option>UI Design</option><option>3D Art</option>
-          <option>Graphic Design</option><option>Motion Graphics</option><option>Illustration</option>
-          <option>Typography</option><option>Photography</option></select>
-      </div>
       <div class="field" style="flex:.5"><label>Suit</label>
         <select id="f_suit"><option value="">—</option><option>♠</option><option>♥</option><option>♦</option><option>♣</option></select>
       </div>
@@ -424,9 +418,9 @@ document.querySelectorAll('.img-slot').forEach(function(slot) {
 
 
 // ── Enable upload check ─────────────────────────────────────
-var fields = ['f_folder','f_title','f_cat','f_suit','f_rank','f_desc','f_client','f_tools'];
+var fields = ['f_folder','f_title','f_suit','f_rank','f_desc','f_client','f_tools'];
 var fieldLabels = {
-    f_folder: 'Folder Name', f_title: 'Title', f_cat: 'Category',
+    f_folder: 'Folder Name', f_title: 'Title',
     f_suit: 'Suit', f_rank: 'Rank', f_desc: 'Description',
     f_client: 'Client', f_tools: 'Tools'
 };
@@ -461,7 +455,6 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
     var fd = new FormData();
     fd.append('folderName', folderName);
     fd.append('title',   document.getElementById('f_title').value.trim());
-    fd.append('cat',     document.getElementById('f_cat').value);
     fd.append('suit',    document.getElementById('f_suit').value);
     fd.append('rank',    document.getElementById('f_rank').value);
     fd.append('desc',    document.getElementById('f_desc').value.trim());

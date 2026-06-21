@@ -13,7 +13,6 @@ function buildDesignWorkGrid() {
             '<div class="dw-card-img" style="background-image:url(' + img + ')"></div>' +
             '<div class="dw-card-overlay"></div>' +
             '<div class="dw-card-info">' +
-            '<p class="dw-card-cat">' + (item.cat || '') + '</p>' +
             '<p class="dw-card-title">' + (item.title || '') + '</p>' +
             '</div>' +
             '</div>';
@@ -78,7 +77,6 @@ function buildDesignWorkDetail(id) {
         '<div class="dw-detail-hero-mask"></div>' +
         '<div class="dw-detail-hero-content">' +
         '<h2 class="dw-detail-hero-title">' + item.title + '</h2>' +
-        '<p class="dw-detail-hero-cat">' + item.cat + '</p>' +
         '</div></div>' +
         '<div class="dw-detail-body">' +
         descHtml + mediaHtml + tagsHtml + likeHtml +
@@ -100,7 +98,6 @@ function buildDesignWorkListCards(page) {
         return '<div class="dw-list-card" data-dw-id="' + realIndex + '">' +
             '<div class="dw-list-card-thumb" style="background:' + thumbBg + '"></div>' +
             '<div class="dw-list-card-body">' +
-            '<p class="dw-list-card-cat">' + item.cat + '</p>' +
             '<h3 class="dw-list-card-title">' + item.title + '</h3>' +
             '<p class="dw-list-card-meta">' + (item.published || '') + '  ' + (item.client || '') + '</p>' +
             '<p class="dw-list-card-desc">' + (item.desc || '').substring(0, 120) + '</p>' +
