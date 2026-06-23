@@ -134,7 +134,6 @@
     var banner = document.getElementById('banner');
     var brandSvg = document.querySelector('.brand-text-svg');
     var brandPath = document.getElementById('brandTextPath');
-    var footerEl = document.getElementById('brandFooter');
     var maskEl = document.querySelector('#banner .mask');
     var qrArea = document.getElementById('socialQRArea');
 
@@ -149,7 +148,6 @@
     // Initial state: text hidden, fill white
     gsap.set(brandSvg, { clipPath: 'inset(0 100% 0 0)' });
     gsap.set(brandPath, { fill: '#fff' });
-    gsap.set(footerEl, { opacity: 0 });
     gsap.set(qrArea, { opacity: 0, y: 20 });
 
     var tl = gsap.timeline({
@@ -176,9 +174,6 @@
 
     // Phase 3: Fill turns fluorescent green (58% → 64%)
     tl.to(brandPath, { fill: '#39ff14', ease: 'power2.in', duration: 0.06 }, 0.58);
-
-    // Phase 4: Copyright fades in (58% → 68%)
-    tl.to(footerEl, { opacity: 1, ease: 'power2.out', duration: 0.10 }, 0.58);
 
     // Phase 5: Social QR icons fade in (72% → 88%)
     tl.to(qrArea, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.16 }, 0.72);
