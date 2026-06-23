@@ -62,15 +62,15 @@
 
 /* QR popup — single shared popup below icon row */
 #socialQRPopup{
-  display:none;
+  visibility:hidden;opacity:0;
   position:relative;margin:.16rem auto 0;width:.96rem;height:.96rem;
   background:#111;border:none;border-radius:0;
-  padding:.06rem;opacity:0;
-  transition:opacity .5s ease;
-  box-shadow:0 .08rem .32rem rgba(0,0,0,.6);
+  padding:0;overflow:hidden;
+  transition:visibility .4s,opacity .4s ease;
 }
 #socialQRPopup.visible{
-  display:block;opacity:1;
+  visibility:visible;opacity:1;padding:.06rem;
+  box-shadow:0 .08rem .32rem rgba(0,0,0,.6);
 }
 #socialQRPopup img{
   width:100%;height:100%;object-fit:contain;display:block;border-radius:0;
