@@ -117,14 +117,14 @@
     tl.to(banner, { scale: 0, opacity: 0, ease: 'power2.in', duration: 0.25 }, 0);
     tl.to(maskEl, { opacity: 0, duration: 0.25 }, 0);
 
-    // Phase 2: Handwriting stroke draw (15% → 50%)
+    // Phase 2: Handwriting stroke draw — white ink fills in (15% → 50%)
     tl.to(brandPath, { strokeDashoffset: 0, ease: 'power2.inOut', duration: 0.35 }, 0.15);
 
-    // Phase 3: Fill stroke → fluorescent green (48% → 55%)
-    tl.to(brandPath, { fill: '#39ff14', stroke: '#39ff14', duration: 0.07 }, 0.48);
+    // Phase 3: Fill fades to fluorescent green (48% → 55%)
+    tl.to(brandPath, { fill: '#39ff14', ease: 'power2.in', duration: 0.07 }, 0.48);
 
-    // Phase 4: Green → pure white fill (55% → 62%)
-    tl.to(brandPath, { fill: '#fff', stroke: '#fff', duration: 0.07 }, 0.55);
+    // Phase 4: Green fill → pure white (55% → 62%)
+    tl.to(brandPath, { fill: '#fff', ease: 'power2.out', duration: 0.07 }, 0.55);
 
     // Phase 5: Social QR icons fade in (65% → 80%)
     tl.to(qrArea, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.15 }, 0.65);
