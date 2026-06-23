@@ -71,7 +71,7 @@
   cursor:pointer;transition:transform .3s ease,opacity .3s ease;opacity:.55;
   pointer-events:auto;
 }
-.social-qr-area .social-qr-item:hover{transform:scale(1.15);opacity:1}
+.social-qr-area .social-qr-item:hover{opacity:1}
 .social-qr-area .social-qr-item svg{
   width:.28rem;height:.28rem;fill:#fff;
 }
@@ -94,8 +94,8 @@
 #socialQRPopup .social-qr-text{
   display:none;color:rgba(255,255,255,.55);
   font-family:'Inter',-apple-system,sans-serif;
-  font-size:.10rem;text-align:center;
-  padding:.1rem;word-break:break-all;line-height:1.4;
+  font-size:.10rem;text-align:center;white-space:nowrap;
+  padding:.1rem;line-height:1.4;
 }
 #socialQRPopup .social-qr-popup-label{
   position:absolute;bottom:.04rem;left:50%;transform:translateX(-50%);
