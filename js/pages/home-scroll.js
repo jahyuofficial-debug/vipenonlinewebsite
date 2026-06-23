@@ -1,13 +1,12 @@
 /**
  * Homepage scroll-driven animation (SPA-aware)
- * Video shrinks → "VipenOnline" reveals → QR codes appear
- * Elements are dynamically injected ONLY on homepage
+ * Dynamically injects VipenOnline + QR content ONLY on homepage
+ * Removes from DOM entirely when leaving homepage
  */
 (function() {
   'use strict';
 
   var scrollTriggerInstance = null;
-  var scrollContentEl = null;
   var setupComplete = false;
 
   var QR_HTML = '' +
@@ -34,8 +33,7 @@
     '</div>';
 
   function getCurrentPage() {
-    var hash = window.location.hash.replace('#/', '');
-    return hash || 'home';
+    return window.location.hash.replace('#/', '') || 'home';
   }
 
   function isHomepage() {
@@ -43,32 +41,18 @@
   }
 
   function injectScrollContent() {
-    if (document.getElementById('scrollContent')) return; // Already injected
+    if (document.getElementById('scrollContent')) return;
     var homeWrapper = document.getElementById('homeWrapper');
     if (!homeWrapper) return;
     var temp = document.createElement('div');
     temp.innerHTML = QR_HTML;
-    scrollContentEl = temp.firstChild;
-    homeWrapper.appendChild(scrollContentEl);
-
-    // Re-run social QR hover bindings
-    var items = scrollContentEl.querySelectorAll('.social-qr-item');
-    items.forEach(function(item) {
-      item.addEventListener('mouseenter', function() {});
-      item.addEventListener('mouseleave', function() {});
-    });
+    var el = temp.firstChild;
+    homeWrapper.appendChild(el);
   }
 
   function removeScrollContent() {
-    if (scrollContentEl && scrollContentEl.parentNode) {
-      scrollContentEl.parentNode.removeChild(scrollContentEl);
-      scrollContentEl = null;
-    }
-    // Also clean up any other injected instance
-    var existing = document.getElementById('scrollContent');
-    if (existing && existing.parentNode) {
-      existing.parentNode.removeChild(existing);
-    }
+    var el = document.getElementById('scrollContent');
+    if (el && el.parentNode) el.parentNode.removeChild(el);
   }
 
   function killAnimation() {
@@ -80,26 +64,23 @@
     setupComplete = false;
   }
 
-  function isVisible(el) {
-    if (!el) return false;
-    return el.offsetParent !== null || (el.style && el.style.display !== 'none');
-  }
-
   function setupAnimation() {
     if (setupComplete) return;
 
-    var homeWrapper = document.getElementById('homeWrapper');
-    if (!homeWrapper || !isVisible(homeWrapper)) return;
-
-    // Inject scroll content DOM
+    // Inject DOM synchronously before querying
     injectScrollContent();
 
+    var homeWrapper = document.getElementById('homeWrapper');
     var banner = document.getElementById('banner');
     var brandText = document.querySelector('.brand-text');
     var maskEl = document.querySelector('#banner .mask');
     var qrArea = document.getElementById('socialQRArea');
 
-    if (!banner || !brandText || !qrArea) return;
+    if (!homeWrapper || !banner || !brandText || !qrArea) {
+      // If elements not found (e.g. wrapper hidden), clean up injected DOM
+      removeScrollContent();
+      return;
+    }
 
     gsap.registerPlugin(ScrollTrigger);
 
@@ -131,10 +112,8 @@
   function onHashChange() {
     if (isHomepage()) {
       killAnimation();
-      requestAnimationFrame(function() {
-        setupAnimation();
-        ScrollTrigger.refresh();
-      });
+      setupAnimation();
+      ScrollTrigger.refresh();
     } else {
       killAnimation();
     }
