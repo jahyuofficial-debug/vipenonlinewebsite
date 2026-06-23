@@ -1,30 +1,30 @@
 .fresh-page{background:#000;padding-top:1.2rem}
-.fresh-hero-carousel{position:relative;width:100%;height:70vh;overflow:hidden;background:transparent}
+.fresh-hero-carousel{position:relative;width:100%;height:50vh;overflow:hidden;background:transparent}
 .fresh-hero-slide{position:absolute;inset:0;opacity:0;transition:opacity 1s cubic-bezier(.4,0,.2,1);pointer-events:none}
 .fresh-hero-slide.active{opacity:1;pointer-events:auto}
 .fresh-hero-bg{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center;cursor:pointer}
 .fresh-hero-mask{position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,.4) 40%,rgba(0,0,0,.2) 60%,rgba(0,0,0,.5) 100%);pointer-events:none}
-.fresh-hero-content{position:absolute;top:50%;left:.8rem;z-index:3;transform:translateY(-50%);max-width:35%}
-.fresh-hero-main-title{font-size:1.4rem;font-weight:800;color:#fff;line-height:1;letter-spacing:-.02rem;margin-bottom:.16rem;text-shadow:0 .02rem .12rem rgba(0,0,0,.5)}
-.fresh-hero-sub-title{font-size:.18rem;color:rgba(255,255,255,.5);letter-spacing:.04rem;font-weight:400}
-.fresh-hero-panel{position:absolute;right:.8rem;top:50%;z-index:3;transform:translateY(-50%);display:flex;flex-direction:column;gap:.2rem;width:4rem}
-.fresh-hero-card{background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#a855f7 100%);border-radius:.2rem;padding:.28rem;position:relative;overflow:hidden;box-shadow:0 .2rem .6rem rgba(99,102,241,.3);cursor:pointer;transition:transform .35s,box-shadow .35s}
+.fresh-hero-content{position:absolute;top:50%;left:.6rem;z-index:3;transform:translateY(-50%);max-width:30%}
+.fresh-hero-main-title{font-size:1rem;font-weight:800;color:#fff;line-height:1;letter-spacing:-.02rem;margin-bottom:.12rem;text-shadow:0 .02rem .12rem rgba(0,0,0,.5)}
+.fresh-hero-sub-title{font-size:.14rem;color:rgba(255,255,255,.5);letter-spacing:.04rem;font-weight:400}
+.fresh-hero-panel{position:absolute;right:.6rem;top:50%;z-index:3;transform:translateY(-50%);display:flex;flex-direction:column;gap:.16rem;width:3.2rem}
+.fresh-hero-card{background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#a855f7 100%);border-radius:.16rem;padding:.20rem;position:relative;overflow:hidden;box-shadow:0 .2rem .6rem rgba(99,102,241,.3);cursor:pointer;transition:transform .35s,box-shadow .35s}
 .fresh-hero-card:hover{transform:translateY(-.04rem);box-shadow:0 .3rem .8rem rgba(99,102,241,.45)}
 .fresh-hero-card::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,rgba(255,255,255,.1) 0%,transparent 50%);pointer-events:none}
-.fresh-hero-card-tag{display:inline-flex;align-items:center;gap:.06rem;font-size:.09rem;font-weight:500;color:rgba(255,255,255,.8);letter-spacing:.06rem;text-transform:uppercase;margin-bottom:.16rem}
+.fresh-hero-card-tag{display:inline-flex;align-items:center;gap:.06rem;font-size:.08rem;font-weight:500;color:rgba(255,255,255,.8);letter-spacing:.06rem;text-transform:uppercase;margin-bottom:.10rem}
 .fresh-hero-card-tag::before{content:'';width:.06rem;height:.06rem;background:#fff;border-radius:50%}
-.fresh-hero-card-title{font-size:.2rem;font-weight:600;color:#fff;line-height:1.4;margin-bottom:.1rem}
-.fresh-hero-card-desc{font-size:.11rem;color:rgba(255,255,255,.6);line-height:1.6;font-weight:300}
-.fresh-hero-news{display:flex;flex-direction:column;gap:0;background:linear-gradient(180deg,rgba(0,0,0,.7) 0%,rgba(10,10,20,.85) 100%);border-radius:.12rem;padding:.16rem .2rem;backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08);box-shadow:0 .08rem .24rem rgba(0,0,0,.4)}
-.fresh-hero-news-item{display:flex;align-items:center;gap:.16rem;padding:.12rem 0;border-bottom:1px solid rgba(255,255,255,.04);transition:all .35s;cursor:pointer}
+.fresh-hero-card-title{font-size:.16rem;font-weight:600;color:#fff;line-height:1.4;margin-bottom:.06rem}
+.fresh-hero-card-desc{font-size:.10rem;color:rgba(255,255,255,.6);line-height:1.6;font-weight:300}
+.fresh-hero-news{display:flex;flex-direction:column;gap:0;background:linear-gradient(180deg,rgba(0,0,0,.7) 0%,rgba(10,10,20,.85) 100%);border-radius:.10rem;padding:.12rem .16rem;backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08);box-shadow:0 .08rem .24rem rgba(0,0,0,.4)}
+.fresh-hero-news-item{display:flex;align-items:center;gap:.12rem;padding:.08rem 0;border-bottom:1px solid rgba(255,255,255,.04);transition:all .35s;cursor:pointer}
 .fresh-hero-news-item:last-child{border-bottom:none}
-.fresh-hero-news-item:hover{background:rgba(255,255,255,.03);margin:0 -.2rem;padding:.12rem .2rem}
-.fresh-hero-news-label{font-size:.09rem;font-weight:600;color:#fff;letter-spacing:.02rem;flex-shrink:0;min-width:1.6rem}
-.fresh-hero-news-text{font-size:.11rem;color:#fff;line-height:1.4;font-weight:500;flex:1}
-.fresh-hero-news-date{font-size:.09rem;color:rgba(255,255,255,.5);flex-shrink:0}
-.fresh-hero-dots{position:absolute;bottom:.6rem;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:.12rem;align-items:center}
-.fresh-hero-dot{width:.48rem;height:.08rem;border-radius:.04rem;background:rgba(255,255,255,.2);transition:all .5s cubic-bezier(.4,0,.2,1);cursor:none}
-.fresh-hero-dot.active{width:.48rem;height:.08rem;background:#fff}
+.fresh-hero-news-item:hover{background:rgba(255,255,255,.03);margin:0 -.16rem;padding:.08rem .16rem}
+.fresh-hero-news-label{font-size:.08rem;font-weight:600;color:#fff;letter-spacing:.02rem;flex-shrink:0;min-width:1.4rem}
+.fresh-hero-news-text{font-size:.10rem;color:#fff;line-height:1.4;font-weight:500;flex:1}
+.fresh-hero-news-date{font-size:.08rem;color:rgba(255,255,255,.5);flex-shrink:0}
+.fresh-hero-dots{position:absolute;bottom:.4rem;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:.10rem;align-items:center}
+.fresh-hero-dot{width:.36rem;height:.06rem;border-radius:.03rem;background:rgba(255,255,255,.2);transition:all .5s cubic-bezier(.4,0,.2,1);cursor:none}
+.fresh-hero-dot.active{width:.36rem;height:.06rem;background:#fff}
 .fresh-hero-dot:hover:not(.active){background:rgba(255,255,255,.4)}
 .fresh-section{max-width:14rem;margin:0 auto;padding:1.2rem .8rem}
 .fresh-section-title{font-size:.14rem;font-weight:400;color:rgba(255,255,255,.25);letter-spacing:.08rem;text-transform:uppercase;margin-bottom:.5rem}
