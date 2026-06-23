@@ -1,16 +1,14 @@
 /* ============================================================
-   Social QR Component — Bottom-left corner icons
-   WeChat + Instagram with hover-to-reveal QR popup
+   Social QR Component — Centered in banner area
+   WeChat + Instagram with hover-to-reveal QR popup (appears above)
    ============================================================ */
 
 #socialQR {
-  position: fixed;
-  bottom: .24rem;
-  left: .24rem;
-  z-index: 1000;
   display: flex;
   flex-direction: row;
-  gap: .12rem;
+  justify-content: center;
+  gap: .20rem;
+  padding: .12rem 0;
 }
 
 .social-qr-item {
@@ -50,12 +48,12 @@
   fill: #e1306c;
 }
 
-/* QR popup */
+/* QR popup — appears above the icon */
 .social-qr-popup {
   position: absolute;
-  left: calc(100% + .16rem);
-  bottom: 50%;
-  transform: translateY(50%) scale(.8);
+  left: 50%;
+  bottom: calc(100% + .14rem);
+  transform: translateX(-50%) scale(.8);
   width: 1.6rem;
   height: 1.6rem;
   background: #111;
@@ -68,17 +66,17 @@
   box-shadow: 0 .08rem .32rem rgba(0, 0, 0, .6);
 }
 
-/* Triangle arrow pointing left */
+/* Triangle arrow pointing down */
 .social-qr-popup::before {
   content: '';
   position: absolute;
-  left: -.06rem;
-  top: 50%;
-  transform: translateY(-50%) rotate(45deg);
+  left: 50%;
+  bottom: -.06rem;
+  transform: translateX(-50%) rotate(45deg);
   width: .10rem;
   height: .10rem;
   background: #111;
-  border-left: 1px solid rgba(255, 255, 255, .12);
+  border-right: 1px solid rgba(255, 255, 255, .12);
   border-bottom: 1px solid rgba(255, 255, 255, .12);
 }
 
@@ -94,7 +92,7 @@
 .social-qr-item:hover .social-qr-popup {
   opacity: 1;
   pointer-events: auto;
-  transform: translateY(50%) scale(1);
+  transform: translateX(-50%) scale(1);
 }
 
 /* Platform badge on popup */

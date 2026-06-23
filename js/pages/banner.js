@@ -184,7 +184,6 @@ function initBgVideo(){
 }
 
 function startBannerAnimations(){
-    startTypewriter();
     if (bgVideo && bgVideo.paused) bgVideo.play();
 }
 

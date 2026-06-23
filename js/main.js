@@ -365,76 +365,11 @@ BannerPage.initBgVideo();
     }
 
     function initExtraInfoBar() {
+        // Extra info bar is now static at page bottom — no scroll-to-reveal behavior
         var bar = document.getElementById('extraInfoBar');
         if (!bar) return;
-        var isAtBottom = false;
-        var revealTimer = null;
-        var accumulatedDelta = 0;
-        var threshold = 80;
-
-        window.addEventListener('scroll', function() {
-            var scrollBottom = window.scrollY + window.innerHeight;
-            var docHeight = document.documentElement.scrollHeight;
-            if (scrollBottom >= docHeight - 2) {
-                if (!isAtBottom) {
-                    isAtBottom = true;
-                    accumulatedDelta = 0;
-                }
-            } else {
-                if (isAtBottom) {
-                    isAtBottom = false;
-                    bar.classList.remove('revealed');
-                    accumulatedDelta = 0;
-                }
-            }
-        }, { passive: true });
-
-        window.addEventListener('wheel', function(e) {
-            if (!isAtBottom) return;
-            if (e.deltaY > 0) {
-                accumulatedDelta += e.deltaY;
-                if (accumulatedDelta >= threshold) {
-                    bar.classList.add('revealed');
-                    clearTimeout(revealTimer);
-                    revealTimer = setTimeout(function() {
-                        bar.classList.remove('revealed');
-                        accumulatedDelta = 0;
-                    }, 2500);
-                }
-            } else {
-                if (bar.classList.contains('revealed')) {
-                    bar.classList.remove('revealed');
-                }
-                accumulatedDelta = Math.max(0, accumulatedDelta + e.deltaY);
-            }
-        }, { passive: true });
-
-        var touchStartY = 0;
-        window.addEventListener('touchstart', function(e) {
-            if (!isAtBottom) return;
-            touchStartY = e.touches[0].clientY;
-        }, { passive: true });
-
-        window.addEventListener('touchmove', function(e) {
-            if (!isAtBottom) return;
-            var deltaY = touchStartY - e.touches[0].clientY;
-            if (deltaY > 0) {
-                accumulatedDelta += deltaY;
-                if (accumulatedDelta >= threshold) {
-                    bar.classList.add('revealed');
-                    clearTimeout(revealTimer);
-                    revealTimer = setTimeout(function() {
-                        bar.classList.remove('revealed');
-                        accumulatedDelta = 0;
-                    }, 2500);
-                }
-            } else {
-                if (bar.classList.contains('revealed')) {
-                    bar.classList.remove('revealed');
-                }
-                accumulatedDelta = Math.max(0, accumulatedDelta + deltaY);
-            }
-        }, { passive: true });
+        // Ensure bar is visible from the start
+        bar.style.display = '';
     }
 
     initExtraInfoBar();
