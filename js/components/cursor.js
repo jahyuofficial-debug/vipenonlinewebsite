@@ -39,7 +39,7 @@ var Cursor = (function () {
 
       initialized = true;
 
-      // Whitelist: elements that keep their native cursor
+      // Whitelist: elements that show native cursor (form fields)
       function isFormLike(el) {
         var tag = el.tagName;
         return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' ||
@@ -51,7 +51,7 @@ var Cursor = (function () {
         cursorEl.style.opacity = '1';
         cursorEl.style.transform = 'translate3d(' + (e.clientX - halfSize) + 'px,' + (e.clientY - halfSize) + 'px,0)';
 
-        // Check if under clickable element — before overriding cursor
+        // Check if under clickable element
         var el = document.elementFromPoint(e.clientX, e.clientY);
         if (el && el.nodeType === 1) {
           var nowHovered = isInteractive(el);
@@ -62,9 +62,9 @@ var Cursor = (function () {
               dotEl.style.height = hovered ? '20px' : '8px';
             }
           }
-          // Reactively hide native cursor
-          if (!isFormLike(el) && el.style) {
-            el.style.cursor = 'none';
+          // Restore native cursor only on form-like elements (body has cursor:none globally)
+          if (isFormLike(el) && el.style) {
+            el.style.cursor = 'text';
           }
         }
       }, { passive: true });
