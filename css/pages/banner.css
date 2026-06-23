@@ -14,18 +14,18 @@
   z-index:3;pointer-events:none;
 }
 
-/* Brand text reveal — handwriting stroke animation */
+/* Brand text reveal — handwriting style, filled text revealed left→right */
 .brand-reveal{
-  text-align:center;overflow:visible;margin-bottom:.3rem;
+  text-align:center;overflow:hidden;margin-bottom:.3rem;
 }
 .brand-text-svg{
   display:block;width:6rem;margin:0 auto;
+  clip-path:inset(0 100% 0 0);
 }
 .brand-text-path{
   font-family:'Story Script','Caveat','Brush Script MT',cursive;
   font-size:90px;font-weight:400;font-style:italic;
-  fill:none;stroke:#fff;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;
-  stroke-dasharray:600;stroke-dashoffset:600;
+  fill:#fff;stroke:none;
 }
 
 /* Social QR area */

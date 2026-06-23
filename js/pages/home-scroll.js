@@ -81,6 +81,7 @@
 
     var homeWrapper = document.getElementById('homeWrapper');
     var banner = document.getElementById('banner');
+    var brandSvg = document.querySelector('.brand-text-svg');
     var brandPath = document.getElementById('brandTextPath');
     var maskEl = document.querySelector('#banner .mask');
     var qrArea = document.getElementById('socialQRArea');
@@ -93,9 +94,9 @@
 
     gsap.registerPlugin(ScrollTrigger);
 
-    // Calculate exact stroke length for handwriting animation
-    var pathLen = brandPath.getComputedTextLength();
-    gsap.set(brandPath, { strokeDasharray: pathLen, strokeDashoffset: pathLen, fill: 'none' });
+    // Initial state: text hidden, fill white
+    gsap.set(brandSvg, { clipPath: 'inset(0 100% 0 0)' });
+    gsap.set(brandPath, { fill: '#fff' });
     gsap.set(qrArea, { opacity: 0, y: 20 });
 
     var tl = gsap.timeline({
@@ -117,13 +118,13 @@
     tl.to(banner, { scale: 0, opacity: 0, ease: 'power2.in', duration: 0.25 }, 0);
     tl.to(maskEl, { opacity: 0, duration: 0.25 }, 0);
 
-    // Phase 2: Handwriting stroke draw — white ink fills in (15% → 50%)
-    tl.to(brandPath, { strokeDashoffset: 0, ease: 'power2.inOut', duration: 0.35 }, 0.15);
+    // Phase 2: Text reveals left→right (15% → 50%)
+    tl.to(brandSvg, { clipPath: 'inset(0 0% 0 0)', ease: 'power2.inOut', duration: 0.35 }, 0.15);
 
-    // Phase 3: Fill fades to fluorescent green (48% → 55%)
+    // Phase 3: Fill turns fluorescent green (48% → 55%)
     tl.to(brandPath, { fill: '#39ff14', ease: 'power2.in', duration: 0.07 }, 0.48);
 
-    // Phase 4: Green fill → pure white (55% → 62%)
+    // Phase 4: Green → pure white (55% → 62%)
     tl.to(brandPath, { fill: '#fff', ease: 'power2.out', duration: 0.07 }, 0.55);
 
     // Phase 5: Social QR icons fade in (65% → 80%)
