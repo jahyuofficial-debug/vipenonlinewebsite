@@ -92,7 +92,7 @@
         id: 'homeScrollAnim',
         trigger: homeWrapper,
         start: 'top top',
-        end: '+=250%',
+        end: '+=150%',
         scrub: 1,
         pin: true,
         pinSpacing: true
