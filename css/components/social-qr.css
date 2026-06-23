@@ -6,35 +6,32 @@
 #socialQR {
   display: flex;
   flex-direction: row;
+  align-items: center;
   justify-content: center;
-  gap: .20rem;
-  padding: .12rem 0;
+  gap: .32rem;
+  margin: 0 auto;
+  padding: .16rem 0;
 }
 
 .social-qr-item {
   position: relative;
-  width: .40rem;
-  height: .40rem;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, .06);
   cursor: pointer;
-  transition: background .3s ease, transform .3s ease;
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  transition: transform .3s ease, opacity .3s ease;
+  opacity: .55;
 }
 
 .social-qr-item:hover {
-  background: rgba(255, 255, 255, .12);
-  transform: scale(1.1);
+  transform: scale(1.15);
+  opacity: 1;
 }
 
 .social-qr-item svg {
-  width: .20rem;
-  height: .20rem;
-  fill: rgba(255, 255, 255, .55);
+  width: .28rem;
+  height: .28rem;
+  fill: #fff;
   transition: fill .3s ease;
 }
 
