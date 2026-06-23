@@ -1,3 +1,4 @@
+/* Fresh page styles v20260624 */
 .fresh-page{background:#000;padding-top:1.2rem}
 .fresh-hero-carousel{position:relative;width:70%;margin:0 auto;height:70vh;overflow:hidden;background:transparent;border-radius:.16rem}
 .fresh-hero-slide{position:absolute;inset:0;opacity:0;transition:opacity 1s cubic-bezier(.4,0,.2,1);pointer-events:none}
