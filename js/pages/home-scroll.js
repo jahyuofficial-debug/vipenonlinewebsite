@@ -12,7 +12,9 @@
   var QR_HTML = '' +
     '<div id="scrollContent" class="scroll-content">' +
       '<div id="brandReveal" class="brand-reveal">' +
-        '<span class="brand-text">VipenOnline</span>' +
+        '<svg viewBox="0 0 900 140" class="brand-text-svg" xmlns="http://www.w3.org/2000/svg">' +
+          '<text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" class="brand-text-path" id="brandTextPath">VipenOnline</text>' +
+        '</svg>' +
       '</div>' +
       '<div id="socialQRArea" class="social-qr-area">' +
         '<div class="social-qr-item" data-platform="wechat">' +
@@ -79,11 +81,11 @@
 
     var homeWrapper = document.getElementById('homeWrapper');
     var banner = document.getElementById('banner');
-    var brandText = document.querySelector('.brand-text');
+    var brandPath = document.getElementById('brandTextPath');
     var maskEl = document.querySelector('#banner .mask');
     var qrArea = document.getElementById('socialQRArea');
 
-    if (!homeWrapper || !banner || !brandText || !qrArea) {
+    if (!homeWrapper || !banner || !brandPath || !qrArea) {
       // If elements not found (e.g. wrapper hidden), clean up injected DOM
       removeScrollContent();
       return;
@@ -91,8 +93,9 @@
 
     gsap.registerPlugin(ScrollTrigger);
 
-    // Initial state: handwriting font, hidden via clip-path
-    gsap.set(brandText, { clipPath: 'inset(0 100% 0 0)', color: '#fff' });
+    // Calculate exact stroke length for handwriting animation
+    var pathLen = brandPath.getComputedTextLength();
+    gsap.set(brandPath, { strokeDasharray: pathLen, strokeDashoffset: pathLen, fill: 'none' });
     gsap.set(qrArea, { opacity: 0, y: 20 });
 
     var tl = gsap.timeline({
@@ -114,16 +117,16 @@
     tl.to(banner, { scale: 0, opacity: 0, ease: 'power2.in', duration: 0.25 }, 0);
     tl.to(maskEl, { opacity: 0, duration: 0.25 }, 0);
 
-    // Phase 2: "VipenOnline" handwriting reveal left→right (15% → 50%)
-    tl.to(brandText, { clipPath: 'inset(0 0% 0 0)', ease: 'power2.inOut', duration: 0.35 }, 0.15);
+    // Phase 2: Handwriting stroke draw (15% → 50%)
+    tl.to(brandPath, { strokeDashoffset: 0, ease: 'power2.inOut', duration: 0.35 }, 0.15);
 
-    // Color: white → fluorescent green (45% → 55%)
-    tl.to(brandText, { color: '#39ff14', ease: 'power2.in', duration: 0.10 }, 0.45);
+    // Phase 3: Fill stroke → fluorescent green (48% → 55%)
+    tl.to(brandPath, { fill: '#39ff14', stroke: '#39ff14', duration: 0.07 }, 0.48);
 
-    // Color: fluorescent green → pure white (55% → 65%)
-    tl.to(brandText, { color: '#fff', ease: 'power2.out', duration: 0.10 }, 0.55);
+    // Phase 4: Green → pure white fill (55% → 62%)
+    tl.to(brandPath, { fill: '#fff', stroke: '#fff', duration: 0.07 }, 0.55);
 
-    // Phase 3: Social QR icons fade in (65% → 80%)
+    // Phase 5: Social QR icons fade in (65% → 80%)
     tl.to(qrArea, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.15 }, 0.65);
   }
 
