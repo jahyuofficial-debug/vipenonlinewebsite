@@ -84,7 +84,8 @@ function buildFreshHeroCarousel() {
 
     return '<div class="fresh-hero-carousel" id="freshHeroCarousel">' +
         slides +
-        '<div class="fresh-hero-dots" id="freshHeroDots">' + dots + '</div>' +
+        '<button class="fresh-carousel-arrow fresh-carousel-prev" id="freshCarouselPrev" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>' +
+        '<button class="fresh-carousel-arrow fresh-carousel-next" id="freshCarouselNext" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>' +
         '</div>';
 }
 
@@ -180,16 +181,9 @@ function goToFreshSlide(index) {
     heroAnimating = true;
 
     var slides = document.querySelectorAll('.fresh-hero-slide');
-    var dots = document.querySelectorAll('.fresh-hero-dot');
-
     slides.forEach(function(slide, i) {
         if (i === newIndex) slide.classList.add('active');
         else slide.classList.remove('active');
-    });
-
-    dots.forEach(function(dot, i) {
-        if (i === newIndex) dot.classList.add('active');
-        else dot.classList.remove('active');
     });
 
     heroCurrent = newIndex;
@@ -203,17 +197,31 @@ function initFreshCarousel() {
     heroCurrent = 0;
     heroAnimating = false;
 
-    var dots = document.querySelectorAll('.fresh-hero-dot');
-    dots.forEach(function(dot) {
-        dot.addEventListener('click', function() {
-            var idx = parseInt(this.getAttribute('data-fresh-hero-dot'), 10);
-            goToFreshSlide(idx);
+    // Arrow navigation
+    var prevBtn = document.getElementById('freshCarouselPrev');
+    var nextBtn = document.getElementById('freshCarouselNext');
+    if (prevBtn) prevBtn.addEventListener('click', function() { goToFreshSlide(-1); });
+    if (nextBtn) nextBtn.addEventListener('click', function() { goToFreshSlide(1); });
+
+    // Hover-based arrow reveal: left half shows prev, right half shows next
+    var carousel = document.getElementById('freshHeroCarousel');
+    if (carousel) {
+        carousel.addEventListener('mousemove', function(e) {
+            var rect = carousel.getBoundingClientRect();
+            var x = e.clientX - rect.left;
+            var mid = rect.width / 2;
+            if (x < mid) {
+                carousel.classList.add('show-prev');
+                carousel.classList.remove('show-next');
+            } else {
+                carousel.classList.add('show-next');
+                carousel.classList.remove('show-prev');
+            }
         });
-        dot.addEventListener('mouseenter', function() {
-            var idx = parseInt(this.getAttribute('data-fresh-hero-dot'), 10);
-            goToFreshSlide(idx);
+        carousel.addEventListener('mouseleave', function() {
+            carousel.classList.remove('show-prev', 'show-next');
         });
-    });
+    }
 
     if (heroInterval) clearInterval(heroInterval);
     heroInterval = setInterval(function() { goToFreshSlide(1); }, 5000);
