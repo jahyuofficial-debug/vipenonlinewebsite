@@ -15,16 +15,10 @@
     var brandText = document.querySelector('.brand-text');
     var maskEl = document.querySelector('#banner .mask');
     var qrArea = document.getElementById('socialQRArea');
-    var extraBar = document.getElementById('extraInfoBar');
 
     if (!homeWrapper || !banner || !brandText || !qrArea) return;
 
     gsap.registerPlugin(ScrollTrigger);
-
-    // Hide footer bar during scroll animation
-    if (extraBar) {
-      gsap.set(extraBar, { opacity: 0 });
-    }
 
     // Build scroll-driven timeline
     var tl = gsap.timeline({
@@ -34,15 +28,7 @@
         end: '+=250%',
         scrub: 1,
         pin: true,
-        pinSpacing: true,
-        onLeave: function() {
-          // Show footer after scroll animation completes
-          if (extraBar) gsap.to(extraBar, { opacity: 1, duration: 0.4 });
-        },
-        onEnterBack: function() {
-          // Hide footer when scrolling back up to video
-          if (extraBar) gsap.to(extraBar, { opacity: 0, duration: 0.3 });
-        }
+        pinSpacing: true
       }
     });
 

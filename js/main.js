@@ -317,62 +317,8 @@ BannerPage.initBgVideo();
             var logoImg = document.querySelector('header .logo img');
             if (logoImg) logoImg.src = settings.siteLogo;
         }
-        var extraBarInner = document.getElementById('extraInfoBarInner');
-        if (extraBarInner) {
-            var extraBar = document.getElementById('extraInfoBar');
-            if (extraBar) {
-                extraBar.classList.toggle('font-handwriting', settings.extraBarFontStyle === 'handwriting');
-                extraBar.classList.toggle('font-italic', settings.extraBarItalic === true);
-                if (settings.footerBackground) {
-                    extraBar.style.background = settings.footerBackground;
-                }
-            }
-            if (settings.footerTextColor) {
-                extraBarInner.style.color = settings.footerTextColor;
-                var links = extraBarInner.querySelectorAll('a');
-                links.forEach(function(a) {
-                    a.style.color = settings.footerTextColor;
-                    a.style.opacity = '0.7';
-                });
-                var seps = extraBarInner.querySelectorAll('.extra-info-bar-sep');
-                seps.forEach(function(sep) {
-                    sep.style.background = settings.footerTextColor;
-                    sep.style.opacity = '0.2';
-                });
-            }
-            var items = [];
-            if (settings.siteName) {
-                items.push('<span class="extra-info-bar-item">' + settings.siteName.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span>');
-            }
-            if (settings.contactEmail) {
-                items.push('<span class="extra-info-bar-item"><a href="mailto:' + settings.contactEmail + '">' + settings.contactEmail + '</a></span>');
-            }
-            if (settings.footerContent) {
-                items.push('<span class="extra-info-bar-item">' + settings.footerContent.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span>');
-            }
-            var socials = settings.socials || {};
-            if (socials.instagram || socials.x || socials.facebook) {
-                var socialLinks = [];
-                if (socials.instagram) socialLinks.push('<a href="' + socials.instagram + '" target="_blank" rel="noopener">Instagram</a>');
-                if (socials.x) socialLinks.push('<a href="' + socials.x + '" target="_blank" rel="noopener">X</a>');
-                if (socials.facebook) socialLinks.push('<a href="' + socials.facebook + '" target="_blank" rel="noopener">Facebook</a>');
-                if (socialLinks.length) {
-                    items.push('<span class="extra-info-bar-item">' + socialLinks.join(' &middot; ') + '</span>');
-                }
-            }
-            extraBarInner.innerHTML = items.join('<span class="extra-info-bar-sep"></span>');
-        }
     }
 
-    function initExtraInfoBar() {
-        // Extra info bar is now static at page bottom — no scroll-to-reveal behavior
-        var bar = document.getElementById('extraInfoBar');
-        if (!bar) return;
-        // Ensure bar is visible from the start
-        bar.style.display = '';
-    }
-
-    initExtraInfoBar();
 })();
 
 var freshHeroItems = [];
