@@ -30,8 +30,8 @@
 
 /* Footer logo — between QR icons and footer text */
 .brand-footer-logo{
-  text-align:center;opacity:0;
-  transition:opacity .5s ease;
+  text-align:center;opacity:0;visibility:hidden;
+  transition:opacity .5s ease,visibility .5s;
   margin:.24rem auto .16rem;
   pointer-events:none;
 }
@@ -39,7 +39,7 @@
   width:2rem;height:auto;display:inline-block;
 }
 .brand-footer-logo.visible{
-  opacity:0.25;
+  opacity:0.25;visibility:visible;
 }
 
 /* Footer info — middle-lower of viewport */
