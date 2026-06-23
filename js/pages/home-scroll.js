@@ -32,7 +32,7 @@
         '</div>' +
       '</div>' +
       '<div id="socialQRPopup" class="social-qr-popup">' +
-        '<img src="" alt="QR" id="socialQRImg">' +
+        '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="QR" id="socialQRImg">' +
         '<span class="social-qr-popup-label">QR coming soon</span>' +
       '</div>' +
     '</div>';

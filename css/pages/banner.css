@@ -62,14 +62,15 @@
 
 /* QR popup — single shared popup below icon row */
 #socialQRPopup{
+  display:none;
   position:relative;margin:.16rem auto 0;width:.96rem;height:.96rem;
   background:#111;border:none;border-radius:0;
-  padding:.06rem;opacity:0;pointer-events:none;
+  padding:.06rem;opacity:0;
   transition:opacity .5s ease;
   box-shadow:0 .08rem .32rem rgba(0,0,0,.6);
 }
 #socialQRPopup.visible{
-  opacity:1;pointer-events:auto;
+  display:block;opacity:1;
 }
 #socialQRPopup img{
   width:100%;height:100%;object-fit:contain;display:block;border-radius:0;
