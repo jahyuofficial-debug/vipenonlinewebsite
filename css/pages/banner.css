@@ -31,7 +31,7 @@
 /* Copyright line — between brand and social icons */
 .brand-copyright{
   font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-  font-size:.36rem;font-weight:300;color:rgba(255,255,255,.35);
+  font-size:.11rem;font-weight:300;color:rgba(255,255,255,.35);
   text-align:center;opacity:0;margin:.20rem 0 .32rem;
   letter-spacing:.02rem;
 }
