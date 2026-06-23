@@ -24,6 +24,21 @@
       scrollTriggerInstance.kill();
       scrollTriggerInstance = null;
     }
+    // Clean up inline styles set by GSAP/ScrollTrigger pinning
+    var homeWrapper = document.getElementById('homeWrapper');
+    if (homeWrapper) {
+      homeWrapper.removeAttribute('style');
+    }
+    var brandText = document.querySelector('.brand-text');
+    if (brandText) {
+      brandText.style.clipPath = 'inset(0 100% 0 0)';
+      brandText.style.fontWeight = '300';
+      brandText.style.letterSpacing = '0.02rem';
+    }
+    var qrArea = document.getElementById('socialQRArea');
+    if (qrArea) {
+      qrArea.style.opacity = '0';
+    }
     setupComplete = false;
   }
 
