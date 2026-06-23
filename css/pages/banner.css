@@ -76,26 +76,26 @@
   width:.28rem;height:.28rem;fill:#fff;
 }
 
-/* QR popup — single shared popup below icon row */
+/* QR popup — single shared popup below icon row, no box */
 #socialQRPopup{
   visibility:hidden;opacity:0;
-  position:relative;margin:.16rem auto 0;width:.96rem;height:.96rem;
-  background:#111;border:none;border-radius:0;
-  padding:0;overflow:hidden;
+  position:relative;margin:.16rem auto 0;width:.96rem;min-height:.96rem;
+  background:transparent;border:none;
+  padding:0;
   transition:visibility .4s,opacity .4s ease;
+  display:flex;align-items:center;justify-content:center;
 }
 #socialQRPopup.visible{
-  visibility:visible;opacity:1;padding:.06rem;
-  box-shadow:0 .08rem .32rem rgba(0,0,0,.6);
+  visibility:visible;opacity:1;
 }
 #socialQRPopup img{
-  width:100%;height:100%;object-fit:contain;display:block;border-radius:0;
+  width:100%;height:auto;display:block;border-radius:0;
 }
 #socialQRPopup .social-qr-text{
-  display:none;color:rgba(255,255,255,.6);
+  display:none;color:rgba(255,255,255,.55);
   font-family:'Inter',-apple-system,sans-serif;
   font-size:.10rem;text-align:center;
-  padding:.2rem;word-break:break-all;
+  padding:.1rem;word-break:break-all;line-height:1.4;
 }
 #socialQRPopup .social-qr-popup-label{
   position:absolute;bottom:.04rem;left:50%;transform:translateX(-50%);
