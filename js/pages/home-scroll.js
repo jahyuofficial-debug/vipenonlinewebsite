@@ -17,6 +17,7 @@
         '</svg>' +
       '</div>' +
       '<div class="brand-footer" id="brandFooter">' +
+        '<div class="brand-footer-bg" id="brandFooterBg"><img src="images/logo-bg.png" alt="" onerror="this.style.display=\'none\'"></div>' +
         '<div class="brand-design-by">Design by Jah72</div>' +
         '<div class="brand-copyright">© 2026 Vipen Studio. All rights reserved</div>' +
       '</div>' +
