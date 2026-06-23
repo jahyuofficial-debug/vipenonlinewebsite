@@ -32,7 +32,7 @@
         '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="QR" id="socialQRImg">' +
         '<span class="social-qr-text" id="socialQRText"></span>' +
         '<span class="social-qr-popup-label">QR coming soon</span>' +
-      '</div></div>' +
+      '</div>' +
       '<div class="brand-footer" id="brandFooter">' +
         '<div class="brand-design-by">Design by Jah72</div>' +
         '<div class="brand-copyright">© 2026 Vipen Studio. All rights reserved</div>' +
