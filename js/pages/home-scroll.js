@@ -91,7 +91,8 @@
 
     gsap.registerPlugin(ScrollTrigger);
 
-    gsap.set(brandText, { clipPath: 'inset(0 100% 0 0)', fontWeight: 300, letterSpacing: '0.02rem' });
+    // Initial state: handwriting font, hidden via clip-path
+    gsap.set(brandText, { clipPath: 'inset(0 100% 0 0)', color: '#fff' });
     gsap.set(qrArea, { opacity: 0, y: 20 });
 
     var tl = gsap.timeline({
@@ -99,7 +100,7 @@
         id: 'homeScrollAnim',
         trigger: homeWrapper,
         start: 'top top',
-        end: '+=150%',
+        end: '+=180%',
         scrub: 1,
         pin: true,
         pinSpacing: true
@@ -109,11 +110,21 @@
     scrollTriggerInstance = ScrollTrigger.getById('homeScrollAnim');
     setupComplete = true;
 
-    tl.to(banner, { scale: 0, opacity: 0, ease: 'power2.in', duration: 0.3 }, 0);
-    tl.to(maskEl, { opacity: 0, duration: 0.3 }, 0);
+    // Phase 1: Video shrinks to 0 (0% → 25%)
+    tl.to(banner, { scale: 0, opacity: 0, ease: 'power2.in', duration: 0.25 }, 0);
+    tl.to(maskEl, { opacity: 0, duration: 0.25 }, 0);
+
+    // Phase 2: "VipenOnline" handwriting reveal left→right (15% → 50%)
     tl.to(brandText, { clipPath: 'inset(0 0% 0 0)', ease: 'power2.inOut', duration: 0.35 }, 0.15);
-    tl.to(brandText, { fontWeight: 700, letterSpacing: '0.04rem', ease: 'power2.in', duration: 0.25 }, 0.25);
-    tl.to(qrArea, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.2 }, 0.50);
+
+    // Color: white → fluorescent green (45% → 55%)
+    tl.to(brandText, { color: '#39ff14', ease: 'power2.in', duration: 0.10 }, 0.45);
+
+    // Color: fluorescent green → pure white (55% → 65%)
+    tl.to(brandText, { color: '#fff', ease: 'power2.out', duration: 0.10 }, 0.55);
+
+    // Phase 3: Social QR icons fade in (65% → 80%)
+    tl.to(qrArea, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.15 }, 0.65);
   }
 
   function onHashChange() {
