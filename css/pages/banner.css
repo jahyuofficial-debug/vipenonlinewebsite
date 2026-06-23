@@ -46,7 +46,7 @@
 .brand-footer{
   position:absolute;left:50%;transform:translateX(-50%);
   bottom:12%;width:100%;
-  text-align:center;opacity:0;
+  text-align:center;
 }
 .brand-design-by{
   font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
