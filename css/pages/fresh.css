@@ -1,6 +1,6 @@
 /* Fresh page styles v20260624 */
 .fresh-page{background:#000;padding-top:1.2rem}
-.fresh-hero-carousel{position:relative;width:70%;margin:0 auto;height:70vh;overflow:hidden;background:transparent;border-radius:.16rem}
+.fresh-hero-carousel{position:relative;width:60%;margin:0 auto;height:70vh;overflow:hidden;background:transparent;border-radius:.16rem;border:1px solid rgba(255,255,255,.06);box-shadow:0 0 .6rem rgba(0,0,0,.4)}
 .fresh-hero-slide{position:absolute;inset:0;opacity:0;transition:opacity 1s cubic-bezier(.4,0,.2,1);pointer-events:none}
 .fresh-hero-slide.active{opacity:1;pointer-events:auto}
 .fresh-hero-bg{position:absolute;inset:0;z-index:0;background-size:cover;background-position:center;cursor:pointer}
