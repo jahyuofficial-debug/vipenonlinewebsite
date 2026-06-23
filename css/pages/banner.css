@@ -28,23 +28,25 @@
   fill:#fff;stroke:none;
 }
 
+/* Footer logo — between QR icons and footer text */
+.brand-footer-logo{
+  text-align:center;opacity:0;
+  transition:opacity .5s ease;
+  margin:.24rem auto .16rem;
+  pointer-events:none;
+}
+.brand-footer-logo img{
+  width:2rem;height:auto;display:inline-block;
+}
+.brand-footer-logo.visible{
+  opacity:0.25;
+}
+
 /* Footer info — middle-lower of viewport */
 .brand-footer{
   position:absolute;left:50%;transform:translateX(-50%);
   bottom:12%;width:100%;
   text-align:center;opacity:0;
-}
-.brand-footer-bg{
-  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-  width:6rem;height:auto;opacity:0;
-  transition:opacity .5s ease;
-  pointer-events:none;z-index:0;
-}
-.brand-footer-bg img{
-  width:100%;height:auto;display:block;
-}
-.brand-footer:hover .brand-footer-bg{
-  opacity:0.25;
 }
 .brand-design-by{
   font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;

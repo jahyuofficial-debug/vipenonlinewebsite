@@ -17,7 +17,8 @@
         '</svg>' +
       '</div>' +
       '<div class="brand-footer" id="brandFooter">' +
-        '<div class="brand-footer-bg" id="brandFooterBg"><img src="images/logo-bg.png" alt="" onerror="this.style.display=\'none\'"></div>' +
+        '<div class="brand-footer-logo" id="brandFooterLogo"><img src="images/logo-bg.png" alt=""></div>' +
+      '<div class="brand-footer" id="brandFooter">' +
         '<div class="brand-design-by">Design by Jah72</div>' +
         '<div class="brand-copyright">© 2026 Vipen Studio. All rights reserved</div>' +
       '</div>' +
@@ -82,6 +83,16 @@
       popup.addEventListener('mouseleave', function() {
         popup.classList.remove('visible');
       });
+    }
+
+    // Logo hover: show when hovering footer text
+    var footerEl = document.getElementById('brandFooter');
+    var logoEl = document.getElementById('brandFooterLogo');
+    if (footerEl && logoEl) {
+      footerEl.addEventListener('mouseenter', function() { logoEl.classList.add('visible'); });
+      footerEl.addEventListener('mouseleave', function() { logoEl.classList.remove('visible'); });
+      logoEl.addEventListener('mouseenter', function() { logoEl.classList.add('visible'); });
+      logoEl.addEventListener('mouseleave', function() { logoEl.classList.remove('visible'); });
     }
   }
 
