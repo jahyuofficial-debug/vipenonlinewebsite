@@ -43,13 +43,12 @@
 
 /* QR popup — centered on page, below icons, fade in/out */
 .social-qr-area .social-qr-popup{
-  position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);
-  width:1.6rem;height:1.6rem;
+  position:absolute;left:50%;top:calc(100% + .10rem);
+  transform:translateX(-50%);width:.96rem;height:.96rem;
   background:#111;border:none;border-radius:0;
-  padding:.08rem;opacity:0;pointer-events:none;
+  padding:.06rem;opacity:0;pointer-events:none;
   transition:opacity .5s ease;
   box-shadow:0 .08rem .32rem rgba(0,0,0,.6);
-  z-index:100;
 }
 .social-qr-area .social-qr-popup img{
   width:100%;height:100%;object-fit:contain;display:block;border-radius:0;
