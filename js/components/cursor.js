@@ -39,6 +39,9 @@ var Cursor = (function () {
 
       initialized = true;
 
+      // Show custom cursor, hide native cursor
+      document.body.style.cursor = 'none';
+
       // Whitelist: elements that show native cursor (form fields)
       function isFormLike(el) {
         var tag = el.tagName;
