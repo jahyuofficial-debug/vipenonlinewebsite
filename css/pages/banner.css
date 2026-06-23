@@ -91,6 +91,12 @@
 #socialQRPopup img{
   width:100%;height:100%;object-fit:contain;display:block;border-radius:0;
 }
+#socialQRPopup .social-qr-text{
+  display:none;color:rgba(255,255,255,.6);
+  font-family:'Inter',-apple-system,sans-serif;
+  font-size:.10rem;text-align:center;
+  padding:.2rem;word-break:break-all;
+}
 #socialQRPopup .social-qr-popup-label{
   position:absolute;bottom:.04rem;left:50%;transform:translateX(-50%);
   font-size:.10rem;color:rgba(255,255,255,.4);white-space:nowrap;pointer-events:none;

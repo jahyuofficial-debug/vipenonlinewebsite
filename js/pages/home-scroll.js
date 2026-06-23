@@ -30,6 +30,7 @@
       '</div>' +
       '<div id="socialQRPopup" class="social-qr-popup">' +
         '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="QR" id="socialQRImg">' +
+        '<span class="social-qr-text" id="socialQRText"></span>' +
         '<span class="social-qr-popup-label">QR coming soon</span>' +
       '</div>' +
       '<div class="brand-footer" id="brandFooter">' +
@@ -58,17 +59,31 @@
     // Bind shared QR popup hover behavior
     var popup = document.getElementById('socialQRPopup');
     var img = document.getElementById('socialQRImg');
-    if (popup && img) {
+    var text = document.getElementById('socialQRText');
+    var label = popup ? popup.querySelector('.social-qr-popup-label') : null;
+    if (popup && img && text) {
       var qrMap = {
-        wechat: 'images/qr-wechat.png',
-        instagram: 'images/qr-instagram.png',
-        google: 'images/qr-google.png'
+        wechat: { type: 'image', src: 'images/qr-wechat.png' },
+        instagram: { type: 'image', src: 'images/qr-instagram.png' },
+        google: { type: 'text', content: 'jahyuofficial@gmail.com' }
       };
       var items = document.querySelectorAll('.social-qr-item');
       items.forEach(function(item) {
         item.addEventListener('mouseenter', function() {
           var platform = this.getAttribute('data-platform');
-          img.src = qrMap[platform] || '';
+          var data = qrMap[platform];
+          if (!data) return;
+          if (data.type === 'image') {
+            img.src = data.src;
+            img.style.display = 'block';
+            text.style.display = 'none';
+            if (label) label.style.display = 'none';
+          } else {
+            img.style.display = 'none';
+            text.textContent = data.content;
+            text.style.display = 'block';
+            if (label) label.style.display = 'none';
+          }
           popup.classList.add('visible');
         });
         item.addEventListener('mouseleave', function() {
