@@ -28,13 +28,20 @@
   fill:#fff;stroke:none;
 }
 
-/* Copyright line — middle-lower of viewport */
-.brand-copyright{
+/* Footer info — middle-lower of viewport */
+.brand-footer{
   position:absolute;left:50%;transform:translateX(-50%);
-  bottom:18%;width:100%;
+  bottom:12%;width:100%;
+  text-align:center;opacity:0;
+}
+.brand-design-by{
   font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   font-size:.11rem;font-weight:300;color:rgba(255,255,255,.35);
-  text-align:center;opacity:0;
+  letter-spacing:.04rem;text-transform:uppercase;margin-bottom:.06rem;
+}
+.brand-copyright{
+  font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  font-size:.10rem;font-weight:300;color:rgba(255,255,255,.25);
   letter-spacing:.02rem;
 }
 
