@@ -6,7 +6,9 @@ img{vertical-align:top;border:0;max-width:100%}
 a{text-decoration:none;color:inherit}
 input,select,textarea,button{vertical-align:middle;outline:none}
 ::-webkit-scrollbar{width:5px;background-color:transparent}
-::-webkit-scrollbar-thumb{width:3px;background-color:#39ff14;border:1px solid transparent;border-radius:4px}
+::-webkit-scrollbar-thumb{width:3px;background-color:transparent;border-radius:4px;transition:background-color .5s ease}
+html.is-scrolling::-webkit-scrollbar-thumb{background-color:#39ff14}
 ::-webkit-scrollbar-thumb:hover{background-color:#5dff2e}
-*{scrollbar-width:thin;scrollbar-color:#39ff14 transparent}
+*{scrollbar-width:thin;scrollbar-color:transparent transparent}
+html.is-scrolling{scrollbar-color:#39ff14 transparent}
 ::selection{background-color:transparent}

@@ -6,6 +6,18 @@ var discAudio;
 
 Cursor.init('cursor');
 
+// ── Scrollbar auto-hide: show on scroll, fade out after 0.5s inactivity ──
+(function(){
+    var scrollTimer;
+    window.addEventListener('scroll', function() {
+        document.documentElement.classList.add('is-scrolling');
+        clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(function() {
+            document.documentElement.classList.remove('is-scrolling');
+        }, 500);
+    }, { passive: true });
+})();
+
 // ── Real loading: track video buffer + JSON fetch + disc preload ─────
 Loading.addTask('data', 15);   // JSON fetches
 Loading.addTask('video', 40);  // banner video buffer
