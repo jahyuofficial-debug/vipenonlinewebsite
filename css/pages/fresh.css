@@ -17,7 +17,7 @@
 .fresh-hero-card-title{font-size:.2rem;font-weight:600;color:#fff;line-height:1.4;margin-bottom:.1rem}
 .fresh-hero-card-desc{font-size:.11rem;color:rgba(255,255,255,.6);line-height:1.6;font-weight:300}
 .fresh-hero-news{display:flex;flex-direction:column;gap:0;background:linear-gradient(180deg,rgba(0,0,0,.7) 0%,rgba(10,10,20,.85) 100%);border-radius:.12rem;padding:.16rem .2rem;backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08);box-shadow:0 .08rem .24rem rgba(0,0,0,.4)}
-.fresh-hero-news-item{display:flex;align-items:center;gap:.16rem;padding:.12rem 0;border-bottom:1px solid rgba(255,255,255,.04);transition:all .35s;cursor:pointer}
+.fresh-hero-news-item{display:flex;align-items:center;gap:.16rem;padding:.12rem 0;border-bottom:1px solid rgba(255,255,255,.04);transition:all .35s}
 .fresh-hero-news-item:last-child{border-bottom:none}
 .fresh-hero-news-item:hover{background:rgba(255,255,255,.03);margin:0 -.2rem;padding:.12rem .2rem}
 .fresh-hero-news-label{font-size:.09rem;font-weight:600;color:#fff;letter-spacing:.02rem;flex-shrink:0;min-width:1.6rem}
