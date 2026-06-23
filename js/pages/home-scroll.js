@@ -16,12 +16,7 @@
           '<text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" class="brand-text-path" id="brandTextPath">VipenOnline</text>' +
         '</svg>' +
       '</div>' +
-      '<div class="brand-footer" id="brandFooter">' +
-        '<div class="brand-footer-logo" id="brandFooterLogo"><img src="images/logo-bg.png" alt=""></div>' +
-      '<div class="brand-footer" id="brandFooter">' +
-        '<div class="brand-design-by">Design by Jah72</div>' +
-        '<div class="brand-copyright">© 2026 Vipen Studio. All rights reserved</div>' +
-      '</div>' +
+      '<div class="brand-footer-logo" id="brandFooterLogo"><img src="images/logo-bg.png" alt=""></div>' +
       '<div id="socialQRArea" class="social-qr-area">' +
         '<div class="social-qr-item" data-platform="wechat">' +
           '<svg viewBox="0 0 24 24"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm3.906 2.314c-3.681 0-6.667 2.546-6.667 5.687 0 3.14 2.986 5.687 6.667 5.687a7.572 7.572 0 0 0 2.179-.317.625.625 0 0 1 .522.074l1.41.826a.226.226 0 0 0 .122.04.217.217 0 0 0 .213-.217c0-.052-.022-.105-.035-.158l-.288-1.096a.432.432 0 0 1 .156-.494A4.96 4.96 0 0 0 22.17 13.99c0-3.14-2.986-5.685-6.666-5.685zm-2.44 3.26c.494 0 .896.407.896.908 0 .5-.402.907-.896.907a.902.902 0 0 1-.896-.907c0-.5.402-.907.896-.907zm4.884 0c.494 0 .896.407.896.908 0 .5-.402.907-.896.907a.902.902 0 0 1-.896-.907c0-.5.402-.907.896-.907z"/></svg>' +
@@ -36,6 +31,10 @@
       '<div id="socialQRPopup" class="social-qr-popup">' +
         '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="QR" id="socialQRImg">' +
         '<span class="social-qr-popup-label">QR coming soon</span>' +
+      '</div>' +
+      '<div class="brand-footer" id="brandFooter">' +
+        '<div class="brand-design-by">Design by Jah72</div>' +
+        '<div class="brand-copyright">© 2026 Vipen Studio. All rights reserved</div>' +
       '</div>' +
     '</div>';
 
