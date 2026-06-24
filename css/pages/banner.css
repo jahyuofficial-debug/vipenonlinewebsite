@@ -38,6 +38,9 @@
 .brand-footer-logo img{
   width:2rem;height:auto;display:inline-block;
 }
+.brand-footer-logo.revealed{
+  opacity:0.18;
+}
 .brand-footer-logo.visible{
   opacity:0.25;
 }

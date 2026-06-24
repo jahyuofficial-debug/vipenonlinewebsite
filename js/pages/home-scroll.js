@@ -177,8 +177,9 @@
     // Phase 3: Fill turns fluorescent green (58% → 64%)
     tl.to(brandPath, { fill: '#39ff14', ease: 'power2.in', duration: 0.06 }, 0.58);
 
-    // Phase 4: Copyright fades in (58% → 68%)
+    // Phase 4: Copyright + Logo base reveal (58% → 68%)
     tl.to(footerEl, { opacity: 1, ease: 'power2.out', duration: 0.10 }, 0.58);
+    tl.to('.brand-footer-logo', { opacity: 0.18, ease: 'power2.out', duration: 0.10 }, 0.62);
 
     // Phase 5: Social QR icons fade in (72% → 88%)
     tl.to(qrArea, { opacity: 1, y: 0, ease: 'power2.out', duration: 0.16 }, 0.72);
