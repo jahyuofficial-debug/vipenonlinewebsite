@@ -27,7 +27,7 @@
 /* Carousel arrow navigation */
 .fresh-carousel-arrow{
   position:absolute;top:50%;transform:translateY(-50%);
-  z-index:11;width:.48rem;height:.48rem;
+  z-index:20;width:.48rem;height:.48rem;
   display:flex;align-items:center;justify-content:center;
   background:rgba(0,0,0,.6);border:none;border-radius:50%;
   color:#fff;opacity:0;

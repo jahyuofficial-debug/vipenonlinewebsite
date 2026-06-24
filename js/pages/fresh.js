@@ -197,11 +197,17 @@ function initFreshCarousel() {
     heroCurrent = 0;
     heroAnimating = false;
 
-    // Arrow navigation
+    // Arrow navigation — use mousedown for instant response
     var prevBtn = document.getElementById('freshCarouselPrev');
     var nextBtn = document.getElementById('freshCarouselNext');
-    if (prevBtn) prevBtn.addEventListener('click', function() { goToFreshSlide(-1); });
-    if (nextBtn) nextBtn.addEventListener('click', function() { goToFreshSlide(1); });
+    if (prevBtn) {
+        prevBtn.addEventListener('mousedown', function(e) { e.preventDefault(); goToFreshSlide(-1); });
+        prevBtn.addEventListener('click', function(e) { e.preventDefault(); goToFreshSlide(-1); });
+    }
+    if (nextBtn) {
+        nextBtn.addEventListener('mousedown', function(e) { e.preventDefault(); goToFreshSlide(1); });
+        nextBtn.addEventListener('click', function(e) { e.preventDefault(); goToFreshSlide(1); });
+    }
 
     // Hover detection — show arrow on the side being hovered
     var carousel = document.getElementById('freshHeroCarousel');
