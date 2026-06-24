@@ -30,19 +30,22 @@
   z-index:11;width:.48rem;height:.48rem;
   display:flex;align-items:center;justify-content:center;
   background:rgba(0,0,0,.6);border:none;border-radius:50%;
-  color:#fff;opacity:0;pointer-events:none;
-  transition:opacity .15s ease,transform .2s ease;
+  color:#fff;opacity:0;
+  transition:opacity .15s ease,background .2s ease,transform .2s ease;
 }
 .fresh-carousel-arrow svg{width:.24rem;height:.24rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 .fresh-carousel-prev{left:.16rem}
-.fresh-carousel-prev:hover{transform:translateY(-50%) scale(1.1)}
-.fresh-carousel-next{right:.16rem}
+.fresh-carousel-prev:hover,
 .fresh-carousel-next:hover{transform:translateY(-50%) scale(1.1)}
+.fresh-carousel-next{right:.16rem}
+
+/* Hover on arrow itself: inverted colors */
+.fresh-carousel-arrow:hover{background:#fff;color:#000}
 
 /* JS controls arrow visibility via show-prev/show-next classes */
-.fresh-hero-carousel.show-prev .fresh-carousel-prev{opacity:1;pointer-events:auto}
-.fresh-hero-carousel.show-next .fresh-carousel-next{opacity:1;pointer-events:auto}
+.fresh-hero-carousel.show-prev .fresh-carousel-prev{opacity:1}
+.fresh-hero-carousel.show-next .fresh-carousel-next{opacity:1}
 
 /* Shadow feedback on carousel hover */
 .fresh-hero-carousel:hover{box-shadow:0 0 1.2rem rgba(0,0,0,.5),0 0 .6rem rgba(0,0,0,.4)}
