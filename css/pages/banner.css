@@ -83,7 +83,7 @@
 #socialQRPopup{
   visibility:hidden;opacity:0;
   position:absolute;left:50%;transform:translateX(-50%);
-  bottom:15%;width:.72rem;min-height:.72rem;
+  bottom:19%;width:.72rem;min-height:.72rem;
   background:transparent;border:none;
   padding:0;
   transition:visibility .4s,opacity .4s ease;
