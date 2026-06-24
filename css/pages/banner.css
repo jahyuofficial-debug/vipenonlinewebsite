@@ -83,7 +83,7 @@
 #socialQRPopup{
   visibility:hidden;opacity:0;
   position:absolute;left:50%;transform:translateX(-50%);
-  bottom:20%;width:.72rem;min-height:.72rem;
+  bottom:15%;width:.72rem;min-height:.72rem;
   background:transparent;border:none;
   padding:0;
   transition:visibility .4s,opacity .4s ease;
@@ -100,7 +100,8 @@
   display:none;color:rgba(255,255,255,.55);
   font-family:'Inter',-apple-system,sans-serif;
   font-size:.10rem;text-align:center;white-space:nowrap;
-  line-height:1.4;width:100%;
+  line-height:1.4;width:1.4rem;
+  position:absolute;left:50%;transform:translateX(-50%);
 }
 #socialQRPopup .social-qr-popup-label{
   position:absolute;bottom:.04rem;left:50%;transform:translateX(-50%);
