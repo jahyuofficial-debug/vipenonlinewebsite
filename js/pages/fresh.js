@@ -173,10 +173,12 @@ function buildFreshDetail(id) {
     });
 }
 
-function goToFreshSlide(index) {
+function goToFreshSlide(delta) {
     if (heroAnimating) return;
     var total = heroGroups.length;
-    var newIndex = (typeof index === 'number') ? index : ((heroCurrent + index + total) % total);
+    if (total === 0) return;
+    // delta is always a relative offset (-1 or 1)
+    var newIndex = (heroCurrent + delta + total) % total;
     if (newIndex === heroCurrent) return;
     heroAnimating = true;
 
@@ -190,24 +192,18 @@ function goToFreshSlide(index) {
 
     setTimeout(function() {
         heroAnimating = false;
-    }, 800);
+    }, 300);
 }
 
 function initFreshCarousel() {
     heroCurrent = 0;
     heroAnimating = false;
 
-    // Arrow navigation — use mousedown for instant response
+    // Arrow navigation — click only, no double binding
     var prevBtn = document.getElementById('freshCarouselPrev');
     var nextBtn = document.getElementById('freshCarouselNext');
-    if (prevBtn) {
-        prevBtn.addEventListener('mousedown', function(e) { e.preventDefault(); goToFreshSlide(-1); });
-        prevBtn.addEventListener('click', function(e) { e.preventDefault(); goToFreshSlide(-1); });
-    }
-    if (nextBtn) {
-        nextBtn.addEventListener('mousedown', function(e) { e.preventDefault(); goToFreshSlide(1); });
-        nextBtn.addEventListener('click', function(e) { e.preventDefault(); goToFreshSlide(1); });
-    }
+    if (prevBtn) prevBtn.addEventListener('click', function(e) { e.preventDefault(); goToFreshSlide(-1); });
+    if (nextBtn) nextBtn.addEventListener('click', function(e) { e.preventDefault(); goToFreshSlide(1); });
 
     // Hover detection — show arrow on the side being hovered
     var carousel = document.getElementById('freshHeroCarousel');
