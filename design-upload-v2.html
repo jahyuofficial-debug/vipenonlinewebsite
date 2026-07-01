@@ -111,6 +111,14 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
 
 /* ── Manager cards ── */
 .mgr-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:16px;margin-bottom:12px}
+.mgr-card-collapsed{padding:0}
+.mgr-card-collapsed .mgr-toggle{padding:14px 16px;margin-bottom:0;cursor:pointer;transition:background .2s}
+.mgr-card-collapsed .mgr-toggle:hover{background:rgba(212,168,83,.08)}
+.mgr-card-expanded .mgr-toggle{padding:0 0 12px 0;cursor:pointer}
+.mgr-card-expanded .mgr-card-body{padding-top:4px}
+.mgr-toggle{font-size:15px;display:flex;align-items:center;gap:8px}
+.mgr-title-preview{flex:1;color:#fff;font-size:14px}
+.mgr-expand-hint{font-size:11px;color:rgba(212,168,83,.5);white-space:nowrap}
 .mgr-card h3{font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .mgr-card h3 input{flex:1;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;padding:6px 10px;border-radius:6px;font-size:14px}
 .mgr-card h3 .idx{font-size:10px;color:rgba(255,255,255,.2);min-width:40px}
@@ -704,6 +712,7 @@ function checkFileSize(file, label, maxMB) {
 (function(){
 'use strict';
 var mgrProjects = [];
+var mgrExpanded = -1; // which project index is expanded (-1 = none)
 var mgrImageFiles = {};
 var MAX_FILE_MB = 100;
 
@@ -731,10 +740,15 @@ document.querySelectorAll('.tab-btn').forEach(function(b){
 
 // Load live
 document.getElementById('mgrLoadLive').addEventListener('click',function(){
+    var btn=this; btn.disabled=true; btn.textContent='Loading...';
     fetch('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/design/index.json?'+Date.now())
         .then(function(r){return r.json();})
-        .then(function(d){mgrProjects=d;renderMgr();toast('Loaded '+d.length+' projects');})
-        .catch(function(){toast('Failed to load','err');});
+        .then(function(d){
+            mgrProjects=d; mgrExpanded=-1; mgrImageFiles={};
+            renderMgr(); toast('Loaded '+d.length+' projects — click one to expand');
+            btn.disabled=false; btn.textContent='Load from Live Site';
+        })
+        .catch(function(){toast('Failed to load','err');btn.disabled=false;btn.textContent='Load from Live Site';});
 });
 
 // Save changes → upload to R2 via API
@@ -810,18 +824,38 @@ function renderMgr(){
     document.getElementById('mgrCount').textContent=mgrProjects.length+' projects';
     var h='';
     mgrProjects.forEach(function(p,pi){
-        h+=buildMgrCard(p,pi);
+        if(pi===mgrExpanded){
+            // Expanded: full editor card
+            h+='<div class="mgr-card mgr-card-expanded" data-pi="'+pi+'">';
+            h+='<h3 class="mgr-toggle" data-toggle="'+pi+'"><span class="idx">#'+(pi+1)+'</span>'+
+               '<span class="mgr-title-preview">'+esc(p.title||'(untitled)')+'</span>'+
+               '<span class="mgr-expand-hint">▼ collapse</span></h3>';
+            h+='<div class="mgr-card-body">'+buildMgrCardBody(p,pi)+'</div>';
+            h+='</div>';
+        } else {
+            // Collapsed: just title bar
+            h+='<div class="mgr-card mgr-card-collapsed" data-pi="'+pi+'">';
+            h+='<h3 class="mgr-toggle" data-toggle="'+pi+'"><span class="idx">#'+(pi+1)+'</span>'+
+               '<span class="mgr-title-preview">'+esc(p.title||'(untitled)')+'</span>'+
+               '<span class="mgr-expand-hint">▶ expand</span></h3>';
+            h+='</div>';
+        }
     });
     c.innerHTML=h;
-    mgrProjects.forEach(function(p,pi){bindMgrCard(pi);});
+    // Bind toggle clicks
+    c.querySelectorAll('.mgr-toggle').forEach(function(el){
+        el.addEventListener('click',function(){
+            var idx=parseInt(this.getAttribute('data-toggle'),10);
+            mgrExpanded = (mgrExpanded===idx) ? -1 : idx;
+            renderMgr();
+        });
+    });
+    // Bind card body events only for expanded card
+    if(mgrExpanded>=0) bindMgrCard(mgrExpanded);
 }
 
-function buildMgrCard(p,pi){
-    return '<div class="mgr-card" data-pi="'+pi+'">'+
-        '<h3><span class="idx">#'+(pi+1)+'</span>'+
-        '<input value="'+esc(p.title||'')+'" data-mgr-field="title" data-pi="'+pi+'" placeholder="Title">'+
-        '</h3>'+
-        '<div class="mgr-fields">'+
+function buildMgrCardBody(p,pi){
+    return '<div class="mgr-fields">'+
         '<div class="mgr-field full"><label>Subtitle</label><input value="'+esc(p.subtitle||'')+'" data-mgr-field="subtitle" data-pi="'+pi+'">'+
         '<div class="mgr-field full"><label>Description</label><textarea data-mgr-field="description" data-pi="'+pi+'">'+esc(p.description||'')+'</textarea></div>'+
         '<div class="mgr-field"><label>Client</label><input value="'+esc(p.client||'')+'" data-mgr-field="client" data-pi="'+pi+'">'+
@@ -837,6 +871,7 @@ function buildMgrCard(p,pi){
         '<option value="top"'+(p.descPosition==='top'?' selected':'')+'>Top</option>'+
         '<option value="bottom"'+(p.descPosition==='bottom'?' selected':'')+'>Bottom</option></select></div>'+
         '</div>'+
+        '<div class="mgr-field full"><label>Title</label><input value="'+esc(p.title||'')+'" data-mgr-field="title" data-pi="'+pi+'" placeholder="Title"></div>'+
         '<div class="mgr-label">Main Images</div>'+
         '<div class="mgr-main-imgs">'+
         mgrMainSlot('card-bg','Cover',p.cardBg,pi)+
@@ -848,7 +883,6 @@ function buildMgrCard(p,pi){
         mgrSortSlots(p.contentImages||[],pi)+
         '<div class="mgr-add-img" data-mgr-add-pi="'+pi+'" title="Add image / video file">+</div>'+
         '<div class="mgr-add-img mgr-add-yt" data-mgr-add-yt="'+pi+'" title="Add YouTube video" style="color:rgba(255,0,0,.4);border-color:rgba(255,0,0,.2)">▶</div>'+
-        '</div>'+
         '</div>';
 }
 
