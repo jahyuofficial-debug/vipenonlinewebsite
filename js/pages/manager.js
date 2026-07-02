@@ -1,4 +1,4 @@
-﻿var ManagerGo = (function() {
+var ManagerGo = (function() {
     'use strict';
 
     var sessionToken = null;
@@ -1816,9 +1816,16 @@
         var html = '<div class="manager-design-grid">';
         for (var i = 0; i < designData.works.length; i++) {
             var work = designData.works[i];
-            var thumbStyle = work.coverImage ? work.coverImage : (work.gradient || 'linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%)');
+            var isImg = work.coverImage && work.coverImage.indexOf('data:image') === 0;
             html += '<div class="manager-design-item" data-work-index="' + i + '">' +
-                '<div class="manager-design-thumb" style="background:' + thumbStyle + '"></div>' +
+                '<div class="manager-design-thumb">';
+            if (isImg) {
+                html += '<img src="' + work.coverImage + '" loading="lazy" decoding="async" alt="">';
+            } else {
+                var fallback = work.gradient || 'linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%)';
+                html += '<div class="manager-design-thumb-bg" style="background:' + fallback + '"></div>';
+            }
+            html += '</div>' +
                 '<div class="manager-design-body">' +
                 '<span class="manager-design-cat">' + work.cat + '</span>' +
                 '<h3 class="manager-design-title">' + work.title + '</h3>' +
