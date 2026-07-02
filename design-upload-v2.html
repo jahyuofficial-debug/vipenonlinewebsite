@@ -325,6 +325,8 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
 </div>
 
 <script>
+var MAX_FILE_MB = 95;   // Cloudflare free tier has 100MB body limit — leave 5MB headroom
+
 // ── State ────────────────────────────────────────────────────
 var pool = [];             // all image files from folder
 var assigned = {};         // { 'card-bg': file, 'card-hover': file, 'header-bg': file }
@@ -728,7 +730,6 @@ function checkFileSize(file, label, maxMB) {
 var mgrProjects = [];
 var mgrExpanded = -1; // which project index is expanded (-1 = none)
 var mgrImageFiles = {};
-var MAX_FILE_MB = 95;   // Cloudflare free tier has 100MB body limit — leave 5MB headroom
 
 function isVideo(name){ return /\.(mp4|webm|mov|avi|mkv|ogg)$/i.test(name||''); }
 
