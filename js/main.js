@@ -395,6 +395,15 @@ var signinBtn = document.getElementById('signinBtn');
     }
 
 function updateAuthUI() {
+    if (CONFIG.LOGIN_DISABLED) {
+        if (signinBtn) signinBtn.style.display = 'none';
+        if (signupBtn) signupBtn.style.display = 'none';
+        if (profileLink) profileLink.style.display = 'none';
+        if (managerGoLink) managerGoLink.style.display = 'none';
+        if (mobileManagerGoLink) mobileManagerGoLink.style.display = 'none';
+        NotificationCenter.hide();
+        return;
+    }
     var isLoggedIn = Utils.isLoggedIn();
     if (isLoggedIn) {
         Utils.migrateUserData();
@@ -706,16 +715,23 @@ function navigateTo(pageName) {
 
     var herosTopBg = document.getElementById('herosTopBg');
 
-    if (pageName === 'design-work' || pageName === 'design-work-list') {
-        if (!Utils.isLoggedIn()) {
-            window.location.hash = '#/signup';
+    if (CONFIG.LOGIN_DISABLED) {
+        if (pageName === 'signin' || pageName === 'signup' || pageName === 'profile') {
+            window.location.hash = '#/';
             return;
         }
-    }
-    if (pageName === 'msg' || pageName === 'action' || pageName === 'profile') {
-        if (!Utils.isLoggedIn()) {
-            window.location.hash = '#/signin';
-            return;
+    } else {
+        if (pageName === 'design-work' || pageName === 'design-work-list') {
+            if (!Utils.isLoggedIn()) {
+                window.location.hash = '#/signup';
+                return;
+            }
+        }
+        if (pageName === 'msg' || pageName === 'action' || pageName === 'profile') {
+            if (!Utils.isLoggedIn()) {
+                window.location.hash = '#/signin';
+                return;
+            }
         }
     }
 
@@ -1196,7 +1212,7 @@ function navigateToFreshDetail(id) {
     var likeBtn = document.getElementById('freshDetailLikeBtn');
     if (likeBtn) {
         likeBtn.addEventListener('click', function() {
-            if (!Utils.isLoggedIn()) {
+            if (!CONFIG.LOGIN_DISABLED && !Utils.isLoggedIn()) {
                 showFreshAuthPopup();
                 return;
             }
@@ -1238,7 +1254,7 @@ function navigateToFreshDetail(id) {
     var commentBtn = document.getElementById('freshDetailCommentBtn');
     if (commentBtn) {
         commentBtn.addEventListener('click', function() {
-            if (!Utils.isLoggedIn()) {
+            if (!CONFIG.LOGIN_DISABLED && !Utils.isLoggedIn()) {
                 showFreshAuthPopup();
                 return;
             }
@@ -1287,7 +1303,7 @@ function navigateToFreshDetail(id) {
 }
 
 function navigateToDesignWorkDetail(id) {
-    if (!Utils.isLoggedIn()) {
+    if (!CONFIG.LOGIN_DISABLED && !Utils.isLoggedIn()) {
         window.location.hash = '#/signup';
         return;
     }
@@ -1336,7 +1352,7 @@ function navigateToDesignWorkDetail(id) {
     var likeBtn = document.getElementById('dwDetailLikeBtn');
     if (likeBtn) {
         likeBtn.addEventListener('click', function() {
-            if (!Utils.isLoggedIn()) {
+            if (!CONFIG.LOGIN_DISABLED && !Utils.isLoggedIn()) {
                 window.location.hash = '#/signup';
                 return;
             }
