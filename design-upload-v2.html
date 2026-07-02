@@ -144,7 +144,9 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
 .mgr-sort-item{width:70px;cursor:grab;position:relative;transition:transform .12s}
 .mgr-sort-item:active{cursor:grabbing}
 .mgr-sort-item.drag-over{transform:scale(1.06);box-shadow:0 0 0 2px #d4a853}
-.mgr-sort-item img{width:70px;height:52px;border-radius:3px;object-fit:cover;border:1px solid rgba(255,255,255,.08);pointer-events:none}
+.mgr-sort-item img{width:70px;height:52px;border-radius:3px;object-fit:cover;border:1px solid rgba(255,255,255,.08);pointer-events:none;contain:layout paint}
+.mgr-sort-item{contain:layout style}
+.mgr-sortable{contain:layout style}
 .mgr-sort-item .badge{position:absolute;top:1px;left:1px;background:rgba(0,0,0,.7);color:rgba(255,255,255,.5);font-size:8px;padding:0 4px;border-radius:2px}
 .mgr-sort-item .del{position:absolute;top:1px;right:1px;width:14px;height:14px;border-radius:50%;background:rgba(239,68,68,.7);color:#fff;font-size:8px;line-height:14px;text-align:center;cursor:pointer;display:none}
 .mgr-sort-item:hover .del{display:block}
@@ -890,7 +892,10 @@ function buildMgrCardBody(p,pi){
 
 function mgrMainSlot(k,label,url,pi){
     var isBlob = url && /^blob:/.test(url);
-    var imgHtml = (url && !isBlob) ? '<img src="'+esc(url)+'" alt="" loading="lazy" title="Click to replace">' : '<div class="mgr-main-placeholder">'+label+'</div>';
+    var isR2 = url && /r2\.dev/i.test(url);
+    var thumbUrl = url;
+    // R2 supports no resize, but we can at least hint browser with loading=lazy
+    var imgHtml = (url && !isBlob) ? '<img src="'+esc(thumbUrl)+'" alt="" loading="lazy" decoding="async" title="Click to replace">' : '<div class="mgr-main-placeholder">'+label+'</div>';
     return '<div class="mgr-main-slot"><div class="sl">'+label+'</div>'+
         imgHtml+
         '<input type="file" accept="image/*" data-mgr-img="'+k+'" data-pi="'+pi+'"></div>';
@@ -906,7 +911,7 @@ function mgrSortSlots(imgs,pi){
             if (ytm) thumbSrc = 'https://img.youtube.com/vi/' + ytm[1] + '/default.jpg';
             h+='<div class="mgr-sort-item yt-item" draggable="true" data-pi="'+pi+'" data-mi="'+i+'">'+
                 '<span class="badge">'+(i+1)+'</span>'+
-                '<img src="'+esc(thumbSrc)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">'+
+                '<img src="'+esc(thumbSrc)+'" alt="" loading="lazy" decoding="async" width="70" height="52" onerror="this.style.opacity=\'0.3\'">'+
                 '<div class="yt-icon">▶</div>'+
                 '<div class="del" title="Remove">✕</div>'+
                 '<div class="repl" title="Replace">↻</div>'+
@@ -915,7 +920,7 @@ function mgrSortSlots(imgs,pi){
         } else {
             h+='<div class="mgr-sort-item" draggable="true" data-pi="'+pi+'" data-mi="'+i+'">'+
                 '<span class="badge">'+(i+1)+'</span>'+
-                '<img src="'+esc(u||'')+'" alt="" loading="lazy">'+
+                '<img src="'+esc(u||'')+'" alt="" loading="lazy" decoding="async" width="70" height="52" onerror="this.style.opacity=\'0.3\'">'+
                 '<div class="del" title="Remove">✕</div>'+
                 '<div class="repl" title="Replace">↻</div>'+
                 '<input type="file" accept="image/*,video/*" data-pi="'+pi+'" data-mi="'+i+'">'+
@@ -975,20 +980,35 @@ function bindMgrCard(pi){
             var file=inp.files[0];
             mgrImageFiles[pi+'_content-'+mi]=file;
             mgrProjects[pi].contentImages[mi]=buildPreview(file);
-            renderMgr();
+            renderMgrSortableOnly(pi);
         });
     });
-    // Delete
-    ct.querySelectorAll('.del').forEach(function(b){
-        b.addEventListener('click',function(e){
+    // Delete + Replace via delegation (no per-item listeners)
+    ct.addEventListener('click',function(e){
+        var del=e.target.closest('.del');
+        var repl=e.target.closest('.repl');
+        if(del){
             e.stopPropagation();
-            var mi=parseInt(b.parentNode.getAttribute('data-mi'));
-            mgrProjects[pi].contentImages.splice(mi,1);
-            renderMgr();
-        });
+            var item=del.closest('.mgr-sort-item');
+            if(item){
+                var mi=parseInt(item.getAttribute('data-mi'));
+                mgrProjects[pi].contentImages.splice(mi,1);
+                renderMgrSortableOnly(pi);
+            }
+            return;
+        }
+        if(repl){
+            e.stopPropagation();
+            var item2=repl.closest('.mgr-sort-item');
+            if(item2){
+                var inp=item2.querySelector('input[type="file"]');
+                if(inp)inp.click();
+            }
+            return;
+        }
     });
-    // Add image — file upload
-    var addBtn=ct.querySelector('.mgr-add-img');
+    // Add buttons
+    bindMgrAddButtons(ct,pi);
     if(addBtn){
         addBtn.addEventListener('click',function(){
             var inp=document.createElement('input');
@@ -1000,7 +1020,7 @@ function bindMgrCard(pi){
                 var idx=mgrProjects[pi].contentImages.length;
                 mgrImageFiles[pi+'_content-'+idx]=f;
                 mgrProjects[pi].contentImages.push(buildPreview(f));
-                renderMgr();
+                renderMgrSortableOnly(pi);
             });
             inp.click();
         });
@@ -1015,37 +1035,100 @@ function bindMgrCard(pi){
             url=url.trim();
             if(!/(youtube\.com|youtu\.be)/i.test(url)){toast('Invalid YouTube URL','err');return;}
             mgrProjects[pi].contentImages.push(url);
-            renderMgr();
+            renderMgrSortableOnly(pi);
+        });
+    }
+
+    // Bind sortable via delegation
+    mgrBindSort(ct,pi);
+}
+
+function bindMgrAddButtons(ct,pi){
+    // Add image — file upload
+    var addBtn=ct.querySelector('.mgr-add-img:not(.mgr-add-yt)');
+    if(addBtn){
+        addBtn.addEventListener('click',function(){
+            var inp=document.createElement('input');
+            inp.type='file';
+            inp.accept='image/*,video/*';
+            inp.addEventListener('change',function(){
+                if(!inp.files.length)return;
+                var f=inp.files[0];
+                var idx=mgrProjects[pi].contentImages.length;
+                mgrImageFiles[pi+'_content-'+idx]=f;
+                mgrProjects[pi].contentImages.push(buildPreview(f));
+                renderMgrSortableOnly(pi);
+            });
+            inp.click();
+        });
+    }
+    // Add YouTube
+    var ytBtn=ct.querySelector('.mgr-add-yt');
+    if(ytBtn){
+        ytBtn.addEventListener('click',function(e){
+            e.stopPropagation();
+            var url=prompt('Enter YouTube URL:\ne.g. https://www.youtube.com/watch?v=VIDEO_ID\nor https://youtu.be/VIDEO_ID');
+            if(!url||!url.trim())return;
+            url=url.trim();
+            if(!/(youtube\.com|youtu\.be)/i.test(url)){toast('Invalid YouTube URL','err');return;}
+            mgrProjects[pi].contentImages.push(url);
+            renderMgrSortableOnly(pi);
         });
     }
 }
 
 function mgrBindSort(ct,pi){
     var dr=null;
-    ct.querySelectorAll('.mgr-sort-item').forEach(function(item){
-        item.addEventListener('dragstart',function(e){
-            dr=parseInt(item.getAttribute('data-mi'));
-            item.style.opacity='0.5';
-            e.dataTransfer.effectAllowed='move';
-        });
-        item.addEventListener('dragend',function(){
-            item.style.opacity='1';
-            ct.querySelectorAll('.mgr-sort-item').forEach(function(s){s.classList.remove('drag-over')});
-            dr=null;
-        });
-        item.addEventListener('dragover',function(e){e.preventDefault();e.dataTransfer.dropEffect='move';item.classList.add('drag-over')});
-        item.addEventListener('dragleave',function(){item.classList.remove('drag-over')});
-        item.addEventListener('drop',function(e){
-            e.preventDefault();item.classList.remove('drag-over');
-            var di=parseInt(item.getAttribute('data-mi'));
-            if(dr!==null&&dr!==di){
-                var arr=mgrProjects[pi].contentImages;
-                var it=arr.splice(dr,1)[0];
-                arr.splice(di,0,it);
-                renderMgr();
-            }
-        });
+    // Use event delegation on container instead of per-item listeners
+    ct.addEventListener('dragstart',function(e){
+        var item=e.target.closest('.mgr-sort-item');
+        if(!item)return;
+        dr=parseInt(item.getAttribute('data-mi'));
+        item.style.opacity='0.5';
+        e.dataTransfer.effectAllowed='move';
     });
+    ct.addEventListener('dragend',function(e){
+        var item=e.target.closest('.mgr-sort-item');
+        if(item)item.style.opacity='1';
+        ct.querySelectorAll('.mgr-sort-item').forEach(function(s){s.classList.remove('drag-over')});
+        dr=null;
+    });
+    ct.addEventListener('dragover',function(e){
+        var item=e.target.closest('.mgr-sort-item');
+        if(!item)return;
+        e.preventDefault();e.dataTransfer.dropEffect='move';
+        // Only add class to the item, avoid reflow by checking first
+        if(!item.classList.contains('drag-over')){
+            ct.querySelectorAll('.mgr-sort-item').forEach(function(s){s.classList.remove('drag-over')});
+            item.classList.add('drag-over');
+        }
+    });
+    ct.addEventListener('drop',function(e){
+        var item=e.target.closest('.mgr-sort-item');
+        if(!item)return;
+        e.preventDefault();item.classList.remove('drag-over');
+        var di=parseInt(item.getAttribute('data-mi'));
+        if(dr!==null&&dr!==di){
+            var arr=mgrProjects[pi].contentImages;
+            var it=arr.splice(dr,1)[0];
+            arr.splice(di,0,it);
+            // Re-render only the sortable area, not full page
+            renderMgrSortableOnly(pi);
+        }
+    });
+}
+
+function renderMgrSortableOnly(pi){
+    var ct=document.getElementById('mgrSort-'+pi);
+    if(!ct)return;
+    // Save scroll position
+    var scrollY=window.scrollY;
+    ct.innerHTML=mgrSortSlots(mgrProjects[pi].contentImages||[],pi)+
+        '<div class="mgr-add-img" data-mgr-add-pi="'+pi+'" title="Add image / video file">+</div>'+
+        '<div class="mgr-add-img mgr-add-yt" data-mgr-add-yt="'+pi+'" title="Add YouTube video" style="color:rgba(255,0,0,.4);border-color:rgba(255,0,0,.2)">▶</div>';
+    window.scrollTo(0,scrollY);
+    // Rebind add buttons
+    bindMgrAddButtons(ct,pi);
 }
 })();
 
