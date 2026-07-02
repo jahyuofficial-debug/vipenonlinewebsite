@@ -636,6 +636,17 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
     var folderName = document.getElementById('f_folder').value.trim();
     if (!folderName) return alert('Enter R2 Folder Name');
 
+    // Check total file size before building FormData
+    var totalBytes = 0;
+    if (assigned['card-bg'])    totalBytes += assigned['card-bg'].size;
+    if (assigned['card-hover']) totalBytes += assigned['card-hover'].size;
+    if (assigned['header-bg'])  totalBytes += assigned['header-bg'].size;
+    Object.keys(contentFiles).forEach(function(k) { totalBytes += contentFiles[k].size; });
+    if (totalBytes > MAX_FILE_MB * 1024 * 1024) {
+        alert('Total file size (' + (totalBytes / 1048576).toFixed(1) + 'MB) exceeds ' + MAX_FILE_MB + 'MB limit.\n\nCloudflare free tier limits uploads to 100MB.\nPlease reduce image sizes or split into multiple projects.');
+        return;
+    }
+
     var fd = new FormData();
     fd.append('folderName', folderName);
     fd.append('title',   document.getElementById('f_title').value.trim());
@@ -682,6 +693,9 @@ document.getElementById('uploadBtn').addEventListener('click', function() {
         if (xhr.status===200 && r && r.success) {
             stat.textContent = '✅ ' + r.entry.title + ' — ' + r.files + ' files uploaded!';
             stat.className = 'status show ok';
+        } else if (xhr.status === 413) {
+            stat.textContent = '❌ File too large — Cloudflare limits uploads to 100MB. Reduce image sizes or split into multiple projects.';
+            stat.className = 'status show err';
         } else {
             stat.textContent = '❌ ' + ((r && r.error) || 'Upload failed');
             stat.className = 'status show err';
@@ -714,7 +728,7 @@ function checkFileSize(file, label, maxMB) {
 var mgrProjects = [];
 var mgrExpanded = -1; // which project index is expanded (-1 = none)
 var mgrImageFiles = {};
-var MAX_FILE_MB = 100;
+var MAX_FILE_MB = 95;   // Cloudflare free tier has 100MB body limit — leave 5MB headroom
 
 function isVideo(name){ return /\.(mp4|webm|mov|avi|mkv|ogg)$/i.test(name||''); }
 
