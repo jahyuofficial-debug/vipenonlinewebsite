@@ -957,6 +957,8 @@ function handleManagerAPI(req, res, apiPath, body) {
             handleManagerDesignSave(res, body, session);
         } else if (action === 'fresh-save') {
             handleManagerFreshSave(res, body, session);
+        } else if (action === 'fresh-articles-save') {
+            handleManagerFreshArticlesSave(res, body, session);
         } else if (action === 'logs') {
             handleManagerLogs(res, session);
         } else {
@@ -1575,6 +1577,36 @@ function handleManagerFreshSave(res, body, session) {
             });
         } else {
             addManagerLog('fresh_save', session.username, 'Updated fresh hero data (local only, no Blob)');
+            sendJSON(res, 200, { success: true });
+        }
+    });
+}
+
+function handleManagerFreshArticlesSave(res, body, session) {
+    if (!body.data) {
+        sendJSON(res, 400, { success: false, error: 'No articles data provided' });
+        return;
+    }
+    var json = JSON.stringify(body.data, null, 2);
+
+    // Always save locally first (for local dev fallback)
+    writeManagerJSON('fresh-articles.json', body.data, function(localErr) {
+        // Also save to Vercel Blob (primary storage)
+        if (blobPut) {
+            blobPut('data/fresh-articles.json', json, {
+                access: 'public',
+                contentType: 'application/json',
+                allowOverwrite: true
+            }).then(function(blob) {
+                addManagerLog('fresh_articles_save', session.username, 'Updated fresh articles data to Blob');
+                sendJSON(res, 200, { success: true, url: blob.url });
+            }).catch(function(putErr) {
+                console.error('[ManagerGo] Fresh articles Blob save failed:', putErr.message);
+                addManagerLog('fresh_articles_save', session.username, 'Updated fresh articles data (local only, blob failed: ' + putErr.message + ')');
+                sendJSON(res, 200, { success: true, warning: 'Saved locally but Blob sync failed' });
+            });
+        } else {
+            addManagerLog('fresh_articles_save', session.username, 'Updated fresh articles data (local only, no Blob)');
             sendJSON(res, 200, { success: true });
         }
     });

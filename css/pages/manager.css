@@ -4167,3 +4167,148 @@
     color: rgba(255, 255, 255, .2);
     font-style: italic;
 }
+
+.manager-fresh-tabs {
+    display: flex;
+    gap: .04rem;
+    padding: .12rem .2rem 0;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+.manager-fresh-tab {
+    padding: .08rem .16rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: rgba(255,255,255,.4);
+    font-size: .12rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color .25s, border-color .25s;
+    font-family: inherit;
+    margin-bottom: -1px;
+}
+
+.manager-fresh-tab:hover {
+    color: rgba(255,255,255,.7);
+}
+
+.manager-fresh-tab.active {
+    color: #fff;
+    border-bottom-color: #6366f1;
+}
+
+.manager-fresh-articles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(2.4rem, 1fr));
+    gap: .14rem;
+    padding: .16rem .2rem;
+}
+
+.manager-fresh-article-card {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255,255,255,.02);
+    border: 1px solid rgba(255,255,255,.04);
+    border-radius: .1rem;
+    overflow: hidden;
+    transition: border-color .25s, transform .25s;
+}
+
+.manager-fresh-article-card:hover {
+    border-color: rgba(99,102,241,.25);
+    transform: translateY(-.02rem);
+}
+
+.manager-fresh-article-thumb {
+    width: 100%;
+    height: 1.2rem;
+    background-size: cover;
+    background-position: center;
+    background-color: rgba(0,0,0,.2);
+    flex-shrink: 0;
+}
+
+.manager-fresh-article-thumb-noimg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,.1);
+}
+
+.manager-fresh-article-thumb-noimg svg {
+    width: .36rem;
+    height: .36rem;
+}
+
+.manager-fresh-article-card-body {
+    padding: .12rem .14rem .14rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: .06rem;
+}
+
+.manager-fresh-article-card-cat {
+    font-size: .1rem;
+    color: #6366f1;
+    letter-spacing: .04rem;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.manager-fresh-article-card-title {
+    font-size: .14rem;
+    color: #fff;
+    font-weight: 600;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.manager-fresh-article-card-summary {
+    font-size: .11rem;
+    color: rgba(255,255,255,.45);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.manager-fresh-article-card-meta {
+    font-size: .1rem;
+    color: rgba(255,255,255,.3);
+    display: flex;
+    align-items: center;
+    gap: .04rem;
+    margin-top: auto;
+    flex-wrap: wrap;
+}
+
+.manager-fresh-article-card-meta-sep {
+    color: rgba(255,255,255,.15);
+}
+
+.manager-fresh-article-card-actions {
+    display: flex;
+    gap: .06rem;
+    margin-top: .1rem;
+    padding-top: .1rem;
+    border-top: 1px solid rgba(255,255,255,.04);
+}
+
+.manager-fresh-article-card-actions .manager-btn {
+    flex: 1;
+    padding: .06rem .08rem;
+    font-size: .1rem;
+}
+
+.manager-fresh-article-card-actions .manager-fresh-article-reorder-btn {
+    flex: 0 0 auto;
+    min-width: .36rem;
+    padding: .06rem 0;
+    text-align: center;
+}

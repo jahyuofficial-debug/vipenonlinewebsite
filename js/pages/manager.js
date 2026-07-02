@@ -18,9 +18,11 @@ var ManagerGo = (function() {
     var freshData = { heroGroups: [], articles: [], categories: [] };
     var designData = { works: [] };
     var usersData = [];
+    var currentFreshTab = 'groups';
 
     var STORAGE_KEYS = {
         freshHeroItems: 'vipen_mgr_fresh_heroItems',
+        freshArticles: 'vipen_mgr_fresh_articles',
         designDwItems: 'vipen_mgr_design_dwItems',
         users: 'vipen_mgr_users',
         trash: 'vipen_mgr_trash',
@@ -416,10 +418,17 @@ var ManagerGo = (function() {
             '<div class="manager-main-header">' +
             '<h1 class="manager-main-title">Fresh Manager</h1>' +
             '<div class="manager-main-actions">' +
-            '<button class="manager-btn manager-btn-primary" id="freshAddGroupBtn">' +
+            '<button class="manager-btn manager-btn-primary" id="freshAddGroupBtn"' + (currentFreshTab === 'groups' ? '' : ' style="display:none;"') + '>' +
             '<svg class="manager-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
             'Add Group</button>' +
+            '<button class="manager-btn manager-btn-primary" id="freshAddArticleBtn"' + (currentFreshTab === 'articles' ? '' : ' style="display:none;"') + '>' +
+            '<svg class="manager-btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>' +
+            'Add Article</button>' +
             '</div>' +
+            '</div>' +
+            '<div class="manager-fresh-tabs">' +
+            '<button class="manager-fresh-tab' + (currentFreshTab === 'groups' ? ' active' : '') + '" data-fresh-tab="groups">Hero Groups</button>' +
+            '<button class="manager-fresh-tab' + (currentFreshTab === 'articles' ? ' active' : '') + '" data-fresh-tab="articles">Articles</button>' +
             '</div>' +
             '<div id="freshManagerContent"><div style="text-align:center;padding:.6rem;color:rgba(255,255,255,.25);">Loading...</div></div>';
 
@@ -437,12 +446,43 @@ var ManagerGo = (function() {
             if (siteData && siteData.fresh) {
                 freshData.categories = siteData.fresh.categories || [];
             }
-            renderFreshGroups(fc);
+            var savedArticles = loadFromLocalStorage(STORAGE_KEYS.freshArticles);
+            if (savedArticles && Array.isArray(savedArticles)) {
+                freshData.articles = savedArticles;
+            } else if (siteData && siteData.fresh && Array.isArray(siteData.fresh.items)) {
+                freshData.articles = siteData.fresh.items.map(function(it, i) {
+                    if (typeof it.id === 'string') it.id = i;
+                    return it;
+                });
+            }
+            renderFreshTabContent(fc);
         });
 
-        document.getElementById('freshAddGroupBtn').addEventListener('click', function() {
-            openFreshGroupEditor(null);
+        var addGroupBtn = document.getElementById('freshAddGroupBtn');
+        var addArticleBtn = document.getElementById('freshAddArticleBtn');
+        if (addGroupBtn) addGroupBtn.addEventListener('click', function() { openFreshGroupEditor(null); });
+        if (addArticleBtn) addArticleBtn.addEventListener('click', function() { openFreshArticleItemEditor(null); });
+
+        var tabBtns = container.querySelectorAll('.manager-fresh-tab');
+        tabBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                currentFreshTab = this.getAttribute('data-fresh-tab');
+                tabBtns.forEach(function(b) { b.classList.remove('active'); });
+                this.classList.add('active');
+                if (addGroupBtn) addGroupBtn.style.display = currentFreshTab === 'groups' ? '' : 'none';
+                if (addArticleBtn) addArticleBtn.style.display = currentFreshTab === 'articles' ? '' : 'none';
+                var fc = document.getElementById('freshManagerContent');
+                if (fc) renderFreshTabContent(fc);
+            });
         });
+    }
+
+    function renderFreshTabContent(container) {
+        if (currentFreshTab === 'articles') {
+            renderFreshArticlesList(container);
+        } else {
+            renderFreshGroups(container);
+        }
     }
 
     function migrateLegacyData(oldData) {
@@ -681,6 +721,265 @@ var ManagerGo = (function() {
         });
     }
 
+    function renderFreshArticlesList(container) {
+        if (!freshData.articles || freshData.articles.length === 0) {
+            container.innerHTML = '<div class="manager-empty">No articles yet. Click "Add Article" to create one.</div>';
+            return;
+        }
+        var html = '<div class="manager-fresh-articles">';
+        for (var i = 0; i < freshData.articles.length; i++) {
+            html += buildFreshArticleCard(freshData.articles[i], i);
+        }
+        html += '</div>';
+        container.innerHTML = html;
+        bindFreshArticleCardEvents(container);
+    }
+
+    function buildFreshArticleCard(article, index) {
+        var cover = article.image
+            ? '<div class="manager-fresh-article-thumb" style="background-image:url(' + article.image + ')"></div>'
+            : '<div class="manager-fresh-article-thumb manager-fresh-article-thumb-noimg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>';
+        var metaParts = [];
+        if (article.date) metaParts.push('<span>' + escapeAttr(article.date) + '</span>');
+        if (article.readTime) metaParts.push('<span>' + escapeAttr(article.readTime) + '</span>');
+        if (article.author) metaParts.push('<span>' + escapeAttr(article.author) + '</span>');
+        var metaHtml = metaParts.length
+            ? '<div class="manager-fresh-article-card-meta">' + metaParts.join('<span class="manager-fresh-article-card-meta-sep">·</span>') + '</div>'
+            : '';
+        return '<div class="manager-fresh-article-card" data-idx="' + index + '">' +
+            cover +
+            '<div class="manager-fresh-article-card-body">' +
+            '<div class="manager-fresh-article-card-cat">' + escapeAttr((article.cat || 'blog').toUpperCase()) + '</div>' +
+            '<div class="manager-fresh-article-card-title">' + escapeAttr(article.headline || 'Untitled') + '</div>' +
+            (article.summary ? '<div class="manager-fresh-article-card-summary">' + escapeAttr(article.summary) + '</div>' : '') +
+            metaHtml +
+            '<div class="manager-fresh-article-card-actions">' +
+            '<button class="manager-btn manager-btn-outline manager-btn-sm btn-fresh-article-edit" data-idx="' + index + '">Edit</button>' +
+            '<button class="manager-btn manager-btn-outline manager-btn-sm manager-fresh-article-reorder-btn btn-fresh-article-up" data-idx="' + index + '" data-dir="-1" title="Move up">↑</button>' +
+            '<button class="manager-btn manager-btn-outline manager-btn-sm manager-fresh-article-reorder-btn btn-fresh-article-down" data-idx="' + index + '" data-dir="1" title="Move down">↓</button>' +
+            '<button class="manager-btn manager-btn-danger manager-btn-sm btn-fresh-article-delete" data-idx="' + index + '">Delete</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+    }
+
+    function bindFreshArticleCardEvents(container) {
+        var editBtns = container.querySelectorAll('.btn-fresh-article-edit');
+        editBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var idx = parseInt(this.getAttribute('data-idx'), 10);
+                openFreshArticleItemEditor(idx);
+            });
+        });
+
+        var delBtns = container.querySelectorAll('.btn-fresh-article-delete');
+        delBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var idx = parseInt(this.getAttribute('data-idx'), 10);
+                var article = freshData.articles[idx];
+                if (!article) return;
+                showDeleteConfirm(
+                    'Delete Article',
+                    'Are you sure you want to delete "' + (article.headline || 'Untitled') + '"? This will be moved to Trash.',
+                    'Delete',
+                    'Move to Trash',
+                    function(confirmed) {
+                        if (!confirmed) return;
+                        saveToTrash('fresh_article', JSON.parse(JSON.stringify(article)), STORAGE_KEYS.freshArticles);
+                        freshData.articles.splice(idx, 1);
+                        normalizeArticleIds(freshData.articles);
+                        saveToLocalStorage(STORAGE_KEYS.freshArticles, freshData.articles);
+                        saveFreshArticlesToServer({ articles: freshData.articles });
+                        var fc = document.getElementById('freshManagerContent');
+                        if (fc) renderFreshArticlesList(fc);
+                        showToast('Article moved to Trash');
+                    }
+                );
+            });
+        });
+
+        var reorderBtns = container.querySelectorAll('.btn-fresh-article-up, .btn-fresh-article-down');
+        reorderBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                var idx = parseInt(this.getAttribute('data-idx'), 10);
+                var dir = parseInt(this.getAttribute('data-dir'), 10);
+                var newIdx = idx + dir;
+                if (newIdx < 0 || newIdx >= freshData.articles.length) return;
+                var tmp = freshData.articles[idx];
+                freshData.articles[idx] = freshData.articles[newIdx];
+                freshData.articles[newIdx] = tmp;
+                normalizeArticleIds(freshData.articles);
+                saveToLocalStorage(STORAGE_KEYS.freshArticles, freshData.articles);
+                saveFreshArticlesToServer({ articles: freshData.articles });
+                var fc = document.getElementById('freshManagerContent');
+                if (fc) renderFreshArticlesList(fc);
+            });
+        });
+    }
+
+    function normalizeArticleIds(arr) {
+        if (!Array.isArray(arr)) return arr;
+        arr.forEach(function(a, i) { a.id = i; });
+        return arr;
+    }
+
+    function openFreshArticleItemEditor(editIndex) {
+        var isNew = (editIndex === null || editIndex === undefined);
+        var blankArticle = { id: 0, cat: 'blog', headline: '', headlineEn: '', summary: '', summaryEn: '', body: '', bodyEn: '', image: '', date: '', fullDate: '', author: 'Vipen', authorInitial: 'V', authorBg: '#6366f1', readTime: '1 min read', tags: '' };
+        var article = isNew ? blankArticle : (freshData.articles[editIndex] || blankArticle);
+
+        var catOptions = (freshData.categories || [])
+            .filter(function(c) { return c.key !== 'all'; })
+            .map(function(c) {
+                return '<option value="' + escapeAttr(c.key) + '"' + (article.cat === c.key ? ' selected' : '') + '>' + escapeAttr(c.label) + '</option>';
+            }).join('');
+
+        var overlay = document.createElement('div');
+        overlay.className = 'manager-modal-overlay manager-fresh-editor-overlay';
+        overlay.id = 'freshArticleItemEditorOverlay';
+
+        overlay.innerHTML =
+            '<div class="manager-fresh-editor">' +
+            '<div class="manager-fresh-editor-header">' +
+            '<button class="manager-design-editor-back" id="freshArtItemEditorBack">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m7-7l-7 7 7 7"/></svg>' +
+            'Back</button>' +
+            '<div class="manager-design-editor-title">' + (isNew ? 'New Article' : 'Edit Article #' + (editIndex + 1)) + '</div>' +
+            '<button class="manager-btn manager-btn-primary manager-design-editor-save active" id="freshArtItemEditorSave">Save</button>' +
+            '</div>' +
+            '<div class="manager-fresh-editor-body">' +
+            '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.12rem;">' +
+            '<div class="manager-form-group">' +
+            '<label class="manager-form-label">Headline (ZH)</label>' +
+            '<input type="text" class="manager-form-input" id="freshArtItemHeadline" value="' + escapeAttr(article.headline) + '">' +
+            '</div>' +
+            '<div class="manager-form-group">' +
+            '<label class="manager-form-label">Headline (EN)</label>' +
+            '<input type="text" class="manager-form-input" id="freshArtItemHeadlineEn" value="' + escapeAttr(article.headlineEn) + '">' +
+            '</div>' +
+            '<div class="manager-form-group">' +
+            '<label class="manager-form-label">Category</label>' +
+            '<select class="manager-form-input" id="freshArtItemCat">' + catOptions + '</select>' +
+            '</div>' +
+            '</div>' +
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:.12rem;">' +
+            '<div class="manager-form-group">' +
+            '<label class="manager-form-label">Summary (ZH)</label>' +
+            '<input type="text" class="manager-form-input" id="freshArtItemSummary" value="' + escapeAttr(article.summary) + '">' +
+            '</div>' +
+            '<div class="manager-form-group">' +
+            '<label class="manager-form-label">Summary (EN)</label>' +
+            '<input type="text" class="manager-form-input" id="freshArtItemSummaryEn" value="' + escapeAttr(article.summaryEn) + '">' +
+            '</div>' +
+            '</div>' +
+            '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.12rem;">' +
+            '<div class="manager-form-group">' +
+            '<label class="manager-form-label">Author</label>' +
+            '<input type="text" class="manager-form-input" id="freshArtItemAuthor" value="' + escapeAttr(article.author) + '">' +
+            '</div>' +
+            '<div class="manager-form-group">' +
+            '<label class="manager-form-label">Author Initial</label>' +
+            '<input type="text" class="manager-form-input" id="freshArtItemAuthorInitial" maxlength="1" value="' + escapeAttr(article.authorInitial) + '">' +
+            '</div>' +
+            '<div class="manager-form-group">' +
+            '<label class="manager-form-label">Author Bg Color</label>' +
+            '<input type="color" class="manager-form-input" id="freshArtItemAuthorBg" value="' + escapeAttr(article.authorBg) + '" style="height:.4rem;padding:.04rem;">' +
+            '</div>' +
+            '</div>' +
+            '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.12rem;">' +
+            '<div class="manager-form-group">' +
+            '<label class="manager-form-label">Short Date (e.g. 07/03)</label>' +
+            '<input type="text" class="manager-form-input" id="freshArtItemDate" value="' + escapeAttr(article.date) + '">' +
+            '</div>' +
+            '<div class="manager-form-group">' +
+            '<label class="manager-form-label">Full Date</label>' +
+            '<input type="date" class="manager-form-input" id="freshArtItemFullDate" value="' + escapeAttr(article.fullDate) + '">' +
+            '</div>' +
+            '<div class="manager-form-group">' +
+            '<label class="manager-form-label">Read Time</label>' +
+            '<input type="text" class="manager-form-input" id="freshArtItemReadTime" value="' + escapeAttr(article.readTime) + '">' +
+            '</div>' +
+            '</div>' +
+            '<div class="manager-form-group">' +
+            '<label class="manager-form-label">Tags (comma-separated)</label>' +
+            '<input type="text" class="manager-form-input" id="freshArtItemTags" value="' + escapeAttr(article.tags) + '">' +
+            '</div>' +
+            createImageUploadField('artItem', article.image, 'Cover Image', 'freshArtItemImage') +
+            '<div class="manager-form-group">' +
+            '<label class="manager-form-label">Body Content (ZH)</label>' +
+            buildRichTextToolbar('rte-art-item-zh') +
+            '<div class="manager-rte-editor" id="rte-art-item-zh" contenteditable="true">' + (article.body || '') + '</div>' +
+            '</div>' +
+            '<div class="manager-form-group">' +
+            '<label class="manager-form-label">Body Content (EN)</label>' +
+            buildRichTextToolbar('rte-art-item-en') +
+            '<div class="manager-rte-editor" id="rte-art-item-en" contenteditable="true">' + (article.bodyEn || '') + '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>';
+
+        document.body.appendChild(overlay);
+
+        var toolbarBars = overlay.querySelectorAll('.manager-rte-toolbar');
+        toolbarBars.forEach(function(bar) {
+            var editorEl = bar.nextElementSibling;
+            var editorId = editorEl ? editorEl.id : null;
+            if (editorId) bindRichTextToolbar(bar, editorId);
+        });
+
+        bindImageUploadField(overlay, 'freshArtItemImage', validateFreshImage);
+
+        function closeEditor() { overlay.remove(); }
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) closeEditor(); });
+        overlay.querySelector('#freshArtItemEditorBack').addEventListener('click', closeEditor);
+
+        overlay.querySelector('#freshArtItemEditorSave').addEventListener('click', function() {
+            article.headline = overlay.querySelector('#freshArtItemHeadline').value.trim();
+            article.headlineEn = overlay.querySelector('#freshArtItemHeadlineEn').value.trim();
+            article.cat = overlay.querySelector('#freshArtItemCat').value;
+            article.summary = overlay.querySelector('#freshArtItemSummary').value.trim();
+            article.summaryEn = overlay.querySelector('#freshArtItemSummaryEn').value.trim();
+            article.author = overlay.querySelector('#freshArtItemAuthor').value.trim() || 'Vipen';
+            article.authorInitial = overlay.querySelector('#freshArtItemAuthorInitial').value.trim() || (article.author.charAt(0) || 'V');
+            article.authorBg = overlay.querySelector('#freshArtItemAuthorBg').value || '#6366f1';
+            article.date = overlay.querySelector('#freshArtItemDate').value.trim();
+            article.fullDate = overlay.querySelector('#freshArtItemFullDate').value;
+            article.readTime = overlay.querySelector('#freshArtItemReadTime').value.trim();
+            article.tags = overlay.querySelector('#freshArtItemTags').value.trim();
+            article.image = getImageUploadValue(overlay, 'freshArtItemImage');
+            article.body = overlay.querySelector('#rte-art-item-zh').innerHTML.trim();
+            article.bodyEn = overlay.querySelector('#rte-art-item-en').innerHTML.trim();
+            if (isNew) {
+                freshData.articles.push(article);
+            } else {
+                freshData.articles[editIndex] = article;
+            }
+            normalizeArticleIds(freshData.articles);
+            saveToLocalStorage(STORAGE_KEYS.freshArticles, freshData.articles);
+            saveFreshArticlesToServer({ articles: freshData.articles });
+            var fc = document.getElementById('freshManagerContent');
+            if (fc) renderFreshArticlesList(fc);
+            showToast('Article saved');
+            closeEditor();
+        });
+    }
+
+    function saveFreshArticlesToServer(data) {
+        if (!sessionToken) { console.warn('[ManagerGo] saveFreshArticlesToServer skipped: not logged in'); return; }
+        apiCall('fresh-articles-save', { data: data }, function(res) {
+            if (res && res.success) {
+                console.log('[ManagerGo] Fresh articles saved to server');
+                if (data.articles) {
+                    try { localStorage.setItem(STORAGE_KEYS.freshArticles, JSON.stringify(data.articles)); } catch (e) {}
+                }
+                showToast('Articles saved & synced', false);
+            } else {
+                console.error('[ManagerGo] Fresh articles save failed:', (res && res.error) || 'Unknown error');
+                showToast('Failed to sync articles to server', true);
+            }
+        });
+    }
+
     function createImageUploadField(idSuffix, currentValue, label, fieldId) {
         var bgStyle = currentValue
             ? 'background:url(' + currentValue + ') center/cover no-repeat'
@@ -811,6 +1110,10 @@ var ManagerGo = (function() {
                     imgInput.click();
                     imgInput.addEventListener('change', function() {
                         if (this.files.length > 0) {
+                            var sizeKB = Math.round(this.files[0].size / 1024);
+                            if (typeof CONFIG !== 'undefined' && CONFIG.ARTICLE_IMAGE_MAX_KB && sizeKB > CONFIG.ARTICLE_IMAGE_MAX_KB) {
+                                showToast('Image is ' + sizeKB + 'KB — large base64 may bloat localStorage. Prefer an external URL.', true);
+                            }
                             var reader = new FileReader();
                             reader.onload = function(e) {
                                 editor.focus();

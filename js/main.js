@@ -179,6 +179,10 @@ BannerPage.initBgVideo();
         var mgrFresh = localStorage.getItem('vipen_mgr_fresh_heroItems');
         if (mgrFresh) { try { freshHeroItems = JSON.parse(mgrFresh); } catch (e) {} }
 
+        // Fresh articles: localStorage > static file (managed by ManagerGo)
+        var mgrArticles = localStorage.getItem('vipen_mgr_fresh_articles');
+        if (mgrArticles) { try { freshItems = JSON.parse(mgrArticles); } catch (e) {} }
+
         if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
 
         // Banner: load home/index.json, then fetch meta from R2
