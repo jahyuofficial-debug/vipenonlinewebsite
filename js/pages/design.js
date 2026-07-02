@@ -133,10 +133,10 @@ function bindFanHover() {
                 ease: 'power2.out',
                 overwrite: 'auto'
             });
-            // Dim other cards slightly
+            // Hide other cards
             cards.forEach(function(other) {
                 if (other !== card) {
-                    gsap.to(other, { opacity: 0.5, duration: 0.35, ease: 'power2.out', overwrite: 'auto' });
+                    gsap.to(other, { opacity: 0, duration: 0.35, ease: 'power2.out', overwrite: 'auto' });
                 }
             });
         });
