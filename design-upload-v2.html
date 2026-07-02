@@ -1021,37 +1021,7 @@ function bindMgrCard(pi){
             return;
         }
     });
-    // Add buttons
     bindMgrAddButtons(ct,pi);
-    if(addBtn){
-        addBtn.addEventListener('click',function(){
-            var inp=document.createElement('input');
-            inp.type='file';
-            inp.accept='image/*,video/*';
-            inp.addEventListener('change',function(){
-                if(!inp.files.length)return;
-                var f=inp.files[0];
-                var idx=mgrProjects[pi].contentImages.length;
-                mgrImageFiles[pi+'_content-'+idx]=f;
-                mgrProjects[pi].contentImages.push(buildPreview(f));
-                renderMgrSortableOnly(pi);
-            });
-            inp.click();
-        });
-    }
-    // Add YouTube
-    var ytBtn=ct.querySelector('.mgr-add-yt');
-    if(ytBtn){
-        ytBtn.addEventListener('click',function(e){
-            e.stopPropagation();
-            var url=prompt('Enter YouTube URL:\ne.g. https://www.youtube.com/watch?v=VIDEO_ID\nor https://youtu.be/VIDEO_ID');
-            if(!url||!url.trim())return;
-            url=url.trim();
-            if(!/(youtube\.com|youtu\.be)/i.test(url)){toast('Invalid YouTube URL','err');return;}
-            mgrProjects[pi].contentImages.push(url);
-            renderMgrSortableOnly(pi);
-        });
-    }
 
     // Bind sortable via delegation
     mgrBindSort(ct,pi);
