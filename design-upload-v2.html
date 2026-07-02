@@ -860,7 +860,7 @@ function renderMgr(){
 
 function buildMgrCardBody(p,pi){
     return '<div class="mgr-fields">'+
-        '<div class="mgr-field full"><label>Subtitle</label><input value="'+esc(p.subtitle||'')+'" data-mgr-field="subtitle" data-pi="'+pi+'">'+
+        '<div class="mgr-field full"><label>Subtitle</label><input value="'+esc(p.subtitle||'')+'" data-mgr-field="subtitle" data-pi="'+pi+'"></div>'+
         '<div class="mgr-field full"><label>Description</label><textarea data-mgr-field="description" data-pi="'+pi+'">'+esc(p.description||'')+'</textarea></div>'+
         '<div class="mgr-field"><label>Client</label><input value="'+esc(p.client||'')+'" data-mgr-field="client" data-pi="'+pi+'">'+
         '<div class="mgr-field"><label>Published</label><input value="'+esc(p.published||'')+'" data-mgr-field="published" data-pi="'+pi+'">'+
@@ -929,19 +929,26 @@ function mgrSortSlots(imgs,pi){
 // ── Single-concurrency image loader (prevents 15 simultaneous decodes) ──
 var mgrImgQueue = [];
 var mgrImgActive = false;
+var mgrImgTimer = 0;
 function mgrQueueImgs(scope){
+    mgrImgQueue = [];
     var imgs = (scope||document).querySelectorAll('img.mgr-lazy[data-src]');
     imgs.forEach(function(img){ mgrImgQueue.push(img); });
     mgrPumpImgs();
 }
 function mgrPumpImgs(){
     if(mgrImgActive) return;
-    var img = mgrImgQueue.shift();
-    if(!img) return;
-    if(!img.parentNode){ mgrPumpImgs(); return; }
+    var img;
+    while (true) {
+        img = mgrImgQueue.shift();
+        if (!img) return;
+        if (img.parentNode) break;
+    }
     mgrImgActive = true;
-    img.onload = function(){ mgrImgActive=false; mgrPumpImgs(); };
-    img.onerror = function(){ img.style.opacity='0.25'; mgrImgActive=false; mgrPumpImgs(); };
+    clearTimeout(mgrImgTimer);
+    mgrImgTimer = setTimeout(function(){ mgrImgActive = false; mgrPumpImgs(); }, 15000);
+    img.onload = function(){ clearTimeout(mgrImgTimer); mgrImgActive = false; mgrPumpImgs(); };
+    img.onerror = function(){ img.style.opacity = '0.25'; clearTimeout(mgrImgTimer); mgrImgActive = false; mgrPumpImgs(); };
     img.src = img.getAttribute('data-src');
     img.removeAttribute('data-src');
 }

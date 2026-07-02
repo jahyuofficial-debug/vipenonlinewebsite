@@ -1816,17 +1816,9 @@ var ManagerGo = (function() {
         var html = '<div class="manager-design-grid">';
         for (var i = 0; i < designData.works.length; i++) {
             var work = designData.works[i];
-            var cover = work.coverImage;
-            var isImgSrc = cover && (cover.indexOf('data:image') === 0 || cover.indexOf('http') === 0 || cover.indexOf('//') === 0);
+            var thumbStyle = work.coverImage ? work.coverImage : (work.gradient || 'linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%)');
             html += '<div class="manager-design-item" data-work-index="' + i + '">' +
-                '<div class="manager-design-thumb">';
-            if (isImgSrc) {
-                html += '<img src="' + cover + '" loading="lazy" decoding="async" alt="">';
-            } else {
-                var fallback = (cover && cover.indexOf('gradient') !== -1) ? cover : (work.gradient || 'linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%)');
-                html += '<div class="manager-design-thumb-bg" style="background:' + fallback + '"></div>';
-            }
-            html += '</div>' +
+                '<div class="manager-design-thumb" style="background:' + thumbStyle + '"></div>' +
                 '<div class="manager-design-body">' +
                 '<span class="manager-design-cat">' + work.cat + '</span>' +
                 '<h3 class="manager-design-title">' + work.title + '</h3>' +

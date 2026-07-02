@@ -6,6 +6,13 @@ node_modules/
 # 敏感用户数据
 .trae/documents/
 
+# Manager 本地运行数据 — 禁止提交到 Git（含用户邮箱、PIN 哈希等敏感信息）
+data/manager/pins.json
+data/manager/users.json
+data/manager/design-pin.json
+data/manager/logs.json
+data/manager/settings.json
+
 # 大文件 — 已迁移到 Cloudflare R2（禁止提交）
 banner/bg.mp4
 /bg.mp4
