@@ -91,8 +91,15 @@ function buildFreshHeroCarousel() {
 
 function buildFreshPage(activeKey) {
     var hero = buildFreshHeroCarousel();
+    var key = activeKey || 'all';
+    var tabs = buildFreshTabs(key);
+    var articles = buildFreshArticles(key);
     return '<section id="page-fresh" class="fresh-page">' +
         hero +
+        '<div class="fresh-content">' +
+        '<div class="fresh-tabs">' + tabs + '</div>' +
+        '<div class="fresh-article-list">' + articles + '</div>' +
+        '</div>' +
         '</section>';
 }
 
@@ -421,6 +428,7 @@ return {
     bindAll: function() {
         initFreshCarousel();
         bindFreshHeroClicks();
+        bindFreshArticleClicks();
     },
     bindTranslate: function() { bindTranslateBtn(); },
     initCarousel: function() { initFreshCarousel(); },

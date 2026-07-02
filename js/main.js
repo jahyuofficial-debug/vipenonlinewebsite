@@ -187,7 +187,13 @@ BannerPage.initBgVideo();
             .then(function(articles) {
                 if (articles && Array.isArray(articles) && articles.length) {
                     freshItems = articles;
-                    if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
+                    if (typeof FreshPage !== 'undefined') {
+                        FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
+                        if (currentPage === 'fresh' && subPageContainer) {
+                            subPageContainer.innerHTML = FreshPage.buildPage(freshActiveTab);
+                            FreshPage.bindAll();
+                        }
+                    }
                 }
             })
             .catch(function() { /* silent fallback to fresh.json items */ });
