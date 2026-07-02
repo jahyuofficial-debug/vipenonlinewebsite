@@ -175,6 +175,56 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
 .mgr-progress-ring .fill{fill:none;stroke:#d4a853;stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .3s}
 .mgr-progress-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#d4a853}
 .mgr-progress-label{margin-top:16px;font-size:13px;color:rgba(255,255,255,.4)}
+
+/* ── Articles tab ── */
+.art-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start}
+.art-card-thumb{width:60px;height:60px;border-radius:6px;background-size:cover;background-position:center;background-color:rgba(255,255,255,.05);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.15);font-size:9px;text-align:center}
+.art-card-body{flex:1;min-width:0}
+.art-card-cat{font-size:9px;color:#d4a853;text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:4px}
+.art-card-title{font-size:14px;font-weight:600;color:#fff;margin-bottom:4px;word-break:break-word}
+.art-card-summary{font-size:11px;color:rgba(255,255,255,.4);line-height:1.5;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.art-card-meta{font-size:10px;color:rgba(255,255,255,.25);margin-bottom:8px}
+.art-card-actions{display:flex;gap:6px;flex-wrap:wrap}
+.art-card-actions button{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;padding:5px 10px;border-radius:5px;cursor:pointer;font-size:11px;transition:all .2s}
+.art-card-actions button:hover{background:rgba(212,168,83,.15);border-color:rgba(212,168,83,.4)}
+.art-card-actions .btn-del{border-color:rgba(239,68,68,.2);color:rgba(239,68,68,.7)}
+.art-card-actions .btn-del:hover{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.5)}
+
+/* Article editor modal */
+.art-editor-overlay{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.75);display:none;align-items:flex-start;justify-content:center;padding:30px 16px;overflow-y:auto}
+.art-editor-overlay.show{display:flex}
+.art-editor{background:#0f0f17;border:1px solid rgba(255,255,255,.08);border-radius:12px;width:100%;max-width:720px;padding:20px;margin-bottom:30px}
+.art-editor-header{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.06)}
+.art-editor-header h3{flex:1;font-size:16px;color:#fff;margin:0}
+.art-editor-header button{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;transition:all .2s;font-family:inherit}
+.art-editor-header button:hover{background:rgba(255,255,255,.1)}
+.art-editor-header .btn-save{background:#d4a853;color:#000;border-color:#d4a853;font-weight:600}
+.art-editor-header .btn-save:hover{background:#e0b960}
+.art-editor-body{max-height:calc(100vh - 200px);overflow-y:auto;padding-right:4px}
+.rte-field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.rte-full-row{margin-bottom:10px}
+.rte-label{font-size:11px;color:rgba(255,255,255,.4);margin-bottom:5px;display:block;letter-spacing:.02em}
+
+/* Rich text toolbar */
+.rte-toolbar{display:flex;gap:4px;flex-wrap:wrap;padding:6px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-bottom:none;border-radius:6px 6px 0 0}
+.rte-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);color:#fff;width:30px;height:30px;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0;font-family:inherit}
+.rte-btn:hover{background:rgba(212,168,83,.2);border-color:rgba(212,168,83,.4)}
+.rte-btn.rte-sep{background:rgba(255,255,255,.1);border:none;cursor:default;width:1px;height:22px;margin:4px 2px;padding:0}
+.rte-btn.rte-sep:hover{background:rgba(255,255,255,.1)}
+.rte-btn-wide{width:auto;padding:0 10px;font-size:11px}
+.rte-editor{min-height:240px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:0 0 6px 6px;padding:14px;color:#fff;font-size:13px;line-height:1.7;outline:none;overflow-y:auto;max-height:520px}
+.rte-editor:focus{border-color:#d4a853}
+.rte-editor:empty:before{content:attr(data-placeholder);color:rgba(255,255,255,.2);pointer-events:none}
+.rte-editor h1{font-size:22px;margin:.6em 0;font-weight:700;color:#fff}
+.rte-editor h2{font-size:18px;margin:.6em 0;font-weight:700;color:#fff}
+.rte-editor h3{font-size:15px;margin:.5em 0;font-weight:600;color:#fff}
+.rte-editor p{margin:.5em 0}
+.rte-editor blockquote{border-left:3px solid #d4a853;padding-left:12px;margin:.6em 0;color:rgba(255,255,255,.65);font-style:italic}
+.rte-editor ul,.rte-editor ol{margin:.4em 0;padding-left:24px}
+.rte-editor a{color:#d4a853;text-decoration:underline}
+.rte-editor img{max-width:100%;border-radius:6px;margin:8px 0;display:block}
+.rte-editor figure{margin:10px 0;text-align:center}
+.rte-editor figcaption{font-size:11px;color:rgba(255,255,255,.4);margin-top:4px;font-style:italic}
 </style>
 </head>
 <body>
@@ -184,6 +234,7 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
     <button class="tab-btn active" data-tab="upload">Upload New</button>
     <button class="tab-btn" data-tab="manage">Manage Existing</button>
     <button class="tab-btn" data-tab="disc">Disc</button>
+    <button class="tab-btn" data-tab="articles">Articles</button>
   </div>
 
   <!-- ═══ Upload Tab ═══ -->
@@ -310,6 +361,20 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
       <button id="discAddTrack" class="btn-gold" style="width:auto;padding:10px 20px">+ Add Track</button>
     </div>
   </div><!-- /tab-disc -->
+
+  <!-- ═══ Articles Tab ═══ -->
+  <div class="tab-panel" id="tab-articles">
+    <div class="mgr-toolbar">
+      <button id="artLoadBtn" class="btn-gold">Load Articles</button>
+      <button id="artSaveBtn" class="btn-gold">Save to Site</button>
+      <button id="artAddBtn" class="btn-gold">+ New Article</button>
+      <span style="font-size:10px;color:rgba(255,255,255,.2);display:flex;align-items:center;margin-left:4px" id="artCount"></span>
+    </div>
+    <div id="artList"></div>
+    <div style="margin-top:14px;padding:12px;background:rgba(255,255,255,.02);border-radius:8px;font-size:11px;color:rgba(255,255,255,.32);line-height:1.6">
+      <strong style="color:#d4a853">How it works:</strong> Articles are saved to localStorage (key <code style="color:#9ca3af">vipen_mgr_fresh_articles</code>) and override the static <code style="color:#9ca3af">data/fresh.json</code> items on the live site. Visitors will see your latest articles on the Fresh page after you click "Save to Site".
+    </div>
+  </div><!-- /tab-articles -->
 
 </div><!-- /wrap -->
 <div class="status-toast" id="statusToast"></div>
@@ -1350,6 +1415,342 @@ ds.textContent='.disc-track-row{display:flex;align-items:center;gap:8px;padding:
     '.disc-del{background:none;border:1px solid rgba(239,68,68,.3);border-radius:50%;color:rgba(239,68,68,.6);width:20px;height:20px;font-size:10px;cursor:pointer;flex-shrink:0;padding:0;line-height:18px;text-align:center}'+
     '.disc-del:hover{background:rgba(239,68,68,.15)}';
 document.head.appendChild(ds);
+})();
+
+// ── Articles JS (公众号-style article editor → Fresh page) ─────
+(function(){
+'use strict';
+
+var ARTICLES_KEY = 'vipen_mgr_fresh_articles';
+var articles = [];
+var editingIdx = null;
+
+var CATEGORIES = [
+    { key: 'blog', label: 'Blog' },
+    { key: 'ai', label: 'AI' },
+    { key: 'hot', label: 'Hot' },
+    { key: 'music', label: 'Music' },
+    { key: 'culture', label: 'Culture' },
+    { key: 'sports', label: 'Sports' }
+];
+
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function toast(msg,t){
+    var s=document.getElementById('statusToast');
+    if(!s)return;
+    s.textContent=msg;
+    s.className='status-toast show '+(t||'ok');
+    setTimeout(function(){s.classList.remove('show')},3000);
+}
+
+function loadArticles(){
+    var raw = localStorage.getItem(ARTICLES_KEY);
+    if (raw) {
+        try {
+            articles = JSON.parse(raw) || [];
+            renderArticlesList();
+            toast('Loaded ' + articles.length + ' articles from localStorage');
+            return;
+        } catch(e) { console.warn('Bad stored articles, falling back:', e); }
+    }
+    // No localStorage data → load from fresh.json (live site)
+    toast('Loading articles from fresh.json...');
+    fetch('data/fresh.json?'+Date.now())
+        .then(function(r){return r.json();})
+        .then(function(d){
+            if (d && d.items && d.items.length) {
+                articles = d.items.map(function(it, i){
+                    if (typeof it.id === 'string') it.id = i;
+                    return it;
+                });
+            } else {
+                articles = [];
+            }
+            renderArticlesList();
+            toast('Loaded ' + articles.length + ' articles from fresh.json (these are read-only until you click "Save to Site")');
+        })
+        .catch(function(){
+            articles = [];
+            renderArticlesList();
+            toast('No articles found. Click "+ New Article" to write one.', 'err');
+        });
+}
+
+function saveArticles(){
+    try {
+        articles.forEach(function(a, i){ a.id = i; });
+        localStorage.setItem(ARTICLES_KEY, JSON.stringify(articles));
+        toast('✓ Saved ' + articles.length + ' articles. Refresh the Fresh page on the live site to see them.');
+    } catch (e) {
+        toast('Save failed: ' + (e.message || 'storage quota exceeded — try smaller images or external URLs'), 'err');
+    }
+}
+
+function renderArticlesList(){
+    var c = document.getElementById('artList');
+    document.getElementById('artCount').textContent = articles.length + ' articles';
+    if (!articles.length) {
+        c.innerHTML = '<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,.2);font-size:13px">No articles yet.<br>Click "+ New Article" to write one like a 公众号 post.</div>';
+        return;
+    }
+    var h = '';
+    for (var i = 0; i < articles.length; i++) {
+        h += buildArticleCard(articles[i], i);
+    }
+    c.innerHTML = h;
+    bindArticleCardEvents();
+}
+
+function buildArticleCard(a, i){
+    var thumb = a.image
+        ? '<div class="art-card-thumb" style="background-image:url(' + esc(a.image) + ')"></div>'
+        : '<div class="art-card-thumb">NO IMG</div>';
+    var metaParts = [];
+    if (a.date) metaParts.push(esc(a.date));
+    if (a.readTime) metaParts.push(esc(a.readTime));
+    if (a.author) metaParts.push(esc(a.author));
+    var meta = metaParts.length ? '<div class="art-card-meta">' + metaParts.join(' · ') + '</div>' : '';
+    return '<div class="art-card" data-idx="' + i + '">' +
+        thumb +
+        '<div class="art-card-body">' +
+        '<div class="art-card-cat">' + esc((a.cat || 'blog').toUpperCase()) + '</div>' +
+        '<div class="art-card-title">' + esc(a.headline || 'Untitled') + '</div>' +
+        (a.summary ? '<div class="art-card-summary">' + esc(a.summary) + '</div>' : '') +
+        meta +
+        '<div class="art-card-actions">' +
+        '<button data-art-action="edit" data-idx="' + i + '">Edit</button>' +
+        '<button data-art-action="up" data-idx="' + i + '">↑</button>' +
+        '<button data-art-action="down" data-idx="' + i + '">↓</button>' +
+        '<button data-art-action="delete" data-idx="' + i + '" class="btn-del">Delete</button>' +
+        '</div>' +
+        '</div>' +
+        '</div>';
+}
+
+function bindArticleCardEvents(){
+    var c = document.getElementById('artList');
+    c.querySelectorAll('[data-art-action]').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var action = this.getAttribute('data-art-action');
+            var idx = parseInt(this.getAttribute('data-idx'), 10);
+            if (action === 'edit') openArticleEditor(idx);
+            else if (action === 'delete') deleteArticle(idx);
+            else if (action === 'up') moveArticle(idx, -1);
+            else if (action === 'down') moveArticle(idx, 1);
+        });
+    });
+}
+
+function deleteArticle(idx){
+    if (!confirm('Delete "' + (articles[idx].headline || 'Untitled') + '"?\nThis removes it from the list. Click "Save to Site" to commit the change.')) return;
+    articles.splice(idx, 1);
+    renderArticlesList();
+    toast('Article removed. Click "Save to Site" to apply.');
+}
+
+function moveArticle(idx, dir){
+    var newIdx = idx + dir;
+    if (newIdx < 0 || newIdx >= articles.length) return;
+    var tmp = articles[idx];
+    articles[idx] = articles[newIdx];
+    articles[newIdx] = tmp;
+    renderArticlesList();
+}
+
+function openArticleEditor(idx){
+    editingIdx = idx;
+    var isNew = (idx === null || idx === undefined);
+    var blank = { id: 0, cat: 'blog', headline: '', headlineEn: '', summary: '', summaryEn: '', body: '', bodyEn: '', image: '', date: new Date().toISOString().slice(5,10).replace('-','/'), fullDate: new Date().toISOString().slice(0,10), author: 'Vipen', authorInitial: 'V', authorBg: '#d4a853', readTime: '1 min read', tags: '' };
+    var a = isNew ? blank : (articles[idx] || blank);
+
+    var catOpts = CATEGORIES.map(function(c){
+        return '<option value="' + c.key + '"' + (a.cat === c.key ? ' selected' : '') + '>' + c.label + '</option>';
+    }).join('');
+
+    var overlay = document.createElement('div');
+    overlay.className = 'art-editor-overlay';
+    overlay.id = 'artEditorOverlay';
+
+    overlay.innerHTML =
+        '<div class="art-editor">' +
+        '<div class="art-editor-header">' +
+        '<h3>' + (isNew ? '✍ New Article' : '✍ Edit Article #' + (idx + 1)) + '</h3>' +
+        '<button id="artEditorCancel">Cancel</button>' +
+        '<button id="artEditorSave" class="btn-save">Save</button>' +
+        '</div>' +
+        '<div class="art-editor-body">' +
+        '<div class="rte-field-row">' +
+        '<div><label class="rte-label">Headline (ZH) *</label><input class="field" id="artHeadline" value="' + esc(a.headline) + '" placeholder="文章标题"></div>' +
+        '<div><label class="rte-label">Headline (EN)</label><input class="field" id="artHeadlineEn" value="' + esc(a.headlineEn) + '" placeholder="English title"></div>' +
+        '</div>' +
+        '<div class="rte-field-row">' +
+        '<div><label class="rte-label">Summary (ZH)</label><input class="field" id="artSummary" value="' + esc(a.summary) + '" placeholder="摘要"></div>' +
+        '<div><label class="rte-label">Summary (EN)</label><input class="field" id="artSummaryEn" value="' + esc(a.summaryEn) + '" placeholder="English summary"></div>' +
+        '</div>' +
+        '<div class="rte-field-row">' +
+        '<div><label class="rte-label">Category</label><select class="field" id="artCat">' + catOpts + '</select></div>' +
+        '<div><label class="rte-label">Author</label><input class="field" id="artAuthor" value="' + esc(a.author) + '"></div>' +
+        '</div>' +
+        '<div class="rte-field-row">' +
+        '<div><label class="rte-label">Short Date (e.g. 07/03)</label><input class="field" id="artDate" value="' + esc(a.date) + '"></div>' +
+        '<div><label class="rte-label">Read Time</label><input class="field" id="artReadTime" value="' + esc(a.readTime) + '" placeholder="3 min read"></div>' +
+        '</div>' +
+        '<div class="rte-full-row">' +
+        '<label class="rte-label">Tags (comma-separated)</label>' +
+        '<input class="field" id="artTags" value="' + esc(a.tags) + '" placeholder="AI, 设计, 思考">' +
+        '</div>' +
+        '<div class="rte-full-row">' +
+        '<label class="rte-label">Cover Image URL (recommended: Unsplash / external URL — base64 may bloat localStorage)</label>' +
+        '<input class="field" id="artImage" value="' + esc(a.image) + '" placeholder="https://images.unsplash.com/...">' +
+        '</div>' +
+        '<div class="rte-full-row">' +
+        '<label class="rte-label">Body Content (ZH) — write your article here</label>' +
+        buildRteToolbar('artBodyZh') +
+        '<div class="rte-editor" id="artBodyZh" contenteditable="true" data-placeholder="开始写正文...">' + (a.body || '') + '</div>' +
+        '</div>' +
+        '<div class="rte-full-row">' +
+        '<label class="rte-label">Body Content (EN) — optional English version</label>' +
+        buildRteToolbar('artBodyEn') +
+        '<div class="rte-editor" id="artBodyEn" contenteditable="true" data-placeholder="Write English body...">' + (a.bodyEn || '') + '</div>' +
+        '</div>' +
+        '</div>' +
+        '</div>';
+
+    document.body.appendChild(overlay);
+    setTimeout(function(){ overlay.classList.add('show'); }, 10);
+
+    var toolbars = overlay.querySelectorAll('.rte-toolbar');
+    toolbars.forEach(function(tb){
+        var editorId = tb.getAttribute('data-editor');
+        if (editorId) bindRteToolbar(tb, editorId);
+    });
+
+    overlay.querySelector('#artEditorCancel').addEventListener('click', closeArticleEditor);
+    overlay.addEventListener('click', function(e){ if (e.target === overlay) closeArticleEditor(); });
+
+    overlay.querySelector('#artEditorSave').addEventListener('click', function(){
+        var headline = overlay.querySelector('#artHeadline').value.trim();
+        if (!headline) { toast('Please enter a headline', 'err'); return; }
+        var newArticle = {
+            id: isNew ? 0 : (articles[editingIdx].id || editingIdx),
+            cat: overlay.querySelector('#artCat').value,
+            headline: headline,
+            headlineEn: overlay.querySelector('#artHeadlineEn').value.trim(),
+            summary: overlay.querySelector('#artSummary').value.trim(),
+            summaryEn: overlay.querySelector('#artSummaryEn').value.trim(),
+            author: overlay.querySelector('#artAuthor').value.trim() || 'Vipen',
+            authorInitial: (overlay.querySelector('#artAuthor').value.trim() || 'V').charAt(0).toUpperCase(),
+            authorBg: '#d4a853',
+            date: overlay.querySelector('#artDate').value.trim(),
+            fullDate: overlay.querySelector('#artDate').value.trim() ? new Date().getFullYear() + '-' + overlay.querySelector('#artDate').value.trim().replace('/','-') : new Date().toISOString().slice(0,10),
+            readTime: overlay.querySelector('#artReadTime').value.trim() || '1 min read',
+            tags: overlay.querySelector('#artTags').value.trim(),
+            image: overlay.querySelector('#artImage').value.trim(),
+            body: overlay.querySelector('#artBodyZh').innerHTML.trim(),
+            bodyEn: overlay.querySelector('#artBodyEn').innerHTML.trim()
+        };
+        if (isNew) {
+            articles.push(newArticle);
+        } else {
+            articles[editingIdx] = newArticle;
+        }
+        renderArticlesList();
+        closeArticleEditor();
+        toast(isNew ? 'Article added! Click "Save to Site" to publish to Fresh page.' : 'Article updated! Click "Save to Site" to apply.');
+    });
+}
+
+function closeArticleEditor(){
+    var overlay = document.getElementById('artEditorOverlay');
+    if (overlay) {
+        overlay.classList.remove('show');
+        setTimeout(function(){ if (overlay.parentNode) overlay.remove(); }, 200);
+    }
+    editingIdx = null;
+}
+
+function buildRteToolbar(editorId){
+    return '<div class="rte-toolbar" data-editor="' + editorId + '">' +
+        '<button type="button" class="rte-btn" data-cmd="bold" title="Bold (Ctrl+B)"><b>B</b></button>' +
+        '<button type="button" class="rte-btn" data-cmd="italic" title="Italic (Ctrl+I)"><i>I</i></button>' +
+        '<button type="button" class="rte-btn" data-cmd="underline" title="Underline"><u>U</u></button>' +
+        '<span class="rte-btn rte-sep"></span>' +
+        '<button type="button" class="rte-btn rte-btn-wide" data-cmd="formatBlock" data-value="h1" title="Heading 1">H1</button>' +
+        '<button type="button" class="rte-btn rte-btn-wide" data-cmd="formatBlock" data-value="h2" title="Heading 2">H2</button>' +
+        '<button type="button" class="rte-btn rte-btn-wide" data-cmd="formatBlock" data-value="h3" title="Heading 3">H3</button>' +
+        '<span class="rte-btn rte-sep"></span>' +
+        '<button type="button" class="rte-btn rte-btn-wide" data-cmd="formatBlock" data-value="blockquote" title="Quote">❝</button>' +
+        '<button type="button" class="rte-btn" data-cmd="insertUnorderedList" title="Bullet list">•</button>' +
+        '<button type="button" class="rte-btn" data-cmd="insertOrderedList" title="Numbered list">1.</button>' +
+        '<span class="rte-btn rte-sep"></span>' +
+        '<button type="button" class="rte-btn rte-btn-wide" data-cmd="insertLink" title="Insert link">🔗</button>' +
+        '<button type="button" class="rte-btn rte-btn-wide" data-cmd="insertImage" title="Insert image">🖼</button>' +
+        '<button type="button" class="rte-btn rte-btn-wide" data-cmd="removeFormat" title="Clear formatting">⌫</button>' +
+        '</div>';
+}
+
+function bindRteToolbar(toolbar, editorId){
+    var editor = document.getElementById(editorId);
+    if (!editor) return;
+    toolbar.querySelectorAll('.rte-btn:not(.rte-sep)').forEach(function(btn){
+        btn.addEventListener('mousedown', function(e){ e.preventDefault(); });
+        btn.addEventListener('click', function(e){
+            e.preventDefault();
+            var cmd = this.getAttribute('data-cmd');
+            var value = this.getAttribute('data-value');
+            editor.focus();
+            if (cmd === 'insertLink') {
+                var url = prompt('Enter URL:', 'https://');
+                if (!url) return;
+                document.execCommand('createLink', false, url);
+            } else if (cmd === 'insertImage') {
+                var choice = confirm('OK = paste image URL (recommended)\nCancel = upload from computer (large images bloat localStorage)');
+                if (choice) {
+                    var imgUrl = prompt('Image URL:', 'https://');
+                    if (!imgUrl) return;
+                    document.execCommand('insertImage', false, imgUrl);
+                } else {
+                    var inp = document.createElement('input');
+                    inp.type = 'file';
+                    inp.accept = 'image/*';
+                    inp.addEventListener('change', function(){
+                        if (!inp.files.length) return;
+                        var f = inp.files[0];
+                        var sizeKB = Math.round(f.size / 1024);
+                        if (sizeKB > 500) toast('Image is ' + sizeKB + 'KB — large base64 may bloat localStorage. Prefer external URL.', 'err');
+                        var reader = new FileReader();
+                        reader.onload = function(ev){ document.execCommand('insertImage', false, ev.target.result); };
+                        reader.readAsDataURL(f);
+                    });
+                    inp.click();
+                }
+            } else if (value) {
+                document.execCommand(cmd, false, value);
+            } else {
+                document.execCommand(cmd, false, null);
+            }
+        });
+    });
+}
+
+document.getElementById('artLoadBtn').addEventListener('click', loadArticles);
+document.getElementById('artSaveBtn').addEventListener('click', saveArticles);
+document.getElementById('artAddBtn').addEventListener('click', function(){ openArticleEditor(null); });
+
+// Auto-load when user clicks Articles tab for the first time
+document.querySelectorAll('.tab-btn').forEach(function(b){
+    if (b.getAttribute('data-tab') === 'articles') {
+        b.addEventListener('click', function(){
+            if (!articles.length && !localStorage.getItem(ARTICLES_KEY)) {
+                loadArticles();
+            } else if (!articles.length) {
+                loadArticles();
+            }
+        });
+    }
+});
+
 })();
 </script>
 </body>
