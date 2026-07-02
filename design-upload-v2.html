@@ -855,7 +855,7 @@ function renderMgr(){
         });
     });
     // Bind card body events only for expanded card
-    if(mgrExpanded>=0) bindMgrCard(mgrExpanded);
+    if(mgrExpanded>=0){ bindMgrCard(mgrExpanded); mgrQueueImgs(); }
 }
 
 function buildMgrCardBody(p,pi){
@@ -892,10 +892,7 @@ function buildMgrCardBody(p,pi){
 
 function mgrMainSlot(k,label,url,pi){
     var isBlob = url && /^blob:/.test(url);
-    var isR2 = url && /r2\.dev/i.test(url);
-    var thumbUrl = url;
-    // R2 supports no resize, but we can at least hint browser with loading=lazy
-    var imgHtml = (url && !isBlob) ? '<img src="'+esc(thumbUrl)+'" alt="" loading="lazy" decoding="async" title="Click to replace">' : '<div class="mgr-main-placeholder">'+label+'</div>';
+    var imgHtml = (url && !isBlob) ? '<img data-src="'+esc(url)+'" alt="" class="mgr-lazy" title="Click to replace">' : '<div class="mgr-main-placeholder">'+label+'</div>';
     return '<div class="mgr-main-slot"><div class="sl">'+label+'</div>'+
         imgHtml+
         '<input type="file" accept="image/*" data-mgr-img="'+k+'" data-pi="'+pi+'"></div>';
@@ -905,13 +902,12 @@ function mgrSortSlots(imgs,pi){
     var h='';
     imgs.forEach(function(u,i){
         var isYt = /(youtube\.com|youtu\.be)/i.test(u||'');
-        var thumbSrc = u;
         if (isYt) {
             var ytm = (u||'').match(/(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtube\.com\/shorts\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-            if (ytm) thumbSrc = 'https://img.youtube.com/vi/' + ytm[1] + '/default.jpg';
+            var vid = ytm ? ytm[1] : '';
             h+='<div class="mgr-sort-item yt-item" draggable="true" data-pi="'+pi+'" data-mi="'+i+'">'+
                 '<span class="badge">'+(i+1)+'</span>'+
-                '<img src="'+esc(thumbSrc)+'" alt="" loading="lazy" decoding="async" width="70" height="52" onerror="this.style.opacity=\'0.3\'">'+
+                '<img data-src="https://img.youtube.com/vi/'+vid+'/default.jpg" alt="" class="mgr-lazy" width="70" height="52">'+
                 '<div class="yt-icon">▶</div>'+
                 '<div class="del" title="Remove">✕</div>'+
                 '<div class="repl" title="Replace">↻</div>'+
@@ -920,7 +916,7 @@ function mgrSortSlots(imgs,pi){
         } else {
             h+='<div class="mgr-sort-item" draggable="true" data-pi="'+pi+'" data-mi="'+i+'">'+
                 '<span class="badge">'+(i+1)+'</span>'+
-                '<img src="'+esc(u||'')+'" alt="" loading="lazy" decoding="async" width="70" height="52" onerror="this.style.opacity=\'0.3\'">'+
+                '<img data-src="'+esc(u||'')+'" alt="" class="mgr-lazy" width="70" height="52">'+
                 '<div class="del" title="Remove">✕</div>'+
                 '<div class="repl" title="Replace">↻</div>'+
                 '<input type="file" accept="image/*,video/*" data-pi="'+pi+'" data-mi="'+i+'">'+
@@ -928,6 +924,26 @@ function mgrSortSlots(imgs,pi){
         }
     });
     return h;
+}
+
+// ── Single-concurrency image loader (prevents 15 simultaneous decodes) ──
+var mgrImgQueue = [];
+var mgrImgActive = false;
+function mgrQueueImgs(scope){
+    var imgs = (scope||document).querySelectorAll('img.mgr-lazy[data-src]');
+    imgs.forEach(function(img){ mgrImgQueue.push(img); });
+    mgrPumpImgs();
+}
+function mgrPumpImgs(){
+    if(mgrImgActive) return;
+    var img = mgrImgQueue.shift();
+    if(!img) return;
+    if(!img.parentNode){ mgrPumpImgs(); return; }
+    mgrImgActive = true;
+    img.onload = function(){ mgrImgActive=false; mgrPumpImgs(); };
+    img.onerror = function(){ img.style.opacity='0.25'; mgrImgActive=false; mgrPumpImgs(); };
+    img.src = img.getAttribute('data-src');
+    img.removeAttribute('data-src');
 }
 
 function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -1109,11 +1125,26 @@ function mgrBindSort(ct,pi){
         e.preventDefault();item.classList.remove('drag-over');
         var di=parseInt(item.getAttribute('data-mi'));
         if(dr!==null&&dr!==di){
+            // Move DOM nodes directly — NO innerHTML rebuild, NO image reload
+            var draggedNode = ct.querySelector('.mgr-sort-item[data-mi="'+dr+'"]');
+            if(draggedNode){
+                if(dr < di){
+                    item.parentNode.insertBefore(draggedNode, item.nextSibling);
+                } else {
+                    item.parentNode.insertBefore(draggedNode, item);
+                }
+                // Renumber badges + data-mi
+                var allItems = ct.querySelectorAll('.mgr-sort-item');
+                allItems.forEach(function(n,idx){
+                    n.setAttribute('data-mi', idx);
+                    var badge = n.querySelector('.badge');
+                    if(badge) badge.textContent = idx+1;
+                });
+            }
+            // Update data model to match
             var arr=mgrProjects[pi].contentImages;
             var it=arr.splice(dr,1)[0];
             arr.splice(di,0,it);
-            // Re-render only the sortable area, not full page
-            renderMgrSortableOnly(pi);
         }
     });
 }
@@ -1129,6 +1160,8 @@ function renderMgrSortableOnly(pi){
     window.scrollTo(0,scrollY);
     // Rebind add buttons
     bindMgrAddButtons(ct,pi);
+    // Queue new images (only ones still having data-src)
+    mgrQueueImgs(ct);
 }
 })();
 
