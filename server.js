@@ -2094,8 +2094,9 @@ http.createServer(function(req, res) {
 }).listen(PORT, function() {
     console.log('Server running at http://localhost:' + PORT);
 
-    // Sync local design/index.json to R2 on startup (fixes stale/corrupted R2 data)
-    if (r2Client) {
+    // WARNING: This startup sync will OVERWRITE R2 design/index.json with local copy.
+    // Only enable if you need to force-push local data to R2. Disabled by default to prevent data loss.
+    if (false && r2Client) {
         var designIdxPath = path.join(ROOT, 'design', 'index.json');
         try {
             var designIdx = fs.readFileSync(designIdxPath, 'utf8');
