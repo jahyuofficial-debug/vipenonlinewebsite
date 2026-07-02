@@ -926,9 +926,8 @@ function mgrSortSlots(imgs,pi){
     return h;
 }
 
-// ── Single-concurrency lazy loader (one image at a time to avoid decode lag) ──
+// ── Staggered loader: load one image every 200ms to avoid decode lag ──
 var mgrImgQueue = [];
-var mgrImgBusy = false;
 function mgrLoadLazy(scope) {
     mgrImgQueue = [];
     var imgs = (scope || document).querySelectorAll('img.mgr-lazy[data-src]');
@@ -936,19 +935,13 @@ function mgrLoadLazy(scope) {
     mgrPumpNext();
 }
 function mgrPumpNext() {
-    while (mgrImgQueue.length) {
-        if (!mgrImgQueue[0].parentNode) { mgrImgQueue.shift(); continue; }
-        break;
-    }
+    while (mgrImgQueue.length && !mgrImgQueue[0].parentNode) { mgrImgQueue.shift(); }
     if (!mgrImgQueue.length) return;
-    if (mgrImgBusy) return;
     var img = mgrImgQueue.shift();
-    mgrImgBusy = true;
-    var done = function() { mgrImgBusy = false; mgrPumpNext(); };
-    img.onload = done;
-    img.onerror = function() { this.style.opacity = '0.25'; done(); };
+    img.onerror = function() { this.style.opacity = '0.25'; };
     img.src = img.getAttribute('data-src');
     img.removeAttribute('data-src');
+    setTimeout(mgrPumpNext, 200);
 }
 
 function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
