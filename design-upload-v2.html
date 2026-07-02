@@ -135,6 +135,8 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
 .mgr-main-imgs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .mgr-main-slot{width:90px;position:relative}
 .mgr-main-slot .sl{font-size:8px;color:rgba(255,255,255,.2);margin-bottom:3px;text-align:center}
+.mgr-main-slot img{width:90px;height:68px;border-radius:4px;border:1px solid rgba(255,255,255,.06);object-fit:cover;cursor:pointer}
+.mgr-main-slot img:hover{border-color:rgba(255,255,255,.2)}
 .mgr-main-placeholder{width:90px;height:68px;border-radius:4px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;font-size:9px;color:rgba(255,255,255,.25);text-align:center;word-break:break-all;padding:4px;cursor:pointer;overflow:hidden}
 .mgr-main-placeholder:hover{border-color:rgba(255,255,255,.2)}
 .mgr-main-slot input{display:none}
@@ -142,9 +144,7 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
 .mgr-sort-item{width:70px;cursor:grab;position:relative;transition:transform .12s}
 .mgr-sort-item:active{cursor:grabbing}
 .mgr-sort-item.drag-over{transform:scale(1.06);box-shadow:0 0 0 2px #d4a853}
-.mgr-thumb-placeholder{width:70px;height:52px;border-radius:3px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;font-size:8px;color:rgba(255,255,255,.3);text-align:center;word-break:break-all;padding:2px;pointer-events:none;overflow:hidden}
-.mgr-thumb-placeholder.yt{background:rgba(255,0,0,.06);color:rgba(255,80,80,.6)}
-.mgr-url-hint{position:absolute;bottom:1px;left:1px;right:1px;font-size:7px;color:rgba(255,255,255,.15);text-align:center;pointer-events:none;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.mgr-sort-item img{width:70px;height:52px;border-radius:3px;object-fit:cover;border:1px solid rgba(255,255,255,.08);pointer-events:none}
 .mgr-sort-item .badge{position:absolute;top:1px;left:1px;background:rgba(0,0,0,.7);color:rgba(255,255,255,.5);font-size:8px;padding:0 4px;border-radius:2px}
 .mgr-sort-item .del{position:absolute;top:1px;right:1px;width:14px;height:14px;border-radius:50%;background:rgba(239,68,68,.7);color:#fff;font-size:8px;line-height:14px;text-align:center;cursor:pointer;display:none}
 .mgr-sort-item:hover .del{display:block}
@@ -889,10 +889,10 @@ function buildMgrCardBody(p,pi){
 }
 
 function mgrMainSlot(k,label,url,pi){
-    var hasUrl = url && !/^blob:/.test(url);
-    var fname = hasUrl ? (url.split('/').pop().split('?')[0] || label) : label;
+    var isBlob = url && /^blob:/.test(url);
+    var imgHtml = (url && !isBlob) ? '<img src="'+esc(url)+'" alt="" loading="lazy" title="Click to replace">' : '<div class="mgr-main-placeholder">'+label+'</div>';
     return '<div class="mgr-main-slot"><div class="sl">'+label+'</div>'+
-        '<div class="mgr-main-placeholder" title="'+esc(url||'')+'">'+esc(fname.substring(0,14))+'</div>'+
+        imgHtml+
         '<input type="file" accept="image/*" data-mgr-img="'+k+'" data-pi="'+pi+'"></div>';
 }
 
@@ -900,23 +900,22 @@ function mgrSortSlots(imgs,pi){
     var h='';
     imgs.forEach(function(u,i){
         var isYt = /(youtube\.com|youtu\.be)/i.test(u||'');
+        var thumbSrc = u;
         if (isYt) {
             var ytm = (u||'').match(/(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtube\.com\/shorts\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-            var vid = ytm ? ytm[1] : '';
+            if (ytm) thumbSrc = 'https://img.youtube.com/vi/' + ytm[1] + '/default.jpg';
             h+='<div class="mgr-sort-item yt-item" draggable="true" data-pi="'+pi+'" data-mi="'+i+'">'+
                 '<span class="badge">'+(i+1)+'</span>'+
-                '<div class="mgr-thumb-placeholder yt">▶ YT</div>'+
-                '<div class="mgr-url-hint">'+esc(vid)+'</div>'+
+                '<img src="'+esc(thumbSrc)+'" alt="" loading="lazy" onerror="this.style.display=\'none\'">'+
+                '<div class="yt-icon">▶</div>'+
                 '<div class="del" title="Remove">✕</div>'+
                 '<div class="repl" title="Replace">↻</div>'+
                 '<input type="file" accept="image/*,video/*" data-pi="'+pi+'" data-mi="'+i+'">'+
                 '</div>';
         } else {
-            // Extract filename from URL for display
-            var fname = (u||'').split('/').pop().split('?')[0] || ('img-'+(i+1));
             h+='<div class="mgr-sort-item" draggable="true" data-pi="'+pi+'" data-mi="'+i+'">'+
                 '<span class="badge">'+(i+1)+'</span>'+
-                '<div class="mgr-thumb-placeholder">'+esc(fname.substring(0,12))+'</div>'+
+                '<img src="'+esc(u||'')+'" alt="" loading="lazy">'+
                 '<div class="del" title="Remove">✕</div>'+
                 '<div class="repl" title="Replace">↻</div>'+
                 '<input type="file" accept="image/*,video/*" data-pi="'+pi+'" data-mi="'+i+'">'+
@@ -949,12 +948,15 @@ function bindMgrCard(pi){
             // Map to camelCase field name (card-bg → cardBg)
             var field = k.replace(/-([a-z])/g, function(_,c){ return c.toUpperCase(); });
             mgrProjects[pi][field]=preview;
-            var ph=inp.parentNode.querySelector('.mgr-main-placeholder');
-            if(ph){ ph.textContent='(new file)'; ph.title=preview; }
+            var slot=inp.parentNode;
+            var oldImg=slot.querySelector('img');
+            var oldPh=slot.querySelector('.mgr-main-placeholder');
+            if(oldImg){ oldImg.src=preview; }
+            else if(oldPh){ var newImg=document.createElement('img'); newImg.src=preview; newImg.alt=''; newImg.title='Click to replace'; oldPh.replaceWith(newImg); }
         });
     });
-    document.querySelectorAll('.mgr-main-slot .mgr-main-placeholder').forEach(function(ph){
-        ph.addEventListener('click',function(){ph.parentNode.querySelector('input').click();});
+    document.querySelectorAll('.mgr-main-slot img, .mgr-main-slot .mgr-main-placeholder').forEach(function(el){
+        el.addEventListener('click',function(){el.parentNode.querySelector('input').click();});
     });
 
     // Sortable
