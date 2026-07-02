@@ -855,7 +855,7 @@ function renderMgr(){
         });
     });
     // Bind card body events only for expanded card
-    if(mgrExpanded>=0){ bindMgrCard(mgrExpanded); }
+    if(mgrExpanded>=0){ bindMgrCard(mgrExpanded); mgrLoadLazy(); }
 }
 
 function buildMgrCardBody(p,pi){
@@ -892,7 +892,7 @@ function buildMgrCardBody(p,pi){
 
 function mgrMainSlot(k,label,url,pi){
     var isBlob = url && /^blob:/.test(url);
-    var imgHtml = (url && !isBlob) ? '<img src="'+esc(url)+'" alt="" loading="lazy" title="Click to replace" onerror="this.style.opacity=\'0.25\'">' : '<div class="mgr-main-placeholder">'+label+'</div>';
+    var imgHtml = (url && !isBlob) ? '<img data-src="'+esc(url)+'" alt="" class="mgr-lazy" title="Click to replace">' : '<div class="mgr-main-placeholder">'+label+'</div>';
     return '<div class="mgr-main-slot"><div class="sl">'+label+'</div>'+
         imgHtml+
         '<input type="file" accept="image/*" data-mgr-img="'+k+'" data-pi="'+pi+'"></div>';
@@ -907,7 +907,7 @@ function mgrSortSlots(imgs,pi){
             var vid = ytm ? ytm[1] : '';
             h+='<div class="mgr-sort-item yt-item" draggable="true" data-pi="'+pi+'" data-mi="'+i+'">'+
                 '<span class="badge">'+(i+1)+'</span>'+
-                '<img src="https://img.youtube.com/vi/'+vid+'/default.jpg" alt="" loading="lazy" width="70" height="52" onerror="this.style.opacity=\'0.25\'">'+
+                '<img data-src="https://img.youtube.com/vi/'+vid+'/default.jpg" alt="" class="mgr-lazy" width="70" height="52">'+
                 '<div class="yt-icon">▶</div>'+
                 '<div class="del" title="Remove">✕</div>'+
                 '<div class="repl" title="Replace">↻</div>'+
@@ -916,7 +916,7 @@ function mgrSortSlots(imgs,pi){
         } else {
             h+='<div class="mgr-sort-item" draggable="true" data-pi="'+pi+'" data-mi="'+i+'">'+
                 '<span class="badge">'+(i+1)+'</span>'+
-                '<img src="'+esc(u||'')+'" alt="" loading="lazy" width="70" height="52" onerror="this.style.opacity=\'0.25\'">'+
+                '<img data-src="'+esc(u||'')+'" alt="" class="mgr-lazy" width="70" height="52">'+
                 '<div class="del" title="Remove">✕</div>'+
                 '<div class="repl" title="Replace">↻</div>'+
                 '<input type="file" accept="image/*,video/*" data-pi="'+pi+'" data-mi="'+i+'">'+
@@ -926,7 +926,30 @@ function mgrSortSlots(imgs,pi){
     return h;
 }
 
-// ── Image rendering uses native loading="lazy" — no custom queue needed ──
+// ── Single-concurrency lazy loader (one image at a time to avoid decode lag) ──
+var mgrImgQueue = [];
+var mgrImgBusy = false;
+function mgrLoadLazy(scope) {
+    mgrImgQueue = [];
+    var imgs = (scope || document).querySelectorAll('img.mgr-lazy[data-src]');
+    for (var i = 0; i < imgs.length; i++) { mgrImgQueue.push(imgs[i]); }
+    mgrPumpNext();
+}
+function mgrPumpNext() {
+    while (mgrImgQueue.length) {
+        if (!mgrImgQueue[0].parentNode) { mgrImgQueue.shift(); continue; }
+        break;
+    }
+    if (!mgrImgQueue.length) return;
+    if (mgrImgBusy) return;
+    var img = mgrImgQueue.shift();
+    mgrImgBusy = true;
+    var done = function() { mgrImgBusy = false; mgrPumpNext(); };
+    img.onload = done;
+    img.onerror = function() { this.style.opacity = '0.25'; done(); };
+    img.src = img.getAttribute('data-src');
+    img.removeAttribute('data-src');
+}
 
 function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
@@ -1142,6 +1165,7 @@ function renderMgrSortableOnly(pi){
     window.scrollTo(0,scrollY);
     // Rebind add buttons
     bindMgrAddButtons(ct,pi);
+    mgrLoadLazy(ct);
 }
 })();
 
