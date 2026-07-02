@@ -179,11 +179,18 @@ BannerPage.initBgVideo();
         var mgrFresh = localStorage.getItem('vipen_mgr_fresh_heroItems');
         if (mgrFresh) { try { freshHeroItems = JSON.parse(mgrFresh); } catch (e) {} }
 
-        // Fresh articles: localStorage > static file (managed by ManagerGo)
-        var mgrArticles = localStorage.getItem('vipen_mgr_fresh_articles');
-        if (mgrArticles) { try { freshItems = JSON.parse(mgrArticles); } catch (e) {} }
-
         if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
+
+        // Fresh articles: async load from R2 (overrides fresh.json items if present)
+        fetch('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/articles/articles.json?' + Date.now())
+            .then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(articles) {
+                if (articles && Array.isArray(articles) && articles.length) {
+                    freshItems = articles;
+                    if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
+                }
+            })
+            .catch(function() { /* silent fallback to fresh.json items */ });
 
         // Banner: load home/index.json, then fetch meta from R2
         if (bannerData && Array.isArray(bannerData)) {

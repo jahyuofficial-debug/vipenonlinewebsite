@@ -1445,12 +1445,28 @@ function toast(msg,t){
 }
 
 function loadArticles(){
+    // 1. Try R2 public URL first (cross-device source of truth)
+    fetch('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/articles/articles.json?' + Date.now())
+        .then(function(r) { return r.ok ? r.json() : null; })
+        .then(function(data) {
+            if (data && Array.isArray(data) && data.length) {
+                articles = data;
+                renderArticlesList();
+                toast('Loaded ' + articles.length + ' articles from R2');
+                return;
+            }
+            loadFromLocalStorageOrFreshJson();
+        })
+        .catch(function() { loadFromLocalStorageOrFreshJson(); });
+}
+
+function loadFromLocalStorageOrFreshJson(){
     var raw = localStorage.getItem(ARTICLES_KEY);
     if (raw) {
         try {
             articles = JSON.parse(raw) || [];
             renderArticlesList();
-            toast('Loaded ' + articles.length + ' articles from localStorage');
+            toast('Loaded ' + articles.length + ' articles from localStorage (R2 empty)');
             return;
         } catch(e) { console.warn('Bad stored articles, falling back:', e); }
     }
@@ -1478,13 +1494,34 @@ function loadArticles(){
 }
 
 function saveArticles(){
+    // 1. Update localStorage as a local backup
     try {
         articles.forEach(function(a, i){ a.id = i; });
         localStorage.setItem(ARTICLES_KEY, JSON.stringify(articles));
-        toast('✓ Saved ' + articles.length + ' articles. Refresh the Fresh page on the live site to see them.');
-    } catch (e) {
-        toast('Save failed: ' + (e.message || 'storage quota exceeded — try smaller images or external URLs'), 'err');
-    }
+    } catch (e) { /* quota exceeded, continue to R2 save */ }
+
+    // 2. POST to /api/articles/save → writes to R2 (cross-device visible)
+    var btn = document.getElementById('artSaveBtn');
+    var origText = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Saving to R2...';
+    fetch('/api/articles/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ articles: articles })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+        btn.disabled = false; btn.textContent = origText;
+        if (res.success) {
+            toast('✓ Saved ' + res.count + ' articles to R2. Visitors will see them on the Fresh page shortly.');
+        } else {
+            toast('R2 save failed: ' + (res.error || 'unknown'), 'err');
+        }
+    })
+    .catch(function(err) {
+        btn.disabled = false; btn.textContent = origText;
+        toast('Network error: ' + err.message + ' (localStorage backup still saved)', 'err');
+    });
 }
 
 function renderArticlesList(){
