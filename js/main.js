@@ -541,6 +541,20 @@ var msgCurrentUser = { username: 'Guest', avatar: 'https://images.unsplash.com/p
 var msgEmojiList = ['\u{1F600}','\u{1F60D}','\u{1F601}','\u{1F389}','\u{1F92F}','\u{1F44D}','\u{1F496}','\u{1F480}','\u{1F4AF}','\u{1F4A1}','\u{1F525}','\u{1F308}','\u{1F31F}','\u{1F3B6}','\u{1F60E}','\u{1F618}','\u{1F92A}','\u{1F44F}','\u{1F4A5}','\u{1F6A8}','\u{2615}','\u{1F37F}','\u{1F3C6}','\u{1F451}','\u{1F98B}','\u{1F31A}','\u{270C}','\u{1F64C}','\u{1F33A}','\u{1F30D}','\u{1F3A8}','\u{1F48E}','\u{1F514}','\u{1F380}','\u{1F31E}','\u{1F4F8}','\u{1F393}','\u{1F91D}','\u{1F680}','\u{1F49D}'];
 var msgNextId = 10;
 var msgTempImages = [];
+var msgUserPosts = [];
+try {
+    var _savedMsgs = JSON.parse(localStorage.getItem('vipen_msg_board') || '[]');
+    if (Array.isArray(_savedMsgs) && _savedMsgs.length) {
+        msgUserPosts = _savedMsgs;
+        var maxId = 9;
+        msgUserPosts.forEach(function(m){ if (m.id > maxId) maxId = m.id; });
+        msgNextId = maxId + 1;
+    }
+} catch(e) {}
+
+function saveMsgUserPosts() {
+    try { localStorage.setItem('vipen_msg_board', JSON.stringify(msgUserPosts)); } catch(e) {}
+}
 
 window.currentPage = null;
 var banner = document.getElementById('banner');
@@ -584,10 +598,11 @@ function buildMsgItem(item) {
 }
 
 function buildMsgList() {
-    if (msgBoardData.length === 0) {
+    var allMsgs = msgUserPosts.concat(msgBoardData);
+    if (allMsgs.length === 0) {
         return '<div class="msg-empty"><h3 class="msg-empty-title">No Messages</h3><p class="msg-empty-desc">Be the first to leave a message</p></div>';
     }
-    return msgBoardData.map(function(item) {
+    return allMsgs.map(function(item) {
         return buildMsgItem(item);
     }).join('');
 }
@@ -676,7 +691,6 @@ function bindMsgInteractions() {
         submitBtn.addEventListener('click', function() {
             var content = textarea.value.trim();
             if (!content) return;
-            var now = new Date();
             var timeStr = 'Just now';
             var newMsg = {
                 id: msgNextId++,
@@ -688,7 +702,8 @@ function bindMsgInteractions() {
                 likes: 0,
                 isLiked: false
             };
-            msgBoardData.unshift(newMsg);
+            msgUserPosts.unshift(newMsg);
+            saveMsgUserPosts();
             textarea.value = '';
             textarea.style.height = 'auto';
             var msgList = document.getElementById('msgList');

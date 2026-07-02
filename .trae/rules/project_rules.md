@@ -2,12 +2,12 @@
 
 ## Preview Rule
 
-**每次修改代码后，必须启动本地服务器预览效果并提供预览地址给用户。**
+**不再使用本地预览，一切以线上（Cloudflare）为唯一验收标准。**
 
-- 使用 `node server.js` 在项目目录启动 HTTP 服务（端口 3000）
-- 通过 OpenPreview 工具打开预览页面
-- 在回复中明确给出预览地址：`http://localhost:3000`
-- 若服务已在运行中，直接提供地址即可
+- 禁止启动 `node server.js` 本地服务器，禁止提供 `http://localhost:3000` 预览地址
+- 代码修改后，直接推送至 GitHub 仓库，由 Cloudflare Pages 自动部署到线上
+- 验收与测试一律在线上站点进行，不在线下预览
+- `server.js` 仅作为本地开发遗留文件保留，不再用于预览流程
 
 ---
 
@@ -388,51 +388,49 @@ setUserData: function(key, data) {
 
 ---
 
-## 九、Vercel 部署规范
+## 九、Cloudflare Pages 部署规范
 
-**核心原则：一切修改以线上 Vercel 部署为最终目标。所有代码决策优先考虑生产环境可用性，本地 `server.js` 仅用于快速预览调试，无需保证功能完整性。**
+**核心原则：一切修改以线上 Cloudflare Pages 部署为最终目标。所有代码决策优先考虑生产环境可用性，本地 `server.js` 不再用于预览（见 Preview Rule）。**
 
 ### 9.0 本地 vs 线上优先级
 
-- **所有功能开发以 Vercel 部署为准**。本地 `server.js` 只要能跑通基本页面预览即可。
+- **所有功能开发以 Cloudflare Pages 部署为准**。本地 `server.js` 不再使用。
 - 本地特有的兼容代码（如本地文件系统上传、本地 Session 等）可以存在，但**不得影响线上功能**。
-- 当本地行为与线上行为冲突时，**以线上正确为准，本地可暂时不可用**。
-- `server.js` 中的模拟/回退逻辑（如本地写入 `Disc/` 目录代替 Blob 上传）仅用于开发调试，不上线。
+- 当本地行为与线上行为冲突时，**以线上正确为准**。
+- `server.js` 中的模拟/回退逻辑（如本地写入 `Disc/` 目录代替 Blob 上传）仅用于历史调试，不上线。
 
 ### 9.1 项目即站点
 
-- 本项目根目录即为 Vercel 部署的站点根目录，所有入口 HTML 文件（`index.html`、`signin.html` 等）必须位于项目根目录。
+- 本项目根目录即为 Cloudflare Pages 部署的站点根目录，所有入口 HTML 文件（`index.html`、`signin.html` 等）必须位于项目根目录。
 - 静态资源（`css/`、`js/`、`images/` 等目录）保持现有层级，**不要移动到 `/public` 或其他子目录**。
 - 新增的页面 HTML 文件直接放在项目根目录，与现有页面保持一致。
 
-### 9.2 vercel.json 配置
+### 9.2 Pages Functions 目录约定
 
-项目根目录下的 [vercel.json](file:///d:/设计文档/TareProcess/Vipen2.0/vercel.json) 为 Vercel 部署配置文件，包含路由重写和 CORS 头设置。新增路由时同步更新该文件。
+- Serverless 函数放在 `functions/api/` 目录下，遵循 Cloudflare Pages Functions 文件路由约定。
+- `functions/api/design/upload.js` → 处理 `/api/design/upload` 请求。
+- `functions/api/auth/[[path]].js` → catch-all 路由，处理 `/api/auth/*` 下所有路径。
+- 新增 API 端点时在 `functions/api/` 下新建对应文件，无需额外配置文件。
 
 ### 9.3 上线前检查清单
 
 每次修改代码后，必须确保网站可正常上线：
 
-1. **纯静态资源**：本项目的所有资源（HTML、CSS、JS、图片、JSON）必须是纯静态文件，不依赖任何服务端运行时（`server.js` 仅用于本地开发预览，不上线）。
+1. **纯静态资源**：本项目的所有前端资源（HTML、CSS、JS、图片、JSON）必须是纯静态文件，不依赖 `server.js` 运行时（`server.js` 不上线）。
 2. **无外部框架依赖**：所有页面必须保持纯 Vanilla JS，不引入任何第三方前端框架/库。
-3. **路径兼容**：所有 `fetch()`、`<img src>`、`<link href>`、`<script src>` 的路径使用相对路径（不以 `/` 开头），确保在 Vercel 任意域名下正常工作。
-4. **大小写敏感**：Vercel 部署环境（Linux）区分文件名大小写，所有文件引用路径必须与实际文件名大小写完全一致。
+3. **路径兼容**：所有 `fetch()`、`<img src>`、`<link href>`、`<script src>` 的路径使用相对路径（不以 `/` 开头），确保在 Cloudflare 任意域名下正常工作。
+4. **大小写敏感**：Cloudflare 部署环境（Linux）区分文件名大小写，所有文件引用路径必须与实际文件名大小写完全一致。
 5. **禁止本地绝对路径**：代码中不得出现 `D:\`、`C:\`、`localhost:3000` 等仅本地有效的路径。
 
-### 9.4 vercel.json 软路由规则
+### 9.4 SPA 路由说明
 
-Vercel 支持通过 `rewrites` 实现 SPA 风格的 URL 美化（无需 HTML 文件扩展名）：
+- 本项目采用 **hash 路由**（`#/msg`、`#/action` 等），无需服务端 rewrite 即可在 Cloudflare Pages 上正常工作。
+- 若未来需要路径美化（如 `/manager` → `/manager.html`），在项目根目录新建 `_redirects` 文件（Cloudflare Pages 原生支持）添加规则，例如 `/manager /manager.html 200`。
 
-```
-/manager  →  /manager.html
-```
+### 9.5 Pages Functions 限制
 
-新增需要美化 URL 的页面时，在 [vercel.json](file:///d:/设计文档/TareProcess/Vipen2.0/vercel.json) 的 `rewrites` 中添加对应规则。
+**Cloudflare Pages 免费计划：每日 100,000 次 Functions 调用。**
 
-### 9.5 Serverless Functions 限制
-
-**Hobby 计划每个 Deployment 最多 12 个 Serverless Functions。**
-
-- 本项目部署在 Vercel Hobby 计划，`api/` 目录下的每个文件对应一个 Serverless Function。
-- 如需新增 API 端点，确保总数不超过 12 个。
-- 超过限制后将无法部署，需合并功能相近的端点或升级计划。
+- 本项目的 Serverless 函数位于 `functions/api/` 目录（当前含 design/upload、design/save、disc/save、auth catch-all）。
+- Cloudflare Pages 不限制 Functions 文件数量，但有每日调用次数限制。
+- 超过每日调用上限后 Functions 会返回 429，需升级到 Paid 计划。
