@@ -437,9 +437,7 @@ function renderContentSlot(k) {
     var f = contentFiles[k];
     if (f) {
         cs.classList.add('filled');
-        var reader = new FileReader();
-        reader.onload = function(e) { ci.src = e.target.result; };
-        reader.readAsDataURL(f);
+        ci.src = URL.createObjectURL(f);
     } else {
         cs.classList.remove('filled');
         ci.src = '';
@@ -543,9 +541,7 @@ function renderAssigned() {
             slot.classList.remove('warn');
             var fname = f.relativePath ? f.relativePath.split('/').pop() : f.name;
             name.textContent = fname;
-            var reader = new FileReader();
-            reader.onload = function(e) { img.src = e.target.result; };
-            reader.readAsDataURL(f);
+            img.src = URL.createObjectURL(f);
         } else {
             slot.classList.remove('filled');
             slot.classList.add('warn');
