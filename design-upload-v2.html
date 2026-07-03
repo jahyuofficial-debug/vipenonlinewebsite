@@ -1528,6 +1528,21 @@ var ACTION_R2 = 'https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev';
 var actionPosts = [];
 var actionFiles = {};   // key: "<pi>_<ii>" -> File
 
+// Local HTML-escape — this IIFE has its own scope and can't see the esc()
+// defined inside the other IIFEs on this page. Without this, renderAction()
+// throws ReferenceError on the first esc(...) call, so add-post only bumps
+// the count text but never renders the card body.
+function esc(s){if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+// Local toast — same reason: the page-level toast() lives inside other IIFEs.
+function toast(msg,t){
+    var s=document.getElementById('statusToast');
+    if(!s)return;
+    s.textContent=msg;
+    s.className='status-toast show '+(t||'ok');
+    setTimeout(function(){s.classList.remove('show');},3000);
+}
+
 document.getElementById('actionLoadBtn').addEventListener('click', function(){
     fetch(ACTION_R2 + '/action/index.json?' + Date.now())
         .then(function(r){ if(!r.ok) throw new Error('not found'); return r.json(); })
