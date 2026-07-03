@@ -1657,9 +1657,20 @@ function renderAction(){
         h +=   '</div>';
         if(open){
             h += '<div class="action-post-body">';
-            // Author row — avatar only (no username; posts are by the site owner, 朋友圈-style)
-            h += '<div class="action-row"><div class="action-field" style="flex:1"><label>Avatar URL</label><input class="act-avatar" value="' + esc(p.avatar||'') + '" data-pi="' + pi + '"></div></div>';
-            if(p.avatar){ h += '<img class="act-avatar-preview" src="' + esc(p.avatar) + '" alt="">'; }
+            // Avatar — upload button (朋友圈-style: site owner avatar, upload not paste URL)
+            h += '<div class="action-avatar-row">';
+            h += '<div class="action-avatar-box' + (p.avatar ? '' : ' empty') + '">';
+            if(p.avatar){
+                h += '<img src="' + esc(p.avatar) + '" alt="" title="' + ((p.avatar||'').indexOf('blob:')===0?'new (pending upload)':'existing') + '">';
+            } else {
+                h += '<span class="action-avatar-placeholder">no avatar</span>';
+            }
+            h += '</div>';
+            h += '<div class="action-avatar-controls">';
+            h += '<button class="act-avatar-upload btn-gold" data-pi="' + pi + '" type="button">换头像</button>';
+            if(p.avatar){ h += '<button class="act-avatar-clear" data-pi="' + pi + '" type="button" title="清除头像">✕</button>'; }
+            h += '</div>';
+            h += '</div>';
             // Caption
             h += '<div class="action-row"><div class="action-field"><label>Caption</label><textarea class="act-caption" rows="3" data-pi="' + pi + '">' + esc(p.caption||'') + '</textarea></div></div>';
             // Meta row — time only (likes/comments are user-driven on the main site, not editable here)
@@ -1712,11 +1723,31 @@ function bindActionRows(){
         });
     });
     // Field edits (username/likes/comments intentionally not editable — 朋友圈-style)
-    document.querySelectorAll('.act-avatar').forEach(function(inp){
-        inp.addEventListener('change', function(){ actionPosts[+this.getAttribute('data-pi')].avatar = this.value; renderAction(); });
-    });
     document.querySelectorAll('.act-caption').forEach(function(inp){ inp.addEventListener('change', function(){ actionPosts[+this.getAttribute('data-pi')].caption = this.value; }); });
     document.querySelectorAll('.act-timeago').forEach(function(inp){ inp.addEventListener('change', function(){ actionPosts[+this.getAttribute('data-pi')].timeAgo = this.value; }); });
+
+    // Avatar upload (replaces old URL text input)
+    document.querySelectorAll('.act-avatar-upload').forEach(function(btn){
+        btn.addEventListener('click', function(e){
+            e.stopPropagation();
+            var pi = parseInt(this.getAttribute('data-pi'));
+            pickAvatar(pi);
+        });
+    });
+    document.querySelectorAll('.act-avatar-clear').forEach(function(btn){
+        btn.addEventListener('click', function(e){
+            e.stopPropagation();
+            var pi = parseInt(this.getAttribute('data-pi'));
+            var old = actionPosts[pi].avatar;
+            if(old && old.indexOf('blob:')===0){
+                URL.revokeObjectURL(old);
+                delete actionBlobFileMap[old];
+            }
+            actionPosts[pi].avatar = '';
+            delete actionFiles[pi + '_avatar'];
+            renderAction();
+        });
+    });
 
     // Replace image
     document.querySelectorAll('.action-img-repl').forEach(function(btn){
@@ -1818,17 +1849,48 @@ function pickImage(pi, ii){
     inp.click();
 }
 
+// Pick an avatar image file for post[pi]. Stores blob: URL in post.avatar and
+// the File in actionFiles[pi + '_avatar']; /api/action/save back-fills the
+// real R2 https URL via the img_<pi>_avatar form key.
+function pickAvatar(pi){
+    var inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*';
+    inp.addEventListener('change', function(){
+        if(!inp.files.length) return;
+        var f = inp.files[0];
+        if(f.size > MAX_FILE_MB * 1024 * 1024){ toast('Avatar exceeds ' + MAX_FILE_MB + 'MB limit.','err'); return; }
+        var post = actionPosts[pi];
+        // Revoke old blob avatar if any
+        if(post.avatar && post.avatar.indexOf('blob:')===0){
+            URL.revokeObjectURL(post.avatar);
+            delete actionBlobFileMap[post.avatar];
+        }
+        var url = URL.createObjectURL(f);
+        actionBlobFileMap[url] = f;
+        post.avatar = url;
+        actionFiles[pi + '_avatar'] = f;
+        renderAction();
+    });
+    inp.click();
+}
+
 // Re-key actionFiles after posts/images are reordered or deleted, so file slots stay
 // aligned with their current array positions. Rebuilds from actionBlobFileMap (blobUrl->File)
-// by scanning actionPosts.images for blob: URLs still awaiting upload.
+// by scanning actionPosts.images AND .avatar for blob: URLs still awaiting upload.
 function rekeyActionFiles(){
     var nf = {};
     for(var pi=0; pi<actionPosts.length; pi++){
-        var imgs = actionPosts[pi].images || [];
+        var post = actionPosts[pi];
+        // Images
+        var imgs = post.images || [];
         for(var ii=0; ii<imgs.length; ii++){
             if(imgs[ii] && imgs[ii].indexOf('blob:')===0 && actionBlobFileMap[imgs[ii]]){
                 nf[pi + '_' + ii] = actionBlobFileMap[imgs[ii]];
             }
+        }
+        // Avatar
+        if(post.avatar && post.avatar.indexOf('blob:')===0 && actionBlobFileMap[post.avatar]){
+            nf[pi + '_avatar'] = actionBlobFileMap[post.avatar];
         }
     }
     actionFiles = nf;
@@ -1854,7 +1916,16 @@ as.textContent =
     '.action-field label{font-size:9px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.04em}'+
     '.action-field input,.action-field textarea{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:#fff;padding:6px 8px;font-size:11px;font-family:inherit}'+
     '.action-field input:focus,.action-field textarea:focus{outline:none;border-color:rgba(212,168,83,.4)}'+
-    '.act-avatar-preview{width:36px;height:36px;border-radius:50%;object-fit:cover;margin:-4px 0 10px;border:1px solid rgba(255,255,255,.08)}'+
+    '.act-avatar-preview{display:none}'+  // legacy, kept to avoid orphan refs
+    '.action-avatar-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}'+
+    '.action-avatar-box{width:56px;height:56px;border-radius:50%;overflow:hidden;flex-shrink:0;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03)}'+
+    '.action-avatar-box img{width:100%;height:100%;object-fit:cover}'+
+    '.action-avatar-box.empty{border-style:dashed;border-color:rgba(255,255,255,.1)}'+
+    '.action-avatar-placeholder{display:flex;width:100%;height:100%;align-items:center;justify-content:center;font-size:8px;color:rgba(255,255,255,.15)}'+
+    '.action-avatar-controls{display:flex;align-items:center;gap:6px}'+
+    '.act-avatar-upload{font-size:11px;padding:6px 14px;width:auto}'+
+    '.act-avatar-clear{background:none;border:1px solid rgba(239,68,68,.3);border-radius:50%;color:rgba(239,68,68,.6);width:20px;height:20px;font-size:10px;cursor:pointer;padding:0;line-height:18px;text-align:center}'+
+    '.act-avatar-clear:hover{background:rgba(239,68,68,.15)}'+
     '.action-imgs-label{font-size:9px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.04em;margin:6px 0}'+
     '.action-imgs{display:flex;flex-wrap:wrap;gap:6px;align-items:flex-start}'+
     '.action-img-slot{position:relative;width:64px;height:64px}'+

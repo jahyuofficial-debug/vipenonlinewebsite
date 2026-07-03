@@ -69,39 +69,49 @@ export async function onRequest(context) {
 
     const r2Base = 'https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev';
 
-    // 1. Upload new/replaced post images.
-    //    Key format: img_<postIdx>_<imgIdx>
+    // 1. Upload new/replaced post images AND avatars.
+    //    Key formats:
+    //      img_<postIdx>_<imgIdx>   — post image at images[imgIdx]
+    //      img_<postIdx>_avatar     — post avatar (post.avatar field)
     let uploadedCount = 0;
     for (const [key, value] of formData.entries()) {
       if (!key.startsWith('img_') || !(value instanceof File)) continue;
-      const parts = key.split('_');           // ['img', postIdx, imgIdx]
+      const parts = key.split('_');           // ['img', postIdx, field]
       const pi = parseInt(parts[1]);
-      const ii = parseInt(parts[2]);
-      if (isNaN(pi) || isNaN(ii)) continue;
+      const field = parts[2];                 // imgIdx (numeric) or 'avatar'
+      if (isNaN(pi) || field == null) continue;
 
       const post = posts[pi];
       if (!post) continue;
 
-      // Build a safe id-based folder so a post's images live together and don't clash
+      // Build a safe id-based folder so a post's files live together and don't clash
       // with other posts even if filenames repeat.
       const idStr = String(post.id != null ? post.id : pi).replace(/[^a-zA-Z0-9_-]/g, '_') || ('post-' + pi);
       const safeFolder = 'post-' + idStr;
 
-      const origName = value.name || ('img-' + ii + '.bin');
+      const isAvatar = (field === 'avatar');
+      const origName = value.name || (isAvatar ? 'avatar.bin' : ('img-' + field + '.bin'));
       const safeName = origName.replace(/[^a-zA-Z0-9\u4e00-\u9fff._-]/g, '_');
-      const r2Path = 'action/' + safeFolder + '/' + ii + '-' + safeName;
+      const prefix = isAvatar ? 'avatar-' : (field + '-');
+      const r2Path = 'action/' + safeFolder + '/' + prefix + safeName;
 
       await bucket.put(r2Path, value.stream(), {
         httpMetadata: { contentType: value.type || 'application/octet-stream' }
       });
 
-      const newUrl = r2Base + '/action/' + encodeURIComponent(safeFolder) + '/' + encodeURIComponent(ii + '-' + safeName);
+      const newUrl = r2Base + '/action/' + encodeURIComponent(safeFolder) + '/' + encodeURIComponent(prefix + safeName);
 
-      // Back-fill the URL into the post's images array at the matching slot.
-      // Ensure images array is long enough.
-      if (!Array.isArray(post.images)) post.images = [];
-      while (post.images.length <= ii) post.images.push('');
-      post.images[ii] = newUrl;
+      if (isAvatar) {
+        // Back-fill avatar URL
+        post.avatar = newUrl;
+      } else {
+        const ii = parseInt(field);
+        if (isNaN(ii)) continue;
+        // Back-fill the URL into the post's images array at the matching slot.
+        if (!Array.isArray(post.images)) post.images = [];
+        while (post.images.length <= ii) post.images.push('');
+        post.images[ii] = newUrl;
+      }
 
       uploadedCount++;
     }
