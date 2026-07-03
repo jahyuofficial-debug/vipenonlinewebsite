@@ -4,25 +4,13 @@
             "id": 0,
             "headline": {
                 "bgImage": "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=1920&q=80",
-                "mainTitle": "SGA",
-                "subTitle": "荣获26年常规赛MVP",
-                "mainTitleEn": "SGA",
-                "subTitleEn": "2026 Regular Season MVP",
                 "titleImage": "",
                 "body": "<p>谢伊·吉尔杰斯-亚历山大（SGA）凭借本赛季场均32.5分、7.2助攻、5.8篮板的全面数据，成功荣膺2026年NBA常规赛最有价值球员。</p><p>这位雷霆队的当家球星在整个赛季中展现了非凡的统治力，带领球队以西部第一的战绩闯入季后赛，他的表现征服了所有评委和球迷。</p>",
-                "bodyEn": "<p>Shai Gilgeous-Alexander (SGA) successfully won the 2026 NBA Regular Season MVP with comprehensive averages of 32.5 points, 7.2 assists, and 5.8 rebounds per game this season.</p><p>The Thunder's franchise player demonstrated extraordinary dominance throughout the season, leading his team to the top seed in the Western Conference and earning the admiration of all judges and fans.</p>"
-            },
-            "spot": {
-                "tag": "AI TECH",
-                "title": "苹果将放弃GPT植入siri，正与Gemini或Claude谈合作",
-                "titleEn": "Apple Ditches GPT for Siri, in Talks with Gemini or Claude",
-                "summary": "苹果公司正在与谷歌和Anthropic进行谈判，计划将Gemini或Claude AI模型整合到Siri中。",
-                "summaryEn": "Apple is in talks with Google and Anthropic to integrate Gemini or Claude AI models into Siri.",
-                "image": "",
-                "body": "<p>苹果公司正在重新评估其AI战略。据知情人士透露，苹果正在与谷歌和Anthropic进行深入谈判，计划将Gemini或Claude AI模型整合到Siri中，而非此前传闻的GPT。</p><p>这一决策标志着苹果在AI领域的重大转向。公司认为多样化的AI模型选择将为用户提供更好的体验，同时降低对单一供应商的依赖。</p>",
-                "bodyEn": "<p>Apple is reassessing its AI strategy. According to informed sources, Apple is in advanced talks with Google and Anthropic to integrate Gemini or Claude AI models into Siri, rather than the previously rumored GPT.</p><p>This decision marks a major shift in Apple's AI approach. The company believes that a diverse selection of AI models will provide users with a better experience while reducing dependence on a single supplier.</p>",
-                "date": "05/20",
-                "bgColor": "linear-gradient(135deg,#6366f1 0%,#8b5cf6 50%,#a855f7 100%)"
+                "bodyEn": "<p>Shai Gilgeous-Alexander (SGA) successfully won the 2026 NBA Regular Season MVP with comprehensive averages of 32.5 points, 7.2 assists, and 5.8 rebounds per game this season.</p><p>The Thunder's franchise player demonstrated extraordinary dominance throughout the season, leading his team to the top seed in the Western Conference and earning the admiration of all judges and fans.</p>",
+                "title": "SGA",
+                "titleEn": "SGA",
+                "summary": "荣获26年常规赛MVP",
+                "summaryEn": "2026 Regular Season MVP"
             },
             "hotNews": [
                 {
@@ -64,25 +52,13 @@
             "id": 1,
             "headline": {
                 "bgImage": "https://pub-3c6f999311af4dc38671403851f8973f.r2.dev/02Banner/%E9%A6%96%E9%A1%B5%E8%BD%AE%E6%92%ADDisctrack.png",
-                "mainTitle": "Disctrack",
-                "subTitle": "全新音乐体验",
-                "mainTitleEn": "Disctrack",
-                "subTitleEn": "A New Music Experience",
                 "titleImage": "",
                 "body": "<p>Disctrack正在重新定义数字音乐收藏的概念。通过将每张数字唱片赋予独特的视觉与听觉身份，我们创造了一种全新的音乐体验方式。</p><p>不同于传统的流媒体播放列表，Disctrack让每张专辑都成为一个完整的艺术作品——从封面设计到内页视觉，从音轨过渡到整体氛围。</p>",
-                "bodyEn": "<p>Disctrack is redefining the concept of digital music collecting. By giving each digital record a unique visual and auditory identity, we have created a whole new way to experience music.</p><p>Unlike traditional streaming playlists, Disctrack makes every album a complete work of art—from cover design to inner visuals, from track transitions to overall atmosphere.</p>"
-            },
-            "spot": {
-                "tag": "MUSIC",
-                "title": "Disctrack：重新定义数字音乐收藏",
-                "titleEn": "Disctrack: Redefining Digital Music Collections",
-                "summary": "探索全新的音乐发现与收藏方式，让每一张数字唱片都有独特的视觉与听觉体验。",
-                "summaryEn": "Explore new ways to discover and collect music, giving every digital record a unique visual and auditory experience.",
-                "image": "",
-                "body": "<p>流媒体时代，音乐变得触手可及，却也失去了实体唱片时代的仪式感。Disctrack的出现正在改变这一现状。</p><p>它将每张数字专辑包装成一个独立的视觉艺术品——独特的封面设计、内页视觉叙事、以及为每张专辑量身定制的色彩方案和动画效果，让数字音乐收藏重新变得有意义。</p>",
-                "bodyEn": "<p>In the streaming era, music is at our fingertips, yet it has lost the ritualistic feel of the physical record era. Disctrack is changing that.</p><p>It packages each digital album as an independent visual artwork—unique cover designs, inner-page visual storytelling, and custom color schemes and animations tailored for each album, making digital music collecting meaningful again.</p>",
-                "date": "05/25",
-                "bgColor": "linear-gradient(135deg,#ec4899 0%,#d946ef 50%,#a855f7 100%)"
+                "bodyEn": "<p>Disctrack is redefining the concept of digital music collecting. By giving each digital record a unique visual and auditory identity, we have created a whole new way to experience music.</p><p>Unlike traditional streaming playlists, Disctrack makes every album a complete work of art—from cover design to inner visuals, from track transitions to overall atmosphere.</p>",
+                "title": "Disctrack",
+                "titleEn": "Disctrack",
+                "summary": "全新音乐体验",
+                "summaryEn": "A New Music Experience"
             },
             "hotNews": [
                 {
@@ -124,25 +100,13 @@
             "id": 2,
             "headline": {
                 "bgImage": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1920&q=80",
-                "mainTitle": "AI",
-                "subTitle": "创意工具的模式转移",
-                "mainTitleEn": "AI",
-                "subTitleEn": "A Paradigm Shift for Creative Tools",
                 "titleImage": "",
                 "body": "<p>创意产业正处于一个关键转折点。生成式AI已经超越了新奇事物的阶段，进入了全球工作室的核心工作流程。</p><p>从实验性的图像生成开始，如今已经演变成了一套全面的工具，可以增强设计过程的每个阶段。真正的突破在于AI能够提供的意想不到的方向。</p>",
-                "bodyEn": "<p>The creative industry is at a critical turning point. Generative AI has moved beyond the novelty stage and entered the core workflows of studios worldwide.</p><p>Starting from experimental image generation, it has now evolved into a comprehensive set of tools that can enhance every stage of the design process. The real breakthrough lies in the unexpected directions AI can provide.</p>"
-            },
-            "spot": {
-                "tag": "TRENDING",
-                "title": "Generative Design: 从辅助到共创",
-                "titleEn": "Generative Design: From Assistance to Co-Creation",
-                "summary": "生成式AI正在从效率工具进化为设计思维过程中的创造性合作者。",
-                "summaryEn": "Generative AI is evolving from an efficiency tool to a creative collaborator in the design thinking process.",
-                "image": "",
-                "body": "<p>设计领域正在经历一场范式转变。生成式AI不再只是加速工作流程的工具——它正在成为一个活跃的创作伙伴，能够提出设计师从未考虑过的方向和可能性。</p><p>从建筑可视化到时装设计，从UI/UX到工业设计，AI辅助的生成式设计正在重新定义“创造力”的边界。重要的不是AI能替代什么，而是它能启发什么。</p>",
-                "bodyEn": "<p>The design world is undergoing a paradigm shift. Generative AI is no longer just a tool to accelerate workflows—it is becoming an active creative partner that can propose directions and possibilities designers had never considered.</p><p>From architectural visualization to fashion design, from UI/UX to industrial design, AI-assisted generative design is redefining the boundaries of creativity. What matters is not what AI can replace, but what it can inspire.</p>",
-                "date": "05/17",
-                "bgColor": "linear-gradient(135deg,#f59e0b 0%,#ef4444 50%,#ec4899 100%)"
+                "bodyEn": "<p>The creative industry is at a critical turning point. Generative AI has moved beyond the novelty stage and entered the core workflows of studios worldwide.</p><p>Starting from experimental image generation, it has now evolved into a comprehensive set of tools that can enhance every stage of the design process. The real breakthrough lies in the unexpected directions AI can provide.</p>",
+                "title": "AI",
+                "titleEn": "AI",
+                "summary": "创意工具的模式转移",
+                "summaryEn": "A Paradigm Shift for Creative Tools"
             },
             "hotNews": [
                 {

@@ -181,14 +181,14 @@ BannerPage.initBgVideo();
 
         if (typeof FreshPage !== 'undefined') FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
 
-        // Fresh articles: async load from R2 (overrides fresh.json items if present)
-        fetch('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/articles/articles.json?' + Date.now())
+        // Fresh heroGroups: async load from R2 (overrides fresh.json heroGroups if present)
+        fetch('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/articles/hero-groups.json?' + Date.now())
             .then(function(r) { return r.ok ? r.json() : null; })
-            .then(function(articles) {
-                if (articles && Array.isArray(articles) && articles.length) {
-                    freshItems = articles;
+            .then(function(groups) {
+                if (groups && Array.isArray(groups) && groups.length) {
+                    freshHeroItems = groups;
                     if (typeof FreshPage !== 'undefined') {
-                        FreshPage.setData({ heroGroups: freshHeroItems, categories: freshCategories, items: freshItems });
+                        FreshPage.setData({ heroGroups: freshHeroItems });
                         if (currentPage === 'fresh' && subPageContainer) {
                             subPageContainer.innerHTML = FreshPage.buildPage(freshActiveTab);
                             FreshPage.bindAll();
@@ -196,7 +196,7 @@ BannerPage.initBgVideo();
                     }
                 }
             })
-            .catch(function() { /* silent fallback to fresh.json items */ });
+            .catch(function() { /* silent fallback to fresh.json heroGroups */ });
 
         // Banner: load home/index.json, then fetch meta from R2
         if (bannerData && Array.isArray(bannerData)) {
@@ -1161,29 +1161,6 @@ function navigateToFreshHeroDetail(groupIdx) {
     FreshPage.bindTranslate();
 }
 
-function navigateToFreshSpotDetail(groupIdx) {
-    if (subPageContainer) {
-        subPageContainer.remove();
-        subPageContainer = null;
-    }
-    banner.style.display = 'none';
-    homeWrapper.style.display = 'none';
-    header.classList.remove('dimmed');
-    subPageContainer = document.createElement('div');
-    subPageContainer.innerHTML = FreshPage.buildSpotDetail(groupIdx);
-    app.appendChild(subPageContainer);
-    currentPage = 'fresh-detail';
-    updateNavActiveState(currentPage);
-
-    var backBtn = document.getElementById('freshDetailBack');
-    if (backBtn) {
-        backBtn.addEventListener('click', function() {
-            window.location.hash = '#/fresh';
-        });
-    }
-    FreshPage.bindTranslate();
-}
-
 function navigateToFreshHotDetail(groupIdx, newsIdx) {
     if (subPageContainer) {
         subPageContainer.remove();
@@ -1463,13 +1440,6 @@ function handleRoute() {
 function handleRouteInner(hash) {
     if (!hash) {
         navigateTo('home');
-    } else if (hash.indexOf('fresh/detail/s/') === 0) {
-        var gIdx = parseInt(hash.replace('fresh/detail/s/', ''), 10);
-        if (!isNaN(gIdx)) {
-            navigateToFreshSpotDetail(gIdx);
-        } else {
-            navigateTo('fresh');
-        }
     } else if (hash.indexOf('fresh/detail/n/') === 0) {
         var parts = hash.replace('fresh/detail/n/', '').split('/');
         var gIdx = parseInt(parts[0], 10);

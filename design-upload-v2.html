@@ -225,6 +225,48 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
 .rte-editor img{max-width:100%;border-radius:6px;margin:8px 0;display:block}
 .rte-editor figure{margin:10px 0;text-align:center}
 .rte-editor figcaption{font-size:11px;color:rgba(255,255,255,.4);margin-top:4px;font-style:italic}
+
+/* Articles tab — heroGroups editor */
+.art-count-badge{font-size:10px;color:rgba(255,255,255,.35);display:flex;align-items:center;margin-left:6px;padding:2px 8px;background:rgba(255,255,255,.04);border-radius:10px}
+.art-help{margin-top:14px;padding:12px;background:rgba(255,255,255,.02);border-radius:8px;font-size:11px;color:rgba(255,255,255,.4);line-height:1.6}
+.art-help code{color:#9ca3af;background:rgba(255,255,255,.04);padding:1px 5px;border-radius:3px}
+.art-empty{text-align:center;padding:40px 20px;color:rgba(255,255,255,.2);font-size:13px;line-height:1.7}
+
+.grp-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:14px;margin-bottom:12px}
+.grp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.06)}
+.grp-num{font-size:13px;font-weight:600;color:#d4a853;letter-spacing:.03em}
+.grp-actions{display:flex;gap:6px}
+.grp-actions button{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;padding:4px 9px;border-radius:5px;cursor:pointer;font-size:11px;transition:all .2s;font-family:inherit}
+.grp-actions button:hover{background:rgba(212,168,83,.15);border-color:rgba(212,168,83,.4)}
+.grp-actions .btn-del{border-color:rgba(239,68,68,.2);color:rgba(239,68,68,.7)}
+.grp-actions .btn-del:hover{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.5)}
+
+.grp-headline-row{display:flex;align-items:center;gap:10px;padding:10px;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.15);border-radius:8px;margin-bottom:10px;flex-wrap:wrap}
+.grp-hot-row{padding:10px;background:rgba(239,68,68,.04);border:1px solid rgba(239,68,68,.12);border-radius:8px}
+.grp-role-tag{font-size:9px;font-weight:700;letter-spacing:.08em;padding:3px 8px;border-radius:4px;text-transform:uppercase;flex-shrink:0}
+.grp-role-headline{background:rgba(99,102,241,.2);color:#a5b4fc;border:1px solid rgba(99,102,241,.3)}
+.grp-role-hot{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.25);display:inline-block;margin-bottom:8px}
+
+.grp-headline-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.grp-headline-title{font-size:13px;font-weight:600;color:#fff;word-break:break-word}
+.grp-headline-sub{font-size:11px;color:rgba(255,255,255,.45)}
+.grp-headline-date{font-size:10px;color:rgba(255,255,255,.25);font-family:Georgia,'Times New Roman',serif}
+.grp-headline-empty{flex:1;font-size:12px;color:rgba(255,255,255,.25);font-style:italic}
+.grp-headline-actions{flex-shrink:0}
+.grp-headline-actions button{background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);color:#a5b4fc;padding:5px 12px;border-radius:5px;cursor:pointer;font-size:11px;transition:all .2s;font-family:inherit}
+.grp-headline-actions button:hover{background:rgba(99,102,241,.25)}
+
+.grp-hot-list{display:flex;flex-direction:column;gap:6px}
+.grp-hot-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:6px;flex-wrap:wrap}
+.grp-hot-title{flex:1;min-width:0;font-size:12px;color:#fff;word-break:break-word}
+.grp-hot-date{font-size:10px;color:rgba(255,255,255,.25);font-family:Georgia,'Times New Roman',serif;flex-shrink:0}
+.grp-hot-actions{display:flex;gap:5px;flex-shrink:0}
+.grp-hot-actions button{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;padding:3px 9px;border-radius:4px;cursor:pointer;font-size:10px;transition:all .2s;font-family:inherit}
+.grp-hot-actions button:hover{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.3)}
+.grp-hot-actions .btn-del{border-color:rgba(239,68,68,.2);color:rgba(239,68,68,.7)}
+.grp-hot-empty{padding:8px 10px;background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.08);border-radius:6px;text-align:center}
+.grp-hot-empty button{background:transparent;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:11px;padding:4px 8px;font-family:inherit;transition:color .2s}
+.grp-hot-empty button:hover{color:rgba(239,68,68,.6)}
 </style>
 </head>
 <body>
@@ -365,14 +407,14 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
   <!-- ═══ Articles Tab ═══ -->
   <div class="tab-panel" id="tab-articles">
     <div class="mgr-toolbar">
-      <button id="artLoadBtn" class="btn-gold">Load Articles</button>
+      <button id="artLoadBtn" class="btn-gold">Load Groups</button>
       <button id="artSaveBtn" class="btn-gold">Save to Site</button>
-      <button id="artAddBtn" class="btn-gold">+ New Article</button>
-      <span style="font-size:10px;color:rgba(255,255,255,.2);display:flex;align-items:center;margin-left:4px" id="artCount"></span>
+      <button id="artAddGroupBtn" class="btn-gold">+ New Group</button>
+      <span class="art-count-badge" id="artCount"></span>
     </div>
-    <div id="artList"></div>
-    <div style="margin-top:14px;padding:12px;background:rgba(255,255,255,.02);border-radius:8px;font-size:11px;color:rgba(255,255,255,.32);line-height:1.6">
-      <strong style="color:#d4a853">How it works:</strong> Articles are saved to Cloudflare R2 (path <code style="color:#9ca3af">articles/articles.json</code>, shared bucket with design works) and override the static <code style="color:#9ca3af">data/fresh.json</code> items on the live site. A local backup is also kept in localStorage (key <code style="color:#9ca3af">vipen_mgr_fresh_articles</code>). Visitors on any device will see your latest articles on the Fresh page after you click "Save to Site".
+    <div id="artGroups"></div>
+    <div class="art-help">
+      <strong>How it works:</strong> Each group = 1 Headline (background big-image article) + up to 3 Hot News (small list items, no preview image). Saved to R2 at <code>articles/hero-groups.json</code> (shared bucket with design works), overrides <code>data/fresh.json</code> heroGroups on the live site. Visitors on any device will see your changes after "Save to Site".
     </div>
   </div><!-- /tab-articles -->
 
@@ -1417,22 +1459,13 @@ ds.textContent='.disc-track-row{display:flex;align-items:center;gap:8px;padding:
 document.head.appendChild(ds);
 })();
 
-// ── Articles JS (公众号-style article editor → Fresh page) ─────
+// ── Articles JS (heroGroups editor → Fresh page carousel) ─────
 (function(){
 'use strict';
 
-var ARTICLES_KEY = 'vipen_mgr_fresh_articles';
-var articles = [];
-var editingIdx = null;
-
-var CATEGORIES = [
-    { key: 'blog', label: 'Blog' },
-    { key: 'ai', label: 'AI' },
-    { key: 'hot', label: 'Hot' },
-    { key: 'music', label: 'Music' },
-    { key: 'culture', label: 'Culture' },
-    { key: 'sports', label: 'Sports' }
-];
+var ARTICLES_KEY = 'vipen_mgr_fresh_heroGroups';
+var groups = [];
+var editingCtx = null;
 
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
@@ -1444,15 +1477,27 @@ function toast(msg,t){
     setTimeout(function(){s.classList.remove('show')},3000);
 }
 
-function loadArticles(){
-    // 1. Try R2 public URL first (cross-device source of truth)
-    fetch('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/articles/articles.json?' + Date.now())
+function todayShort(){return new Date().toISOString().slice(5,10).replace('-','/');}
+
+function blankHeadline(){
+    return { title:'', titleEn:'', summary:'', summaryEn:'', body:'', bodyEn:'', bgImage:'', date:todayShort(), author:'Vipen', authorInitial:'V', authorBg:'#6366f1', readTime:'' };
+}
+function blankHotNews(){
+    return { title:'', titleEn:'', summary:'', summaryEn:'', body:'', bodyEn:'', date:todayShort() };
+}
+function blankGroup(){
+    return { id:0, headline:blankHeadline(), hotNews:[] };
+}
+
+function loadGroups(){
+    fetch('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/articles/hero-groups.json?' + Date.now())
         .then(function(r) { return r.ok ? r.json() : null; })
         .then(function(data) {
             if (data && Array.isArray(data) && data.length) {
-                articles = data;
-                renderArticlesList();
-                toast('Loaded ' + articles.length + ' articles from R2');
+                groups = data;
+                normalizeGroups();
+                renderGroups();
+                toast('Loaded ' + groups.length + ' groups from R2');
                 return;
             }
             loadFromLocalStorageOrFreshJson();
@@ -1464,56 +1509,92 @@ function loadFromLocalStorageOrFreshJson(){
     var raw = localStorage.getItem(ARTICLES_KEY);
     if (raw) {
         try {
-            articles = JSON.parse(raw) || [];
-            renderArticlesList();
-            toast('Loaded ' + articles.length + ' articles from localStorage (R2 empty)');
-            return;
-        } catch(e) { console.warn('Bad stored articles, falling back:', e); }
+            groups = JSON.parse(raw) || [];
+            if (groups.length) {
+                normalizeGroups();
+                renderGroups();
+                toast('Loaded ' + groups.length + ' groups from localStorage (R2 empty)');
+                return;
+            }
+        } catch(e) { console.warn('Bad stored groups, falling back:', e); }
     }
-    // No localStorage data → load from fresh.json (live site)
-    toast('Loading articles from fresh.json...');
+    toast('Loading groups from fresh.json...');
     fetch('data/fresh.json?'+Date.now())
         .then(function(r){return r.json();})
         .then(function(d){
-            if (d && d.items && d.items.length) {
-                articles = d.items.map(function(it, i){
-                    if (typeof it.id === 'string') it.id = i;
-                    return it;
+            if (d && d.heroGroups && d.heroGroups.length) {
+                groups = d.heroGroups.map(function(g){
+                    var h = g.headline || {};
+                    // Normalize legacy field names (mainTitle→title etc.)
+                    return {
+                        id: g.id || 0,
+                        headline: {
+                            title: h.title || h.mainTitle || '',
+                            titleEn: h.titleEn || h.mainTitleEn || '',
+                            summary: h.summary || h.subTitle || '',
+                            summaryEn: h.summaryEn || h.subTitleEn || '',
+                            body: h.body || '',
+                            bodyEn: h.bodyEn || '',
+                            bgImage: h.bgImage || h.titleImage || '',
+                            date: h.date || todayShort(),
+                            author: h.author || 'Vipen',
+                            authorInitial: h.authorInitial || (h.author || 'V').charAt(0),
+                            authorBg: h.authorBg || '#6366f1',
+                            readTime: h.readTime || ''
+                        },
+                        hotNews: (g.hotNews || []).slice(0, 3).map(function(n){
+                            return {
+                                title: n.title || '',
+                                titleEn: n.titleEn || '',
+                                summary: n.summary || '',
+                                summaryEn: n.summaryEn || '',
+                                body: n.body || '',
+                                bodyEn: n.bodyEn || '',
+                                date: n.date || todayShort()
+                            };
+                        })
+                    };
                 });
             } else {
-                articles = [];
+                groups = [];
             }
-            renderArticlesList();
-            toast('Loaded ' + articles.length + ' articles from fresh.json (these are read-only until you click "Save to Site")');
+            normalizeGroups();
+            renderGroups();
+            toast('Loaded ' + groups.length + ' groups from fresh.json (read-only until "Save to Site")');
         })
         .catch(function(){
-            articles = [];
-            renderArticlesList();
-            toast('No articles found. Click "+ New Article" to write one.', 'err');
+            groups = [];
+            renderGroups();
+            toast('No groups found. Click "+ New Group" to start.', 'err');
         });
 }
 
-function saveArticles(){
-    // 1. Update localStorage as a local backup
-    try {
-        articles.forEach(function(a, i){ a.id = i; });
-        localStorage.setItem(ARTICLES_KEY, JSON.stringify(articles));
-    } catch (e) { /* quota exceeded, continue to R2 save */ }
+function normalizeGroups(){
+    groups.forEach(function(g, i){
+        g.id = i;
+        if (!g.headline) g.headline = blankHeadline();
+        if (!Array.isArray(g.hotNews)) g.hotNews = [];
+        if (g.hotNews.length > 3) g.hotNews = g.hotNews.slice(0, 3);
+    });
+}
 
-    // 2. POST to /api/articles/save → writes to R2 (cross-device visible)
+function saveGroups(){
+    normalizeGroups();
+    try { localStorage.setItem(ARTICLES_KEY, JSON.stringify(groups)); } catch(e) {}
+
     var btn = document.getElementById('artSaveBtn');
     var origText = btn.textContent;
     btn.disabled = true; btn.textContent = 'Saving to R2...';
     fetch('/api/articles/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ articles: articles })
+        body: JSON.stringify({ groups: groups })
     })
     .then(function(r) { return r.json(); })
     .then(function(res) {
         btn.disabled = false; btn.textContent = origText;
         if (res.success) {
-            toast('✓ Saved ' + res.count + ' articles to R2. Visitors will see them on the Fresh page shortly.');
+            toast('✓ Saved ' + res.count + ' groups to R2. Fresh page will refresh shortly.');
         } else {
             toast('R2 save failed: ' + (res.error || 'unknown'), 'err');
         }
@@ -1524,86 +1605,130 @@ function saveArticles(){
     });
 }
 
-function renderArticlesList(){
-    var c = document.getElementById('artList');
-    document.getElementById('artCount').textContent = articles.length + ' articles';
-    if (!articles.length) {
-        c.innerHTML = '<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,.2);font-size:13px">No articles yet.<br>Click "+ New Article" to write one like a 公众号 post.</div>';
+function renderGroups(){
+    var c = document.getElementById('artGroups');
+    document.getElementById('artCount').textContent = groups.length + (groups.length === 1 ? ' group' : ' groups');
+    if (!groups.length) {
+        c.innerHTML = '<div class="art-empty">No groups yet.<br>Click "+ New Group" to create a carousel slide (1 Headline + up to 3 Hot News).</div>';
         return;
     }
     var h = '';
-    for (var i = 0; i < articles.length; i++) {
-        h += buildArticleCard(articles[i], i);
+    for (var i = 0; i < groups.length; i++) {
+        h += buildGroupCard(groups[i], i);
     }
     c.innerHTML = h;
-    bindArticleCardEvents();
+    bindGroupEvents();
 }
 
-function buildArticleCard(a, i){
-    var thumb = a.image
-        ? '<div class="art-card-thumb" style="background-image:url(' + esc(a.image) + ')"></div>'
-        : '<div class="art-card-thumb">NO IMG</div>';
-    var metaParts = [];
-    if (a.date) metaParts.push(esc(a.date));
-    if (a.readTime) metaParts.push(esc(a.readTime));
-    if (a.author) metaParts.push(esc(a.author));
-    var meta = metaParts.length ? '<div class="art-card-meta">' + metaParts.join(' · ') + '</div>' : '';
-    return '<div class="art-card" data-idx="' + i + '">' +
-        thumb +
-        '<div class="art-card-body">' +
-        '<div class="art-card-cat">' + esc((a.cat || 'blog').toUpperCase()) + '</div>' +
-        '<div class="art-card-title">' + esc(a.headline || 'Untitled') + '</div>' +
-        (a.summary ? '<div class="art-card-summary">' + esc(a.summary) + '</div>' : '') +
-        meta +
-        '<div class="art-card-actions">' +
-        '<button data-art-action="edit" data-idx="' + i + '">Edit</button>' +
-        '<button data-art-action="up" data-idx="' + i + '">↑</button>' +
-        '<button data-art-action="down" data-idx="' + i + '">↓</button>' +
-        '<button data-art-action="delete" data-idx="' + i + '" class="btn-del">Delete</button>' +
+function buildGroupCard(g, gi){
+    var h = g.headline || {};
+    var headlineInfo = h.title
+        ? '<div class="grp-headline-info"><span class="grp-headline-title">' + esc(h.title) + '</span>' +
+          (h.summary ? '<span class="grp-headline-sub">' + esc(h.summary) + '</span>' : '') +
+          (h.date ? '<span class="grp-headline-date">' + esc(h.date) + '</span>' : '') + '</div>'
+        : '<div class="grp-headline-empty">No headline yet</div>';
+
+    var hotNewsHtml = '';
+    for (var ni = 0; ni < 3; ni++) {
+        var n = (g.hotNews && g.hotNews[ni]) || null;
+        if (n && n.title) {
+            hotNewsHtml += '<div class="grp-hot-item" data-group="' + gi + '" data-slot="' + ni + '">' +
+                '<span class="grp-hot-title">' + esc(n.title) + '</span>' +
+                '<span class="grp-hot-date">' + esc(n.date || '') + '</span>' +
+                '<div class="grp-hot-actions">' +
+                '<button data-art-action="edit-hot" data-group="' + gi + '" data-slot="' + ni + '">Edit</button>' +
+                '<button data-art-action="del-hot" data-group="' + gi + '" data-slot="' + ni + '" class="btn-del">Remove</button>' +
+                '</div></div>';
+        } else {
+            hotNewsHtml += '<div class="grp-hot-empty" data-group="' + gi + '" data-slot="' + ni + '">' +
+                '<button data-art-action="add-hot" data-group="' + gi + '" data-slot="' + ni + '">+ Add Hot News ' + (ni + 1) + '</button>' +
+                '</div>';
+        }
+    }
+
+    return '<div class="grp-card" data-group="' + gi + '">' +
+        '<div class="grp-header">' +
+        '<span class="grp-num">Group ' + (gi + 1) + '</span>' +
+        '<div class="grp-actions">' +
+        '<button data-art-action="up-group" data-group="' + gi + '">↑</button>' +
+        '<button data-art-action="down-group" data-group="' + gi + '">↓</button>' +
+        '<button data-art-action="del-group" data-group="' + gi + '" class="btn-del">Delete Group</button>' +
         '</div>' +
+        '</div>' +
+        '<div class="grp-headline-row">' +
+        '<span class="grp-role-tag grp-role-headline">HEADLINE</span>' +
+        headlineInfo +
+        '<div class="grp-headline-actions">' +
+        (h.title
+            ? '<button data-art-action="edit-headline" data-group="' + gi + '">Edit Headline</button>'
+            : '<button data-art-action="add-headline" data-group="' + gi + '">+ Add Headline</button>') +
+        '</div>' +
+        '</div>' +
+        '<div class="grp-hot-row">' +
+        '<span class="grp-role-tag grp-role-hot">HOT NEWS (max 3)</span>' +
+        '<div class="grp-hot-list">' + hotNewsHtml + '</div>' +
         '</div>' +
         '</div>';
 }
 
-function bindArticleCardEvents(){
-    var c = document.getElementById('artList');
+function bindGroupEvents(){
+    var c = document.getElementById('artGroups');
     c.querySelectorAll('[data-art-action]').forEach(function(btn){
         btn.addEventListener('click', function(){
             var action = this.getAttribute('data-art-action');
-            var idx = parseInt(this.getAttribute('data-idx'), 10);
-            if (action === 'edit') openArticleEditor(idx);
-            else if (action === 'delete') deleteArticle(idx);
-            else if (action === 'up') moveArticle(idx, -1);
-            else if (action === 'down') moveArticle(idx, 1);
+            var gi = parseInt(this.getAttribute('data-group'), 10);
+            var slot = this.getAttribute('data-slot');
+            slot = slot !== null ? parseInt(slot, 10) : null;
+            if (action === 'add-headline' || action === 'edit-headline') {
+                openHeadlineEditor(gi);
+            } else if (action === 'add-hot') {
+                openHotNewsEditor(gi, slot, true);
+            } else if (action === 'edit-hot') {
+                openHotNewsEditor(gi, slot, false);
+            } else if (action === 'del-hot') {
+                deleteHotNews(gi, slot);
+            } else if (action === 'del-group') {
+                deleteGroup(gi);
+            } else if (action === 'up-group') {
+                moveGroup(gi, -1);
+            } else if (action === 'down-group') {
+                moveGroup(gi, 1);
+            }
         });
     });
 }
 
-function deleteArticle(idx){
-    if (!confirm('Delete "' + (articles[idx].headline || 'Untitled') + '"?\nThis removes it from the list. Click "Save to Site" to commit the change.')) return;
-    articles.splice(idx, 1);
-    renderArticlesList();
-    toast('Article removed. Click "Save to Site" to apply.');
+function deleteGroup(gi){
+    if (!confirm('Delete Group ' + (gi + 1) + '?\nThis removes its headline and all hot news. Click "Save to Site" to commit.')) return;
+    groups.splice(gi, 1);
+    normalizeGroups();
+    renderGroups();
+    toast('Group removed. Click "Save to Site" to apply.');
 }
 
-function moveArticle(idx, dir){
-    var newIdx = idx + dir;
-    if (newIdx < 0 || newIdx >= articles.length) return;
-    var tmp = articles[idx];
-    articles[idx] = articles[newIdx];
-    articles[newIdx] = tmp;
-    renderArticlesList();
+function moveGroup(gi, dir){
+    var newIdx = gi + dir;
+    if (newIdx < 0 || newIdx >= groups.length) return;
+    var tmp = groups[gi];
+    groups[gi] = groups[newIdx];
+    groups[newIdx] = tmp;
+    normalizeGroups();
+    renderGroups();
 }
 
-function openArticleEditor(idx){
-    editingIdx = idx;
-    var isNew = (idx === null || idx === undefined);
-    var blank = { id: 0, cat: 'blog', headline: '', headlineEn: '', summary: '', summaryEn: '', body: '', bodyEn: '', image: '', date: new Date().toISOString().slice(5,10).replace('-','/'), fullDate: new Date().toISOString().slice(0,10), author: 'Vipen', authorInitial: 'V', authorBg: '#d4a853', readTime: '1 min read', tags: '' };
-    var a = isNew ? blank : (articles[idx] || blank);
+function deleteHotNews(gi, slot){
+    if (!groups[gi] || !groups[gi].hotNews[slot]) return;
+    if (!confirm('Remove "' + groups[gi].hotNews[slot].title + '" from slot ' + (slot + 1) + '?')) return;
+    groups[gi].hotNews.splice(slot, 1);
+    renderGroups();
+    toast('Hot news removed. Click "Save to Site" to apply.');
+}
 
-    var catOpts = CATEGORIES.map(function(c){
-        return '<option value="' + c.key + '"' + (a.cat === c.key ? ' selected' : '') + '>' + c.label + '</option>';
-    }).join('');
+function openHeadlineEditor(gi){
+    if (!groups[gi]) return;
+    editingCtx = { type: 'headline', groupIdx: gi };
+    var isNew = !groups[gi].headline || !groups[gi].headline.title;
+    var a = isNew ? blankHeadline() : groups[gi].headline;
 
     var overlay = document.createElement('div');
     overlay.className = 'art-editor-overlay';
@@ -1612,42 +1737,34 @@ function openArticleEditor(idx){
     overlay.innerHTML =
         '<div class="art-editor">' +
         '<div class="art-editor-header">' +
-        '<h3>' + (isNew ? '✍ New Article' : '✍ Edit Article #' + (idx + 1)) + '</h3>' +
+        '<h3>' + (isNew ? '✍ New Headline — Group ' + (gi + 1) : '✍ Edit Headline — Group ' + (gi + 1)) + '</h3>' +
         '<button id="artEditorCancel">Cancel</button>' +
         '<button id="artEditorSave" class="btn-save">Save</button>' +
         '</div>' +
         '<div class="art-editor-body">' +
         '<div class="rte-field-row">' +
-        '<div><label class="rte-label">Headline (ZH) *</label><input class="field" id="artHeadline" value="' + esc(a.headline) + '" placeholder="文章标题"></div>' +
-        '<div><label class="rte-label">Headline (EN)</label><input class="field" id="artHeadlineEn" value="' + esc(a.headlineEn) + '" placeholder="English title"></div>' +
+        '<div><label class="rte-label">Title (ZH) *</label><input class="field" id="artTitle" value="' + esc(a.title) + '" placeholder="头条标题"></div>' +
+        '<div><label class="rte-label">Title (EN)</label><input class="field" id="artTitleEn" value="' + esc(a.titleEn) + '" placeholder="English title"></div>' +
         '</div>' +
         '<div class="rte-field-row">' +
-        '<div><label class="rte-label">Summary (ZH)</label><input class="field" id="artSummary" value="' + esc(a.summary) + '" placeholder="摘要"></div>' +
-        '<div><label class="rte-label">Summary (EN)</label><input class="field" id="artSummaryEn" value="' + esc(a.summaryEn) + '" placeholder="English summary"></div>' +
-        '</div>' +
-        '<div class="rte-field-row">' +
-        '<div><label class="rte-label">Category</label><select class="field" id="artCat">' + catOpts + '</select></div>' +
-        '<div><label class="rte-label">Author</label><input class="field" id="artAuthor" value="' + esc(a.author) + '"></div>' +
+        '<div><label class="rte-label">Subtitle (ZH)</label><input class="field" id="artSummary" value="' + esc(a.summary) + '" placeholder="副标题"></div>' +
+        '<div><label class="rte-label">Subtitle (EN)</label><input class="field" id="artSummaryEn" value="' + esc(a.summaryEn) + '" placeholder="English subtitle"></div>' +
         '</div>' +
         '<div class="rte-field-row">' +
         '<div><label class="rte-label">Short Date (e.g. 07/03)</label><input class="field" id="artDate" value="' + esc(a.date) + '"></div>' +
-        '<div><label class="rte-label">Read Time</label><input class="field" id="artReadTime" value="' + esc(a.readTime) + '" placeholder="3 min read"></div>' +
+        '<div><label class="rte-label">Author</label><input class="field" id="artAuthor" value="' + esc(a.author) + '"></div>' +
         '</div>' +
         '<div class="rte-full-row">' +
-        '<label class="rte-label">Tags (comma-separated)</label>' +
-        '<input class="field" id="artTags" value="' + esc(a.tags) + '" placeholder="AI, 设计, 思考">' +
+        '<label class="rte-label">Background Image URL (large carousel background)</label>' +
+        '<input class="field" id="artBgImage" value="' + esc(a.bgImage) + '" placeholder="https://images.unsplash.com/...">' +
         '</div>' +
         '<div class="rte-full-row">' +
-        '<label class="rte-label">Cover Image URL (recommended: Unsplash / external URL — base64 may bloat localStorage)</label>' +
-        '<input class="field" id="artImage" value="' + esc(a.image) + '" placeholder="https://images.unsplash.com/...">' +
-        '</div>' +
-        '<div class="rte-full-row">' +
-        '<label class="rte-label">Body Content (ZH) — write your article here</label>' +
+        '<label class="rte-label">Body Content (ZH)</label>' +
         buildRteToolbar('artBodyZh') +
         '<div class="rte-editor" id="artBodyZh" contenteditable="true" data-placeholder="开始写正文...">' + (a.body || '') + '</div>' +
         '</div>' +
         '<div class="rte-full-row">' +
-        '<label class="rte-label">Body Content (EN) — optional English version</label>' +
+        '<label class="rte-label">Body Content (EN)</label>' +
         buildRteToolbar('artBodyEn') +
         '<div class="rte-editor" id="artBodyEn" contenteditable="true" data-placeholder="Write English body...">' + (a.bodyEn || '') + '</div>' +
         '</div>' +
@@ -1657,54 +1774,119 @@ function openArticleEditor(idx){
     document.body.appendChild(overlay);
     setTimeout(function(){ overlay.classList.add('show'); }, 10);
 
-    var toolbars = overlay.querySelectorAll('.rte-toolbar');
-    toolbars.forEach(function(tb){
-        var editorId = tb.getAttribute('data-editor');
-        if (editorId) bindRteToolbar(tb, editorId);
-    });
-
-    overlay.querySelector('#artEditorCancel').addEventListener('click', closeArticleEditor);
-    overlay.addEventListener('click', function(e){ if (e.target === overlay) closeArticleEditor(); });
-
+    bindToolbars(overlay);
+    overlay.querySelector('#artEditorCancel').addEventListener('click', closeEditor);
+    overlay.addEventListener('click', function(e){ if (e.target === overlay) closeEditor(); });
     overlay.querySelector('#artEditorSave').addEventListener('click', function(){
-        var headline = overlay.querySelector('#artHeadline').value.trim();
-        if (!headline) { toast('Please enter a headline', 'err'); return; }
-        var newArticle = {
-            id: isNew ? 0 : (articles[editingIdx].id || editingIdx),
-            cat: overlay.querySelector('#artCat').value,
-            headline: headline,
-            headlineEn: overlay.querySelector('#artHeadlineEn').value.trim(),
+        var title = overlay.querySelector('#artTitle').value.trim();
+        if (!title) { toast('Please enter a title', 'err'); return; }
+        groups[editingCtx.groupIdx].headline = {
+            title: title,
+            titleEn: overlay.querySelector('#artTitleEn').value.trim(),
             summary: overlay.querySelector('#artSummary').value.trim(),
             summaryEn: overlay.querySelector('#artSummaryEn').value.trim(),
+            date: overlay.querySelector('#artDate').value.trim(),
             author: overlay.querySelector('#artAuthor').value.trim() || 'Vipen',
             authorInitial: (overlay.querySelector('#artAuthor').value.trim() || 'V').charAt(0).toUpperCase(),
-            authorBg: '#d4a853',
+            authorBg: groups[editingCtx.groupIdx].headline.authorBg || '#6366f1',
+            readTime: groups[editingCtx.groupIdx].headline.readTime || '',
+            bgImage: overlay.querySelector('#artBgImage').value.trim(),
+            body: overlay.querySelector('#artBodyZh').innerHTML.trim(),
+            bodyEn: overlay.querySelector('#artBodyEn').innerHTML.trim()
+        };
+        renderGroups();
+        closeEditor();
+        toast('Headline saved! Click "Save to Site" to publish.');
+    });
+}
+
+function openHotNewsEditor(gi, slot, isNew){
+    if (!groups[gi]) return;
+    editingCtx = { type: 'hotnews', groupIdx: gi, slot: slot };
+    var a = isNew ? blankHotNews() : (groups[gi].hotNews[slot] || blankHotNews());
+
+    var overlay = document.createElement('div');
+    overlay.className = 'art-editor-overlay';
+    overlay.id = 'artEditorOverlay';
+
+    overlay.innerHTML =
+        '<div class="art-editor">' +
+        '<div class="art-editor-header">' +
+        '<h3>' + (isNew ? '✍ New Hot News — Group ' + (gi + 1) + ' / Slot ' + (slot + 1) : '✍ Edit Hot News — Group ' + (gi + 1) + ' / Slot ' + (slot + 1)) + '</h3>' +
+        '<button id="artEditorCancel">Cancel</button>' +
+        '<button id="artEditorSave" class="btn-save">Save</button>' +
+        '</div>' +
+        '<div class="art-editor-body">' +
+        '<div class="rte-field-row">' +
+        '<div><label class="rte-label">Title (ZH) *</label><input class="field" id="artTitle" value="' + esc(a.title) + '" placeholder="热点标题"></div>' +
+        '<div><label class="rte-label">Title (EN)</label><input class="field" id="artTitleEn" value="' + esc(a.titleEn) + '" placeholder="English title"></div>' +
+        '</div>' +
+        '<div class="rte-field-row">' +
+        '<div><label class="rte-label">Summary (ZH)</label><input class="field" id="artSummary" value="' + esc(a.summary) + '" placeholder="摘要"></div>' +
+        '<div><label class="rte-label">Summary (EN)</label><input class="field" id="artSummaryEn" value="' + esc(a.summaryEn) + '" placeholder="English summary"></div>' +
+        '</div>' +
+        '<div class="rte-full-row">' +
+        '<label class="rte-label">Short Date (e.g. 07/03)</label>' +
+        '<input class="field" id="artDate" value="' + esc(a.date) + '">' +
+        '</div>' +
+        '<div class="rte-full-row">' +
+        '<label class="rte-label">Body Content (ZH)</label>' +
+        buildRteToolbar('artBodyZh') +
+        '<div class="rte-editor" id="artBodyZh" contenteditable="true" data-placeholder="开始写正文...">' + (a.body || '') + '</div>' +
+        '</div>' +
+        '<div class="rte-full-row">' +
+        '<label class="rte-label">Body Content (EN)</label>' +
+        buildRteToolbar('artBodyEn') +
+        '<div class="rte-editor" id="artBodyEn" contenteditable="true" data-placeholder="Write English body...">' + (a.bodyEn || '') + '</div>' +
+        '</div>' +
+        '</div>' +
+        '</div>';
+
+    document.body.appendChild(overlay);
+    setTimeout(function(){ overlay.classList.add('show'); }, 10);
+
+    bindToolbars(overlay);
+    overlay.querySelector('#artEditorCancel').addEventListener('click', closeEditor);
+    overlay.addEventListener('click', function(e){ if (e.target === overlay) closeEditor(); });
+    overlay.querySelector('#artEditorSave').addEventListener('click', function(){
+        var title = overlay.querySelector('#artTitle').value.trim();
+        if (!title) { toast('Please enter a title', 'err'); return; }
+        var news = {
+            title: title,
+            titleEn: overlay.querySelector('#artTitleEn').value.trim(),
+            summary: overlay.querySelector('#artSummary').value.trim(),
+            summaryEn: overlay.querySelector('#artSummaryEn').value.trim(),
             date: overlay.querySelector('#artDate').value.trim(),
-            fullDate: overlay.querySelector('#artDate').value.trim() ? new Date().getFullYear() + '-' + overlay.querySelector('#artDate').value.trim().replace('/','-') : new Date().toISOString().slice(0,10),
-            readTime: overlay.querySelector('#artReadTime').value.trim() || '1 min read',
-            tags: overlay.querySelector('#artTags').value.trim(),
-            image: overlay.querySelector('#artImage').value.trim(),
             body: overlay.querySelector('#artBodyZh').innerHTML.trim(),
             bodyEn: overlay.querySelector('#artBodyEn').innerHTML.trim()
         };
         if (isNew) {
-            articles.push(newArticle);
+            if (!groups[editingCtx.groupIdx].hotNews) groups[editingCtx.groupIdx].hotNews = [];
+            groups[editingCtx.groupIdx].hotNews[editingCtx.slot] = news;
         } else {
-            articles[editingIdx] = newArticle;
+            groups[editingCtx.groupIdx].hotNews[editingCtx.slot] = news;
         }
-        renderArticlesList();
-        closeArticleEditor();
-        toast(isNew ? 'Article added! Click "Save to Site" to publish to Fresh page.' : 'Article updated! Click "Save to Site" to apply.');
+        renderGroups();
+        closeEditor();
+        toast('Hot news saved! Click "Save to Site" to publish.');
     });
 }
 
-function closeArticleEditor(){
+function closeEditor(){
     var overlay = document.getElementById('artEditorOverlay');
     if (overlay) {
         overlay.classList.remove('show');
         setTimeout(function(){ if (overlay.parentNode) overlay.remove(); }, 200);
     }
-    editingIdx = null;
+    editingCtx = null;
+}
+
+function bindToolbars(overlay){
+    var toolbars = overlay.querySelectorAll('.rte-toolbar');
+    toolbars.forEach(function(tb){
+        var editorId = tb.getAttribute('data-editor');
+        if (editorId) bindRteToolbar(tb, editorId);
+    });
 }
 
 function buildRteToolbar(editorId){
@@ -1742,7 +1924,7 @@ function bindRteToolbar(toolbar, editorId){
                 if (!url) return;
                 document.execCommand('createLink', false, url);
             } else if (cmd === 'insertImage') {
-                var choice = confirm('OK = paste image URL (recommended)\nCancel = upload from computer (large images bloat localStorage)');
+                var choice = confirm('OK = paste image URL (recommended)\nCancel = upload from computer (large images bloat storage)');
                 if (choice) {
                     var imgUrl = prompt('Image URL:', 'https://');
                     if (!imgUrl) return;
@@ -1755,7 +1937,7 @@ function bindRteToolbar(toolbar, editorId){
                         if (!inp.files.length) return;
                         var f = inp.files[0];
                         var sizeKB = Math.round(f.size / 1024);
-                        if (sizeKB > 500) toast('Image is ' + sizeKB + 'KB — large base64 may bloat localStorage. Prefer external URL.', 'err');
+                        if (sizeKB > 500) toast('Image is ' + sizeKB + 'KB — large base64 may bloat storage. Prefer external URL.', 'err');
                         var reader = new FileReader();
                         reader.onload = function(ev){ document.execCommand('insertImage', false, ev.target.result); };
                         reader.readAsDataURL(f);
@@ -1771,18 +1953,20 @@ function bindRteToolbar(toolbar, editorId){
     });
 }
 
-document.getElementById('artLoadBtn').addEventListener('click', loadArticles);
-document.getElementById('artSaveBtn').addEventListener('click', saveArticles);
-document.getElementById('artAddBtn').addEventListener('click', function(){ openArticleEditor(null); });
+document.getElementById('artLoadBtn').addEventListener('click', loadGroups);
+document.getElementById('artSaveBtn').addEventListener('click', saveGroups);
+document.getElementById('artAddGroupBtn').addEventListener('click', function(){
+    groups.push(blankGroup());
+    normalizeGroups();
+    renderGroups();
+    toast('New group added. Click "Edit Headline" to fill content.');
+});
 
-// Auto-load when user clicks Articles tab for the first time
 document.querySelectorAll('.tab-btn').forEach(function(b){
     if (b.getAttribute('data-tab') === 'articles') {
         b.addEventListener('click', function(){
-            if (!articles.length && !localStorage.getItem(ARTICLES_KEY)) {
-                loadArticles();
-            } else if (!articles.length) {
-                loadArticles();
+            if (!groups.length) {
+                loadGroups();
             }
         });
     }

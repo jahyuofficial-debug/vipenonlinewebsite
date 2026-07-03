@@ -49,30 +49,22 @@ function buildFreshArticles(activeKey) {
 function buildFreshHeroCarousel() {
     var slides = heroGroups.map(function(group, i) {
         var h = group.headline || {};
-        var s = group.spot || {};
         var hotNews = group.hotNews || [];
         var hotNewsHtml = hotNews.map(function(n, idx) {
             return '<div class="fresh-hero-news-item" data-group-idx="' + i + '" data-news-idx="' + idx + '">' +
-                '<span class="fresh-hero-news-text">' + n.title + '</span>' +
-                '<span class="fresh-hero-news-date">' + n.date + '</span>' +
+                '<span class="fresh-hero-news-text">' + (n.title || '') + '</span>' +
+                '<span class="fresh-hero-news-date">' + (n.date || '') + '</span>' +
                 '</div>';
         }).join('');
 
-        var spotStyle = s.bgColor ? ' style="background:' + s.bgColor + '"' : '';
-
         return '<div class="fresh-hero-slide' + (i === 0 ? ' active' : '') + '" data-fresh-hero="' + i + '">' +
-            '<div class="fresh-hero-bg" data-fresh-hero-bg="' + i + '" style="background-image:url(' + h.bgImage + ')"></div>' +
+            '<div class="fresh-hero-bg" data-fresh-hero-bg="' + i + '" style="background-image:url(' + (h.bgImage || '') + ')"></div>' +
             '<div class="fresh-hero-mask"></div>' +
             '<div class="fresh-hero-content">' +
-            '<h2 class="fresh-hero-main-title">' + h.mainTitle + '</h2>' +
-            '<p class="fresh-hero-sub-title">' + h.subTitle + '</p>' +
+            '<h2 class="fresh-hero-main-title">' + (h.title || '') + '</h2>' +
+            '<p class="fresh-hero-sub-title">' + (h.summary || '') + '</p>' +
             '</div>' +
             '<div class="fresh-hero-panel">' +
-            '<div class="fresh-hero-card" data-fresh-hero-spot="' + i + '"' + spotStyle + '>' +
-            '<span class="fresh-hero-card-tag">' + (s.tag || '') + '</span>' +
-            '<h3 class="fresh-hero-card-title">' + (s.title || '') + '</h3>' +
-            '<p class="fresh-hero-card-desc">' + (s.summary || '') + '</p>' +
-            '</div>' +
             '<div class="fresh-hero-news">' + hotNewsHtml + '</div>' +
             '</div>' +
             '</div>';
@@ -91,15 +83,8 @@ function buildFreshHeroCarousel() {
 
 function buildFreshPage(activeKey) {
     var hero = buildFreshHeroCarousel();
-    var key = activeKey || 'all';
-    var tabs = buildFreshTabs(key);
-    var articles = buildFreshArticles(key);
     return '<section id="page-fresh" class="fresh-page">' +
         hero +
-        '<div class="fresh-content">' +
-        '<div class="fresh-tabs">' + tabs + '</div>' +
-        '<div class="fresh-article-list">' + articles + '</div>' +
-        '</div>' +
         '</section>';
 }
 
@@ -273,17 +258,6 @@ function bindFreshHeroClicks() {
         });
     });
 
-    var cards = document.querySelectorAll('[data-fresh-hero-spot]');
-    cards.forEach(function(card) {
-        card.addEventListener('click', function() {
-            var idx = parseInt(this.getAttribute('data-fresh-hero-spot'), 10);
-            var group = heroGroups[idx];
-            if (group && group.spot) {
-                window.location.hash = '#/fresh/detail/s/' + idx;
-            }
-        });
-    });
-
     var newsItems = document.querySelectorAll('.fresh-hero-news-item');
     newsItems.forEach(function(news) {
         news.addEventListener('click', function() {
@@ -315,18 +289,18 @@ function getHeroDetailData(groupIdx) {
     var h = group.headline;
     var isEn = currentLang === 'en';
     return {
-        headline: isEn && h.mainTitleEn ? h.mainTitleEn : h.mainTitle,
-        headlineEn: h.mainTitleEn || '',
-        summary: isEn && h.subTitleEn ? h.subTitleEn : h.subTitle,
-        summaryEn: h.subTitleEn || '',
+        headline: isEn && h.titleEn ? h.titleEn : (h.title || ''),
+        headlineEn: h.titleEn || '',
+        summary: isEn && h.summaryEn ? h.summaryEn : (h.summary || ''),
+        summaryEn: h.summaryEn || '',
         body: isEn && h.bodyEn ? h.bodyEn : (h.body || ''),
         bodyEn: h.bodyEn || '',
-        image: h.titleImage || '',
-        date: 'Headline',
-        author: 'Vipen',
-        authorInitial: 'V',
-        authorBg: '#6366f1',
-        readTime: ''
+        image: h.bgImage || '',
+        date: h.date || 'Headline',
+        author: h.author || 'Vipen',
+        authorInitial: (h.author || 'V').charAt(0),
+        authorBg: h.authorBg || '#6366f1',
+        readTime: h.readTime || ''
     };
 }
 
@@ -336,7 +310,7 @@ function getHotNewsDetailData(groupIdx, newsIdx) {
     var n = group.hotNews[newsIdx];
     var isEn = currentLang === 'en';
     return {
-        headline: isEn && n.titleEn ? n.titleEn : n.title,
+        headline: isEn && n.titleEn ? n.titleEn : (n.title || ''),
         headlineEn: n.titleEn || '',
         summary: isEn && n.summaryEn ? n.summaryEn : (n.summary || ''),
         summaryEn: n.summaryEn || '',
@@ -344,31 +318,10 @@ function getHotNewsDetailData(groupIdx, newsIdx) {
         bodyEn: n.bodyEn || '',
         image: n.image || '',
         date: n.date || '',
-        author: 'Vipen',
-        authorInitial: 'V',
-        authorBg: '#6366f1',
-        readTime: ''
-    };
-}
-
-function getSpotDetailData(groupIdx) {
-    var group = heroGroups[groupIdx];
-    if (!group || !group.spot) return null;
-    var s = group.spot;
-    var isEn = currentLang === 'en';
-    return {
-        headline: isEn && s.titleEn ? s.titleEn : s.title,
-        headlineEn: s.titleEn || '',
-        summary: isEn && s.summaryEn ? s.summaryEn : (s.summary || ''),
-        summaryEn: s.summaryEn || '',
-        body: isEn && s.bodyEn ? s.bodyEn : (s.body || ''),
-        bodyEn: s.bodyEn || '',
-        image: s.image || '',
-        date: s.date || '',
-        author: 'Vipen',
-        authorInitial: 'V',
-        authorBg: '#6366f1',
-        readTime: ''
+        author: n.author || 'Vipen',
+        authorInitial: (n.author || 'V').charAt(0),
+        authorBg: n.authorBg || '#6366f1',
+        readTime: n.readTime || ''
     };
 }
 
@@ -420,15 +373,9 @@ return {
         if (!data) return '';
         return buildFreshDetailHtml(data);
     },
-    buildSpotDetail: function(groupIdx) {
-        var data = getSpotDetailData(groupIdx);
-        if (!data) return '';
-        return buildFreshDetailHtml(data);
-    },
     bindAll: function() {
         initFreshCarousel();
         bindFreshHeroClicks();
-        bindFreshArticleClicks();
     },
     bindTranslate: function() { bindTranslateBtn(); },
     initCarousel: function() { initFreshCarousel(); },
