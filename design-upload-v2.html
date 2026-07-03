@@ -315,6 +315,7 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
     <button class="tab-btn" data-tab="manage">Manage Existing</button>
     <button class="tab-btn" data-tab="disc">Disc</button>
     <button class="tab-btn" data-tab="articles">Articles</button>
+    <button class="tab-btn" data-tab="action">Action</button>
   </div>
 
   <!-- ═══ Upload Tab ═══ -->
@@ -455,6 +456,22 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
       <strong>How it works:</strong> Each group = 1 Headline (background big-image article) + up to 3 Hot News (small list items, no preview image). Saved to R2 at <code>articles/hero-groups.json</code> (shared bucket with design works), overrides <code>data/fresh.json</code> heroGroups on the live site. Visitors on any device will see your changes after "Save to Site".
     </div>
   </div><!-- /tab-articles -->
+
+  <!-- ═══ Action Tab ═══ -->
+  <div class="tab-panel" id="tab-action">
+    <div class="mgr-toolbar">
+      <button id="actionLoadBtn" class="btn-gold">Load from R2</button>
+      <button id="actionSaveBtn" class="btn-gold">Save Changes</button>
+      <span style="font-size:10px;color:rgba(255,255,255,.2);display:flex;align-items:center;margin-left:4px" id="actionCount"></span>
+    </div>
+    <div id="actionPosts"></div>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.06)">
+      <button id="actionAddPost" class="btn-gold" style="width:auto;padding:10px 20px">+ Add Post</button>
+    </div>
+    <div class="art-help">
+      <strong>How it works:</strong> Each post = 1 author + caption + 1~N images (+ optional comments). Images upload to R2 at <code>action/post-&lt;id&gt;/</code>, post data saves to <code>action/index.json</code> (shared bucket with design/articles). Main site loads it and renders the Action feed. Existing comments are preserved; reorder posts by drag.
+    </div>
+  </div><!-- /tab-action -->
 
 </div><!-- /wrap -->
 <div class="status-toast" id="statusToast"></div>
@@ -1503,6 +1520,350 @@ ds.textContent='.disc-track-row{display:flex;align-items:center;gap:8px;padding:
     '.disc-del{background:none;border:1px solid rgba(239,68,68,.3);border-radius:50%;color:rgba(239,68,68,.6);width:20px;height:20px;font-size:10px;cursor:pointer;flex-shrink:0;padding:0;line-height:18px;text-align:center}'+
     '.disc-del:hover{background:rgba(239,68,68,.15)}';
 document.head.appendChild(ds);
+})();
+
+// ═══ Action tab ═══
+(function(){
+var ACTION_R2 = 'https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev';
+var actionPosts = [];
+var actionFiles = {};   // key: "<pi>_<ii>" -> File
+
+document.getElementById('actionLoadBtn').addEventListener('click', function(){
+    fetch(ACTION_R2 + '/action/index.json?' + Date.now())
+        .then(function(r){ if(!r.ok) throw new Error('not found'); return r.json(); })
+        .then(function(d){
+            actionPosts = Array.isArray(d) ? d : [];
+            actionFiles = {};
+            renderAction();
+            toast('Loaded ' + actionPosts.length + ' posts from R2');
+        })
+        .catch(function(){
+            fetch('../data/action.json')
+                .then(function(r){ return r.json(); })
+                .then(function(d){
+                    actionPosts = Array.isArray(d) ? d : [];
+                    actionFiles = {};
+                    renderAction();
+                    toast('Loaded ' + actionPosts.length + ' posts (local fallback)');
+                })
+                .catch(function(){ toast('Failed to load.','err'); });
+        });
+});
+
+document.getElementById('actionSaveBtn').addEventListener('click', function(){
+    var btn = document.getElementById('actionSaveBtn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    var totalBytes = 0;
+    Object.keys(actionFiles).forEach(function(k){ totalBytes += actionFiles[k].size; });
+    if(totalBytes > MAX_FILE_MB * 1024 * 1024){
+        btn.disabled = false; btn.textContent = 'Save Changes';
+        toast('Total upload exceeds ' + MAX_FILE_MB + 'MB limit.','err'); return;
+    }
+    // Ensure each post has a stable id (used as R2 folder name)
+    var maxId = -1;
+    actionPosts.forEach(function(p){ if(typeof p.id === 'number' && p.id > maxId) maxId = p.id; });
+    actionPosts.forEach(function(p){ if(p.id == null) p.id = (++maxId); });
+
+    var cleanPosts = JSON.parse(JSON.stringify(actionPosts));
+    cleanPosts.forEach(function(p){
+        if(p.avatar && p.avatar.indexOf('blob:')===0) p.avatar = '';
+        if(Array.isArray(p.images)){
+            for(var i=0;i<p.images.length;i++){
+                if(p.images[i] && p.images[i].indexOf('blob:')===0) p.images[i] = '';
+            }
+        }
+    });
+    var fd = new FormData();
+    fd.append('json', JSON.stringify(cleanPosts));
+    Object.keys(actionFiles).forEach(function(k){
+        var p = k.split('_');
+        fd.append('img_' + p[0] + '_' + p[1], actionFiles[k]);
+    });
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/action/save');
+    xhr.timeout = 180000;
+    var overlay = document.getElementById('mgrProgressOverlay');
+    var circle = document.getElementById('mgrProgressCircle');
+    var pctEl = document.getElementById('mgrProgressPct');
+    var labelEl = document.getElementById('mgrProgressLabel');
+    var circLen = 213.6;
+    overlay.classList.add('show'); circle.style.strokeDashoffset = circLen;
+    pctEl.textContent = '0%'; labelEl.textContent = 'Uploading...';
+    xhr.upload.onprogress = function(e){
+        if(e.lengthComputable){ var p = Math.round(e.loaded/e.total*100); circle.style.strokeDashoffset = circLen-(circLen*p/100); pctEl.textContent = p+'%'; }
+    };
+    xhr.onload = function(){
+        overlay.classList.remove('show'); btn.disabled = false; btn.textContent = 'Save Changes';
+        try { var r = JSON.parse(xhr.responseText);
+            if(r.success){ actionFiles = {}; renderAction(); toast('Saved! ' + (r.uploaded||0) + ' images, ' + (r.count||0) + ' posts.'); }
+            else { toast(r.error || 'Save failed','err'); }
+        } catch(e){ toast('Save failed','err'); }
+    };
+    xhr.onerror = function(){ overlay.classList.remove('show'); btn.disabled = false; btn.textContent = 'Save Changes'; toast('Network error','err'); };
+    xhr.send(fd);
+});
+
+document.getElementById('actionAddPost').addEventListener('click', function(){
+    var maxId = -1;
+    actionPosts.forEach(function(p){ if(typeof p.id === 'number' && p.id > maxId) maxId = p.id; });
+    actionPosts.push({
+        id: maxId + 1,
+        username: 'Chen Mobai',
+        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80',
+        images: [],
+        caption: '',
+        likes: 0,
+        comments: 0,
+        timeAgo: 'just now',
+        isLiked: false,
+        commentList: []
+    });
+    actionExpanded = actionPosts.length - 1;
+    renderAction();
+});
+
+var actionExpanded = -1;
+
+function renderAction(){
+    document.getElementById('actionCount').textContent = actionPosts.length + ' posts';
+    var h = '';
+    actionPosts.forEach(function(p, pi){
+        var imgCount = (p.images || []).length;
+        var captionPreview = (p.caption || '').slice(0, 50) + ((p.caption||'').length > 50 ? '…' : '');
+        var open = (actionExpanded === pi) ? ' open' : '';
+        h += '<div class="action-post-card' + open + '" draggable="true" data-pi="' + pi + '">';
+        h +=   '<div class="action-post-head" data-toggle="' + pi + '">';
+        h +=     '<span class="action-drag-handle" title="Drag to reorder">⋮⋮</span>';
+        h +=     '<span class="action-idx">#' + (pi+1) + '</span>';
+        h +=     '<span class="action-preview">' + esc(captionPreview || '(no caption)') + '</span>';
+        h +=     '<span class="action-meta">' + imgCount + ' imgs · ' + (p.likes||0) + ' likes</span>';
+        h +=     '<span class="action-caret">' + (open ? '▾' : '▸') + '</span>';
+        h +=   '</div>';
+        if(open){
+            h += '<div class="action-post-body">';
+            // Author row
+            h += '<div class="action-row"><div class="action-field" style="flex:1"><label>Username</label><input class="act-username" value="' + esc(p.username||'') + '" data-pi="' + pi + '"></div>';
+            h += '<div class="action-field" style="flex:1.6"><label>Avatar URL</label><input class="act-avatar" value="' + esc(p.avatar||'') + '" data-pi="' + pi + '"></div></div>';
+            if(p.avatar){ h += '<img class="act-avatar-preview" src="' + esc(p.avatar) + '" alt="">'; }
+            // Caption
+            h += '<div class="action-row"><div class="action-field"><label>Caption</label><textarea class="act-caption" rows="2" data-pi="' + pi + '">' + esc(p.caption||'') + '</textarea></div></div>';
+            // Meta row
+            h += '<div class="action-row">';
+            h += '<div class="action-field" style="flex:.6"><label>Time ago</label><input class="act-timeago" value="' + esc(p.timeAgo||'') + '" data-pi="' + pi + '"></div>';
+            h += '<div class="action-field" style="flex:.4"><label>Likes</label><input type="number" class="act-likes" value="' + (p.likes||0) + '" data-pi="' + pi + '"></div>';
+            h += '<div class="action-field" style="flex:.4"><label>Comments</label><input type="number" class="act-comments" value="' + (p.comments||0) + '" data-pi="' + pi + '"></div>';
+            h += '<div class="action-field" style="flex:.4"><label>ID</label><input value="' + (p.id!=null?p.id:'') + '" disabled></div>';
+            h += '</div>';
+            // Images
+            h += '<div class="action-imgs-label">Images (' + imgCount + ')</div>';
+            h += '<div class="action-imgs" data-pi="' + pi + '">';
+            (p.images || []).forEach(function(img, ii){
+                var isBlob = (img||'').indexOf('blob:')===0;
+                h += '<div class="action-img-slot" data-pi="' + pi + '" data-ii="' + ii + '">';
+                if(img){
+                    h += '<img src="' + esc(img) + '" alt="" title="' + (isBlob?'new (pending upload)':'existing') + '">';
+                } else {
+                    h += '<span class="action-img-empty">empty</span>';
+                }
+                h += '<button class="action-img-repl" data-pi="' + pi + '" data-ii="' + ii + '" title="Replace">↻</button>';
+                h += '<button class="action-img-del" data-pi="' + pi + '" data-ii="' + ii + '" title="Remove">✕</button>';
+                h += '</div>';
+            });
+            h += '<button class="action-img-add" data-pi="' + pi + '" title="Add image">+ Add</button>';
+            h += '</div>';
+            // Comments (read-only, preserved)
+            if(Array.isArray(p.commentList) && p.commentList.length){
+                h += '<div class="action-comments-label">Comments (' + p.commentList.length + ', preserved)</div>';
+                h += '<div class="action-comments">';
+                p.commentList.forEach(function(c){
+                    h += '<div class="action-comment"><span class="ac-user">' + esc(c.user||'') + '</span><span class="ac-text">' + esc(c.text||'') + '</span></div>';
+                });
+                h += '</div>';
+            }
+            h += '</div>'; // /body
+        }
+        h += '</div>'; // /card
+    });
+    document.getElementById('actionPosts').innerHTML = h;
+    bindActionRows();
+}
+
+function bindActionRows(){
+    // Toggle expand
+    document.querySelectorAll('.action-post-head').forEach(function(head){
+        head.addEventListener('click', function(e){
+            if(e.target.classList.contains('action-drag-handle')) return;
+            var pi = parseInt(this.getAttribute('data-toggle'));
+            actionExpanded = (actionExpanded === pi) ? -1 : pi;
+            renderAction();
+        });
+    });
+    // Field edits
+    document.querySelectorAll('.act-username').forEach(function(inp){ inp.addEventListener('change',function(){ actionPosts[+this.getAttribute('data-pi')].username = this.value; }); });
+    document.querySelectorAll('.act-avatar').forEach(function(inp){
+        inp.addEventListener('change', function(){ actionPosts[+this.getAttribute('data-pi')].avatar = this.value; renderAction(); });
+    });
+    document.querySelectorAll('.act-caption').forEach(function(inp){ inp.addEventListener('change', function(){ actionPosts[+this.getAttribute('data-pi')].caption = this.value; }); });
+    document.querySelectorAll('.act-timeago').forEach(function(inp){ inp.addEventListener('change', function(){ actionPosts[+this.getAttribute('data-pi')].timeAgo = this.value; }); });
+    document.querySelectorAll('.act-likes').forEach(function(inp){ inp.addEventListener('change', function(){ actionPosts[+this.getAttribute('data-pi')].likes = parseInt(this.value)||0; }); });
+    document.querySelectorAll('.act-comments').forEach(function(inp){ inp.addEventListener('change', function(){ actionPosts[+this.getAttribute('data-pi')].comments = parseInt(this.value)||0; }); });
+
+    // Replace image
+    document.querySelectorAll('.action-img-repl').forEach(function(btn){
+        btn.addEventListener('click', function(e){
+            e.stopPropagation();
+            var pi = parseInt(this.getAttribute('data-pi'));
+            var ii = parseInt(this.getAttribute('data-ii'));
+            pickImage(pi, ii);
+        });
+    });
+    // Delete image
+    document.querySelectorAll('.action-img-del').forEach(function(btn){
+        btn.addEventListener('click', function(e){
+            e.stopPropagation();
+            var pi = parseInt(this.getAttribute('data-pi'));
+            var ii = parseInt(this.getAttribute('data-ii'));
+            actionPosts[pi].images.splice(ii, 1);
+            rekeyActionFiles();
+            renderAction();
+        });
+    });
+    // Add image
+    document.querySelectorAll('.action-img-add').forEach(function(btn){
+        btn.addEventListener('click', function(e){
+            e.stopPropagation();
+            var pi = parseInt(this.getAttribute('data-pi'));
+            pickImage(pi, null);
+        });
+    });
+    // Delete post
+    document.querySelectorAll('.action-post-card').forEach(function(card){
+        var pi = parseInt(card.getAttribute('data-pi'));
+        var delBtn = card.querySelector('.action-del-btn');
+        if(delBtn){
+            delBtn.addEventListener('click', function(e){
+                e.stopPropagation();
+                actionPosts.splice(pi, 1);
+                if(actionExpanded === pi) actionExpanded = -1;
+                rekeyActionFiles();
+                renderAction();
+            });
+        }
+        // Drag to reorder posts
+        var dr = null;
+        card.addEventListener('dragstart', function(e){
+            dr = pi;
+            card.style.opacity = '0.4';
+            e.dataTransfer.effectAllowed = 'move';
+            e.stopPropagation();
+        });
+        card.addEventListener('dragend', function(){
+            card.style.opacity = '1';
+            document.querySelectorAll('.action-post-card').forEach(function(c){ c.classList.remove('action-drag-over'); });
+        });
+        card.addEventListener('dragover', function(e){
+            if(dr === null) return;
+            e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+            card.classList.add('action-drag-over');
+        });
+        card.addEventListener('dragleave', function(){ card.classList.remove('action-drag-over'); });
+        card.addEventListener('drop', function(e){
+            e.preventDefault(); card.classList.remove('action-drag-over');
+            var di = pi;
+            if(dr !== null && dr !== di){
+                var it = actionPosts.splice(dr, 1)[0];
+                actionPosts.splice(di, 0, it);
+                if(actionExpanded === dr) actionExpanded = di;
+                else if(dr < actionExpanded && di <= actionExpanded) actionExpanded--;
+                rekeyActionFiles();
+                renderAction();
+            }
+        });
+    });
+}
+
+var actionBlobFileMap = {}; // blobUrl -> File, kept in sync on pick/delete
+
+function pickImage(pi, ii){
+    var inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*';
+    inp.addEventListener('change', function(){
+        if(!inp.files.length) return;
+        var f = inp.files[0];
+        if(f.size > MAX_FILE_MB * 1024 * 1024){ toast('Image exceeds ' + MAX_FILE_MB + 'MB limit.','err'); return; }
+        var post = actionPosts[pi];
+        if(!Array.isArray(post.images)) post.images = [];
+        var isReplace = (ii !== null && ii !== undefined);
+        var slot = isReplace ? ii : post.images.length;
+        if(isReplace && post.images[slot] && post.images[slot].indexOf('blob:')===0){
+            URL.revokeObjectURL(post.images[slot]);
+            delete actionBlobFileMap[post.images[slot]];
+        }
+        var url = URL.createObjectURL(f);
+        actionBlobFileMap[url] = f;
+        post.images[slot] = url;
+        actionFiles[pi + '_' + slot] = f;
+        renderAction();
+    });
+    inp.click();
+}
+
+// Re-key actionFiles after posts/images are reordered or deleted, so file slots stay
+// aligned with their current array positions. Rebuilds from actionBlobFileMap (blobUrl->File)
+// by scanning actionPosts.images for blob: URLs still awaiting upload.
+function rekeyActionFiles(){
+    var nf = {};
+    for(var pi=0; pi<actionPosts.length; pi++){
+        var imgs = actionPosts[pi].images || [];
+        for(var ii=0; ii<imgs.length; ii++){
+            if(imgs[ii] && imgs[ii].indexOf('blob:')===0 && actionBlobFileMap[imgs[ii]]){
+                nf[pi + '_' + ii] = actionBlobFileMap[imgs[ii]];
+            }
+        }
+    }
+    actionFiles = nf;
+}
+
+
+// CSS
+var as = document.createElement('style');
+as.textContent =
+    '.action-post-card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);border-radius:10px;margin-bottom:10px;overflow:hidden}'+
+    '.action-post-card.action-drag-over{border-color:rgba(212,168,83,.4);box-shadow:0 0 0 2px rgba(212,168,83,.1)}'+
+    '.action-post-head{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;user-select:none}'+
+    '.action-post-head:hover{background:rgba(255,255,255,.02)}'+
+    '.action-drag-handle{color:rgba(255,255,255,.12);cursor:grab;flex-shrink:0;letter-spacing:-2px}'+
+    '.action-drag-handle:hover{color:rgba(255,255,255,.3)}'+
+    '.action-idx{width:26px;font-size:10px;color:rgba(255,255,255,.2);flex-shrink:0}'+
+    '.action-preview{flex:1;font-size:12px;color:rgba(255,255,255,.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'+
+    '.action-meta{font-size:10px;color:rgba(255,255,255,.2);flex-shrink:0}'+
+    '.action-caret{color:rgba(255,255,255,.25);font-size:10px;flex-shrink:0}'+
+    '.action-post-body{padding:6px 12px 14px;border-top:1px solid rgba(255,255,255,.04)}'+
+    '.action-row{display:flex;gap:8px;margin-bottom:8px}'+
+    '.action-field{display:flex;flex-direction:column;gap:3px}'+
+    '.action-field label{font-size:9px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.04em}'+
+    '.action-field input,.action-field textarea{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:#fff;padding:6px 8px;font-size:11px;font-family:inherit}'+
+    '.action-field input:focus,.action-field textarea:focus{outline:none;border-color:rgba(212,168,83,.4)}'+
+    '.act-avatar-preview{width:36px;height:36px;border-radius:50%;object-fit:cover;margin:-4px 0 10px;border:1px solid rgba(255,255,255,.08)}'+
+    '.action-imgs-label{font-size:9px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.04em;margin:6px 0}'+
+    '.action-imgs{display:flex;flex-wrap:wrap;gap:6px;align-items:flex-start}'+
+    '.action-img-slot{position:relative;width:64px;height:64px}'+
+    '.action-img-slot img{width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid rgba(255,255,255,.08)}'+
+    '.action-img-empty{display:flex;width:64px;height:64px;align-items:center;justify-content:center;font-size:9px;color:rgba(255,255,255,.15);background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.08);border-radius:6px}'+
+    '.action-img-repl,.action-img-del{position:absolute;top:-4px;width:16px;height:16px;border-radius:50%;border:1px solid;font-size:8px;cursor:pointer;padding:0;line-height:14px;text-align:center;background:#0a0a0a}'+
+    '.action-img-repl{right:14px;border-color:rgba(212,168,83,.4);color:#d4a853}'+
+    '.action-img-repl:hover{background:rgba(212,168,83,.2)}'+
+    '.action-img-del{right:-4px;border-color:rgba(239,68,68,.4);color:rgba(239,68,68,.7)}'+
+    '.action-img-del:hover{background:rgba(239,68,68,.2)}'+
+    '.action-img-add{background:none;border:1px dashed rgba(212,168,83,.3);border-radius:6px;color:#d4a853;font-size:11px;cursor:pointer;padding:0 14px;height:64px;font-family:inherit}'+
+    '.action-img-add:hover{background:rgba(212,168,83,.06)}'+
+    '.action-comments-label{font-size:9px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.04em;margin:10px 0 4px}'+
+    '.action-comments{background:rgba(255,255,255,.015);border-radius:6px;padding:6px 8px}'+
+    '.action-comment{display:flex;gap:6px;font-size:11px;padding:2px 0}'+
+    '.ac-user{color:#d4a853;flex-shrink:0}'+
+    '.ac-text{color:rgba(255,255,255,.55)}';
+document.head.appendChild(as);
 })();
 
 // ── Articles JS (heroGroups editor → Fresh page carousel) ─────

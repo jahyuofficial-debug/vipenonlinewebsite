@@ -96,7 +96,11 @@ BannerPage.initBgVideo();
     var loadSettings = loadJSON('data/manager/settings.json');
     var loadFresh = loadJSON('data/fresh.json');
     var loadDesign = loadJSON('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/design/index.json');
-    var loadAction = loadJSON('data/action.json');
+    // Action feed: load from R2 (managed via design-upload-v2 → /api/action/save).
+    // Falls back to data/action.json if R2 is unreachable or index.json not yet created.
+    var loadAction = loadJSON('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/action/index.json').then(function(d){
+        return (d && Array.isArray(d)) ? d : loadJSON('data/action.json');
+    });
     var loadBanner = loadJSON('home/index.json');
     var loadDisc = loadJSONWithTimeout('https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/disc/index.json', 5000);
 
