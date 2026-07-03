@@ -1652,22 +1652,19 @@ function renderAction(){
         h +=     '<span class="action-drag-handle" title="Drag to reorder">⋮⋮</span>';
         h +=     '<span class="action-idx">#' + (pi+1) + '</span>';
         h +=     '<span class="action-preview">' + esc(captionPreview || '(no caption)') + '</span>';
-        h +=     '<span class="action-meta">' + imgCount + ' imgs · ' + (p.likes||0) + ' likes</span>';
+        h +=     '<span class="action-meta">' + imgCount + ' imgs</span>';
         h +=     '<span class="action-caret">' + (open ? '▾' : '▸') + '</span>';
         h +=   '</div>';
         if(open){
             h += '<div class="action-post-body">';
-            // Author row
-            h += '<div class="action-row"><div class="action-field" style="flex:1"><label>Username</label><input class="act-username" value="' + esc(p.username||'') + '" data-pi="' + pi + '"></div>';
-            h += '<div class="action-field" style="flex:1.6"><label>Avatar URL</label><input class="act-avatar" value="' + esc(p.avatar||'') + '" data-pi="' + pi + '"></div></div>';
+            // Author row — avatar only (no username; posts are by the site owner, 朋友圈-style)
+            h += '<div class="action-row"><div class="action-field" style="flex:1"><label>Avatar URL</label><input class="act-avatar" value="' + esc(p.avatar||'') + '" data-pi="' + pi + '"></div></div>';
             if(p.avatar){ h += '<img class="act-avatar-preview" src="' + esc(p.avatar) + '" alt="">'; }
             // Caption
-            h += '<div class="action-row"><div class="action-field"><label>Caption</label><textarea class="act-caption" rows="2" data-pi="' + pi + '">' + esc(p.caption||'') + '</textarea></div></div>';
-            // Meta row
+            h += '<div class="action-row"><div class="action-field"><label>Caption</label><textarea class="act-caption" rows="3" data-pi="' + pi + '">' + esc(p.caption||'') + '</textarea></div></div>';
+            // Meta row — time only (likes/comments are user-driven on the main site, not editable here)
             h += '<div class="action-row">';
             h += '<div class="action-field" style="flex:.6"><label>Time ago</label><input class="act-timeago" value="' + esc(p.timeAgo||'') + '" data-pi="' + pi + '"></div>';
-            h += '<div class="action-field" style="flex:.4"><label>Likes</label><input type="number" class="act-likes" value="' + (p.likes||0) + '" data-pi="' + pi + '"></div>';
-            h += '<div class="action-field" style="flex:.4"><label>Comments</label><input type="number" class="act-comments" value="' + (p.comments||0) + '" data-pi="' + pi + '"></div>';
             h += '<div class="action-field" style="flex:.4"><label>ID</label><input value="' + (p.id!=null?p.id:'') + '" disabled></div>';
             h += '</div>';
             // Images
@@ -1714,15 +1711,12 @@ function bindActionRows(){
             renderAction();
         });
     });
-    // Field edits
-    document.querySelectorAll('.act-username').forEach(function(inp){ inp.addEventListener('change',function(){ actionPosts[+this.getAttribute('data-pi')].username = this.value; }); });
+    // Field edits (username/likes/comments intentionally not editable — 朋友圈-style)
     document.querySelectorAll('.act-avatar').forEach(function(inp){
         inp.addEventListener('change', function(){ actionPosts[+this.getAttribute('data-pi')].avatar = this.value; renderAction(); });
     });
     document.querySelectorAll('.act-caption').forEach(function(inp){ inp.addEventListener('change', function(){ actionPosts[+this.getAttribute('data-pi')].caption = this.value; }); });
     document.querySelectorAll('.act-timeago').forEach(function(inp){ inp.addEventListener('change', function(){ actionPosts[+this.getAttribute('data-pi')].timeAgo = this.value; }); });
-    document.querySelectorAll('.act-likes').forEach(function(inp){ inp.addEventListener('change', function(){ actionPosts[+this.getAttribute('data-pi')].likes = parseInt(this.value)||0; }); });
-    document.querySelectorAll('.act-comments').forEach(function(inp){ inp.addEventListener('change', function(){ actionPosts[+this.getAttribute('data-pi')].comments = parseInt(this.value)||0; }); });
 
     // Replace image
     document.querySelectorAll('.action-img-repl').forEach(function(btn){
