@@ -267,6 +267,44 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
 .grp-hot-empty{padding:8px 10px;background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.08);border-radius:6px;text-align:center}
 .grp-hot-empty button{background:transparent;border:none;color:rgba(255,255,255,.3);cursor:pointer;font-size:11px;padding:4px 8px;font-family:inherit;transition:color .2s}
 .grp-hot-empty button:hover{color:rgba(239,68,68,.6)}
+
+/* Article image upload */
+.bg-image-row{display:flex;gap:8px;align-items:stretch}
+.bg-image-row .field{flex:1;min-width:0}
+.upload-btn{background:rgba(212,168,83,.15);border:1px solid rgba(212,168,83,.4);color:#d4a853;padding:0 14px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.upload-btn:hover{background:rgba(212,168,83,.25)}
+.upload-btn:disabled{opacity:.5;cursor:wait}
+.bg-preview{margin-top:8px;border-radius:6px;overflow:hidden;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);max-height:180px;display:none}
+.bg-preview.has-img{display:block}
+.bg-preview img{width:100%;display:block;max-height:180px;object-fit:cover}
+
+/* Image picker overlay */
+.img-picker-overlay{position:fixed;inset:0;z-index:1100;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;padding:20px}
+.img-picker-overlay.show{display:flex}
+.img-picker{background:#0f0f17;border:1px solid rgba(255,255,255,.08);border-radius:12px;width:100%;max-width:480px;padding:20px}
+.img-picker-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.img-picker-header h3{font-size:15px;color:#fff;margin:0}
+.img-picker-header button{background:transparent;border:none;color:rgba(255,255,255,.5);font-size:18px;cursor:pointer;padding:0 4px}
+.img-picker-header button:hover{color:#fff}
+.img-picker-tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,.06)}
+.img-tab-btn{background:transparent;border:none;color:rgba(255,255,255,.4);padding:8px 14px;cursor:pointer;font-size:12px;font-family:inherit;border-bottom:2px solid transparent;transition:all .2s}
+.img-tab-btn:hover{color:#fff}
+.img-tab-btn.active{color:#d4a853;border-bottom-color:#d4a853}
+.img-picker-body{margin-bottom:14px}
+.upload-dropzone{border:2px dashed rgba(255,255,255,.15);border-radius:8px;padding:30px 16px;text-align:center;color:rgba(255,255,255,.35);font-size:12px;cursor:pointer;transition:all .2s}
+.upload-dropzone:hover,.upload-dropzone.dragover{border-color:#d4a853;color:#d4a853;background:rgba(212,168,83,.04)}
+.upload-dropzone .upload-progress{font-size:11px;color:#d4a853;margin-top:8px}
+.img-picker-url{display:flex;gap:8px}
+.img-picker-url input{flex:1;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);color:#fff;padding:8px 10px;border-radius:6px;font-size:12px;font-family:inherit;outline:none}
+.img-picker-url input:focus{border-color:#d4a853}
+.img-picker-preview{margin-bottom:14px;border-radius:6px;overflow:hidden;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);min-height:60px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.2);font-size:11px}
+.img-picker-preview img{width:100%;display:block;max-height:200px;object-fit:contain}
+.img-picker-footer{display:flex;justify-content:flex-end;gap:8px}
+.img-picker-footer button{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;padding:8px 18px;border-radius:6px;cursor:pointer;font-size:12px;font-family:inherit;transition:all .2s}
+.img-picker-footer button:hover{background:rgba(255,255,255,.1)}
+.img-picker-footer button.btn-insert{background:#d4a853;color:#000;border-color:#d4a853;font-weight:600}
+.img-picker-footer button.btn-insert:disabled{opacity:.4;cursor:not-allowed}
+.img-picker-footer button.btn-insert:not(:disabled):hover{background:#e0b960}
 </style>
 </head>
 <body>
@@ -1755,8 +1793,13 @@ function openHeadlineEditor(gi){
         '<div><label class="rte-label">Author</label><input class="field" id="artAuthor" value="' + esc(a.author) + '"></div>' +
         '</div>' +
         '<div class="rte-full-row">' +
-        '<label class="rte-label">Background Image URL (large carousel background)</label>' +
-        '<input class="field" id="artBgImage" value="' + esc(a.bgImage) + '" placeholder="https://images.unsplash.com/...">' +
+        '<label class="rte-label">Background Image</label>' +
+        '<div class="bg-image-row">' +
+        '<input class="field" id="artBgImage" value="' + esc(a.bgImage) + '" placeholder="Paste URL or upload to R2">' +
+        '<button type="button" id="artBgUploadBtn" class="upload-btn">📤 Upload</button>' +
+        '<input type="file" id="artBgFileInput" accept="image/*" hidden>' +
+        '</div>' +
+        '<div class="bg-preview' + (a.bgImage ? ' has-img' : '') + '" id="artBgPreview">' + (a.bgImage ? '<img src="' + esc(a.bgImage) + '">' : '') + '</div>' +
         '</div>' +
         '<div class="rte-full-row">' +
         '<label class="rte-label">Body Content (ZH)</label>' +
@@ -1775,6 +1818,7 @@ function openHeadlineEditor(gi){
     setTimeout(function(){ overlay.classList.add('show'); }, 10);
 
     bindToolbars(overlay);
+    bindBgImageUploader(overlay, editingCtx.groupIdx);
     overlay.querySelector('#artEditorCancel').addEventListener('click', closeEditor);
     overlay.addEventListener('click', function(e){ if (e.target === overlay) closeEditor(); });
     overlay.querySelector('#artEditorSave').addEventListener('click', function(){
@@ -1881,6 +1925,216 @@ function closeEditor(){
     editingCtx = null;
 }
 
+function uploadArticleImage(groupIdx, type, file, onProgress, onDone){
+    var fd = new FormData();
+    fd.append('groupIdx', String(groupIdx));
+    fd.append('type', type);
+    fd.append('file', file);
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/articles/upload');
+    xhr.upload.onprogress = function(e){
+        if (e.lengthComputable && onProgress) onProgress(e.loaded / e.total);
+    };
+    xhr.onload = function(){
+        try {
+            var res = JSON.parse(xhr.responseText);
+            if (res.success) onDone(null, res.url, res.deletedOld || 0);
+            else onDone(res.error || 'Upload failed');
+        } catch(e) { onDone('Bad response from server'); }
+    };
+    xhr.onerror = function(){ onDone('Network error'); };
+    xhr.send(fd);
+}
+
+function deleteImageByUrl(url, onDone){
+    fetch('/api/articles/delete-image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: url })
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(res){ if (onDone) onDone(res.success ? null : (res.error || 'Delete failed'), res); })
+    .catch(function(err){ if (onDone) onDone(err.message); });
+}
+
+function bindBgImageUploader(overlay, groupIdx){
+    var btn = overlay.querySelector('#artBgUploadBtn');
+    var fileInput = overlay.querySelector('#artBgFileInput');
+    var urlInput = overlay.querySelector('#artBgImage');
+    var preview = overlay.querySelector('#artBgPreview');
+    if (!btn || !fileInput) return;
+
+    btn.addEventListener('click', function(){ fileInput.click(); });
+
+    fileInput.addEventListener('change', function(){
+        if (!fileInput.files.length) return;
+        var file = fileInput.files[0];
+        var sizeMB = file.size / 1024 / 1024;
+        if (sizeMB > 95) {
+            toast('Image too large (' + Math.round(sizeMB) + 'MB). Limit 95MB.', 'err');
+            return;
+        }
+        var origText = btn.textContent;
+        btn.disabled = true; btn.textContent = 'Uploading...';
+        uploadArticleImage(groupIdx, 'bg', file, null, function(err, url, deletedOld){
+            btn.disabled = false; btn.textContent = origText;
+            if (err) { toast('Upload failed: ' + err, 'err'); return; }
+            urlInput.value = url;
+            preview.innerHTML = '<img src="' + esc(url) + '">';
+            preview.classList.add('has-img');
+            if (deletedOld > 0) toast('✓ Uploaded (old bg replaced in R2)');
+            else toast('✓ Uploaded to R2');
+        });
+    });
+
+    urlInput.addEventListener('input', function(){
+        var v = urlInput.value.trim();
+        if (v) {
+            preview.innerHTML = '<img src="' + esc(v) + '">';
+            preview.classList.add('has-img');
+        } else {
+            preview.innerHTML = '';
+            preview.classList.remove('has-img');
+        }
+    });
+}
+
+function openImagePicker(groupIdx, editorId){
+    var savedEditor = document.getElementById(editorId);
+    if (!savedEditor) return;
+
+    var picker = document.createElement('div');
+    picker.className = 'img-picker-overlay';
+    picker.id = 'imgPickerOverlay';
+
+    picker.innerHTML =
+        '<div class="img-picker">' +
+        '<div class="img-picker-header">' +
+        '<h3>🖼 Insert Image</h3>' +
+        '<button id="imgPickerClose">✕</button>' +
+        '</div>' +
+        '<div class="img-picker-tabs">' +
+        '<button class="img-tab-btn active" data-mode="upload">📤 Upload to R2</button>' +
+        '<button class="img-tab-btn" data-mode="url">🔗 External URL</button>' +
+        '</div>' +
+        '<div class="img-picker-body">' +
+        '<div class="img-picker-upload" id="imgPickerUpload">' +
+        '<div class="upload-dropzone" id="imgDropzone">' +
+        '<div>Click or drop image here</div>' +
+        '<div class="upload-progress" id="imgUploadProgress"></div>' +
+        '</div>' +
+        '<input type="file" id="imgFileInput" accept="image/*" hidden>' +
+        '</div>' +
+        '<div class="img-picker-url" id="imgPickerUrl" style="display:none">' +
+        '<input type="text" id="imgUrlInput" placeholder="https://...">' +
+        '</div>' +
+        '</div>' +
+        '<div class="img-picker-preview" id="imgPickerPreview">No image selected</div>' +
+        '<div class="img-picker-footer">' +
+        '<button id="imgPickerCancel">Cancel</button>' +
+        '<button id="imgPickerInsert" class="btn-insert" disabled>Insert</button>' +
+        '</div>' +
+        '</div>';
+
+    document.body.appendChild(picker);
+    setTimeout(function(){ picker.classList.add('show'); }, 10);
+
+    var currentMode = 'upload';
+    var pendingUrl = '';
+
+    var dropzone = picker.querySelector('#imgDropzone');
+    var fileInput = picker.querySelector('#imgFileInput');
+    var urlInput = picker.querySelector('#imgUrlInput');
+    var preview = picker.querySelector('#imgPickerPreview');
+    var progress = picker.querySelector('#imgUploadProgress');
+    var insertBtn = picker.querySelector('#imgPickerInsert');
+
+    function setPreview(url){
+        pendingUrl = url;
+        if (url) {
+            preview.innerHTML = '<img src="' + esc(url) + '">';
+            insertBtn.disabled = false;
+        } else {
+            preview.innerHTML = 'No image selected';
+            insertBtn.disabled = true;
+        }
+    }
+
+    function closePicker(){
+        picker.classList.remove('show');
+        setTimeout(function(){ if (picker.parentNode) picker.remove(); }, 200);
+    }
+
+    picker.querySelector('#imgPickerClose').addEventListener('click', closePicker);
+    picker.querySelector('#imgPickerCancel').addEventListener('click', closePicker);
+    picker.addEventListener('click', function(e){ if (e.target === picker) closePicker(); });
+
+    picker.querySelectorAll('.img-tab-btn').forEach(function(tabBtn){
+        tabBtn.addEventListener('click', function(){
+            var mode = this.getAttribute('data-mode');
+            currentMode = mode;
+            picker.querySelectorAll('.img-tab-btn').forEach(function(b){ b.classList.remove('active'); });
+            this.classList.add('active');
+            if (mode === 'upload') {
+                picker.querySelector('#imgPickerUpload').style.display = '';
+                picker.querySelector('#imgPickerUrl').style.display = 'none';
+            } else {
+                picker.querySelector('#imgPickerUpload').style.display = 'none';
+                picker.querySelector('#imgPickerUrl').style.display = '';
+                setPreview(urlInput.value.trim());
+            }
+        });
+    });
+
+    dropzone.addEventListener('click', function(){ fileInput.click(); });
+
+    dropzone.addEventListener('dragover', function(e){ e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragleave', function(){ dropzone.classList.remove('dragover'); });
+    dropzone.addEventListener('drop', function(e){
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+
+    fileInput.addEventListener('change', function(){
+        if (fileInput.files.length) handleFile(fileInput.files[0]);
+    });
+
+    function handleFile(file){
+        var sizeMB = file.size / 1024 / 1024;
+        if (sizeMB > 95) {
+            toast('Image too large (' + Math.round(sizeMB) + 'MB). Limit 95MB.', 'err');
+            return;
+        }
+        progress.textContent = 'Uploading...';
+        dropzone.querySelector('div:first-child').textContent = file.name;
+        uploadArticleImage(groupIdx, 'inline', file, function(p){
+            progress.textContent = 'Uploading... ' + Math.round(p * 100) + '%';
+        }, function(err, url){
+            if (err) {
+                progress.textContent = '❌ ' + err;
+                toast('Upload failed: ' + err, 'err');
+                return;
+            }
+            progress.textContent = '✓ Uploaded';
+            setPreview(url);
+        });
+    }
+
+    urlInput.addEventListener('input', function(){
+        var v = urlInput.value.trim();
+        if (currentMode === 'url') setPreview(v);
+    });
+
+    insertBtn.addEventListener('click', function(){
+        if (!pendingUrl) return;
+        savedEditor.focus();
+        document.execCommand('insertImage', false, pendingUrl);
+        closePicker();
+        toast('✓ Image inserted');
+    });
+}
+
 function bindToolbars(overlay){
     var toolbars = overlay.querySelectorAll('.rte-toolbar');
     toolbars.forEach(function(tb){
@@ -1924,26 +2178,8 @@ function bindRteToolbar(toolbar, editorId){
                 if (!url) return;
                 document.execCommand('createLink', false, url);
             } else if (cmd === 'insertImage') {
-                var choice = confirm('OK = paste image URL (recommended)\nCancel = upload from computer (large images bloat storage)');
-                if (choice) {
-                    var imgUrl = prompt('Image URL:', 'https://');
-                    if (!imgUrl) return;
-                    document.execCommand('insertImage', false, imgUrl);
-                } else {
-                    var inp = document.createElement('input');
-                    inp.type = 'file';
-                    inp.accept = 'image/*';
-                    inp.addEventListener('change', function(){
-                        if (!inp.files.length) return;
-                        var f = inp.files[0];
-                        var sizeKB = Math.round(f.size / 1024);
-                        if (sizeKB > 500) toast('Image is ' + sizeKB + 'KB — large base64 may bloat storage. Prefer external URL.', 'err');
-                        var reader = new FileReader();
-                        reader.onload = function(ev){ document.execCommand('insertImage', false, ev.target.result); };
-                        reader.readAsDataURL(f);
-                    });
-                    inp.click();
-                }
+                var groupIdx = editingCtx ? editingCtx.groupIdx : 0;
+                openImagePicker(groupIdx, editorId);
             } else if (value) {
                 document.execCommand(cmd, false, value);
             } else {
