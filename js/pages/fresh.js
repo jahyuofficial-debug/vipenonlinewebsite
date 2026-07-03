@@ -50,10 +50,19 @@ function buildFreshHeroCarousel() {
     var slides = heroGroups.map(function(group, i) {
         var h = group.headline || {};
         var hotNews = group.hotNews || [];
-        var hotNewsHtml = hotNews.map(function(n, idx) {
-            return '<div class="fresh-hero-news-item" data-group-idx="' + i + '" data-news-idx="' + idx + '">' +
-                '<span class="fresh-hero-news-text">' + (n.title || '') + '</span>' +
-                '<span class="fresh-hero-news-date">' + (n.date || '') + '</span>' +
+        // Always render 3 slots; empty slots get placeholder
+        var slots = [0, 1, 2];
+        var hotNewsHtml = slots.map(function(slotIdx) {
+            var n = hotNews[slotIdx];
+            if (n && n.title) {
+                return '<div class="fresh-hero-news-item" data-group-idx="' + i + '" data-news-idx="' + slotIdx + '">' +
+                    '<span class="fresh-hero-news-num">' + (slotIdx + 1) + '</span>' +
+                    '<span class="fresh-hero-news-text">' + (n.title || '') + '</span>' +
+                    '</div>';
+            }
+            return '<div class="fresh-hero-news-item fresh-hero-news-empty">' +
+                '<span class="fresh-hero-news-num">' + (slotIdx + 1) + '</span>' +
+                '<span class="fresh-hero-news-text">—</span>' +
                 '</div>';
         }).join('');
 
@@ -64,9 +73,7 @@ function buildFreshHeroCarousel() {
             '<h2 class="fresh-hero-main-title">' + (h.title || '') + '</h2>' +
             '<p class="fresh-hero-sub-title">' + (h.summary || '') + '</p>' +
             '</div>' +
-            '<div class="fresh-hero-panel">' +
-            '<div class="fresh-hero-news">' + hotNewsHtml + '</div>' +
-            '</div>' +
+            '<div class="fresh-hero-news-bar">' + hotNewsHtml + '</div>' +
             '</div>';
     }).join('');
 
