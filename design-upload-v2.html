@@ -1370,7 +1370,7 @@ function renderDisc(){
     document.getElementById('discCount').textContent=discTracks.length+' tracks';
     var h='';
     discTracks.forEach(function(t,i){
-        var audioName=t.audio?decodeURIComponent(t.audio.split('/').pop()||''):'';
+        var audioName=t.audio?((t.audio.indexOf('blob:')===0)?'(new audio)':decodeURIComponent(t.audio.split('/').pop()||'')):'';
         var coverName=t.coverUrl?decodeURIComponent(t.coverUrl.split('/').pop()||''):'';
         h+='<div class="disc-track-row" draggable="true" data-ti="'+i+'">'+
             '<span class="disc-drag-handle" title="Drag to reorder">⋮⋮</span>'+
@@ -1419,7 +1419,15 @@ function bindDiscRows(){
                     }
                     discTracks[ti].coverUrl=URL.createObjectURL(f);
                 }else{
-                    discTracks[ti].audio=f.name;
+                    // Use a blob: URL — consistent with cover above.
+                    // cleanTracks (save handler) + /api/disc/save both strip blob: URLs, then back-fill
+                    // the full R2 https URL once the file is uploaded. NEVER store a bare filename here:
+                    // it is not a blob: URL so it survives the strip, then becomes a dead pseudo-URL
+                    // (e.g. "STATU_AWAY.mp3") that the main-site player tries to load and 404s on.
+                    if(discTracks[ti].audio && discTracks[ti].audio.indexOf('blob:')===0){
+                        URL.revokeObjectURL(discTracks[ti].audio);
+                    }
+                    discTracks[ti].audio=URL.createObjectURL(f);
                 }
                 renderDisc();
             });

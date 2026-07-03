@@ -29,10 +29,14 @@ export async function onRequest(context) {
     if (!jsonStr) return json({ success: false, error: 'Missing json field' }, 400);
 
     const tracks = JSON.parse(jsonStr);
-    // Strip any blob URLs (only valid on upload page, not on main site)
+    // Keep ONLY real http(s) URLs in audio/coverUrl. This strips blob: URLs (valid only on
+    // the upload page) AND any bare filenames left over from older buggy uploads — both
+    // would otherwise become dead pseudo-URLs in disc/index.json that the main-site player
+    // tries to load and 404s on. Files uploaded via img_<idx>_<field> below will back-fill
+    // the correct https URL afterwards.
     tracks.forEach(function(t) {
-        if (t.coverUrl && /^blob:/.test(t.coverUrl)) t.coverUrl = '';
-        if (t.audio && /^blob:/.test(t.audio)) t.audio = '';
+        if (t.coverUrl && !/^https?:\/\//.test(t.coverUrl)) t.coverUrl = '';
+        if (t.audio && !/^https?:\/\//.test(t.audio)) t.audio = '';
     });
     const r2Base = 'https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev';
 
