@@ -1529,14 +1529,6 @@ navigateTo = function(pageName) {
 window.addEventListener('hashchange', handleRoute);
 handleRoute();
 
-// Active in-site refresh: a true reload of the site (re-pulls all data, re-inits)
-var siteRefreshBtn = document.getElementById('siteRefreshBtn');
-if (siteRefreshBtn) {
-    siteRefreshBtn.addEventListener('click', function() {
-        window.location.reload();
-    });
-}
-
 // Clicking the nav link for the page you're already on = active refresh (true reload)
 document.addEventListener('click', function(e) {
     var a = e.target && e.target.closest ? e.target.closest('a[href^="#/"]') : null;

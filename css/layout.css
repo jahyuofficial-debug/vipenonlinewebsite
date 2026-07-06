@@ -21,9 +21,6 @@ header .headerActions .authBtn.signin{background:transparent;border:1px solid rg
 header .headerActions .authBtn.signin:hover{border-color:rgba(212,168,83,.7);color:#d4a853;box-shadow:0 0 .12rem rgba(212,168,83,.2)}
 header .headerActions .authBtn.signup{background:linear-gradient(135deg,#d4a853,#b8923f);border:1px solid #d4a853;color:#000;box-shadow:0 0 .08rem rgba(212,168,83,.15)}
 header .headerActions .authBtn.signup:hover{background:linear-gradient(135deg,#e8c97a,#d4a853);box-shadow:0 0 .2rem rgba(212,168,83,.3);transform:translateY(-.01rem)}
-header .headerActions .authBtn.refresh-btn{background:transparent;border:1px solid rgba(212,168,83,.3);color:rgba(212,168,83,.7);padding:.06rem}
-header .headerActions .authBtn.refresh-btn:hover{border-color:rgba(212,168,83,.7);color:#d4a853;box-shadow:0 0 .12rem rgba(212,168,83,.2);transform:rotate(90deg)}
-header .headerActions .authBtn.refresh-btn svg{width:.18rem;height:.18rem}
 header .headerActions .profile-link{background:transparent;border:none;color:rgba(255,255,255,.65);padding:.04rem;transition:color .35s}
 header .headerActions .profile-link:hover{color:#fff}
 header .headerActions .profile-link svg{width:.22rem;height:.22rem}
