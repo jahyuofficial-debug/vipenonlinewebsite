@@ -184,6 +184,7 @@ function buildDiscPage() {
 
     return '<section id="page-disc-library" class="disc-page">' +
         '<div class="disc-bg" id="discBg" style="background-image:url(' + coverUrl + ')"></div>' +
+        '<div class="disc-bg-lines-wrap" id="discBgLinesWrap"></div>' +
         '<div class="disc-bg-overlay"></div>' +
         '<div class="disc-content">' +
 

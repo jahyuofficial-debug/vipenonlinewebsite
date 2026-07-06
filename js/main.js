@@ -837,6 +837,12 @@ function navigateTo(pageName) {
                 DiscPage.syncPlayPauseUI();
             }
             MiniPlayer.updateState(currentPage, DiscPage.getDiscIsPlaying(), discVisited);
+            // Initialize abstract flowing lines background
+            var bgWrap = document.getElementById('discBgLinesWrap');
+            if (bgWrap && typeof DiscBgLines !== 'undefined') {
+                DiscBgLines.init(bgWrap);
+                DiscBgLines.start();
+            }
         }, 100);
         discVisited = true;
         currentPage = 'disc-library';
@@ -1477,7 +1483,10 @@ window.addEventListener('touchend', function() {
 var originalNavigateTo = navigateTo;
 navigateTo = function(pageName) {
     var wasDiscPage = currentPage === 'disc-library';
-    if (wasDiscPage) DiscPage.cleanup();
+    if (wasDiscPage) {
+        DiscPage.cleanup();
+        if (typeof DiscBgLines !== 'undefined') DiscBgLines.destroy();
+    }
     NotificationCenter.hide();
     // If user navigates elsewhere after disc was blocked, cancel auto-redirect
     if (pageName !== 'disc-library') {}
