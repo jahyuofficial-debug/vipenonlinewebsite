@@ -1,6 +1,6 @@
 /* WeChat Moments-style Action Feed — Dark Theme */
 
-.action-page{background:#000;min-height:100vh;padding-top:1.2rem;padding-bottom:2rem}
+.action-page{background:#000;min-height:100vh;padding-top:1.6rem;padding-bottom:2rem}
 .action-feed-container{max-width:6.8rem;margin:0 auto;padding:0 .4rem;zoom:.78}
 .action-feed-list{display:flex;flex-direction:column;gap:0}
 

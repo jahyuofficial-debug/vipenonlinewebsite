@@ -1,8 +1,5 @@
 .disc-page{min-height:100vh;min-height:100dvh;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif}
 
-.disc-bg-lines-wrap{position:absolute;inset:0;z-index:0;pointer-events:auto;overflow:hidden}
-.disc-bg-lines-wrap canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:auto}
-
 .disc-bg{position:absolute;inset:0;background-size:cover;background-position:center;transform:scale(1.15);filter:blur(60px) brightness(0.55);z-index:0;transition:background-image .6s ease;will-change:filter}
 .disc-bg-overlay{position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(0,0,0,.2) 0%,rgba(0,0,0,.55) 100%);z-index:1;pointer-events:none}
 
