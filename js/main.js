@@ -18,37 +18,27 @@ Cursor.init('cursor');
     }, { passive: true });
 })();
 
-// ── Real loading: track video buffer + JSON fetch + disc preload ─────
+// ── Real loading: track video buffer + JSON fetch (disc covers lazy-load on demand) ─────
 Loading.addTask('data', 15);   // JSON fetches
-Loading.addTask('video', 40);  // banner video buffer
-Loading.addTask('disc', 45);   // disc tracks & covers
+Loading.addTask('video', 40);  // banner video buffer (reveals on first frame, non-blocking)
+// Disc covers are lazy-loaded when the Disc page opens — no longer gate the initial load
 
 Loading.init(function() {
     // Banner text rotation will start after data loads
 });
 
-// ── Video preloading ─────
+// ── Video preload (non-blocking): reveal on first frame, stream buffers in background ─────
 (function preloadVideo() {
     var v = document.getElementById('bgVideo');
     if (!v) return Loading.markDone('video');
-    v.preload = 'auto';
-    // Track buffer progress
-    function checkBuffered() {
-        if (v.buffered && v.buffered.length > 0) {
-            var end = v.buffered.end(v.buffered.length - 1);
-            var dur = v.duration || 1;
-            var pct = Math.min(100, Math.round(end / dur * 100));
-            Loading.updateTask('video', pct);
-            if (pct >= 100) { Loading.markDone('video'); return; }
-        }
-        if (v.readyState >= 4) { Loading.markDone('video'); return; }
-        requestAnimationFrame(checkBuffered);
-    }
-    v.addEventListener('canplaythrough', function() { Loading.markDone('video'); }, { once: true });
-    v.addEventListener('loadeddata', function() { checkBuffered(); }, { once: true });
+    // Only fetch metadata up front; the rest streams via HTTP Range requests while the page is shown
+    v.preload = 'metadata';
+    // Reveal as soon as the first frame is buffered — do NOT wait for canplaythrough (which forces a near-full download)
+    v.addEventListener('loadeddata', function() { Loading.markDone('video'); }, { once: true });
+    v.addEventListener('canplay', function() { Loading.markDone('video'); }, { once: true });
     v.addEventListener('error', function() { Loading.markDone('video'); }, { once: true });
-    // Fallback: if nothing happens after 8s, mark as done
-    setTimeout(function() { Loading.markDone('video'); }, 5000);
+    // Safety net: never let video block the loading screen beyond 1.5s
+    setTimeout(function() { Loading.markDone('video'); }, 1500);
     v.load();
 })();
 
@@ -134,25 +124,9 @@ BannerPage.initBgVideo();
                 playMode: 'sequence',
                 currentTapeIndex: 0
             };
-            if (typeof DiscPage !== 'undefined' && DiscPage.startPreload) DiscPage.startPreload();
+            // Disc covers are lazy-loaded when the Disc page opens (no preload at site load)
 
-            // Bridge disc preload progress → loading bar
-            (function bridgeDiscProgress() {
-                if (typeof DiscPage === 'undefined' || !DiscPage.getPreloadProgress) { Loading.markDone('disc'); return; }
-                var started = Date.now();
-                var iv = setInterval(function() {
-                    var prog = DiscPage.getPreloadProgress();
-                    if (!prog || prog.total === 0) {
-                        // If disc data hasn't arrived after 8s, mark done
-                        if (Date.now() - started > 8000) { Loading.markDone('disc'); clearInterval(iv); }
-                        return;
-                    }
-                    var pct = Math.round(prog.loaded / prog.total * 100);
-                    Loading.updateTask('disc', pct);
-                    Loading.setDiscProgress(prog.loaded, prog.total);
-                    if (prog.done) { Loading.markDone('disc'); clearInterval(iv); }
-                }, 200);
-            })();
+
         }
 
         applySiteSettings(settings);
@@ -291,23 +265,9 @@ BannerPage.initBgVideo();
                     }),
                     playMode: 'sequence', currentTapeIndex: 0
                 };
-                if (typeof DiscPage !== 'undefined' && DiscPage.startPreload) DiscPage.startPreload();
-                // Bridge disc preload → loading bar
-                (function() {
-                    if (typeof DiscPage === 'undefined' || !DiscPage.getPreloadProgress) { Loading.markDone('disc'); return; }
-                    var started2 = Date.now();
-                    var iv = setInterval(function() {
-                        var prog = DiscPage.getPreloadProgress();
-                        if (!prog || prog.total === 0) {
-                            if (Date.now() - started2 > 8000) { Loading.markDone('disc'); clearInterval(iv); }
-                            return;
-                        }
-                        var pct = Math.round(prog.loaded / prog.total * 100);
-                        Loading.updateTask('disc', pct);
-                        Loading.setDiscProgress(prog.loaded, prog.total);
-                        if (prog.done) { Loading.markDone('disc'); clearInterval(iv); }
-                    }, 200);
-                })();
+                // Disc covers are lazy-loaded when the Disc page opens (no preload at site load)
+
+
             }
             if (designData && Array.isArray(designData)) {
                 dwItems = designData.map(function(item) {
