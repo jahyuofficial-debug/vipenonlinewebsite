@@ -464,6 +464,21 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
       <button id="actionSaveBtn" class="btn-gold">Save Changes</button>
       <span style="font-size:10px;color:rgba(255,255,255,.2);display:flex;align-items:center;margin-left:4px" id="actionCount"></span>
     </div>
+
+    <!-- Character management bar -->
+    <div class="action-char-bar">
+      <div class="action-char-bar-left">
+        <span class="action-char-bar-label">角色</span>
+        <select id="actionCharSelect" class="action-char-select"></select>
+      </div>
+      <div class="action-char-bar-right">
+        <button id="actionCharNew" class="btn-gold" type="button">+ 新建</button>
+        <button id="actionCharEdit" class="btn-gold" type="button">编辑</button>
+        <button id="actionCharDel" class="btn-gold btn-danger" type="button">删除</button>
+      </div>
+    </div>
+    <div id="actionCharList" class="action-char-list"></div>
+
     <div id="actionPosts"></div>
     <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,.06)">
       <button id="actionAddPost" class="btn-gold" style="width:auto;padding:10px 20px">+ Add Post</button>
@@ -472,6 +487,33 @@ h1{font-size:26px;font-weight:700;letter-spacing:.02em;margin-bottom:4px}
       <strong>How it works:</strong> Each post = 1 author + caption + 1~N images (+ optional comments). Images upload to R2 at <code>action/post-&lt;id&gt;/</code>, post data saves to <code>action/index.json</code> (shared bucket with design/articles). Main site loads it and renders the Action feed. Existing comments are preserved; reorder posts by drag.
     </div>
   </div><!-- /tab-action -->
+
+  <!-- Character edit modal -->
+  <div id="actionCharModal" class="action-char-modal">
+    <div class="action-char-modal-box">
+      <h3 id="actionCharModalTitle">新建角色</h3>
+      <div class="action-char-form">
+        <div class="action-char-form-row">
+          <label>角色名称</label>
+          <input id="actionCharName" type="text" placeholder="输入角色名称" autocomplete="off">
+        </div>
+        <div class="action-char-form-row">
+          <label>头像</label>
+          <div class="action-char-avatar-row">
+            <div id="actionCharAvatarBox" class="action-avatar-box empty">
+              <span class="action-avatar-placeholder">no avatar</span>
+            </div>
+            <button id="actionCharAvatarPick" class="btn-gold" type="button">选择头像</button>
+            <button id="actionCharAvatarClear" class="btn-gold btn-danger" type="button" style="display:none">清除</button>
+          </div>
+        </div>
+      </div>
+      <div class="action-char-modal-actions">
+        <button id="actionCharSave" class="btn-gold">保存</button>
+        <button id="actionCharCancel" class="btn-gold">取消</button>
+      </div>
+    </div>
+  </div>
 
 </div><!-- /wrap -->
 <div class="status-toast" id="statusToast"></div>
@@ -1543,6 +1585,186 @@ function toast(msg,t){
     setTimeout(function(){s.classList.remove('show');},3000);
 }
 
+// ── Character (publisher) presets ──────────────────────────
+// Stored in localStorage as [{ id, name, avatar(dataURL) }].
+// When applied to a post, dataURL is converted to a File → blob URL,
+// so it flows through the existing pickAvatar / save.js upload path.
+var actionCharacters = [];
+var actionCharEditingId = null;
+var actionCharTempAvatar = null;   // dataURL or https URL
+
+function loadCharacters(){
+    try { actionCharacters = JSON.parse(localStorage.getItem('action_characters') || '[]'); }
+    catch(e) { actionCharacters = []; }
+}
+function persistCharacters(){
+    try { localStorage.setItem('action_characters', JSON.stringify(actionCharacters)); } catch(e) {}
+}
+
+function dataURLtoFile(dataURL, filename){
+    var arr = dataURL.split(',');
+    var mime = arr[0].match(/:(.*?);/)[1];
+    var bstr = atob(arr[1]);
+    var n = bstr.length;
+    var u8arr = new Uint8Array(n);
+    while(n--) u8arr[n] = bstr.charCodeAt(n);
+    return new File([u8arr], filename, { type: mime });
+}
+
+function renderCharSelect(){
+    var sel = document.getElementById('actionCharSelect');
+    var cur = sel.value;
+    var h = '<option value="">— 选择角色 —</option>';
+    actionCharacters.forEach(function(c){
+        h += '<option value="' + c.id + '">' + esc(c.name) + '</option>';
+    });
+    sel.innerHTML = h;
+    if(cur) sel.value = cur;
+
+    // Also render the thumbnail list
+    var list = document.getElementById('actionCharList');
+    h = '';
+    actionCharacters.forEach(function(c){
+        h += '<div class="action-char-item" data-id="' + c.id + '" title="' + esc(c.name) + '">';
+        h += '<img src="' + esc(c.avatar) + '" alt="" class="action-char-item-avatar">';
+        h += '<span class="action-char-item-name">' + esc(c.name) + '</span>';
+        h += '</div>';
+    });
+    list.innerHTML = h;
+    list.style.display = actionCharacters.length ? 'flex' : 'none';
+}
+
+function updateCharAvatarPreview(){
+    var box = document.getElementById('actionCharAvatarBox');
+    var clearBtn = document.getElementById('actionCharAvatarClear');
+    if(actionCharTempAvatar){
+        box.innerHTML = '<img src="' + esc(actionCharTempAvatar) + '" alt="">';
+        box.classList.remove('empty');
+        clearBtn.style.display = '';
+    } else {
+        box.innerHTML = '<span class="action-avatar-placeholder">no avatar</span>';
+        box.classList.add('empty');
+        clearBtn.style.display = 'none';
+    }
+}
+
+function openCharModal(charId){
+    actionCharEditingId = charId || null;
+    var c = charId ? actionCharacters.find(function(c){ return String(c.id) === String(charId); }) : null;
+    document.getElementById('actionCharModalTitle').textContent = c ? '编辑角色' : '新建角色';
+    document.getElementById('actionCharName').value = c ? c.name : '';
+    actionCharTempAvatar = c ? c.avatar : null;
+    updateCharAvatarPreview();
+    document.getElementById('actionCharModal').classList.add('show');
+}
+
+function closeCharModal(){
+    document.getElementById('actionCharModal').classList.remove('show');
+    actionCharEditingId = null;
+    actionCharTempAvatar = null;
+    document.getElementById('actionCharName').value = '';
+}
+
+function saveCharacter(){
+    var name = document.getElementById('actionCharName').value.trim();
+    if(!name){ toast('请输入角色名称','err'); return; }
+    if(!actionCharTempAvatar){ toast('请选择头像','err'); return; }
+    if(actionCharEditingId){
+        var c = actionCharacters.find(function(c){ return String(c.id) === String(actionCharEditingId); });
+        if(c){ c.name = name; c.avatar = actionCharTempAvatar; }
+    } else {
+        var maxId = 0;
+        actionCharacters.forEach(function(c){ if(c.id > maxId) maxId = c.id; });
+        actionCharacters.push({ id: maxId + 1, name: name, avatar: actionCharTempAvatar });
+    }
+    persistCharacters();
+    renderCharSelect();
+    closeCharModal();
+    toast('角色已保存');
+}
+
+function deleteCharacter(){
+    var sel = document.getElementById('actionCharSelect');
+    var charId = sel.value;
+    if(!charId){ toast('请先选择要删除的角色','err'); return; }
+    var c = actionCharacters.find(function(c){ return String(c.id) === String(charId); });
+    if(!c) return;
+    if(!confirm('确定删除角色「' + c.name + '」？\n已发布的帖子不受影响。')) return;
+    actionCharacters = actionCharacters.filter(function(c){ return String(c.id) !== String(charId); });
+    persistCharacters();
+    renderCharSelect();
+    toast('角色已删除');
+}
+
+// Apply a character to post[pi]: set username + avatar (convert dataURL → File → blob URL)
+function applyCharacterToPost(pi, charId){
+    var c = actionCharacters.find(function(c){ return String(c.id) === String(charId); });
+    if(!c){ toast('角色未找到','err'); return; }
+    var post = actionPosts[pi];
+    // Revoke old blob avatar
+    if(post.avatar && post.avatar.indexOf('blob:')===0){
+        URL.revokeObjectURL(post.avatar);
+        delete actionBlobFileMap[post.avatar];
+        delete actionFiles[pi + '_avatar'];
+    }
+    post.username = c.name;
+    if(c.avatar && c.avatar.indexOf('data:')===0){
+        // Convert dataURL → File → blob URL (same path as pickAvatar)
+        var file = dataURLtoFile(c.avatar, 'char-' + c.id + '-avatar.png');
+        var url = URL.createObjectURL(file);
+        actionBlobFileMap[url] = file;
+        post.avatar = url;
+        actionFiles[pi + '_avatar'] = file;
+    } else if(c.avatar){
+        // Already an https URL
+        post.avatar = c.avatar;
+    }
+    renderAction();
+    toast('已应用角色：' + c.name);
+}
+
+// Character bar buttons
+document.getElementById('actionCharNew').addEventListener('click', function(){ openCharModal(null); });
+document.getElementById('actionCharEdit').addEventListener('click', function(){
+    var sel = document.getElementById('actionCharSelect');
+    if(!sel.value){ toast('请先选择要编辑的角色','err'); return; }
+    openCharModal(sel.value);
+});
+document.getElementById('actionCharDel').addEventListener('click', deleteCharacter);
+
+// Character modal buttons
+document.getElementById('actionCharSave').addEventListener('click', saveCharacter);
+document.getElementById('actionCharCancel').addEventListener('click', closeCharModal);
+document.getElementById('actionCharModal').addEventListener('click', function(e){
+    if(e.target === this) closeCharModal();
+});
+
+// Character avatar pick (inside modal)
+document.getElementById('actionCharAvatarPick').addEventListener('click', function(){
+    var inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*';
+    inp.addEventListener('change', function(){
+        if(!inp.files.length) return;
+        var f = inp.files[0];
+        if(f.size > 2 * 1024 * 1024){ toast('头像建议不超过 2MB','err'); return; }
+        var reader = new FileReader();
+        reader.onload = function(){
+            actionCharTempAvatar = reader.result;  // dataURL
+            updateCharAvatarPreview();
+        };
+        reader.readAsDataURL(f);
+    });
+    inp.click();
+});
+document.getElementById('actionCharAvatarClear').addEventListener('click', function(){
+    actionCharTempAvatar = null;
+    updateCharAvatarPreview();
+});
+
+// Init characters
+loadCharacters();
+renderCharSelect();
+
 document.getElementById('actionLoadBtn').addEventListener('click', function(){
     fetch(ACTION_R2 + '/action/index.json?' + Date.now())
         .then(function(r){ if(!r.ok) throw new Error('not found'); return r.json(); })
@@ -1657,7 +1879,7 @@ function renderAction(){
         h +=   '</div>';
         if(open){
             h += '<div class="action-post-body">';
-            // Avatar — upload button (朋友圈-style: site owner avatar, upload not paste URL)
+            // Character selector + avatar preview (角色 = publisher)
             h += '<div class="action-avatar-row">';
             h += '<div class="action-avatar-box' + (p.avatar ? '' : ' empty') + '">';
             if(p.avatar){
@@ -1667,7 +1889,13 @@ function renderAction(){
             }
             h += '</div>';
             h += '<div class="action-avatar-controls">';
-            h += '<button class="act-avatar-upload btn-gold" data-pi="' + pi + '" type="button">换头像</button>';
+            // Character select dropdown
+            var charOpts = '<option value="">— 选择角色 —</option>';
+            actionCharacters.forEach(function(c){
+                charOpts += '<option value="' + c.id + '"' + (p.username===c.name?' selected':'') + '>' + esc(c.name) + '</option>';
+            });
+            h += '<select class="act-char-select" data-pi="' + pi + '">' + charOpts + '</select>';
+            h += '<button class="act-avatar-upload btn-gold" data-pi="' + pi + '" type="button" title="临时换头像">换头像</button>';
             if(p.avatar){ h += '<button class="act-avatar-clear" data-pi="' + pi + '" type="button" title="清除头像">✕</button>'; }
             h += '</div>';
             h += '</div>';
@@ -1725,6 +1953,15 @@ function bindActionRows(){
     // Field edits (username/likes/comments intentionally not editable — 朋友圈-style)
     document.querySelectorAll('.act-caption').forEach(function(inp){ inp.addEventListener('change', function(){ actionPosts[+this.getAttribute('data-pi')].caption = this.value; }); });
     document.querySelectorAll('.act-timeago').forEach(function(inp){ inp.addEventListener('change', function(){ actionPosts[+this.getAttribute('data-pi')].timeAgo = this.value; }); });
+
+    // Character select dropdown (apply character to post)
+    document.querySelectorAll('.act-char-select').forEach(function(sel){
+        sel.addEventListener('change', function(){
+            var pi = parseInt(this.getAttribute('data-pi'));
+            var charId = this.value;
+            if(charId) applyCharacterToPost(pi, charId);
+        });
+    });
 
     // Avatar upload (replaces old URL text input)
     document.querySelectorAll('.act-avatar-upload').forEach(function(btn){
@@ -1942,7 +2179,34 @@ as.textContent =
     '.action-comments{background:rgba(255,255,255,.015);border-radius:6px;padding:6px 8px}'+
     '.action-comment{display:flex;gap:6px;font-size:11px;padding:2px 0}'+
     '.ac-user{color:#d4a853;flex-shrink:0}'+
-    '.ac-text{color:rgba(255,255,255,.55)}';
+    '.ac-text{color:rgba(255,255,255,.55)}'+
+    // ── Character management ──
+    '.action-char-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,.06)}'+
+    '.action-char-bar-left{display:flex;align-items:center;gap:8px}'+
+    '.action-char-bar-label{font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.04em}'+
+    '.action-char-bar-right{display:flex;gap:6px}'+
+    '.action-char-select{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#fff;padding:4px 8px;font-size:11px;font-family:inherit;cursor:pointer;min-width:120px}'+
+    '.action-char-select:focus{outline:none;border-color:rgba(212,168,83,.4)}'+
+    '.action-char-list{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}'+
+    '.action-char-item{display:flex;align-items:center;gap:6px;padding:4px 10px 4px 4px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:20px;transition:border-color .25s}'+
+    '.action-char-item:hover{border-color:rgba(212,168,83,.3)}'+
+    '.action-char-item-avatar{width:24px;height:24px;border-radius:50%;object-fit:cover;flex-shrink:0}'+
+    '.action-char-item-name{font-size:11px;color:rgba(255,255,255,.6)}'+
+    // ── Post card character select ──
+    '.act-char-select{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#fff;padding:5px 8px;font-size:11px;font-family:inherit;cursor:pointer;min-width:100px}'+
+    '.act-char-select:focus{outline:none;border-color:rgba(212,168,83,.4)}'+
+    // ── Character modal ──
+    '.action-char-modal{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center}'+
+    '.action-char-modal.show{display:flex}'+
+    '.action-char-modal-box{background:#111;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:24px;width:320px;max-width:90vw}'+
+    '.action-char-modal-box h3{font-size:16px;color:#fff;margin-bottom:16px}'+
+    '.action-char-form{display:flex;flex-direction:column;gap:14px;margin-bottom:18px}'+
+    '.action-char-form-row{display:flex;flex-direction:column;gap:5px}'+
+    '.action-char-form-row label{font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.04em}'+
+    '.action-char-form-row input{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:6px;color:#fff;padding:8px 10px;font-size:13px;font-family:inherit}'+
+    '.action-char-form-row input:focus{outline:none;border-color:rgba(212,168,83,.4)}'+
+    '.action-char-avatar-row{display:flex;align-items:center;gap:10px}'+
+    '.action-char-modal-actions{display:flex;gap:8px;justify-content:flex-end}';
 document.head.appendChild(as);
 })();
 
