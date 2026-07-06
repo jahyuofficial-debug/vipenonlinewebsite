@@ -84,6 +84,11 @@ BannerPage.initBgVideo();
         });
     }
 
+    // Append a cache-buster so a refresh always re-pulls fresh data from R2
+    var cacheBust = function(url) {
+        return url + (url.indexOf('?') === -1 ? '?' : '&') + '_=' + Date.now();
+    };
+
     function resolveDiscTapes() {
         var tapes = window.discData.tapes || [];
         var idx = window.discData.currentTapeIndex || 0;
@@ -95,14 +100,14 @@ BannerPage.initBgVideo();
 
     var loadSettings = loadJSON('data/manager/settings.json');
     var loadFresh = loadJSON('data/fresh.json');
-    var loadDesign = loadJSON('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/design/index.json');
+    var loadDesign = loadJSON(cacheBust('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/design/index.json'));
     // Action feed: load from R2 (managed via design-upload-v2 → /api/action/save).
     // Falls back to data/action.json if R2 is unreachable or index.json not yet created.
-    var loadAction = loadJSON('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/action/index.json').then(function(d){
+    var loadAction = loadJSON(cacheBust('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/action/index.json')).then(function(d){
         return (d && Array.isArray(d)) ? d : loadJSON('data/action.json');
     });
     var loadBanner = loadJSON('home/index.json');
-    var loadDisc = loadJSONWithTimeout('https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/disc/index.json', 5000);
+    var loadDisc = loadJSONWithTimeout(cacheBust('https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/disc/index.json'), 5000);
 
     Promise.all([loadSettings, loadFresh, loadDesign, loadAction, loadBanner, loadDisc]).then(function(results) {
         var settings = results[0];
@@ -269,8 +274,8 @@ BannerPage.initBgVideo();
             return fetch(path).then(function(r) { return r.ok ? r.json() : null; }).catch(function() { return null; });
         };
         Promise.all([
-            tryLoad('https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/disc/index.json'),
-            tryLoad('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/design/index.json'),
+            tryLoad(cacheBust('https://pub-162f7a76795447d39c6186670b92ffa0.r2.dev/disc/index.json')),
+            tryLoad(cacheBust('https://pub-541a045d0ee14f489c6d0115be4f5a34.r2.dev/design/index.json')),
             tryLoad('home/index.json'),
             loadJSON('data/fresh.json'),
             loadJSON('data/action.json')
@@ -1523,6 +1528,25 @@ navigateTo = function(pageName) {
 
 window.addEventListener('hashchange', handleRoute);
 handleRoute();
+
+// Active in-site refresh: a true reload of the site (re-pulls all data, re-inits)
+var siteRefreshBtn = document.getElementById('siteRefreshBtn');
+if (siteRefreshBtn) {
+    siteRefreshBtn.addEventListener('click', function() {
+        window.location.reload();
+    });
+}
+
+// Clicking the nav link for the page you're already on = active refresh (true reload)
+document.addEventListener('click', function(e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[href^="#/"]') : null;
+    if (!a) return;
+    var target = a.getAttribute('href');
+    if (target && target === window.location.hash) {
+        e.preventDefault();
+        window.location.reload();
+    }
+});
 
 window.addEventListener('storage', function(e) {
     if (!e.key) return;
