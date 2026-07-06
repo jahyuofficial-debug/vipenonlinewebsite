@@ -13,12 +13,15 @@
 @property --msg-angle{syntax:'<angle>';initial-value:0deg;inherits:false}
 .msg-input-wrapper::before{content:'';position:absolute;inset:-3px;border-radius:.22rem;padding:3px;background:conic-gradient(from var(--msg-angle),rgba(57,255,20,0) 0deg,rgba(57,255,20,0) 8deg,rgba(57,255,20,.15) 14deg,#39FF14 26deg,#bfffba 32deg,#39FF14 38deg,rgba(57,255,20,.15) 44deg,rgba(57,255,20,0) 52deg,rgba(57,255,20,0) 360deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;animation:msgBeamSpin 3.4s linear infinite;pointer-events:none}
 @keyframes msgBeamSpin{to{--msg-angle:360deg}}
-.msg-input-area{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-radius:.2rem;padding:.1rem .16rem;transition:border-color .3s,box-shadow .3s;display:flex;align-items:flex-end;gap:.08rem;min-height:.4rem;backdrop-filter:blur(8px);outline:none}
+.msg-input-area{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-radius:.2rem;padding:.1rem .16rem;transition:border-color .3s,box-shadow .3s;display:flex;align-items:flex-end;gap:.08rem;min-height:.4rem;backdrop-filter:blur(8px);outline:none;position:relative}
 .msg-input-area:focus-within,.msg-textarea:focus{outline:none;border-color:rgba(255,255,255,.12)}
 /* Original neon-green glow shadow (restored) */
 .msg-input-area:hover{border-color:rgba(57,255,20,.65);box-shadow:0 0 .12rem rgba(57,255,20,.6),0 0 .3rem rgba(57,255,20,.42),0 0 .52rem rgba(57,255,20,.22)}
 .msg-textarea{flex:1;background:transparent;border:none;color:rgba(255,255,255,.7);font-size:.14rem;line-height:1.5;height:auto;min-height:.22rem;max-height:2rem;resize:none;padding:0;font-family:inherit;overflow-y:auto}
 .msg-textarea::placeholder{color:rgba(255,255,255,.25)}
+/* Vertical placeholder: "what' up" stands perpendicular to the horizontal frame */
+.msg-placeholder{position:absolute;left:.2rem;top:50%;transform:translateY(-50%);writing-mode:vertical-rl;text-orientation:upright;font-size:.14rem;color:rgba(255,255,255,.25);letter-spacing:.04rem;pointer-events:none;user-select:none}
+.msg-input-area.has-value .msg-placeholder{display:none}
 .msg-input-actions{display:flex;align-items:center;gap:.06rem}
 .msg-input-tools{display:flex;gap:.04rem;align-items:center}
 .msg-tool-btn{width:.26rem;height:.26rem;border-radius:50%;border:none;background:transparent;color:rgba(255,255,255,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;font-size:.12rem;padding:0}

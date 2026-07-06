@@ -618,7 +618,8 @@ function buildMsgPage() {
         '<div class="msg-input-center">' +
         '<div class="msg-input-wrapper">' +
         '<div class="msg-input-area">' +
-        '<textarea class="msg-textarea" id="msgTextarea" placeholder="留下一句话..." rows="1"></textarea>' +
+        '<textarea class="msg-textarea" id="msgTextarea" rows="1"></textarea>' +
+        '<span class="msg-placeholder" id="msgPlaceholder">what\' up</span>' +
         '<div class="msg-input-actions">' +
         '<div class="msg-input-tools">' +
         '<button class="msg-tool-btn" id="msgEmojiBtn" type="button" title="Emoji">' +
@@ -645,6 +646,12 @@ function bindMsgInteractions() {
     // Load user region on page visit
     loadMsgUserRegion();
 
+    var msgArea = textarea ? textarea.closest('.msg-input-area') : null;
+    function toggleMsgPlaceholder() {
+        if (!msgArea) return;
+        if (textarea.value.trim()) msgArea.classList.add('has-value');
+        else msgArea.classList.remove('has-value');
+    }
     if (textarea) {
         textarea.addEventListener('input', function() {
             textarea.style.height = 'auto';
@@ -655,6 +662,7 @@ function bindMsgInteractions() {
             } else {
                 textarea.style.height = newHeight + 'px';
             }
+            toggleMsgPlaceholder();
         });
         textarea.addEventListener('keydown', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -710,6 +718,7 @@ function bindMsgInteractions() {
             saveMsgUserPosts();
             textarea.value = '';
             textarea.style.height = 'auto';
+            toggleMsgPlaceholder();
             // Rebuild barrage animation with new message
             var track = document.getElementById('msgBarrageTrack');
             if (track) {
