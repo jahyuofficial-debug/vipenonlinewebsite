@@ -6,7 +6,6 @@ var actionLightboxCurrentIndex = 0;
 function getMergedActionFeed() {
     var feed = (window.actionFeed || []).slice();
     var globalActions = (typeof Utils !== 'undefined' && Utils.getGlobalData) ? (Utils.getGlobalData('actions') || []) : [];
-    var userId = (typeof Utils !== 'undefined' && Utils.getUserId) ? Utils.getUserId() : null;
     globalActions.forEach(function(ga) {
         if (ga.hidden) return;
         var exists = feed.find(function(f) { return f.id === ga.id; });
@@ -27,14 +26,12 @@ function getMergedActionFeed() {
             });
         }
     });
-    if (userId) {
-        var likes = (typeof Utils !== 'undefined' && Utils.getUserData) ? (Utils.getUserData('likes') || {}) : {};
-        var likedActions = likes.likedActions || [];
-        feed.forEach(function(post) {
-            var found = likedActions.find(function(la) { return la.id === post.id; });
-            if (found) post.isLiked = true;
-        });
-    }
+    // Restore like state from localStorage (no login required)
+    var likedPosts = [];
+    try { likedPosts = JSON.parse(localStorage.getItem('action_liked_posts') || '[]'); } catch(e) {}
+    feed.forEach(function(post) {
+        if (likedPosts.indexOf(post.id) !== -1) post.isLiked = true;
+    });
     return feed;
 }
 
@@ -239,27 +236,14 @@ function bindActionInteractions() {
     var mergedFeed = getMergedActionFeed();
 
     function persistLike(postId, isLiked) {
-        if (typeof Utils === 'undefined' || !Utils.getUserData) return;
-        var likes = Utils.getUserData('likes') || {};
-        if (!likes.likedActions) likes.likedActions = [];
-        var post = mergedFeed.find(function(p) { return p.id === postId; });
-        if (!post) return;
+        var likedPosts = [];
+        try { likedPosts = JSON.parse(localStorage.getItem('action_liked_posts') || '[]'); } catch(e) {}
         if (isLiked) {
-            var exists = likes.likedActions.find(function(la) { return la.id === postId; });
-            if (!exists) {
-                likes.likedActions.unshift({
-                    id: postId,
-                    type: 'action',
-                    content: post.caption || '',
-                    title: post.caption || '',
-                    author: post.username || 'Unknown',
-                    date: new Date().toISOString().split('T')[0]
-                });
-            }
+            if (likedPosts.indexOf(postId) === -1) likedPosts.push(postId);
         } else {
-            likes.likedActions = likes.likedActions.filter(function(la) { return la.id !== postId; });
+            likedPosts = likedPosts.filter(function(id) { return id !== postId; });
         }
-        Utils.setUserData('likes', likes);
+        try { localStorage.setItem('action_liked_posts', JSON.stringify(likedPosts)); } catch(e) {}
     }
 
     var likeBtns = document.querySelectorAll('.action-post-action-btn.like-btn');
@@ -273,7 +257,6 @@ function bindActionInteractions() {
                 this.classList.toggle('liked');
                 var svg = this.querySelector('svg');
                 var postEl = document.querySelector('.action-post[data-post-id="' + postId + '"]');
-                var likesInfo = postEl ? postEl.querySelector('.action-post-likes-info') : null;
                 if (post.isLiked) {
                     svg.setAttribute('fill', '#ed4956');
                     svg.setAttribute('stroke', '#ed4956');
@@ -281,12 +264,29 @@ function bindActionInteractions() {
                     svg.setAttribute('fill', 'none');
                     svg.setAttribute('stroke', 'currentColor');
                 }
-                if (likesInfo) {
-                    likesInfo.textContent = post.likes > 0 ? post.likes.toLocaleString() + ' likes' : 'Be the first to like';
-                    if (post.isLiked) {
-                        likesInfo.classList.remove('hidden');
-                    } else {
-                        likesInfo.classList.add('hidden');
+                // Update like bubble in social bubble
+                var socialBubble = postEl ? postEl.querySelector('.action-post-social-bubble') : null;
+                if (socialBubble) {
+                    var likeRow = socialBubble.querySelector('.action-post-likes-row');
+                    var likeText = post.likes > 0 ? post.likes.toLocaleString() + ' likes' : 'Be the first to like';
+                    if (post.likes > 0 || post.isLiked) {
+                        if (likeRow) {
+                            likeRow.innerHTML = '<span class="heart-inline">❤</span>' + likeText;
+                            likeRow.style.display = '';
+                        } else {
+                            likeRow = document.createElement('div');
+                            likeRow.className = 'action-post-likes-row has-likes';
+                            likeRow.innerHTML = '<span class="heart-inline">❤</span>' + likeText;
+                            socialBubble.insertBefore(likeRow, socialBubble.firstChild);
+                        }
+                    } else if (likeRow) {
+                        likeRow.style.display = 'none';
+                    }
+                    // If no likes and no comments, hide entire bubble
+                    var hasComments = socialBubble.querySelector('.action-post-comments');
+                    var hasVisibleLikes = socialBubble.querySelector('.action-post-likes-row:not([style*="display: none"])');
+                    if (!hasVisibleLikes && !hasComments) {
+                        socialBubble.style.display = 'none';
                     }
                 }
                 persistLike(postId, post.isLiked);
@@ -359,7 +359,7 @@ function bindActionInteractions() {
                 var post = actionFeed.find(function(p) { return p.id === postId; });
                 if (post) {
                     if (!post.commentList) post.commentList = [];
-                    post.commentList.push({ user: 'Me', text: input.value.trim() });
+                    post.commentList.push({ user: 'Guest', text: input.value.trim() });
                     post.comments = post.commentList.length;
                     var commentsContainer = postEl.querySelector('.action-post-comments');
                     if (commentsContainer) {

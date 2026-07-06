@@ -1184,10 +1184,6 @@ function navigateToFreshDetail(id) {
     var likeBtn = document.getElementById('freshDetailLikeBtn');
     if (likeBtn) {
         likeBtn.addEventListener('click', function() {
-            if (!CONFIG.LOGIN_DISABLED && !Utils.isLoggedIn()) {
-                showFreshAuthPopup();
-                return;
-            }
             var item = freshItems[id];
             if (!item) return;
             item.isLiked = !item.isLiked;
@@ -1203,33 +1199,12 @@ function navigateToFreshDetail(id) {
                 svg.setAttribute('stroke', 'currentColor');
             }
             if (countEl) countEl.textContent = item.likeCount;
-            var likes = Utils.getUserData('likes') || {};
-            if (!likes.likedArticles) likes.likedArticles = [];
-            if (item.isLiked) {
-                var exists = likes.likedArticles.find(function(la) { return la.id === item.id; });
-                if (!exists) {
-                    likes.likedArticles.unshift({
-                        id: item.id,
-                        type: 'article',
-                        title: item.headline || '',
-                        author: item.author || 'Unknown',
-                        date: item.date || ''
-                    });
-                }
-            } else {
-                likes.likedArticles = likes.likedArticles.filter(function(la) { return la.id !== item.id; });
-            }
-            Utils.setUserData('likes', likes);
         });
     }
 
     var commentBtn = document.getElementById('freshDetailCommentBtn');
     if (commentBtn) {
         commentBtn.addEventListener('click', function() {
-            if (!CONFIG.LOGIN_DISABLED && !Utils.isLoggedIn()) {
-                showFreshAuthPopup();
-                return;
-            }
             var commentsArea = document.getElementById('freshDetailComments');
             if (commentsArea) {
                 commentsArea.style.display = commentsArea.style.display === 'none' ? 'block' : 'none';
@@ -1324,10 +1299,6 @@ function navigateToDesignWorkDetail(id) {
     var likeBtn = document.getElementById('dwDetailLikeBtn');
     if (likeBtn) {
         likeBtn.addEventListener('click', function() {
-            if (!CONFIG.LOGIN_DISABLED && !Utils.isLoggedIn()) {
-                window.location.hash = '#/signup';
-                return;
-            }
             var item = dwItems[id];
             if (!item) return;
             item.isLiked = !item.isLiked;
