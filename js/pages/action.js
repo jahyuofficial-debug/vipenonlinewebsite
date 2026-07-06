@@ -67,7 +67,7 @@ function buildActionPostItem(post) {
     var likeClass = post.isLiked ? ' liked' : '';
     var heartFill = post.isLiked ? ' fill="#ed4956" stroke="#ed4956"' : ' fill="none" stroke="currentColor"';
     var likeCountText = post.likes > 0 ? post.likes.toLocaleString() + ' likes' : 'Be the first to like';
-    var likesInfoClass = post.isLiked ? '' : ' hidden';
+    var likesInfoClass = post.isLiked || post.likes > 0 ? ' has-likes' : '';
     var imagesHtml = buildActionPostImages(post);
     var commentsHtml = buildActionPostComments(post);
     var ownerControls = '';
@@ -81,33 +81,42 @@ function buildActionPostItem(post) {
             '</button>' +
             '</div>';
     }
+    // WeChat Moments-style: avatar on left, content on right, like/comment bubble below
+    var likeBubble = post.likes > 0 || post.isLiked ? '<div class="action-post-likes-row' + likesInfoClass + '"><span class="heart-inline">❤</span>' + likeCountText + '</div>' : '';
+    var socialBubble = '';
+    if (likeBubble || commentsHtml) {
+        socialBubble = '<div class="action-post-social-bubble">' + likeBubble + commentsHtml + '</div>';
+    }
     return '<div class="action-post" data-post-id="' + post.id + '">' +
-        '<div class="action-post-header">' +
-        '<img class="action-post-avatar" src="' + post.avatar + '" alt="' + post.username + '">' +
-        '<div class="action-post-user-info">' +
-        '<div class="action-post-username">' + post.username + '</div>' +
-        '<div class="action-post-time">' + post.timeAgo + '</div>' +
-        '</div>' +
-        ownerControls +
-        '<button class="action-post-more-btn share-btn" data-post-id="' + post.id + '">' +
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>' +
-        '</button>' +
-        '</div>' +
+        '<div class="action-post-body">' +
+        '  <div class="action-post-avatar-col">' +
+        '    <img class="action-post-avatar" src="' + post.avatar + '" alt="' + post.username + '">' +
+        '  </div>' +
+        '  <div class="action-post-right">' +
+        '    <div class="action-post-username">' + post.username + '</div>' +
+        '    <div class="action-post-time">' + post.timeAgo + '</div>' +
+        '    <div class="action-post-content">' + post.caption + '</div>' +
         imagesHtml +
-        '<div class="action-post-actions">' +
-        '<button class="action-post-action-btn like-btn' + likeClass + '" data-post-id="' + post.id + '">' +
-        '<svg viewBox="0 0 24 24" ' + heartFill + ' stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' +
-        '</button>' +
-        '<button class="action-post-action-btn comment-btn" data-post-id="' + post.id + '">' +
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>' +
-        '</button>' +
-        '</div>' +
-        '<div class="action-post-likes-info' + likesInfoClass + '">' + likeCountText + '</div>' +
-        '<div class="action-post-content">' + post.caption + '</div>' +
-        commentsHtml +
-        '<div class="action-post-comment-input-area">' +
-        '<input type="text" class="action-post-comment-input" data-post-id="' + post.id + '" placeholder="Add a comment...">' +
-        '<button class="action-post-comment-submit" data-post-id="' + post.id + '">Post</button>' +
+        '    <div class="action-post-actions-row">' +
+        '      <div class="action-post-actions">' +
+        '        <button class="action-post-action-btn like-btn' + likeClass + '" data-post-id="' + post.id + '">' +
+        '        <svg viewBox="0 0 24 24" ' + heartFill + ' stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' +
+        '        </button>' +
+        '        <button class="action-post-action-btn comment-btn" data-post-id="' + post.id + '">' +
+        '        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>' +
+        '        </button>' +
+        '      </div>' +
+        ownerControls +
+        '      <button class="action-post-more-btn share-btn" data-post-id="' + post.id + '">' +
+        '      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>' +
+        '      </button>' +
+        '    </div>' +
+        socialBubble +
+        '    <div class="action-post-comment-input-area">' +
+        '      <input type="text" class="action-post-comment-input" data-post-id="' + post.id + '" placeholder="Add a comment...">' +
+        '      <button class="action-post-comment-submit" data-post-id="' + post.id + '">Post</button>' +
+        '    </div>' +
+        '  </div>' +
         '</div>' +
         '</div>';
 }

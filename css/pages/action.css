@@ -1,67 +1,93 @@
-.action-page{background:#000;min-height:100vh;padding-top:1.43rem;padding-bottom:2rem}
+/* WeChat Moments-style Action Feed — Dark Theme */
+
+.action-page{background:#000;min-height:100vh;padding-top:1.2rem;padding-bottom:2rem}
 .action-feed-container{max-width:6.8rem;margin:0 auto;padding:0 .4rem;zoom:.6}
-.action-feed-header{display:none}
-.action-feed-list{display:flex;flex-direction:column;gap:.4rem}
+.action-feed-list{display:flex;flex-direction:column;gap:0}
 
-.action-post{background:#0a0a0a;border:1px solid rgba(255,255,255,.06);border-radius:.16rem;overflow:hidden;transition:transform .3s,box-shadow .3s;animation:postFadeIn .5s ease}
-.action-post:hover{border-color:rgba(212,168,83,.15);box-shadow:0 .08rem .32rem rgba(0,0,0,.4),0 0 .12rem rgba(212,168,83,.08)}
-@keyframes postFadeIn{from{opacity:0;transform:translateY(.2rem)}to{opacity:1;transform:translateY(0)}}
-.action-post-header{display:flex;align-items:center;gap:.12rem;padding:.16rem .2rem}
-.action-post-avatar{width:.4rem;height:.4rem;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.08)}
-.action-post-user-info{flex:1;min-width:0}
-.action-post-username{font-size:.14rem;color:#fff;font-weight:500;line-height:1.3}
-.action-post-time{font-size:.11rem;color:rgba(255,255,255,.3);line-height:1.3}
-.action-post-more-btn{width:.32rem;height:.32rem;border-radius:50%;border:none;background:transparent;color:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;position:relative}
-.action-post-more-btn:hover{color:rgba(255,255,255,.7);background:rgba(255,255,255,.05)}
-.action-post-more-btn svg{width:.18rem;height:.18rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.action-post-share-menu{position:absolute;top:calc(100% + .06rem);right:0;background:#1a1a1a;border:1px solid rgba(255,255,255,.08);border-radius:.1rem;padding:.08rem 0;min-width:1.4rem;box-shadow:0 .04rem .16rem rgba(0,0,0,.4);opacity:0;pointer-events:none;transform:translateY(-.04rem);transition:all .2s ease;z-index:10}
-.action-post-share-menu.active{opacity:1;pointer-events:auto;transform:translateY(0)}
-.action-post-share-menu-item{display:flex;align-items:center;gap:.08rem;padding:.1rem .16rem;font-size:.12rem;color:rgba(255,255,255,.7);cursor:pointer;transition:all .2s;white-space:nowrap}
-.action-post-share-menu-item:hover{background:rgba(255,255,255,.06);color:#fff}
-.action-post-share-menu-item svg{width:.14rem;height:.14rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+/* ── Post Card ── */
+.action-post{background:transparent;border:none;border-radius:0;padding:.2rem 0;border-bottom:1px solid rgba(255,255,255,.06);animation:postFadeIn .4s ease}
+.action-post:last-child{border-bottom:none}
+@keyframes postFadeIn{from{opacity:0;transform:translateY(.1rem)}to{opacity:1;transform:translateY(0)}}
 
-.action-post-images{position:relative;width:100%}
-.action-post-images.single .action-post-img-wrap{width:100%}
-.action-post-images.double{display:grid;grid-template-columns:1fr 1fr;gap:.04rem}
-.action-post-images.multi{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.04rem}
-.action-post-images.four{display:grid;grid-template-columns:1fr 1fr;gap:.04rem}
-.action-post-img-wrap{aspect-ratio:1;overflow:hidden;background:#111;cursor:pointer;position:relative}
-.action-post-img-wrap:first-child{aspect-ratio:4/3}
-.action-post-images.single .action-post-img-wrap:first-child{aspect-ratio:4/3}
-.action-post-images.double .action-post-img-wrap{aspect-ratio:1}
-.action-post-images.multi .action-post-img-wrap{aspect-ratio:1}
-.action-post-images.four .action-post-img-wrap{aspect-ratio:1}
-.action-post-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
-.action-post-img-wrap:hover img{transform:scale(1.03)}
-.action-post-img-count{position:absolute;bottom:.08rem;right:.08rem;background:rgba(0,0,0,.6);color:#fff;font-size:.1rem;padding:.04rem .1rem;border-radius:.06rem;backdrop-filter:blur(4px)}
+/* ── Post Layout: avatar on left, content on right ── */
+.action-post-body{display:flex;gap:.14rem}
+.action-post-avatar-col{flex-shrink:0}
+.action-post-avatar{width:.48rem;height:.48rem;border-radius:.08rem;object-fit:cover;border:1px solid rgba(255,255,255,.08)}
+.action-post-right{flex:1;min-width:0}
 
-.action-post-content{padding:.14rem .2rem .1rem;font-size:.14rem;color:rgba(255,255,255,.8);line-height:1.6;word-break:break-word}
+/* ── Username + Time ── */
+.action-post-username{font-size:.14rem;color:#fff;font-weight:600;line-height:1.3;margin-bottom:.02rem}
+.action-post-time{font-size:.1rem;color:rgba(255,255,255,.3);line-height:1.3}
+
+/* ── Caption ── */
+.action-post-content{font-size:.13rem;color:rgba(255,255,255,.8);line-height:1.6;word-break:break-word;margin-top:.08rem;margin-bottom:.1rem}
 .action-post-content a{color:#d4a853;text-decoration:none;transition:color .25s}
 .action-post-content a:hover{color:#e8c97a}
 
-.action-post-actions{display:flex;align-items:center;gap:.2rem;padding:.08rem .2rem .14rem}
-.action-post-action-btn{display:flex;align-items:center;gap:.06rem;background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;transition:color .3s;padding:.06rem;font-size:.12rem}
+/* ── Images Grid (WeChat style) ── */
+.action-post-images{width:100%;margin-bottom:.1rem}
+.action-post-images .action-post-img-wrap{border-radius:.04rem;overflow:hidden}
+.action-post-images.single .action-post-img-wrap{width:2.4rem;aspect-ratio:1}
+.action-post-images.double{display:grid;grid-template-columns:1fr 1fr;gap:.04rem;width:2.4rem}
+.action-post-images.double .action-post-img-wrap{aspect-ratio:1}
+.action-post-images.multi{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.04rem;width:2.4rem}
+.action-post-images.multi .action-post-img-wrap{aspect-ratio:1}
+.action-post-images.four{display:grid;grid-template-columns:1fr 1fr;gap:.04rem;width:2.4rem}
+.action-post-images.four .action-post-img-wrap{aspect-ratio:1}
+.action-post-img-wrap img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.action-post-img-wrap:hover img{transform:scale(1.02)}
+.action-post-img-count{position:absolute;bottom:.08rem;right:.08rem;background:rgba(0,0,0,.6);color:#fff;font-size:.09rem;padding:.02rem .06rem;border-radius:.04rem;backdrop-filter:blur(4px)}
+
+/* ── Bottom Actions (like + comment icon) ── */
+.action-post-actions-row{display:flex;align-items:center;justify-content:space-between;margin-top:.06rem}
+.action-post-actions{display:flex;align-items:center;gap:.16rem}
+.action-post-action-btn{display:flex;align-items:center;gap:.04rem;background:none;border:none;color:rgba(255,255,255,.35);cursor:pointer;transition:color .2s;padding:.04rem;font-size:.11rem}
 .action-post-action-btn:hover{color:rgba(255,255,255,.7)}
-.action-post-action-btn svg{width:.2rem;height:.2rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.action-post-action-btn svg{width:.18rem;height:.18rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .action-post-action-btn.liked{color:#ed4956}
 .action-post-action-btn.liked svg{fill:#ed4956;stroke:#ed4956}
-.action-post-action-count{font-size:.12rem;color:rgba(255,255,255,.4);margin-left:.02rem}
+.action-post-action-count{font-size:.1rem;color:rgba(255,255,255,.3);margin-left:.02rem}
 
-.action-post-likes-info{padding:0 .2rem .1rem;font-size:.12rem;color:rgba(255,255,255,.6);font-weight:500;display:block}
-.action-post-likes-info.hidden{display:none}
-.action-post-comments{padding:0 .2rem .16rem}
-.action-post-comment-item{display:flex;gap:.08rem;margin-bottom:.08rem;align-items:flex-start}
-.action-post-comment-user{font-size:.12rem;color:rgba(255,255,255,.7);font-weight:500;white-space:nowrap;flex-shrink:0}
-.action-post-comment-text{font-size:.12rem;color:rgba(255,255,255,.5);line-height:1.5;word-break:break-word}
-.action-post-comment-more{font-size:.11rem;color:rgba(255,255,255,.25);cursor:pointer;margin-top:.04rem;transition:color .3s}
+/* ── Share button (more icon) ── */
+.action-post-more-btn{width:.28rem;height:.28rem;border-radius:50%;border:none;background:transparent;color:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+.action-post-more-btn:hover{color:rgba(255,255,255,.6);background:rgba(255,255,255,.05)}
+.action-post-more-btn svg{width:.16rem;height:.16rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* ── Like/Comment Bubble (WeChat style) ── */
+.action-post-social-bubble{background:rgba(255,255,255,.04);border-radius:.06rem;padding:.08rem .12rem;margin-top:.08rem;position:relative}
+.action-post-social-bubble::before{content:'';position:absolute;top:-.04rem;left:.24rem;width:.08rem;height:.08rem;background:rgba(255,255,255,.04);transform:rotate(45deg)}
+
+/* Likes inside bubble */
+.action-post-likes-row{font-size:.11rem;color:rgba(255,255,255,.6);margin-bottom:.04rem;padding-bottom:.04rem;border-bottom:1px solid rgba(255,255,255,.06);display:none}
+.action-post-likes-row.has-likes{display:block}
+.action-post-likes-row .heart-inline{color:#ed4956;margin-right:.04rem}
+
+/* Comments inside bubble */
+.action-post-comments{padding:0}
+.action-post-comment-item{display:flex;gap:.04rem;margin-bottom:.04rem;align-items:baseline;font-size:.11rem;line-height:1.5}
+.action-post-comment-user{color:#d4a853;font-weight:500;flex-shrink:0;white-space:nowrap}
+.action-post-comment-text{color:rgba(255,255,255,.55)}
+.action-post-comment-more{font-size:.1rem;color:rgba(255,255,255,.25);cursor:pointer;margin-top:.04rem;transition:color .2s}
 .action-post-comment-more:hover{color:rgba(255,255,255,.5)}
-.action-post-comment-input-area{display:none;align-items:center;gap:.08rem;padding:.1rem .2rem;border-top:1px solid rgba(255,255,255,.04)}.action-post-comment-input-area.active{display:flex}
-.action-post-comment-input{flex:1;background:transparent;border:none;color:rgba(255,255,255,.7);font-size:.12rem;line-height:1.4;padding:.06rem 0;outline:none;font-family:inherit}
+
+/* ── Comment Input ── */
+.action-post-comment-input-area{display:none;align-items:center;gap:.08rem;padding:.1rem 0;border-top:1px solid rgba(255,255,255,.04);margin-top:.08rem}
+.action-post-comment-input-area.active{display:flex}
+.action-post-comment-input{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:.2rem;color:rgba(255,255,255,.7);font-size:.11rem;line-height:1.4;padding:.06rem .12rem;outline:none;font-family:inherit}
+.action-post-comment-input:focus{border-color:rgba(212,168,83,.3)}
 .action-post-comment-input::placeholder{color:rgba(255,255,255,.2)}
-.action-post-comment-submit{font-size:.11rem;color:#d4a853;background:none;border:none;cursor:pointer;padding:.04rem .08rem;transition:all .3s;font-weight:500}
-.action-post-comment-submit:hover{color:#e8c97a;text-shadow:0 0 .08rem rgba(212,168,83,.3)}
+.action-post-comment-submit{font-size:.1rem;color:#d4a853;background:none;border:none;cursor:pointer;padding:.04rem .08rem;transition:all .2s;font-weight:500}
+.action-post-comment-submit:hover{color:#e8c97a}
 .action-post-comment-submit:disabled{color:rgba(255,255,255,.2);cursor:not-allowed}
 
+/* ── Owner controls ── */
+.action-post-owner-controls{display:flex;align-items:center;gap:.06rem;margin-left:auto}
+.action-post-owner-btn{width:.24rem;height:.24rem;border-radius:50%;border:none;background:transparent;color:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+.action-post-owner-btn:hover{color:rgba(255,255,255,.6);background:rgba(255,255,255,.05)}
+.action-post-owner-btn svg{width:.12rem;height:.12rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.action-post-owner-btn.delete-btn:hover{color:#ef4444}
+
+/* ── Lightbox ── */
 .action-image-lightbox{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s;backdrop-filter:blur(10px)}
 .action-image-lightbox.active{opacity:1;pointer-events:auto}
 .action-image-lightbox img{max-width:90%;max-height:90%;object-fit:contain;border-radius:.08rem;transform:scale(.95);transition:transform .35s cubic-bezier(.25,.46,.45,.94)}
@@ -75,10 +101,3 @@
 .action-image-lightbox-prev{left:.3rem}
 .action-image-lightbox-next{right:.3rem}
 .action-image-lightbox-counter{position:absolute;bottom:.3rem;left:50%;transform:translateX(-50%);font-size:.12rem;color:rgba(255,255,255,.5)}
-
-.action-post-owner-controls{display:flex;align-items:center;gap:.06rem;margin-right:.04rem}
-.action-post-owner-btn{width:.28rem;height:.28rem;border-radius:50%;border:none;background:transparent;color:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s}
-.action-post-owner-btn:hover{color:rgba(255,255,255,.6);background:rgba(255,255,255,.05)}
-.action-post-owner-btn svg{width:.14rem;height:.14rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.action-post-owner-btn.delete-btn:hover{color:#ef4444}
-
