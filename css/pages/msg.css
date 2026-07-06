@@ -12,9 +12,10 @@
 /* Rotating neon beam circling the input box */
 .msg-input-wrapper::before{content:'';position:absolute;inset:-.02rem;border-radius:.22rem;background:conic-gradient(from 0deg,rgba(57,255,20,0) 0deg,rgba(57,255,20,.95) 30deg,rgba(57,255,20,.18) 60deg,rgba(57,255,20,0) 95deg,rgba(57,255,20,0) 360deg);filter:blur(.05rem);z-index:-1;animation:msgBeamSpin 3.4s linear infinite;pointer-events:none}
 @keyframes msgBeamSpin{to{transform:rotate(360deg)}}
-.msg-input-area{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-radius:.2rem;padding:.1rem .16rem;transition:border-color .3s;display:flex;align-items:flex-end;gap:.08rem;min-height:.4rem;backdrop-filter:blur(8px);outline:none}
+.msg-input-area{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-radius:.2rem;padding:.1rem .16rem;transition:border-color .3s,box-shadow .3s;display:flex;align-items:flex-end;gap:.08rem;min-height:.4rem;backdrop-filter:blur(8px);outline:none}
 .msg-input-area:focus-within,.msg-textarea:focus{outline:none;border-color:rgba(255,255,255,.12)}
-.msg-input-area:hover{border-color:rgba(57,255,20,.4)}
+/* Original neon-green glow shadow (restored) */
+.msg-input-area:hover{border-color:rgba(57,255,20,.65);box-shadow:0 0 .12rem rgba(57,255,20,.6),0 0 .3rem rgba(57,255,20,.42),0 0 .52rem rgba(57,255,20,.22)}
 .msg-textarea{flex:1;background:transparent;border:none;color:rgba(255,255,255,.7);font-size:.14rem;line-height:1.5;height:auto;min-height:.22rem;max-height:2rem;resize:none;padding:0;font-family:inherit;overflow-y:auto}
 .msg-textarea::placeholder{color:rgba(255,255,255,.25)}
 .msg-input-actions{display:flex;align-items:center;gap:.06rem}
