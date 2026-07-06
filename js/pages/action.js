@@ -52,21 +52,16 @@ function buildActionPostImages(post) {
 
 function buildActionPostComments(post) {
     if (!post.commentList || post.commentList.length === 0) return '';
-    var visibleComments = post.commentList.slice(0, 2);
-    var commentsHtml = visibleComments.map(function(c) {
+    return post.commentList.map(function(c) {
         return '<div class="action-post-comment-item"><span class="action-post-comment-user">' + c.user + '</span><span class="action-post-comment-text">' + c.text + '</span></div>';
     }).join('');
-    var moreHtml = post.commentList.length > 2 ? '<div class="action-post-comment-more" data-post-id="' + post.id + '">View all ' + post.commentList.length + ' comments</div>' : '';
-    return '<div class="action-post-comments">' + commentsHtml + moreHtml + '</div>';
 }
 
 function buildActionPostItem(post) {
     var likeClass = post.isLiked ? ' liked' : '';
     var heartFill = post.isLiked ? ' fill="#ed4956" stroke="#ed4956"' : ' fill="none" stroke="currentColor"';
-    var likeCountText = post.likes > 0 ? post.likes.toLocaleString() + ' likes' : 'Be the first to like';
-    var likesInfoClass = post.isLiked || post.likes > 0 ? ' has-likes' : '';
     var imagesHtml = buildActionPostImages(post);
-    var commentsHtml = buildActionPostComments(post);
+    var commentsHtml = (post.commentList && post.commentList.length) ? '<div class="action-post-comments">' + buildActionPostComments(post) + '</div>' : '';
     var ownerControls = '';
     if (isOwner(post)) {
         ownerControls = '<div class="action-post-owner-controls">' +
@@ -78,12 +73,7 @@ function buildActionPostItem(post) {
             '</button>' +
             '</div>';
     }
-    // WeChat Moments-style: avatar on left, content on right, like/comment bubble below
-    var likeBubble = post.likes > 0 || post.isLiked ? '<div class="action-post-likes-row' + likesInfoClass + '"><span class="heart-inline">❤</span>' + likeCountText + '</div>' : '';
-    var socialBubble = '';
-    if (likeBubble || commentsHtml) {
-        socialBubble = '<div class="action-post-social-bubble">' + likeBubble + commentsHtml + '</div>';
-    }
+    // Like count sits next to the like button; comments render directly under the card (WeChat Moments style)
     return '<div class="action-post" data-post-id="' + post.id + '">' +
         '<div class="action-post-body">' +
         '  <div class="action-post-avatar-col">' +
@@ -98,6 +88,7 @@ function buildActionPostItem(post) {
         '      <div class="action-post-actions">' +
         '        <button class="action-post-action-btn like-btn' + likeClass + '" data-post-id="' + post.id + '">' +
         '        <svg viewBox="0 0 24 24" ' + heartFill + ' stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' +
+        '        <span class="action-post-like-count">' + (post.likes > 0 ? post.likes : '0') + '</span>' +
         '        </button>' +
         '        <button class="action-post-action-btn comment-btn" data-post-id="' + post.id + '">' +
         '        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>' +
@@ -108,7 +99,7 @@ function buildActionPostItem(post) {
         '      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>' +
         '      </button>' +
         '    </div>' +
-        socialBubble +
+        commentsHtml +
         '    <div class="action-post-comment-input-area">' +
         '      <input type="text" class="action-post-comment-input" data-post-id="' + post.id + '" placeholder="Add a comment...">' +
         '      <button class="action-post-comment-submit" data-post-id="' + post.id + '">Post</button>' +
@@ -175,26 +166,6 @@ function navigateLightbox(dir) {
     if (counter) counter.textContent = (actionLightboxCurrentIndex + 1) + ' / ' + total;
 }
 
-function bindCommentMoreClicks() {
-    var moreBtns = document.querySelectorAll('.action-post-comment-more');
-    moreBtns.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var postId = parseInt(this.getAttribute('data-post-id'), 10);
-            var post = actionFeed.find(function(p) { return p.id === postId; });
-            var postEl = document.querySelector('.action-post[data-post-id="' + postId + '"]');
-            if (post && postEl) {
-                var commentsContainer = postEl.querySelector('.action-post-comments');
-                if (commentsContainer) {
-                    var allComments = post.commentList.map(function(c) {
-                        return '<div class="action-post-comment-item"><span class="action-post-comment-user">' + c.user + '</span><span class="action-post-comment-text">' + c.text + '</span></div>';
-                    }).join('');
-                    commentsContainer.innerHTML = allComments;
-                }
-            }
-        });
-    });
-}
-
 function showCopiedToast() {
     var toast = document.getElementById('copyToast');
     if (!toast) {
@@ -256,7 +227,6 @@ function bindActionInteractions() {
                 post.likes += post.isLiked ? 1 : -1;
                 this.classList.toggle('liked');
                 var svg = this.querySelector('svg');
-                var postEl = document.querySelector('.action-post[data-post-id="' + postId + '"]');
                 if (post.isLiked) {
                     svg.setAttribute('fill', '#ed4956');
                     svg.setAttribute('stroke', '#ed4956');
@@ -264,31 +234,9 @@ function bindActionInteractions() {
                     svg.setAttribute('fill', 'none');
                     svg.setAttribute('stroke', 'currentColor');
                 }
-                // Update like bubble in social bubble
-                var socialBubble = postEl ? postEl.querySelector('.action-post-social-bubble') : null;
-                if (socialBubble) {
-                    var likeRow = socialBubble.querySelector('.action-post-likes-row');
-                    var likeText = post.likes > 0 ? post.likes.toLocaleString() + ' likes' : 'Be the first to like';
-                    if (post.likes > 0 || post.isLiked) {
-                        if (likeRow) {
-                            likeRow.innerHTML = '<span class="heart-inline">❤</span>' + likeText;
-                            likeRow.style.display = '';
-                        } else {
-                            likeRow = document.createElement('div');
-                            likeRow.className = 'action-post-likes-row has-likes';
-                            likeRow.innerHTML = '<span class="heart-inline">❤</span>' + likeText;
-                            socialBubble.insertBefore(likeRow, socialBubble.firstChild);
-                        }
-                    } else if (likeRow) {
-                        likeRow.style.display = 'none';
-                    }
-                    // If no likes and no comments, hide entire bubble
-                    var hasComments = socialBubble.querySelector('.action-post-comments');
-                    var hasVisibleLikes = socialBubble.querySelector('.action-post-likes-row:not([style*="display: none"])');
-                    if (!hasVisibleLikes && !hasComments) {
-                        socialBubble.style.display = 'none';
-                    }
-                }
+                // Update like count shown next to the heart
+                var countEl = this.querySelector('.action-post-like-count');
+                if (countEl) countEl.textContent = post.likes;
                 persistLike(postId, post.isLiked);
             }
         });
@@ -362,10 +310,14 @@ function bindActionInteractions() {
                     post.commentList.push({ user: 'Guest', text: input.value.trim() });
                     post.comments = post.commentList.length;
                     var commentsContainer = postEl.querySelector('.action-post-comments');
-                    if (commentsContainer) {
-                        commentsContainer.innerHTML = buildActionPostComments(post);
-                        bindCommentMoreClicks();
+                    if (!commentsContainer) {
+                        // First comment: create the comments container under the actions row
+                        commentsContainer = document.createElement('div');
+                        commentsContainer.className = 'action-post-comments';
+                        var actionsRow = postEl.querySelector('.action-post-actions-row');
+                        if (actionsRow) actionsRow.insertAdjacentElement('afterend', commentsContainer);
                     }
+                    commentsContainer.innerHTML = buildActionPostComments(post);
                     input.value = '';
                 }
             }
@@ -383,8 +335,6 @@ function bindActionInteractions() {
             }
         });
     });
-
-    bindCommentMoreClicks();
 
     var shareBtns = document.querySelectorAll('.action-post-more-btn.share-btn');
     shareBtns.forEach(function(btn) {

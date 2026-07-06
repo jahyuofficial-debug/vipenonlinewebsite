@@ -53,22 +53,15 @@
 .action-post-more-btn:hover{color:rgba(255,255,255,.6);background:rgba(255,255,255,.05)}
 .action-post-more-btn svg{width:.16rem;height:.16rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
-/* ── Like/Comment Bubble (WeChat style) ── */
-.action-post-social-bubble{background:rgba(255,255,255,.04);border-radius:.06rem;padding:.08rem .12rem;margin-top:.08rem;position:relative}
-.action-post-social-bubble::before{content:'';position:absolute;top:-.04rem;left:.24rem;width:.08rem;height:.08rem;background:rgba(255,255,255,.04);transform:rotate(45deg)}
+/* ── Like count (next to heart: gray = not liked, red = liked) ── */
+.action-post-like-count{font-size:.1rem;color:inherit;margin-left:.03rem;min-width:.08rem;text-align:left;line-height:1}
 
-/* Likes inside bubble */
-.action-post-likes-row{font-size:.11rem;color:rgba(255,255,255,.6);margin-bottom:.04rem;padding-bottom:.04rem;border-bottom:1px solid rgba(255,255,255,.06);display:none}
-.action-post-likes-row.has-likes{display:block}
-.action-post-likes-row .heart-inline{color:#ed4956;margin-right:.04rem}
-
-/* Comments inside bubble */
-.action-post-comments{padding:0}
+/* ── Comments (WeChat Moments style, directly under the card) ── */
+.action-post-comments{margin-top:.1rem;background:rgba(255,255,255,.03);border-radius:.06rem;padding:.08rem .12rem}
 .action-post-comment-item{display:flex;gap:.04rem;margin-bottom:.04rem;align-items:baseline;font-size:.11rem;line-height:1.5}
+.action-post-comment-item:last-child{margin-bottom:0}
 .action-post-comment-user{color:#d4a853;font-weight:500;flex-shrink:0;white-space:nowrap}
 .action-post-comment-text{color:rgba(255,255,255,.55)}
-.action-post-comment-more{font-size:.1rem;color:rgba(255,255,255,.25);cursor:pointer;margin-top:.04rem;transition:color .2s}
-.action-post-comment-more:hover{color:rgba(255,255,255,.5)}
 
 /* ── Comment Input ── */
 .action-post-comment-input-area{display:none;align-items:center;gap:.08rem;padding:.1rem 0;border-top:1px solid rgba(255,255,255,.04);margin-top:.08rem}
