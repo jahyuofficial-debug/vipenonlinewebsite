@@ -581,7 +581,7 @@ function buildMsgItem(item) {
         '</span>';
 }
 
-var MSG_BARRAGE_LANES = 5;
+var MSG_BARRAGE_LANES = 12;
 
 function buildMsgBarrage() {
     var allMsgs = msgUserPosts.concat(msgBoardData);
@@ -595,11 +595,11 @@ function buildMsgBarrage() {
             laneItems.push(allMsgs[i]);
         }
         if (laneItems.length === 0) continue;
-        // Duplicate items for seamless loop
         var itemsHtml = laneItems.map(buildMsgItem).join('');
-        var duration = 25 + lane * 8;
-        var delay = -lane * 5;
-        html += '<div class="msg-barrage-lane" style="top:' + (lane * 0.42 + 0.1) + 'rem;">' +
+        var duration = 18 + Math.random() * 25 + (lane % 2) * 10;
+        var delay = -Math.random() * 15;
+        var topPct = (lane / MSG_BARRAGE_LANES) * 100;
+        html += '<div class="msg-barrage-lane" style="top:' + topPct + '%;">' +
             '<div class="msg-barrage-scroll" style="animation-duration:' + duration + 's;animation-delay:' + delay + 's;">' +
             itemsHtml + itemsHtml +
             '</div></div>';
@@ -614,6 +614,7 @@ function buildMsgPage() {
         }).join('') +
         '</div>';
     return '<section id="page-msg" class="msg-page">' +
+        '<div class="msg-spacer-top"></div>' +
         '<div class="msg-center-wrap">' +
         '<div class="msg-input-center">' +
         '<div class="msg-input-wrapper">' +

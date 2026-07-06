@@ -1,13 +1,18 @@
 /* MSG Page — Centered Input + Barrage Comments */
 
-.msg-page{background:#0a0a0a;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:1.2rem;padding-bottom:2rem;position:relative;overflow:hidden}
+.msg-page{background:#0a0a0a;height:100vh;position:relative;overflow:hidden}
 
-/* ── Centered Input ── */
-.msg-center-wrap{display:flex;align-items:center;justify-content:center;width:100%;flex-shrink:0;margin-bottom:.4rem;z-index:10}
-.msg-input-center{display:flex;align-items:center;justify-content:center;gap:.1rem;width:100%;max-width:6rem;padding:0 .4rem}
+/* Spacer no longer needed — input is absolutely centered */
+.msg-spacer-top{display:none}
+
+/* ── Centered Input (locked to exact screen center) ── */
+.msg-center-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;width:100%;padding:0 .4rem;z-index:10}
+.msg-input-center{display:flex;align-items:center;justify-content:center;gap:.1rem;width:100%;max-width:6rem}
 .msg-input-wrapper{position:relative;flex:1;max-width:5rem}
-.msg-input-area{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-radius:.2rem;padding:.1rem .16rem;transition:border-color .3s;display:flex;align-items:flex-start;gap:.08rem;min-height:.4rem;backdrop-filter:blur(8px)}
+.msg-input-area{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-radius:.2rem;padding:.1rem .16rem;transition:border-color .3s,box-shadow .3s;display:flex;align-items:flex-start;gap:.08rem;min-height:.4rem;backdrop-filter:blur(8px)}
 .msg-input-area:focus-within{border-color:rgba(212,168,83,.5)}
+/* Neon-green glow on hover */
+.msg-input-area:hover{border-color:rgba(57,255,20,.65);box-shadow:0 0 .12rem rgba(57,255,20,.6),0 0 .3rem rgba(57,255,20,.42),0 0 .52rem rgba(57,255,20,.22)}
 .msg-textarea{flex:1;background:transparent;border:none;color:rgba(255,255,255,.7);font-size:.14rem;line-height:1.5;height:auto;min-height:.22rem;max-height:2rem;resize:none;padding:0;font-family:inherit;overflow-y:auto}
 .msg-textarea::placeholder{color:rgba(255,255,255,.25)}
 .msg-input-actions{display:flex;align-items:center;gap:.06rem}
@@ -25,17 +30,17 @@
 .msg-emoji-panel .emoji-btn:hover{background:rgba(255,255,255,.1)}
 
 /* ── Barrage Track ── */
-.msg-barrage-track{position:relative;width:100%;flex:1;min-height:3rem;overflow:hidden;mask-image:linear-gradient(90deg,transparent 0%,#000 8%,#000 92%,transparent 100%);-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 8%,#000 92%,transparent 100%)}
+.msg-barrage-track{position:absolute;left:0;right:0;top:calc(50% + .9rem);bottom:0;width:100%;overflow:hidden;mask-image:linear-gradient(90deg,transparent 0%,#000 8%,#000 92%,transparent 100%);-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 8%,#000 92%,transparent 100%)}
 
 /* ── Barrage Lane (each row) ── */
-.msg-barrage-lane{position:absolute;left:0;right:0;height:.36rem;display:flex;align-items:center;overflow:hidden}
+.msg-barrage-lane{position:absolute;left:0;right:0;height:.4rem;display:flex;align-items:center;overflow:hidden}
 
 /* ── Barrage Scroll (animated container) ── */
-.msg-barrage-scroll{display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap;will-change:transform;animation-name:msgBarrageScroll;animation-timing-function:linear;animation-iteration-count:infinite}
+.msg-barrage-scroll{display:inline-flex;align-items:center;gap:.6rem;white-space:nowrap;will-change:transform;animation-name:msgBarrageScroll;animation-timing-function:linear;animation-iteration-count:infinite}
 @keyframes msgBarrageScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 
 /* ── Barrage Item ── */
-.msg-barrage-item{display:inline-flex;align-items:baseline;gap:.1rem;padding:.06rem .16rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:.2rem;white-space:nowrap;transition:background .3s,border-color .3s}
+.msg-barrage-item{display:inline-flex;align-items:baseline;gap:.1rem;padding:.08rem .2rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:.2rem;white-space:nowrap;transition:background .3s,border-color .3s}
 .msg-barrage-item:hover{background:rgba(212,168,83,.08);border-color:rgba(212,168,83,.2)}
 .msg-barrage-text{font-size:.14rem;color:rgba(255,255,255,.75);line-height:1.4;font-weight:400}
 .msg-barrage-region{font-size:.1rem;color:rgba(255,255,255,.25);font-weight:300;letter-spacing:.02rem}
