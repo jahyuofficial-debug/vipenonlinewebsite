@@ -55,6 +55,7 @@
 
 /* ── Like count (next to heart: gray = not liked, red = liked) ── */
 .action-post-like-count{font-size:.1rem;color:inherit;margin-left:.03rem;min-width:.08rem;text-align:left;line-height:1}
+.action-post-like-count:empty{display:none}
 
 /* ── Comments (WeChat Moments style, directly under the card) ── */
 .action-post-comments{margin-top:.1rem;background:rgba(255,255,255,.03);border-radius:.06rem;padding:.08rem .12rem}

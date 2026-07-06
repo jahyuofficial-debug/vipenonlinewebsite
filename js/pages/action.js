@@ -88,7 +88,7 @@ function buildActionPostItem(post) {
         '      <div class="action-post-actions">' +
         '        <button class="action-post-action-btn like-btn' + likeClass + '" data-post-id="' + post.id + '">' +
         '        <svg viewBox="0 0 24 24" ' + heartFill + ' stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' +
-        '        <span class="action-post-like-count">' + (post.likes > 0 ? post.likes : '0') + '</span>' +
+        '        <span class="action-post-like-count">' + (post.likes > 0 ? post.likes : '') + '</span>' +
         '        </button>' +
         '        <button class="action-post-action-btn comment-btn" data-post-id="' + post.id + '">' +
         '        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>' +
@@ -234,9 +234,9 @@ function bindActionInteractions() {
                     svg.setAttribute('fill', 'none');
                     svg.setAttribute('stroke', 'currentColor');
                 }
-                // Update like count shown next to the heart
+                // Update like count shown next to the heart (hide when 0)
                 var countEl = this.querySelector('.action-post-like-count');
-                if (countEl) countEl.textContent = post.likes;
+                if (countEl) countEl.textContent = post.likes > 0 ? post.likes : '';
                 persistLike(postId, post.isLiked);
             }
         });

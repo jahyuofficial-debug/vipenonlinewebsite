@@ -59,10 +59,13 @@
 
 .disc-fav-btn{width:.32rem;height:.32rem;border-radius:50%;background:rgba(255,255,255,.12);border:none;cursor:none;display:flex;align-items:center;justify-content:center;transition:all .2s;color:rgba(255,255,255,.5);padding:0;flex-shrink:0;margin-left:.06rem}
 .disc-fav-btn:hover{background:rgba(255,255,255,.2);color:rgba(255,255,255,.8);transform:scale(1.1)}
-.disc-fav-btn.active{color:rgba(255,255,255,.5);background:rgba(255,255,255,.12)}
-.disc-fav-btn.active:hover{background:rgba(255,255,255,.2);color:rgba(255,255,255,.8)}
+.disc-fav-btn.active{color:#ed4956;background:rgba(255,255,255,.12)}
+.disc-fav-btn.active:hover{background:rgba(255,255,255,.2);color:#ed4956}
 .disc-fav-btn svg{width:.16rem;height:.16rem;fill:none;stroke:currentColor;stroke-width:1.5;transition:all .2s}
-.disc-fav-btn.active svg{fill:#d4a853;stroke:#d4a853;filter:drop-shadow(0 0 .06rem rgba(212,168,83,.4))}
+.disc-fav-btn.active svg{fill:#ed4956;stroke:#ed4956;filter:drop-shadow(0 0 .06rem rgba(237,73,86,.4))}
+.disc-fav-count{font-size:.11rem;color:rgba(255,255,255,.5);margin-left:.02rem;align-self:center;line-height:1;flex-shrink:0}
+.disc-fav-count.show{color:#ed4956}
+.disc-fav-count:empty{display:none}
 
 .disc-glass-progress-wrap{display:flex;align-items:center;gap:.08rem}
 .disc-glass-time{font-size:.09rem;color:rgba(255,255,255,.35);font-variant-numeric:tabular-nums;min-width:.36rem;text-align:center;flex-shrink:0}

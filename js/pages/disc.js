@@ -217,6 +217,7 @@ function buildDiscPage() {
         '<button class="disc-fav-btn' + favClass + '" id="discFavBtn" title="Favorite">' +
         '<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>' +
         '</button>' +
+        '<span class="disc-fav-count' + (isFav ? ' show' : '') + '" id="discFavCount">' + (isFav ? '1' : '') + '</span>' +
         '</div>' +
         '<div class="disc-glass-progress-wrap">' +
         '<span class="disc-glass-time" id="discCurrentTime">0:00</span>' +
@@ -438,6 +439,11 @@ function loadDiscTrack(index, callback) {
             var tid = tapes[currentIdx].id;
             var liked = userBehavior.likedTracks.indexOf(tid) !== -1;
             favBtn.classList.toggle('active', liked);
+            var countEl = document.getElementById('discFavCount');
+            if (countEl) {
+                countEl.textContent = liked ? '1' : '';
+                countEl.classList.toggle('show', liked);
+            }
         }
         updateCarousel();
     }
@@ -610,6 +616,11 @@ function bindDiscPlayerInteractions() {
             var tapeId = tapes[currentIdx].id;
             np.fav = !np.fav;
             favBtn.classList.toggle('active', np.fav);
+            var countEl = document.getElementById('discFavCount');
+            if (countEl) {
+                countEl.textContent = np.fav ? '1' : '';
+                countEl.classList.toggle('show', np.fav);
+            }
             var idx = userBehavior.likedTracks.indexOf(tapeId);
             if (np.fav && idx === -1) {
                 userBehavior.likedTracks.push(tapeId);
