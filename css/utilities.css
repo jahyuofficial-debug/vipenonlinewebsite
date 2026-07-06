@@ -1,7 +1,11 @@
 .fw-600{font-weight:600}
 .wc{color:#fff}
-.mc{color:#b2b9ff}
+.mc{color:#d4a853}
 .gray{color:rgba(255,255,255,.5)}
+.gold{color:#d4a853}
+.lime{color:#d2ff00}
+.glow-green{color:#39ff14}
+
 .f-12{font-size:.12rem}
 .f-13{font-size:.13rem}
 .f-14{font-size:.14rem}
@@ -23,3 +27,28 @@
 .max-wid{max-width:14rem;margin:0 auto;padding:0 .5rem}
 .wid-50{width:50%}
 .wid-100{width:100%}
+
+/* ── Gold hover glow utilities ── */
+.hover-gold{transition:color .35s cubic-bezier(0.16,1,0.3,1)}
+.hover-gold:hover{color:#d4a853}
+.hover-gold-glow{transition:color .35s,filter .35s}
+.hover-gold-glow:hover{color:#d4a853;filter:drop-shadow(0 0 .06rem rgba(212,168,83,.4))}
+
+/* ── Card glass utility ── */
+.glass-card{
+  background:rgba(255,255,255,.06);
+  backdrop-filter:blur(24px) saturate(180%);
+  -webkit-backdrop-filter:blur(24px) saturate(180%);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:.16rem;
+  transition:transform .4s cubic-bezier(.25,.46,.45,.94),box-shadow .4s,border-color .4s;
+}
+.glass-card:hover{
+  border-color:rgba(212,168,83,.3);
+  box-shadow:0 .12rem .4rem rgba(0,0,0,.5),0 0 .12rem rgba(212,168,83,.1);
+  transform:translateY(-.04rem);
+}
+
+/* ── Reveal animation classes ── */
+.reveal-up{opacity:0;transform:translateY(.3rem);transition:opacity .8s cubic-bezier(0.16,1,0.3,1),transform .8s cubic-bezier(0.16,1,0.3,1)}
+.reveal-up.visible{opacity:1;transform:translateY(0)}

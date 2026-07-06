@@ -1,0 +1,152 @@
+/* ============================================================
+   Vipen Design System — Black × Gold × Green
+   Inspired by landonorris.com aesthetic
+   ============================================================ */
+
+:root {
+  /* ── Core Palette ── */
+  --v-black:        #000000;
+  --v-white:        #ffffff;
+  --v-gold:         #d4a853;   /* primary accent */
+  --v-gold-light:   #e8c97a;   /* hover gold */
+  --v-gold-dark:    #b8923f;   /* pressed gold */
+  --v-green:        #39ff14;   /* status / progress */
+  --v-green-glow:   #d2ff00;   /* neon lime accent (landonorris style) */
+  --v-dark-surface: #0a0e0a;   /* card backgrounds */
+  --v-dark-elevated:#111111;   /* elevated cards */
+
+  /* ── Functional Colors ── */
+  --v-primary:      var(--v-gold);
+  --v-primary-hover: var(--v-gold-light);
+  --v-accent:       var(--v-green-glow);
+  --v-accent-soft:  var(--v-green);
+  --v-success:      #32c864;
+  --v-danger:       #ed4956;
+  --v-warm-white:   #f5f0e8;
+
+  /* ── White Opacity Scale (for dark theme) ── */
+  --v-w-100:  rgba(255,255,255,1.0);
+  --v-w-90:   rgba(255,255,255,0.90);
+  --v-w-85:   rgba(255,255,255,0.85);
+  --v-w-70:   rgba(255,255,255,0.70);
+  --v-w-55:   rgba(255,255,255,0.55);
+  --v-w-40:   rgba(255,255,255,0.40);
+  --v-w-25:   rgba(255,255,255,0.25);
+  --v-w-18:   rgba(255,255,255,0.18);
+  --v-w-12:   rgba(255,255,255,0.12);
+  --v-w-08:   rgba(255,255,255,0.08);
+  --v-w-06:   rgba(255,255,255,0.06);
+  --v-w-04:   rgba(255,255,255,0.04);
+  --v-w-02:   rgba(255,255,255,0.02);
+
+  /* ── Gold Opacity Scale ── */
+  --v-gold-25:  rgba(212,168,83,0.25);
+  --v-gold-15:  rgba(212,168,83,0.15);
+  --v-gold-10:  rgba(212,168,83,0.10);
+  --v-gold-06:  rgba(212,168,83,0.06);
+  --v-gold-03:  rgba(212,168,83,0.03);
+
+  /* ── Green Opacity Scale ── */
+  --v-green-40: rgba(57,255,20,0.40);
+  --v-green-25: rgba(57,255,20,0.25);
+  --v-green-15: rgba(57,255,20,0.15);
+  --v-green-08: rgba(57,255,20,0.08);
+  --v-green-06: rgba(57,255,20,0.06);
+  --v-glow-60:  rgba(210,255,0,0.60);
+  --v-glow-40:  rgba(210,255,0,0.40);
+  --v-glow-20:  rgba(210,255,0,0.20);
+  --v-glow-10:  rgba(210,255,0,0.10);
+
+  /* ── Animation Tokens ── */
+  --v-ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
+  --v-ease-smooth:  cubic-bezier(0.65, 0.05, 0, 1);
+  --v-ease-spring:  cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --v-duration-fast:   0.2s;
+  --v-duration-normal: 0.35s;
+  --v-duration-slow:   0.75s;
+  --v-duration-hero:   1.2s;
+
+  /* ── Glass Token ── */
+  --v-glass-bg:      rgba(255,255,255,0.08);
+  --v-glass-border:  rgba(255,255,255,0.18);
+  --v-glass-border-hover: rgba(212,168,83,0.35);
+  --v-glass-shadow:  inset 0 1px 0 rgba(255,255,255,0.15), 0 .04rem .2rem rgba(0,0,0,0.2);
+  --v-glass-blur:    blur(20px) saturate(180%);
+
+  /* ── Selection ── */
+  --v-selection-bg:  var(--v-green-glow);
+  --v-selection-text: var(--v-black);
+}
+
+/* ── Global Selection (landonorris style: green on black) ── */
+::selection {
+  background-color: var(--v-selection-bg);
+  color: var(--v-selection-text);
+  text-shadow: none;
+}
+::-moz-selection {
+  background-color: var(--v-selection-bg);
+  color: var(--v-selection-text);
+  text-shadow: none;
+}
+img::selection, svg::selection { background: transparent; }
+
+/* ── Scrollbar (green glow style) ── */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  width: 3px; border-radius: 4px; background: transparent;
+  box-shadow: inset 0 0 0 0 var(--v-green);
+  transition: box-shadow .5s ease;
+}
+html.is-scrolling::-webkit-scrollbar-thumb {
+  box-shadow: inset 0 0 0 5px var(--v-green);
+}
+html.is-scrolling { scrollbar-color: var(--v-green) transparent; }
+
+/* ── Focus Ring (gold glow) ── */
+*:focus-visible {
+  outline: 2px solid var(--v-gold-25);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── Animation Utilities ── */
+@keyframes v-glow-pulse {
+  0%, 100% { box-shadow: 0 0 .04rem var(--v-glow-20); }
+  50%      { box-shadow: 0 0 .12rem var(--v-glow-40), 0 0 .04rem var(--v-glow-10); }
+}
+@keyframes v-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes v-float-up {
+  from { opacity: 0; transform: translateY(.3rem); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes v-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Utility classes ── */
+.v-glow-hover {
+  transition: box-shadow var(--v-duration-normal) var(--v-ease-out),
+              border-color var(--v-duration-normal) var(--v-ease-out);
+}
+.v-glow-hover:hover {
+  border-color: var(--v-glass-border-hover);
+  box-shadow: 0 0 .12rem var(--v-glow-20), 0 0 .04rem var(--v-glow-10);
+}
+
+.v-gold-text {
+  color: var(--v-gold);
+  transition: color var(--v-duration-normal) var(--v-ease-out);
+}
+.v-gold-text:hover {
+  color: var(--v-gold-light);
+}
+
+.v-green-text {
+  color: var(--v-green-glow);
+}

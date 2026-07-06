@@ -6,9 +6,12 @@ html.loading-skip #loading{display:none}
 #loading .loadMsg{position:absolute;bottom:1.0rem;left:.35rem}
 #loading .loadMsg p{font-size:.12rem;color:rgba(255,255,255,.5);font-style:italic}
 #loading .progressWrap{position:absolute;bottom:.28rem;left:.35rem}
-#loading .progressBar{width:2.4rem;height:.02rem;background:rgba(255,255,255,.1);border-radius:.01rem;overflow:hidden;display:block}
-#loading .progressBar .fill{height:100%;width:0%;background:#39ff14;box-shadow:0 0 .08rem rgba(57,255,20,.6);border-radius:.01rem;transition:width .05s linear}
+#loading .progressBar{width:2.4rem;height:.02rem;background:rgba(255,255,255,.1);border-radius:.01rem;overflow:hidden;display:block;position:relative}
+#loading .progressBar .fill{height:100%;width:0%;background:linear-gradient(90deg,#d4a853,#39ff14);border-radius:.01rem;transition:width .05s linear;box-shadow:0 0 .12rem rgba(57,255,20,.5),0 0 .04rem rgba(212,168,83,.3);position:relative;z-index:1}
+#loading .progressBar::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);border-radius:.01rem;animation:v-shimmer 2s infinite linear;z-index:2;pointer-events:none}
 #loading .progressNum{font-size:.24rem;color:rgba(255,255,255,.5);margin-top:.06rem;font-family:Helvetica,Arial,sans-serif;font-weight:300}
+#loading .progressNum span{color:#d4a853;font-weight:500;transition:color .3s}
 #loading .progressStatus{font-size:.11rem;color:rgba(255,255,255,.25);margin-top:.04rem;font-family:Helvetica,Arial,sans-serif;font-weight:300;letter-spacing:.01em}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes zoomFade{0%{transform:scale(1);opacity:1}100%{transform:scale(4);opacity:0}}
+@keyframes v-shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}

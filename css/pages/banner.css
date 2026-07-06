@@ -74,7 +74,7 @@
   cursor:pointer;transition:transform .3s ease,opacity .3s ease;opacity:.55;
   pointer-events:auto;
 }
-.social-qr-area .social-qr-item:hover{opacity:1}
+.social-qr-area .social-qr-item:hover{opacity:1;transform:scale(1.15);filter:drop-shadow(0 0 .1rem rgba(212,168,83,.35))}
 .social-qr-area .social-qr-item svg{
   width:.28rem;height:.28rem;fill:#fff;
 }

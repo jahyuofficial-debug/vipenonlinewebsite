@@ -167,9 +167,9 @@
 }
 
 .notif-action-btn.active {
-    background: rgba(99,102,241,.15);
-    color: rgba(99,102,241,.8);
-    border-color: rgba(99,102,241,.3);
+    background: rgba(212,168,83,.15);
+    color: rgba(212,168,83,.8);
+    border-color: rgba(212,168,83,.3);
 }
 
 .notif-action-icon {
@@ -238,11 +238,11 @@
 }
 
 .notif-sub-item.unread {
-    background: rgba(99,102,241,.06);
+    background: rgba(212,168,83,.06);
 }
 
 .notif-sub-item.unread:hover {
-    background: rgba(99,102,241,.1);
+    background: rgba(212,168,83,.1);
 }
 
 .notif-sub-avatar {
@@ -295,7 +295,7 @@
 
 .notif-sub-target {
     font-size: .09rem;
-    color: rgba(99,102,241,.6);
+    color: rgba(212,168,83,.6);
     margin-top: .02rem;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -324,11 +324,11 @@
 }
 
 .notif-msg-item.unread {
-    background: rgba(99,102,241,.06);
+    background: rgba(212,168,83,.06);
 }
 
 .notif-msg-item.unread:hover {
-    background: rgba(99,102,241,.1);
+    background: rgba(212,168,83,.1);
 }
 
 .notif-msg-avatar {
@@ -542,7 +542,7 @@
 }
 
 .notif-chat-msg-mine .notif-chat-msg-bubble {
-    background: rgba(99,102,241,.3);
+    background: rgba(212,168,83,.3);
     color: #fff;
     border-bottom-right-radius: .04rem;
 }

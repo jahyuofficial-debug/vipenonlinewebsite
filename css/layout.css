@@ -17,10 +17,10 @@ header .pc-nav .navItems a.active{color:#fff}
 
 header .headerActions{display:flex;align-items:center;gap:.12rem}
 header .headerActions .authBtn{font-size:.115rem;font-weight:600;letter-spacing:.01rem;padding:.06rem .16rem;border-radius:.16rem;cursor:none;transition:all .35s;outline:none;line-height:1.2;display:inline-flex;align-items:center;white-space:nowrap;font-family:'Nunito','Quicksand','Helvetica Neue',Helvetica,Arial,sans-serif}
-header .headerActions .authBtn.signin{background:transparent;border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.7)}
-header .headerActions .authBtn.signin:hover{border-color:rgba(255,255,255,.6);color:#fff}
-header .headerActions .authBtn.signup{background:#fff;border:1px solid #fff;color:#000}
-header .headerActions .authBtn.signup:hover{background:rgba(255,255,255,.9)}
+header .headerActions .authBtn.signin{background:transparent;border:1px solid rgba(212,168,83,.3);color:rgba(212,168,83,.7)}
+header .headerActions .authBtn.signin:hover{border-color:rgba(212,168,83,.7);color:#d4a853;box-shadow:0 0 .12rem rgba(212,168,83,.2)}
+header .headerActions .authBtn.signup{background:linear-gradient(135deg,#d4a853,#b8923f);border:1px solid #d4a853;color:#000;box-shadow:0 0 .08rem rgba(212,168,83,.15)}
+header .headerActions .authBtn.signup:hover{background:linear-gradient(135deg,#e8c97a,#d4a853);box-shadow:0 0 .2rem rgba(212,168,83,.3);transform:translateY(-.01rem)}
 header .headerActions .profile-link{background:transparent;border:none;color:rgba(255,255,255,.65);padding:.04rem;transition:color .35s}
 header .headerActions .profile-link:hover{color:#fff}
 header .headerActions .profile-link svg{width:.22rem;height:.22rem}
