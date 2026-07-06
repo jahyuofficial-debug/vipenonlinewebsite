@@ -91,8 +91,8 @@ function buildFreshHeroCarousel() {
 function buildFreshPage(activeKey) {
     return '<section id="page-fresh" class="fresh-page" style="display:flex;align-items:center;justify-content:center;min-height:80vh;">' +
         '<div style="text-align:center;">' +
-        '<h2 style="font-size:.48rem;color:#fff;font-weight:700;margin-bottom:.16rem;">正在建设中</h2>' +
-        '<p style="font-size:.2rem;color:rgba(255,255,255,.5);letter-spacing:.04rem;font-family:Georgia,Times New Roman,serif;">Under Construction</p>' +
+        '<img src="images/k-intro-walk.gif" alt="coming soon" style="width:2.4rem;height:auto;display:block;margin:0 auto .2rem;image-rendering:pixelated;">' +
+        '<p style="font-size:.28rem;color:rgba(255,255,255,.6);font-family:Georgia,Times New Roman,serif;font-style:italic;letter-spacing:.06rem;">coming soon</p>' +
         '</div>' +
         '</section>';
 }
