@@ -504,29 +504,44 @@ window.discData = { tapes: [], playMode: 'sequence', currentTapeIndex: 0 };
 
 var pageTemplates = {};
 
-var msgBoardData = [
-    { id: 0, username: 'Chen Mobai', avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&q=80', content: '', timeAgo: '2026-05-23', images: [], likes: 12, isLiked: false },
-    { id: 1, username: 'Lin Xiaoyu', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80', content: '', timeAgo: '2026-05-23', images: [], likes: 8, isLiked: true },
-    { id: 2, username: 'Zhang Siyuan', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80', content: '', timeAgo: '2026-05-22', images: [], likes: 15, isLiked: false },
-    { id: 3, username: 'Wang Jiaer', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80', content: '', timeAgo: '2026-05-22', images: [], likes: 6, isLiked: false },
-    { id: 4, username: 'Li Mengqi', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80', content: '', timeAgo: '2026-05-21', images: [], likes: 20, isLiked: true },
-    { id: 5, username: 'Zhao Zixuan', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80', content: '', timeAgo: '2026-05-21', images: [], likes: 11, isLiked: false },
-    { id: 6, username: 'Zhou Yuhang', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&q=80', content: '', timeAgo: '2026-05-20', images: [], likes: 9, isLiked: false },
-    { id: 7, username: 'Wu Xinran', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&q=80', content: '', timeAgo: '2026-05-20', images: [], likes: 14, isLiked: true },
-    { id: 8, username: 'Zheng Haoran', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&q=80', content: '', timeAgo: '2026-05-19', images: [], likes: 7, isLiked: false },
-    { id: 9, username: 'Sun Yating', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&q=80', content: '', timeAgo: '2026-05-19', images: [], likes: 18, isLiked: false }
-];
+var msgBoardData = [];
 
-var msgCurrentUser = { username: 'Guest', avatar: 'https://images.unsplash.com/photo-1511367461989-f85a21fda167?w=200&q=80' };
+var msgCurrentUser = { username: 'Guest', avatar: '' };
 var msgEmojiList = ['\u{1F600}','\u{1F60D}','\u{1F601}','\u{1F389}','\u{1F92F}','\u{1F44D}','\u{1F496}','\u{1F480}','\u{1F4AF}','\u{1F4A1}','\u{1F525}','\u{1F308}','\u{1F31F}','\u{1F3B6}','\u{1F60E}','\u{1F618}','\u{1F92A}','\u{1F44F}','\u{1F4A5}','\u{1F6A8}','\u{2615}','\u{1F37F}','\u{1F3C6}','\u{1F451}','\u{1F98B}','\u{1F31A}','\u{270C}','\u{1F64C}','\u{1F33A}','\u{1F30D}','\u{1F3A8}','\u{1F48E}','\u{1F514}','\u{1F380}','\u{1F31E}','\u{1F4F8}','\u{1F393}','\u{1F91D}','\u{1F680}','\u{1F49D}'];
-var msgNextId = 10;
+var msgNextId = 1;
 var msgTempImages = [];
 var msgUserPosts = [];
+var msgUserRegion = '';
+var msgRegionLoaded = false;
+
+function loadMsgUserRegion() {
+    if (msgRegionLoaded) return;
+    msgRegionLoaded = true;
+    fetch('/api/msg/region')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data && data.region) {
+                msgUserRegion = data.region;
+            }
+        })
+        .catch(function(e) {
+            // Fallback: try external API
+            return fetch('https://ipapi.co/json/')
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data && !data.error) {
+                        msgUserRegion = data.region || data.city || '';
+                    }
+                })
+                .catch(function(e2) {});
+        });
+}
+
 try {
     var _savedMsgs = JSON.parse(localStorage.getItem('vipen_msg_board') || '[]');
     if (Array.isArray(_savedMsgs) && _savedMsgs.length) {
         msgUserPosts = _savedMsgs;
-        var maxId = 9;
+        var maxId = 0;
         msgUserPosts.forEach(function(m){ if (m.id > maxId) maxId = m.id; });
         msgNextId = maxId + 1;
     }
@@ -552,39 +567,44 @@ var freshActiveTab = 'all';
 
 
 
-function buildMsgImages(images) {
-    if (!images || images.length === 0) return '';
-    var imgClass = images.length === 1 ? 'single' : images.length === 2 ? 'double' : images.length === 4 ? 'four' : 'multi';
-    var imgsHtml = images.map(function(img) {
-        return '<img class="msg-item-img" src="' + img + '" alt="" loading="lazy">';
-    }).join('');
-    return '<div class="msg-item-images ' + imgClass + '">' + imgsHtml + '</div>';
+function escapeMsgText(str) {
+    if (!str) return '';
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 }
 
 function buildMsgItem(item) {
-    var likeClass = item.isLiked ? ' liked' : '';
-    var heartFill = item.isLiked ? ' fill="#ed4956" stroke="#ed4956"' : ' fill="none" stroke="currentColor"';
-    return '<div class="msg-item" data-msg-id="' + item.id + '">' +
-        '<div class="msg-item-avatar-col">' +
-        '<img class="msg-item-avatar" src="' + item.avatar + '" alt="' + item.username + '">' +
-        '</div>' +
-        '<div class="msg-item-body">' +
-        '<div class="msg-item-header">' +
-        '<span class="msg-item-username">' + item.username + '</span>' +
-        '<span class="msg-item-time">' + item.timeAgo + '</span>' +
-        '</div>' +
-        '<div class="msg-item-content">' + item.content.replace(/\n/g, '<br>') + '</div>' +
-        '</div></div>';
+    var region = item.region ? escapeMsgText(item.region) : '';
+    var regionHtml = region ? '<span class="msg-barrage-region">' + region + '</span>' : '';
+    return '<span class="msg-barrage-item">' +
+        '<span class="msg-barrage-text">' + escapeMsgText(item.content) + '</span>' +
+        regionHtml +
+        '</span>';
 }
 
-function buildMsgList() {
+var MSG_BARRAGE_LANES = 5;
+
+function buildMsgBarrage() {
     var allMsgs = msgUserPosts.concat(msgBoardData);
     if (allMsgs.length === 0) {
-        return '<div class="msg-empty"><h3 class="msg-empty-title">No Messages</h3><p class="msg-empty-desc">Be the first to leave a message</p></div>';
+        return '<div class="msg-barrage-empty">No messages yet</div>';
     }
-    return allMsgs.map(function(item) {
-        return buildMsgItem(item);
-    }).join('');
+    var html = '';
+    for (var lane = 0; lane < MSG_BARRAGE_LANES; lane++) {
+        var laneItems = [];
+        for (var i = lane; i < allMsgs.length; i += MSG_BARRAGE_LANES) {
+            laneItems.push(allMsgs[i]);
+        }
+        if (laneItems.length === 0) continue;
+        // Duplicate items for seamless loop
+        var itemsHtml = laneItems.map(buildMsgItem).join('');
+        var duration = 25 + lane * 8;
+        var delay = -lane * 5;
+        html += '<div class="msg-barrage-lane" style="top:' + (lane * 0.42 + 0.1) + 'rem;">' +
+            '<div class="msg-barrage-scroll" style="animation-duration:' + duration + 's;animation-delay:' + delay + 's;">' +
+            itemsHtml + itemsHtml +
+            '</div></div>';
+    }
+    return html;
 }
 
 function buildMsgPage() {
@@ -594,11 +614,11 @@ function buildMsgPage() {
         }).join('') +
         '</div>';
     return '<section id="page-msg" class="msg-page">' +
-        '<div class="msg-container">' +
-        '<div class="msg-input-wrap">' +
+        '<div class="msg-center-wrap">' +
+        '<div class="msg-input-center">' +
         '<div class="msg-input-wrapper">' +
         '<div class="msg-input-area">' +
-        '<textarea class="msg-textarea" id="msgTextarea" placeholder="Share your thoughts..." rows="1"></textarea>' +
+        '<textarea class="msg-textarea" id="msgTextarea" placeholder="留下一句话..." rows="1"></textarea>' +
         '<div class="msg-input-actions">' +
         '<div class="msg-input-tools">' +
         '<button class="msg-tool-btn" id="msgEmojiBtn" type="button" title="Emoji">' +
@@ -609,11 +629,11 @@ function buildMsgPage() {
         '</div>' +
         emojiPanelHtml +
         '</div>' +
-        '<button class="msg-submit-btn" id="msgSubmitBtn">Post</button>' +
+        '<button class="msg-submit-btn" id="msgSubmitBtn">Send</button>' +
         '</div>' +
-        '<div class="msg-list" id="msgList">' + buildMsgList() + '</div>' +
-        '<div class="msg-load-more" id="msgLoadMore"><span></span><span></span><span></span></div>' +
-        '</div></section>';
+        '</div>' +
+        '<div class="msg-barrage-track" id="msgBarrageTrack">' + buildMsgBarrage() + '</div>' +
+        '</section>';
 }
 
 function bindMsgInteractions() {
@@ -621,6 +641,9 @@ function bindMsgInteractions() {
     var textarea = document.getElementById('msgTextarea');
     var emojiBtn = document.getElementById('msgEmojiBtn');
     var emojiPanel = document.getElementById('msgEmojiPanel');
+
+    // Load user region on page visit
+    loadMsgUserRegion();
 
     if (textarea) {
         textarea.addEventListener('input', function() {
@@ -631,6 +654,12 @@ function bindMsgInteractions() {
                 textarea.style.height = maxHeight + 'px';
             } else {
                 textarea.style.height = newHeight + 'px';
+            }
+        });
+        textarea.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (submitBtn) submitBtn.click();
             }
         });
     }
@@ -671,31 +700,21 @@ function bindMsgInteractions() {
         submitBtn.addEventListener('click', function() {
             var content = textarea.value.trim();
             if (!content) return;
-            var timeStr = 'Just now';
             var newMsg = {
                 id: msgNextId++,
-                username: msgCurrentUser.username,
-                avatar: msgCurrentUser.avatar,
                 content: content,
-                timeAgo: timeStr,
-                images: [],
-                likes: 0,
-                isLiked: false
+                region: msgUserRegion || '',
+                time: Date.now()
             };
             msgUserPosts.unshift(newMsg);
             saveMsgUserPosts();
             textarea.value = '';
             textarea.style.height = 'auto';
-            var msgList = document.getElementById('msgList');
-            if (msgList) {
-                var emptyEl = msgList.querySelector('.msg-empty');
-                if (emptyEl) emptyEl.remove();
-                var tempDiv = document.createElement('div');
-                tempDiv.innerHTML = buildMsgItem(newMsg);
-                var newItem = tempDiv.firstChild;
-                msgList.insertBefore(newItem, msgList.firstChild);
+            // Rebuild barrage animation with new message
+            var track = document.getElementById('msgBarrageTrack');
+            if (track) {
+                track.innerHTML = buildMsgBarrage();
             }
-
         });
     }
 }
