@@ -581,7 +581,7 @@ function buildMsgItem(item) {
         '</span>';
 }
 
-var MSG_BARRAGE_LANES = 12;
+var MSG_BARRAGE_LANES = 8;
 
 function buildMsgBarrage() {
     var allMsgs = msgUserPosts.concat(msgBoardData);
@@ -596,12 +596,11 @@ function buildMsgBarrage() {
         }
         if (laneItems.length === 0) continue;
         var itemsHtml = laneItems.map(buildMsgItem).join('');
-        var duration = 18 + Math.random() * 25 + (lane % 2) * 10;
-        var delay = -Math.random() * 15;
-        var topPct = (lane / MSG_BARRAGE_LANES) * 100;
-        html += '<div class="msg-barrage-lane" style="top:' + topPct + '%;">' +
+        var duration = 16 + Math.random() * 20 + (lane % 2) * 8;
+        var delay = -(Math.random() * duration);
+        html += '<div class="msg-barrage-lane">' +
             '<div class="msg-barrage-scroll" style="animation-duration:' + duration + 's;animation-delay:' + delay + 's;">' +
-            itemsHtml + itemsHtml +
+            itemsHtml +
             '</div></div>';
     }
     return html;
@@ -626,11 +625,11 @@ function buildMsgPage() {
         '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>' +
         '</button>' +
         '</div>' +
+        '<button class="msg-submit-btn" id="msgSubmitBtn">Send</button>' +
         '</div>' +
         '</div>' +
         emojiPanelHtml +
         '</div>' +
-        '<button class="msg-submit-btn" id="msgSubmitBtn">Send</button>' +
         '</div>' +
         '</div>' +
         '<div class="msg-barrage-track" id="msgBarrageTrack">' + buildMsgBarrage() + '</div>' +

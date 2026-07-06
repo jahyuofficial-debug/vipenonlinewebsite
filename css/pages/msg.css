@@ -9,10 +9,12 @@
 .msg-center-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;width:100%;padding:0 .4rem;z-index:10}
 .msg-input-center{display:flex;align-items:center;justify-content:center;gap:.1rem;width:100%;max-width:6rem}
 .msg-input-wrapper{position:relative;flex:1;max-width:5rem}
-.msg-input-area{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-radius:.2rem;padding:.1rem .16rem;transition:border-color .3s,box-shadow .3s;display:flex;align-items:flex-start;gap:.08rem;min-height:.4rem;backdrop-filter:blur(8px)}
-.msg-input-area:focus-within{border-color:rgba(212,168,83,.5)}
-/* Neon-green glow on hover */
-.msg-input-area:hover{border-color:rgba(57,255,20,.65);box-shadow:0 0 .12rem rgba(57,255,20,.6),0 0 .3rem rgba(57,255,20,.42),0 0 .52rem rgba(57,255,20,.22)}
+/* Rotating neon beam circling the input box */
+.msg-input-wrapper::before{content:'';position:absolute;inset:-.02rem;border-radius:.22rem;background:conic-gradient(from 0deg,rgba(57,255,20,0) 0deg,rgba(57,255,20,.95) 30deg,rgba(57,255,20,.18) 60deg,rgba(57,255,20,0) 95deg,rgba(57,255,20,0) 360deg);filter:blur(.05rem);z-index:-1;animation:msgBeamSpin 3.4s linear infinite;pointer-events:none}
+@keyframes msgBeamSpin{to{transform:rotate(360deg)}}
+.msg-input-area{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.12);border-radius:.2rem;padding:.1rem .16rem;transition:border-color .3s;display:flex;align-items:flex-end;gap:.08rem;min-height:.4rem;backdrop-filter:blur(8px);outline:none}
+.msg-input-area:focus-within,.msg-textarea:focus{outline:none;border-color:rgba(255,255,255,.12)}
+.msg-input-area:hover{border-color:rgba(57,255,20,.4)}
 .msg-textarea{flex:1;background:transparent;border:none;color:rgba(255,255,255,.7);font-size:.14rem;line-height:1.5;height:auto;min-height:.22rem;max-height:2rem;resize:none;padding:0;font-family:inherit;overflow-y:auto}
 .msg-textarea::placeholder{color:rgba(255,255,255,.25)}
 .msg-input-actions{display:flex;align-items:center;gap:.06rem}
@@ -20,7 +22,7 @@
 .msg-tool-btn{width:.26rem;height:.26rem;border-radius:50%;border:none;background:transparent;color:rgba(255,255,255,.5);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .3s;font-size:.12rem;padding:0}
 .msg-tool-btn:hover{color:rgba(255,255,255,.9)}
 .msg-tool-btn svg{width:.16rem;height:.16rem}
-.msg-submit-btn{font-size:.13rem;font-weight:700;color:#000;background:linear-gradient(135deg,#d4a853,#b8923f);border:none;border-radius:.5rem;padding:0 .2rem;cursor:pointer;transition:all .3s;text-transform:uppercase;letter-spacing:.02rem;height:.4rem;line-height:.4rem;white-space:nowrap;flex-shrink:0}
+.msg-submit-btn{font-size:.12rem;font-weight:700;color:#000;background:linear-gradient(135deg,#d4a853,#b8923f);border:none;border-radius:.5rem;padding:0 .16rem;cursor:pointer;transition:all .3s;text-transform:uppercase;letter-spacing:.02rem;height:.3rem;line-height:.3rem;white-space:nowrap;flex-shrink:0}
 .msg-submit-btn:hover{background:linear-gradient(135deg,#e8c97a,#d4a853)}
 .msg-submit-btn:disabled{background:rgba(255,255,255,.15);color:rgba(255,255,255,.3);cursor:not-allowed}
 
@@ -30,20 +32,21 @@
 .msg-emoji-panel .emoji-btn:hover{background:rgba(255,255,255,.1)}
 
 /* ── Barrage Track ── */
-.msg-barrage-track{position:absolute;left:0;right:0;top:calc(50% + .9rem);bottom:0;width:100%;overflow:hidden;mask-image:linear-gradient(90deg,transparent 0%,#000 8%,#000 92%,transparent 100%);-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 8%,#000 92%,transparent 100%)}
+.msg-barrage-track{position:absolute;left:0;right:0;top:calc(50% + .9rem);bottom:0;width:100%;display:flex;flex-direction:column;overflow:hidden;mask-image:linear-gradient(90deg,transparent 0%,#000 8%,#000 92%,transparent 100%);-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 8%,#000 92%,transparent 100%)}
 
 /* ── Barrage Lane (each row) ── */
-.msg-barrage-lane{position:absolute;left:0;right:0;height:.4rem;display:flex;align-items:center;overflow:hidden}
+.msg-barrage-lane{position:relative;flex:1 1 0;min-height:0;width:100%;display:flex;align-items:center;overflow:hidden}
 
 /* ── Barrage Scroll (animated container) ── */
-.msg-barrage-scroll{display:inline-flex;align-items:center;gap:.6rem;white-space:nowrap;will-change:transform;animation-name:msgBarrageScroll;animation-timing-function:linear;animation-iteration-count:infinite}
-@keyframes msgBarrageScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.msg-barrage-scroll{display:flex;align-items:center;gap:.6rem;white-space:nowrap;flex-shrink:0;width:max-content;will-change:transform;animation-name:msgBarrageScroll;animation-timing-function:linear;animation-iteration-count:infinite}
+@keyframes msgBarrageScroll{0%{transform:translateX(calc(50vw - 50%))}50%{transform:translateX(calc(-100vw - 100%))}50.001%{transform:translateX(100vw)}100%{transform:translateX(calc(50vw - 50%))}}
 
 /* ── Barrage Item ── */
 .msg-barrage-item{display:inline-flex;align-items:baseline;gap:.1rem;padding:.08rem .2rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:.2rem;white-space:nowrap;transition:background .3s,border-color .3s}
 .msg-barrage-item:hover{background:rgba(212,168,83,.08);border-color:rgba(212,168,83,.2)}
 .msg-barrage-text{font-size:.14rem;color:rgba(255,255,255,.75);line-height:1.4;font-weight:400}
-.msg-barrage-region{font-size:.1rem;color:rgba(255,255,255,.25);font-weight:300;letter-spacing:.02rem}
+.msg-barrage-region{font-size:.1rem;color:rgba(57,255,20,.7);font-weight:300;letter-spacing:.02rem;max-width:0;opacity:0;overflow:hidden;white-space:nowrap;transition:opacity .25s,max-width .25s}
+.msg-barrage-item:hover .msg-barrage-region{opacity:1;max-width:1rem}
 
 /* ── Empty State ── */
 .msg-barrage-empty{text-align:center;color:rgba(255,255,255,.15);font-size:.14rem;padding:1rem 0;width:100%}
