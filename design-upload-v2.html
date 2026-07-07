@@ -1803,6 +1803,7 @@ document.getElementById('actionSaveBtn').addEventListener('click', function(){
 
     var cleanPosts = JSON.parse(JSON.stringify(actionPosts));
     cleanPosts.forEach(function(p){
+        if(!p.publishedAt) p.publishedAt = new Date().toISOString();   // backfill real timestamp for legacy posts
         if(p.avatar && p.avatar.indexOf('blob:')===0) p.avatar = '';
         if(Array.isArray(p.images)){
             for(var i=0;i<p.images.length;i++){
@@ -1852,6 +1853,7 @@ document.getElementById('actionAddPost').addEventListener('click', function(){
         caption: '',
         likes: 0,
         comments: 0,
+        publishedAt: new Date().toISOString(),
         timeAgo: 'just now',
         isLiked: false,
         commentList: []
@@ -1903,7 +1905,7 @@ function renderAction(){
             h += '<div class="action-row"><div class="action-field"><label>Caption</label><textarea class="act-caption" rows="3" data-pi="' + pi + '">' + esc(p.caption||'') + '</textarea></div></div>';
             // Meta row — time only (likes/comments are user-driven on the main site, not editable here)
             h += '<div class="action-row">';
-            h += '<div class="action-field" style="flex:.6"><label>Time ago</label><input class="act-timeago" value="' + esc(p.timeAgo||'') + '" data-pi="' + pi + '"></div>';
+            h += '<div class="action-field" style="flex:.6"><label>发布时间(北京)</label><input value="' + (p.publishedAt ? bjTimeFmt(p.publishedAt) : '— 待保存生成') + '" disabled></div>';
             h += '<div class="action-field" style="flex:.4"><label>ID</label><input value="' + (p.id!=null?p.id:'') + '" disabled></div>';
             h += '</div>';
             // Images
@@ -1952,7 +1954,7 @@ function bindActionRows(){
     });
     // Field edits (username/likes/comments intentionally not editable — 朋友圈-style)
     document.querySelectorAll('.act-caption').forEach(function(inp){ inp.addEventListener('change', function(){ actionPosts[+this.getAttribute('data-pi')].caption = this.value; }); });
-    document.querySelectorAll('.act-timeago').forEach(function(inp){ inp.addEventListener('change', function(){ actionPosts[+this.getAttribute('data-pi')].timeAgo = this.value; }); });
+    // (legacy act-timeago input removed — publish time is auto-stamped via publishedAt)
 
     // Character select dropdown (apply character to post)
     document.querySelectorAll('.act-char-select').forEach(function(sel){
@@ -2229,6 +2231,17 @@ function toast(msg,t){
 }
 
 function todayShort(){return new Date().toISOString().slice(5,10).replace('-','/');}
+
+// Format an ISO timestamp as Beijing time (Asia/Shanghai) -> "M月D日 HH:MM"
+function bjTimeFmt(iso){
+    if(!iso) return '';
+    try {
+        var d = new Date(iso);
+        var f = new Intl.DateTimeFormat('zh-CN', { timeZone:'Asia/Shanghai', month:'numeric', day:'numeric', hour:'2-digit', minute:'2-digit', hour12:false });
+        var p = {}; f.formatToParts(d).forEach(function(o){ p[o.type]=o.value; });
+        return p.month + '月' + p.day + '日 ' + p.hour + ':' + p.minute;
+    } catch(e){ return iso; }
+}
 
 function blankHeadline(){
     return { title:'', titleEn:'', summary:'', summaryEn:'', body:'', bodyEn:'', bgImage:'', date:todayShort(), author:'Vipen', authorInitial:'V', authorBg:'#6366f1', readTime:'' };

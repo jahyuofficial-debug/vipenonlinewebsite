@@ -61,8 +61,9 @@
 .action-post-comments{margin-top:.1rem;background:rgba(255,255,255,.03);border-radius:.06rem;padding:.08rem .12rem}
 .action-post-comment-item{display:flex;gap:.04rem;margin-bottom:.04rem;align-items:baseline;font-size:.11rem;line-height:1.5}
 .action-post-comment-item:last-child{margin-bottom:0}
-.action-post-comment-user{color:#d4a853;font-weight:500;flex-shrink:0;white-space:nowrap}
-.action-post-comment-text{color:rgba(255,255,255,.55)}
+.action-post-comment-text{color:rgba(255,255,255,.7);flex:1;min-width:0}
+.action-post-comment-region{opacity:0;max-width:0;overflow:hidden;white-space:nowrap;margin-left:auto;flex-shrink:0;color:rgba(255,255,255,.3);font-size:.09rem;transition:opacity .2s,max-width .2s}
+.action-post-comment-item:hover .action-post-comment-region{opacity:1;max-width:1.2rem}
 
 /* ── Comment Input ── */
 .action-post-comment-input-area{display:none;align-items:center;gap:.08rem;padding:.1rem 0;border-top:1px solid rgba(255,255,255,.04);margin-top:.08rem}

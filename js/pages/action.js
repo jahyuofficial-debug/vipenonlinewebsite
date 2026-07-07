@@ -55,12 +55,35 @@ function esc(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
 }
 
+// Action post publisher's region (for new comments). Cached via Cloud.region().
+var actionUserRegion = '';
+
+// Format a post's publish time as Beijing time (Asia/Shanghai). Falls back to the
+// legacy frozen `timeAgo` string when no real timestamp exists.
+function formatActionTime(post) {
+    if (!post || !post.publishedAt) return (post && post.timeAgo) || '';
+    try {
+        var d = new Date(post.publishedAt);
+        var f = new Intl.DateTimeFormat('zh-CN', { timeZone: 'Asia/Shanghai', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
+        var p = {};
+        f.formatToParts(d).forEach(function (o) { p[o.type] = o.value; });
+        return p.month + '月' + p.day + '日 ' + p.hour + ':' + p.minute;
+    } catch (e) {
+        return post.timeAgo || '';
+    }
+}
+
 function buildActionPostComments(post) {
     // seed (from index.json, trusted) + cloud comments (D1, untrusted -> escaped)
     var all = (post.commentList || []).concat(post.cloudComments || []);
     if (all.length === 0) return '';
     return all.map(function(c) {
-        return '<div class="action-post-comment-item"><span class="action-post-comment-user">' + esc(c.user || c.author || 'Guest') + '</span><span class="action-post-comment-text">' + esc(c.text || c.content) + '</span></div>';
+        var region = c.region || '';
+        var regionHtml = region ? '<span class="action-post-comment-region">' + esc(region) + '</span>' : '';
+        return '<div class="action-post-comment-item">' +
+            '<span class="action-post-comment-text">' + esc(c.text || c.content) + '</span>' +
+            regionHtml +
+            '</div>';
     }).join('');
 }
 
@@ -88,7 +111,7 @@ function buildActionPostItem(post) {
         '  </div>' +
         '  <div class="action-post-right">' +
         '    <div class="action-post-username">' + post.username + '</div>' +
-        '    <div class="action-post-time">' + post.timeAgo + '</div>' +
+        '    <div class="action-post-time">' + formatActionTime(post) + '</div>' +
         '    <div class="action-post-content">' + post.caption + '</div>' +
         imagesHtml +
         '    <div class="action-post-actions-row">' +
@@ -260,6 +283,7 @@ function enrichActionFromCloud(feed) {
 function bindActionInteractions() {
     var mergedFeed = getMergedActionFeed();
     enrichActionFromCloud(mergedFeed);
+    if (typeof Cloud !== 'undefined') Cloud.region().then(function(r) { actionUserRegion = r; });
 
     function persistLike(postId, isLiked) {
         var likedPosts = [];
@@ -383,7 +407,7 @@ function bindActionInteractions() {
                 if (post) {
                     if (!post.cloudComments) post.cloudComments = [];
                     var ctext = input.value.trim();
-                    post.cloudComments.push({ author: 'Guest', content: ctext });
+                    post.cloudComments.push({ author: 'Guest', content: ctext, region: actionUserRegion });
                     var commentsContainer = postEl.querySelector('.action-post-comments');
                     if (!commentsContainer) {
                         // First comment: create the comments container under the actions row
@@ -394,7 +418,7 @@ function bindActionInteractions() {
                     }
                     commentsContainer.innerHTML = buildActionPostComments(post);
                     input.value = '';
-                    if (typeof Cloud !== 'undefined') Cloud.comments.add(postId, ctext, '');
+                    if (typeof Cloud !== 'undefined') Cloud.comments.add(postId, ctext, actionUserRegion);
                 }
             }
         });

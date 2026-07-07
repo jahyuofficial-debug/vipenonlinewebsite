@@ -32,8 +32,19 @@ var Cloud = (function () {
     }).then(function (r) { return r.json(); }).catch(function () { return null; });
   }
 
+  // Cached visitor region (province, via /api/msg/region). Shared by MSG + Action comments.
+  var _region = null;
+  function region() {
+    if (_region !== null) return Promise.resolve(_region);
+    return fetch('/api/msg/region').then(function (r) { return r.json(); }).then(function (d) {
+      _region = (d && d.region) || '';
+      return _region;
+    }).catch(function () { _region = ''; return ''; });
+  }
+
   return {
     uid: uid,
+    region: region,
     likes: {
       // ids -> { counts: {id:n}, liked: {id:bool} }
       get: function (feature, ids) {
