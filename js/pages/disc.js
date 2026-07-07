@@ -18,6 +18,42 @@ var discNextPreloadAudio = null;
 var discLoadFallbackTimer = null;
 var userBehavior = { likedTracks: [] };
 
+// Cloud like state (D1 via /api/likes, feature='disc'). Keyed by tape folder.
+var discLikeCache = { counts: {}, liked: {} };
+
+function discFolderOf(tape) {
+    return (tape && (tape.folder || tape.title)) || '';
+}
+
+function updateDiscFavUI(folder) {
+    var isFav = !!discLikeCache.liked[folder];
+    var count = discLikeCache.counts[folder] || 0;
+    var favBtn = document.getElementById('discFavBtn');
+    var countEl = document.getElementById('discFavCount');
+    if (favBtn) favBtn.classList.toggle('active', isFav);
+    if (countEl) {
+        countEl.textContent = count > 0 ? count : '';
+        countEl.classList.toggle('show', isFav);
+    }
+    if (window.discData && window.discData.nowPlaying) window.discData.nowPlaying.fav = isFav;
+}
+
+// Fetch cloud likes for all tapes once per disc-page visit, then refresh current track UI.
+function loadDiscLikesFromCloud() {
+    if (typeof Cloud === 'undefined') return;
+    var tapes = (window.discData && window.discData.tapes) || [];
+    var folders = tapes.map(discFolderOf).filter(Boolean);
+    if (!folders.length) return;
+    Cloud.likes.get('disc', folders).then(function(res) {
+        if (!res) return;
+        discLikeCache.counts = res.counts || {};
+        discLikeCache.liked = res.liked || {};
+        var idx = window.discData.currentTapeIndex || 0;
+        var t = tapes[idx];
+        if (t) updateDiscFavUI(discFolderOf(t));
+    });
+}
+
 // Disc full preloader — loads all tracks & covers before page entry
 var preloadState = { total: 0, loaded: 0, loading: false, done: false };
 
@@ -179,7 +215,9 @@ function buildDiscPage() {
     var artist = currentTape.artist || 'Vipen Music';
 
     var currentTapeId = currentTape.id;
-    var isFav = userBehavior.likedTracks.indexOf(currentTapeId) !== -1;
+    var currentFolder = discFolderOf(currentTape);
+    var isFav = !!discLikeCache.liked[currentFolder];
+    var favCount = discLikeCache.counts[currentFolder] || 0;
     var favClass = isFav ? ' active' : '';
 
     return '<section id="page-disc-library" class="disc-page">' +
@@ -217,7 +255,7 @@ function buildDiscPage() {
         '<button class="disc-fav-btn' + favClass + '" id="discFavBtn" title="Favorite">' +
         '<svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>' +
         '</button>' +
-        '<span class="disc-fav-count' + (isFav ? ' show' : '') + '" id="discFavCount">' + (isFav ? '1' : '') + '</span>' +
+        '<span class="disc-fav-count' + (isFav ? ' show' : '') + '" id="discFavCount">' + (favCount > 0 ? favCount : '') + '</span>' +
         '</div>' +
         '<div class="disc-glass-progress-wrap">' +
         '<span class="disc-glass-time" id="discCurrentTime">0:00</span>' +
@@ -436,14 +474,7 @@ function loadDiscTrack(index, callback) {
             var tapes = window.discData.tapes;
             var currentIdx = window.discData.currentTapeIndex;
             if (currentIdx < 0 || currentIdx >= tapes.length) return;
-            var tid = tapes[currentIdx].id;
-            var liked = userBehavior.likedTracks.indexOf(tid) !== -1;
-            favBtn.classList.toggle('active', liked);
-            var countEl = document.getElementById('discFavCount');
-            if (countEl) {
-                countEl.textContent = liked ? '1' : '';
-                countEl.classList.toggle('show', liked);
-            }
+            updateDiscFavUI(discFolderOf(tapes[currentIdx]));
         }
         updateCarousel();
     }
@@ -587,6 +618,9 @@ function bindDiscPlayerInteractions() {
     var progressBar = document.getElementById('discProgressBar');
     if (!playBtn) return;
 
+    // Pull cloud likes (D1) for all tapes, then refresh the current track's fav UI
+    loadDiscLikesFromCloud();
+
     var carousel = document.getElementById('discAlbumCarousel');
     if (carousel) {
         carousel.addEventListener('click', function(e) {
@@ -609,25 +643,26 @@ function bindDiscPlayerInteractions() {
     var favBtn = document.getElementById('discFavBtn');
     if (favBtn) {
         favBtn.addEventListener('click', function() {
-            var np = window.discData.nowPlaying;
             var tapes = window.discData.tapes;
             var currentIdx = window.discData.currentTapeIndex;
             if (currentIdx < 0 || currentIdx >= tapes.length) return;
-            var tapeId = tapes[currentIdx].id;
-            np.fav = !np.fav;
-            favBtn.classList.toggle('active', np.fav);
-            var countEl = document.getElementById('discFavCount');
-            if (countEl) {
-                countEl.textContent = np.fav ? '1' : '';
-                countEl.classList.toggle('show', np.fav);
+            var folder = discFolderOf(tapes[currentIdx]);
+            // Optimistic toggle
+            var nowLiked = !discLikeCache.liked[folder];
+            discLikeCache.liked[folder] = nowLiked;
+            var c = discLikeCache.counts[folder] || 0;
+            discLikeCache.counts[folder] = Math.max(0, c + (nowLiked ? 1 : -1));
+            updateDiscFavUI(folder);
+            // Cloud toggle, then reconcile with the authoritative count
+            if (typeof Cloud !== 'undefined') {
+                Cloud.likes.toggle('disc', folder).then(function(res) {
+                    if (!res) return;
+                    discLikeCache.liked[folder] = !!res.liked;
+                    discLikeCache.counts[folder] = res.count || 0;
+                    var t = window.discData.tapes[window.discData.currentTapeIndex];
+                    if (t && discFolderOf(t) === folder) updateDiscFavUI(folder);
+                });
             }
-            var idx = userBehavior.likedTracks.indexOf(tapeId);
-            if (np.fav && idx === -1) {
-                userBehavior.likedTracks.push(tapeId);
-            } else if (!np.fav && idx !== -1) {
-                userBehavior.likedTracks.splice(idx, 1);
-            }
-            console.log('User liked tracks:', userBehavior.likedTracks);
         });
     }
 

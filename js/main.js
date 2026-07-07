@@ -116,6 +116,7 @@ BannerPage.initBgVideo();
                     return {
                         id: i + 1,
                         title: title,
+                        folder: item.folder || '',
                         time: '0:00',
                         cover: item.coverUrl || '',
                         audio: item.audio
@@ -135,6 +136,7 @@ BannerPage.initBgVideo();
         if (designData && Array.isArray(designData)) {
             dwItems = designData.map(function(item) {
                 return {
+                    folder: item.folder || item.title || '',
                     title: item.title || item.folder.replace(/^\d+-/, ''),
                     subtitle: item.subtitle || '',
                     cat: item.cat || '',
@@ -261,7 +263,7 @@ BannerPage.initBgVideo();
                 window.discData = {
                     tapes: discData.map(function(item, i) {
                         var title = item.folder.replace(/^\d+-/, '');
-                        return { id: i+1, title: title, time: '0:00', cover: item.coverUrl || '', audio: item.audio };
+                        return { id: i+1, title: title, folder: item.folder || '', time: '0:00', cover: item.coverUrl || '', audio: item.audio };
                     }),
                     playMode: 'sequence', currentTapeIndex: 0
                 };
@@ -271,7 +273,7 @@ BannerPage.initBgVideo();
             }
             if (designData && Array.isArray(designData)) {
                 dwItems = designData.map(function(item) {
-                    return { title: item.title || item.folder.replace(/^\d+-/, ''), cat: item.cat||'', desc: item.description||item.desc||'', client: item.client||'', published: item.published||item.year||'', tools: item.tools||'', cardBg: item.cardBg||'', cardHoverBg: item.cardHoverBg||'', headerBg: item.headerBg||'', contentImages: item.contentImages||[], tags: item.tags||[], likeCount: item.likeCount||0 };
+                    return { title: item.title || item.folder.replace(/^\d+-/, ''), folder: item.folder||item.title||'', cat: item.cat||'', desc: item.description||item.desc||'', client: item.client||'', published: item.published||item.year||'', tools: item.tools||'', cardBg: item.cardBg||'', cardHoverBg: item.cardHoverBg||'', headerBg: item.headerBg||'', contentImages: item.contentImages||[], tags: item.tags||[], likeCount: item.likeCount||0 };
                 });
             }
             if (bannerData && Array.isArray(bannerData)) {
@@ -611,6 +613,17 @@ function bindMsgInteractions() {
     // Load user region on page visit
     loadMsgUserRegion();
 
+    // Pull cloud-shared messages (D1) and merge into the board
+    if (typeof Cloud !== 'undefined') {
+        Cloud.msg.list(200).then(function(msgs) {
+            if (msgs && msgs.length) {
+                msgBoardData = msgs;
+                var track = document.getElementById('msgBarrageTrack');
+                if (track) track.innerHTML = buildMsgBarrage();
+            }
+        });
+    }
+
     var msgArea = textarea ? textarea.closest('.msg-input-area') : null;
     function toggleMsgPlaceholder() {
         if (!msgArea) return;
@@ -673,14 +686,8 @@ function bindMsgInteractions() {
         submitBtn.addEventListener('click', function() {
             var content = textarea.value.trim();
             if (!content) return;
-            var newMsg = {
-                id: msgNextId++,
-                content: content,
-                region: msgUserRegion || '',
-                time: Date.now()
-            };
-            msgUserPosts.unshift(newMsg);
-            saveMsgUserPosts();
+            // Optimistic: show immediately in the shared board
+            msgBoardData.unshift({ id: 'pending-' + Date.now(), content: content, region: msgUserRegion || '', time: Date.now() });
             textarea.value = '';
             textarea.style.height = 'auto';
             toggleMsgPlaceholder();
@@ -688,6 +695,10 @@ function bindMsgInteractions() {
             var track = document.getElementById('msgBarrageTrack');
             if (track) {
                 track.innerHTML = buildMsgBarrage();
+            }
+            // Persist to cloud (D1). On failure the message still shows for this session.
+            if (typeof Cloud !== 'undefined') {
+                Cloud.msg.save(content, msgUserRegion);
             }
         });
     }
@@ -1258,6 +1269,31 @@ function navigateToDesignWorkDetail(id) {
     subPageContainer.innerHTML = DesignPage.buildDetail(id);
     app.appendChild(subPageContainer);
     currentPage = 'design-work-detail';
+
+    // Cloud like (D1) for this design work — patch the button with the real count + liked state
+    (function() {
+        var item = dwItems[id];
+        if (!item || typeof Cloud === 'undefined') return;
+        var folder = item.folder || item.title || '';
+        if (!folder) return;
+        Cloud.likes.get('design', [folder]).then(function(res) {
+            if (!res) return;
+            var count = res.counts[folder] || 0;
+            var liked = !!res.liked[folder];
+            item.isLiked = liked;
+            item.likeCount = count;
+            var btn = document.getElementById('dwDetailLikeBtn');
+            if (!btn) return;
+            btn.classList.toggle('liked', liked);
+            var svg = btn.querySelector('svg');
+            if (svg) {
+                if (liked) { svg.setAttribute('fill', '#ed4956'); svg.setAttribute('stroke', '#ed4956'); }
+                else { svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor'); }
+            }
+            var ce = btn.querySelector('.dw-detail-like-count');
+            if (ce) ce.textContent = count > 0 ? count : '';
+        });
+    })();
     updateNavActiveState(currentPage);
 
     var backBtn = document.getElementById('dwDetailBack');
@@ -1294,9 +1330,11 @@ function navigateToDesignWorkDetail(id) {
         likeBtn.addEventListener('click', function() {
             var item = dwItems[id];
             if (!item) return;
+            var folder = item.folder || item.title || '';
+            // Optimistic toggle
             item.isLiked = !item.isLiked;
-            item.likeCount = (item.likeCount || 0) + (item.isLiked ? 1 : -1);
-            this.classList.toggle('liked');
+            item.likeCount = Math.max(0, (item.likeCount || 0) + (item.isLiked ? 1 : -1));
+            this.classList.toggle('liked', item.isLiked);
             var svg = this.querySelector('svg');
             if (svg) {
                 if (item.isLiked) {
@@ -1308,7 +1346,25 @@ function navigateToDesignWorkDetail(id) {
                 }
             }
             var countEl = this.querySelector('.dw-detail-like-count');
-            if (countEl) countEl.textContent = item.likeCount;
+            if (countEl) countEl.textContent = item.likeCount > 0 ? item.likeCount : '';
+            // Cloud toggle, then reconcile with the authoritative count
+            if (typeof Cloud !== 'undefined' && folder) {
+                Cloud.likes.toggle('design', folder).then(function(res) {
+                    if (!res) return;
+                    item.isLiked = !!res.liked;
+                    item.likeCount = res.count || 0;
+                    var btn = document.getElementById('dwDetailLikeBtn');
+                    if (!btn) return;
+                    btn.classList.toggle('liked', item.isLiked);
+                    var s = btn.querySelector('svg');
+                    if (s) {
+                        if (item.isLiked) { s.setAttribute('fill', '#ed4956'); s.setAttribute('stroke', '#ed4956'); }
+                        else { s.setAttribute('fill', 'none'); s.setAttribute('stroke', 'currentColor'); }
+                    }
+                    var ce = btn.querySelector('.dw-detail-like-count');
+                    if (ce) ce.textContent = item.likeCount > 0 ? item.likeCount : '';
+                });
+            }
         });
     }
 }
