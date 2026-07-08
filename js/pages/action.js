@@ -27,12 +27,6 @@ function getMergedActionFeed() {
             });
         }
     });
-    // Restore like state from localStorage (no login required)
-    var likedPosts = [];
-    try { likedPosts = JSON.parse(localStorage.getItem('action_liked_posts') || '[]'); } catch(e) {}
-    feed.forEach(function(post) {
-        if (likedPosts.indexOf(post.id) !== -1) post.isLiked = true;
-    });
     // Sort by publish time, newest first (最近 → 最远)
     feed.sort(function(a, b) {
         var ta = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
@@ -115,7 +109,7 @@ function buildActionPostItem(post) {
             '</button>' +
             '</div>';
     }
-    // Like count sits next to the like button; comments render directly under the card (WeChat Moments style)
+    // Like count sits next to the like button; comments collapsed by default (toggle via comment-btn)
     return '<div class="action-post" data-post-id="' + post.id + '">' +
         '<div class="action-post-body">' +
         '  <div class="action-post-avatar-col">' +
@@ -134,6 +128,7 @@ function buildActionPostItem(post) {
         '        </button>' +
         '        <button class="action-post-action-btn comment-btn" data-post-id="' + post.id + '">' +
         '        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>' +
+        '        <span class="action-post-comment-count">' + (post.comments > 0 ? post.comments : '') + '</span>' +
         '        </button>' +
         '      </div>' +
         ownerControls +
@@ -218,7 +213,8 @@ function navigateLightbox(dir) {
     if (counter) counter.textContent = (actionLightboxCurrentIndex + 1) + ' / ' + total;
 }
 
-// Pull cloud likes (counts + liked) and comments, then patch the DOM.
+// Pull cloud like counts and comments, then patch the DOM.
+// NOTE: isLiked is NOT restored from cloud — only current-session clicks show liked state.
 function enrichActionFromCloud(feed) {
     if (typeof Cloud === 'undefined') return;
     var ids = feed.map(function(p) { return p.id; }).filter(Boolean);
@@ -228,17 +224,11 @@ function enrichActionFromCloud(feed) {
         if (!res) return;
         feed.forEach(function(p) {
             if (typeof res.counts[p.id] === 'number') p.likes = res.counts[p.id];
-            if (typeof res.liked[p.id] === 'boolean') p.isLiked = res.liked[p.id];
+            // 不恢复 isLiked — 只有当前会话点击才显示红心
             var postEl = document.querySelector('.action-post[data-post-id="' + p.id + '"]');
             if (!postEl) return;
             var btn = postEl.querySelector('.like-btn');
             if (btn) {
-                btn.classList.toggle('liked', !!p.isLiked);
-                var svg = btn.querySelector('svg');
-                if (svg) {
-                    if (p.isLiked) { svg.setAttribute('fill', '#ed4956'); svg.setAttribute('stroke', '#ed4956'); }
-                    else { svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor'); }
-                }
                 var countEl = btn.querySelector('.action-post-like-count');
                 if (countEl) countEl.textContent = p.likes > 0 ? p.likes : '';
             }
@@ -249,10 +239,15 @@ function enrichActionFromCloud(feed) {
         if (!map) return;
         feed.forEach(function(p) {
             var arr = map[p.id] || map[String(p.id)] || [];
-            if (!arr.length) return;
+            var totalComments = (p.commentList || []).length + (arr || []).length;
             p.cloudComments = arr;
+            p.comments = totalComments;
             var postEl = document.querySelector('.action-post[data-post-id="' + p.id + '"]');
             if (!postEl) return;
+            // Update comment count badge next to the comment button
+            var commentCountEl = postEl.querySelector('.action-post-comment-count');
+            if (commentCountEl) commentCountEl.textContent = totalComments > 0 ? totalComments : '';
+            // Build/update the comments list (CSS keeps it collapsed by default)
             var c = postEl.querySelector('.action-post-comments');
             if (!c) {
                 c = document.createElement('div');
@@ -270,58 +265,39 @@ function bindActionInteractions() {
     enrichActionFromCloud(mergedFeed);
     if (typeof Cloud !== 'undefined') Cloud.region().then(function(r) { actionUserRegion = r; });
 
-    function persistLike(postId, isLiked) {
-        var likedPosts = [];
-        try { likedPosts = JSON.parse(localStorage.getItem('action_liked_posts') || '[]'); } catch(e) {}
-        if (isLiked) {
-            if (likedPosts.indexOf(postId) === -1) likedPosts.push(postId);
-        } else {
-            likedPosts = likedPosts.filter(function(id) { return id !== postId; });
-        }
-        try { localStorage.setItem('action_liked_posts', JSON.stringify(likedPosts)); } catch(e) {}
-    }
-
     var likeBtns = document.querySelectorAll('.action-post-action-btn.like-btn');
     likeBtns.forEach(function(btn) {
         btn.addEventListener('click', function() {
             var postId = parseInt(this.getAttribute('data-post-id'), 10);
             var post = mergedFeed.find(function(p) { return p.id === postId; });
-            if (post) {
-                post.isLiked = !post.isLiked;
-                post.likes += post.isLiked ? 1 : -1;
-                this.classList.toggle('liked');
-                var svg = this.querySelector('svg');
-                if (post.isLiked) {
-                    svg.setAttribute('fill', '#ed4956');
-                    svg.setAttribute('stroke', '#ed4956');
-                } else {
-                    svg.setAttribute('fill', 'none');
-                    svg.setAttribute('stroke', 'currentColor');
-                }
-                // Update like count shown next to the heart (hide when 0)
-                var countEl = this.querySelector('.action-post-like-count');
-                if (countEl) countEl.textContent = post.likes > 0 ? post.likes : '';
-                persistLike(postId, post.isLiked); // offline fallback cache
-                if (typeof Cloud !== 'undefined') {
-                    Cloud.likes.toggle('action', postId).then(function(res) {
-                        if (!res) return;
-                        post.isLiked = !!res.liked;
-                        post.likes = res.count || 0;
-                        var pel = document.querySelector('.action-post[data-post-id="' + postId + '"]');
-                        if (!pel) return;
-                        var lb = pel.querySelector('.like-btn');
-                        if (lb) {
-                            lb.classList.toggle('liked', post.isLiked);
-                            var s = lb.querySelector('svg');
-                            if (s) {
-                                if (post.isLiked) { s.setAttribute('fill', '#ed4956'); s.setAttribute('stroke', '#ed4956'); }
-                                else { s.setAttribute('fill', 'none'); s.setAttribute('stroke', 'currentColor'); }
-                            }
-                            var ce = lb.querySelector('.action-post-like-count');
-                            if (ce) ce.textContent = post.likes > 0 ? post.likes : '';
-                        }
-                    });
-                }
+            if (!post) return;
+            // Toggle liked state in-session only (not persisted — refresh resets to unliked)
+            post.isLiked = !post.isLiked;
+            this.classList.toggle('liked', post.isLiked);
+            var svg = this.querySelector('svg');
+            if (svg) {
+                if (post.isLiked) { svg.setAttribute('fill', '#ed4956'); svg.setAttribute('stroke', '#ed4956'); }
+                else { svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor'); }
+            }
+            // Optimistic count update
+            post.likes += post.isLiked ? 1 : -1;
+            if (post.likes < 0) post.likes = 0;
+            var countEl = this.querySelector('.action-post-like-count');
+            if (countEl) countEl.textContent = post.likes > 0 ? post.likes : '';
+            // Cloud like/unlike (idempotent), then reconcile count only
+            if (typeof Cloud !== 'undefined') {
+                var api = post.isLiked ? Cloud.likes.like : Cloud.likes.unlike;
+                api('action', postId).then(function(res) {
+                    if (!res) return;
+                    post.likes = res.count || 0;
+                    var pel = document.querySelector('.action-post[data-post-id="' + postId + '"]');
+                    if (!pel) return;
+                    var lb = pel.querySelector('.like-btn');
+                    if (lb) {
+                        var ce = lb.querySelector('.action-post-like-count');
+                        if (ce) ce.textContent = post.likes > 0 ? post.likes : '';
+                    }
+                });
             }
         });
     });
@@ -380,13 +356,10 @@ function bindActionInteractions() {
             var postId = parseInt(this.getAttribute('data-post-id'), 10);
             var postEl = document.querySelector('.action-post[data-post-id="' + postId + '"]');
             if (postEl) {
-                var inputArea = postEl.querySelector('.action-post-comment-input-area');
-                if (inputArea) {
-                    inputArea.classList.toggle('active');
-                    if (inputArea.classList.contains('active')) {
-                        var input = postEl.querySelector('.action-post-comment-input');
-                        if (input) input.focus();
-                    }
+                postEl.classList.toggle('comments-expanded');
+                if (postEl.classList.contains('comments-expanded')) {
+                    var input = postEl.querySelector('.action-post-comment-input');
+                    if (input) input.focus();
                 }
             }
         });
@@ -414,6 +387,13 @@ function bindActionInteractions() {
                     }
                     commentsContainer.innerHTML = buildActionPostComments(post);
                     input.value = '';
+                    // Update comment count badge
+                    var totalComments = (post.commentList || []).length + (post.cloudComments || []).length;
+                    post.comments = totalComments;
+                    var commentCountEl = postEl.querySelector('.action-post-comment-count');
+                    if (commentCountEl) commentCountEl.textContent = totalComments > 0 ? totalComments : '';
+                    // Ensure expanded state
+                    postEl.classList.add('comments-expanded');
                     if (typeof Cloud !== 'undefined') Cloud.comments.add(postId, ctext, actionUserRegion);
                 }
             }

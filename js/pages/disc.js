@@ -33,12 +33,13 @@ function updateDiscFavUI(folder) {
     if (favBtn) favBtn.classList.toggle('active', isFav);
     if (countEl) {
         countEl.textContent = count > 0 ? count : '';
-        countEl.classList.toggle('show', isFav);
+        countEl.classList.toggle('show', count > 0); // always show count when > 0, regardless of liked state
     }
     if (window.discData && window.discData.nowPlaying) window.discData.nowPlaying.fav = isFav;
 }
 
-// Fetch cloud likes for all tapes once per disc-page visit, then refresh current track UI.
+// Fetch cloud like counts for all tapes once per disc-page visit, then refresh current track UI.
+// NOTE: liked state is NOT restored from cloud — only current-session clicks show favorited.
 function loadDiscLikesFromCloud() {
     if (typeof Cloud === 'undefined') return;
     var tapes = (window.discData && window.discData.tapes) || [];
@@ -47,7 +48,7 @@ function loadDiscLikesFromCloud() {
     Cloud.likes.get('disc', folders).then(function(res) {
         if (!res) return;
         discLikeCache.counts = res.counts || {};
-        discLikeCache.liked = res.liked || {};
+        // 不恢复 liked — 只有当前会话点击才显示已收藏
         var idx = window.discData.currentTapeIndex || 0;
         var t = tapes[idx];
         if (t) updateDiscFavUI(discFolderOf(t));
@@ -647,17 +648,17 @@ function bindDiscPlayerInteractions() {
             var currentIdx = window.discData.currentTapeIndex;
             if (currentIdx < 0 || currentIdx >= tapes.length) return;
             var folder = discFolderOf(tapes[currentIdx]);
-            // Optimistic toggle
+            // Optimistic toggle (in-session only, not persisted)
             var nowLiked = !discLikeCache.liked[folder];
             discLikeCache.liked[folder] = nowLiked;
             var c = discLikeCache.counts[folder] || 0;
             discLikeCache.counts[folder] = Math.max(0, c + (nowLiked ? 1 : -1));
             updateDiscFavUI(folder);
-            // Cloud toggle, then reconcile with the authoritative count
+            // Cloud like/unlike (idempotent), then reconcile count only
             if (typeof Cloud !== 'undefined') {
-                Cloud.likes.toggle('disc', folder).then(function(res) {
+                var api = nowLiked ? Cloud.likes.like : Cloud.likes.unlike;
+                api('disc', folder).then(function(res) {
                     if (!res) return;
-                    discLikeCache.liked[folder] = !!res.liked;
                     discLikeCache.counts[folder] = res.count || 0;
                     var t = window.discData.tapes[window.discData.currentTapeIndex];
                     if (t && discFolderOf(t) === folder) updateDiscFavUI(folder);

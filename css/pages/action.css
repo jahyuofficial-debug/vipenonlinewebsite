@@ -51,18 +51,21 @@
 /* ── Like count (next to heart: gray = not liked, red = liked) ── */
 .action-post-like-count{font-size:.1rem;color:inherit;margin-left:.03rem;min-width:.08rem;text-align:left;line-height:1}
 .action-post-like-count:empty{display:none}
+.action-post-comment-count{font-size:.1rem;color:inherit;margin-left:.03rem;min-width:.08rem;text-align:left;line-height:1}
+.action-post-comment-count:empty{display:none}
 
-/* ── Comments (WeChat Moments style, directly under the card) ── */
-.action-post-comments{margin-top:.1rem;background:rgba(255,255,255,.03);border-radius:.06rem;padding:.08rem .12rem}
+/* ── Comments (collapsed by default, expand via comment-btn) ── */
+.action-post-comments{display:none;margin-top:.1rem;background:rgba(255,255,255,.03);border-radius:.06rem;padding:.08rem .12rem}
+.action-post.comments-expanded .action-post-comments{display:block}
 .action-post-comment-item{display:flex;gap:.04rem;margin-bottom:.04rem;align-items:baseline;font-size:.11rem;line-height:1.5}
 .action-post-comment-item:last-child{margin-bottom:0}
 .action-post-comment-text{color:rgba(255,255,255,.7);flex:1;min-width:0}
 .action-post-comment-region{opacity:0;max-width:0;overflow:hidden;white-space:nowrap;margin-left:auto;flex-shrink:0;color:rgba(255,255,255,.3);font-size:.09rem;transition:opacity .2s,max-width .2s}
 .action-post-comment-item:hover .action-post-comment-region{opacity:1;max-width:1.2rem}
 
-/* ── Comment Input ── */
+/* ── Comment Input (also collapsed by default, shows when comments-expanded) ── */
 .action-post-comment-input-area{display:none;align-items:center;gap:.08rem;padding:.1rem 0;border-top:1px solid rgba(255,255,255,.04);margin-top:.08rem}
-.action-post-comment-input-area.active{display:flex}
+.action-post.comments-expanded .action-post-comment-input-area{display:flex}
 .action-post-comment-input{flex:1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:.2rem;color:rgba(255,255,255,.7);font-size:.11rem;line-height:1.4;padding:.06rem .12rem;outline:none;font-family:inherit}
 .action-post-comment-input:focus{border-color:rgba(212,168,83,.3)}
 .action-post-comment-input::placeholder{color:rgba(255,255,255,.2)}

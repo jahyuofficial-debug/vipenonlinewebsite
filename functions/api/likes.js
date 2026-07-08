@@ -50,6 +50,7 @@ export async function onRequest(context) {
     const feature = (body.feature || '').trim();
     const itemId = (body.item_id == null ? '' : body.item_id).toString().trim();
     const uid = (body.uid || '').trim();
+    const action = (body.action || 'toggle').trim(); // 'like' | 'unlike' | 'toggle'
     if (!FEATURES[feature]) return json({ success: false, error: 'bad feature' }, 400);
     if (!itemId || itemId.length > 128) return json({ success: false, error: 'bad item_id' }, 400);
     if (!validUid(uid)) return json({ success: false, error: 'bad uid' }, 400);
@@ -59,12 +60,27 @@ export async function onRequest(context) {
     ).bind(feature, itemId, uid).first();
 
     let liked;
-    if (existing) {
-      await db.prepare('DELETE FROM likes WHERE feature = ? AND item_id = ? AND uid = ?').bind(feature, itemId, uid);
+    if (action === 'like') {
+      // Idempotent add — only insert if not already liked
+      if (!existing) {
+        await db.prepare('INSERT INTO likes (feature, item_id, uid, created_at) VALUES (?, ?, ?, ?)').bind(feature, itemId, uid, Date.now());
+      }
+      liked = true;
+    } else if (action === 'unlike') {
+      // Idempotent remove — only delete if currently liked
+      if (existing) {
+        await db.prepare('DELETE FROM likes WHERE feature = ? AND item_id = ? AND uid = ?').bind(feature, itemId, uid);
+      }
       liked = false;
     } else {
-      await db.prepare('INSERT INTO likes (feature, item_id, uid, created_at) VALUES (?, ?, ?, ?)').bind(feature, itemId, uid, Date.now());
-      liked = true;
+      // Default: toggle
+      if (existing) {
+        await db.prepare('DELETE FROM likes WHERE feature = ? AND item_id = ? AND uid = ?').bind(feature, itemId, uid);
+        liked = false;
+      } else {
+        await db.prepare('INSERT INTO likes (feature, item_id, uid, created_at) VALUES (?, ?, ?, ?)').bind(feature, itemId, uid, Date.now());
+        liked = true;
+      }
     }
     const cnt = await db.prepare('SELECT COUNT(*) AS c FROM likes WHERE feature = ? AND item_id = ?').bind(feature, itemId).first();
     return json({ liked: liked, count: (cnt && cnt.c) || 0 });

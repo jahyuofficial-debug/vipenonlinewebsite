@@ -1304,17 +1304,10 @@ function navigateToDesignWorkDetail(id) {
         Cloud.likes.get('design', [folder]).then(function(res) {
             if (!res) return;
             var count = res.counts[folder] || 0;
-            var liked = !!res.liked[folder];
-            item.isLiked = liked;
             item.likeCount = count;
+            // 不恢复 isLiked — 只有当前会话点击才显示已点赞
             var btn = document.getElementById('dwDetailLikeBtn');
             if (!btn) return;
-            btn.classList.toggle('liked', liked);
-            var svg = btn.querySelector('svg');
-            if (svg) {
-                if (liked) { svg.setAttribute('fill', '#ed4956'); svg.setAttribute('stroke', '#ed4956'); }
-                else { svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor'); }
-            }
             var ce = btn.querySelector('.dw-detail-like-count');
             if (ce) ce.textContent = count > 0 ? count : '';
         });
@@ -1356,7 +1349,7 @@ function navigateToDesignWorkDetail(id) {
             var item = dwItems[id];
             if (!item) return;
             var folder = item.folder || item.title || '';
-            // Optimistic toggle
+            // Optimistic toggle (in-session only, not persisted)
             item.isLiked = !item.isLiked;
             item.likeCount = Math.max(0, (item.likeCount || 0) + (item.isLiked ? 1 : -1));
             this.classList.toggle('liked', item.isLiked);
@@ -1372,20 +1365,14 @@ function navigateToDesignWorkDetail(id) {
             }
             var countEl = this.querySelector('.dw-detail-like-count');
             if (countEl) countEl.textContent = item.likeCount > 0 ? item.likeCount : '';
-            // Cloud toggle, then reconcile with the authoritative count
+            // Cloud like/unlike (idempotent), then reconcile count only
             if (typeof Cloud !== 'undefined' && folder) {
-                Cloud.likes.toggle('design', folder).then(function(res) {
+                var api = item.isLiked ? Cloud.likes.like : Cloud.likes.unlike;
+                api('design', folder).then(function(res) {
                     if (!res) return;
-                    item.isLiked = !!res.liked;
                     item.likeCount = res.count || 0;
                     var btn = document.getElementById('dwDetailLikeBtn');
                     if (!btn) return;
-                    btn.classList.toggle('liked', item.isLiked);
-                    var s = btn.querySelector('svg');
-                    if (s) {
-                        if (item.isLiked) { s.setAttribute('fill', '#ed4956'); s.setAttribute('stroke', '#ed4956'); }
-                        else { s.setAttribute('fill', 'none'); s.setAttribute('stroke', 'currentColor'); }
-                    }
                     var ce = btn.querySelector('.dw-detail-like-count');
                     if (ce) ce.textContent = item.likeCount > 0 ? item.likeCount : '';
                 });

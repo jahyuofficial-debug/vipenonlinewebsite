@@ -54,7 +54,15 @@ var Cloud = (function () {
           '&uid=' + encodeURIComponent(uid());
         return get(q).then(function (d) { return d || { counts: {}, liked: {} }; });
       },
-      // -> { liked: bool, count: n }
+      // -> { liked: bool, count: n }  (idempotent add)
+      like: function (feature, itemId) {
+        return post('/api/likes', { feature: feature, item_id: String(itemId), uid: uid(), action: 'like' });
+      },
+      // -> { liked: bool, count: n }  (idempotent remove)
+      unlike: function (feature, itemId) {
+        return post('/api/likes', { feature: feature, item_id: String(itemId), uid: uid(), action: 'unlike' });
+      },
+      // -> { liked: bool, count: n }  (legacy toggle)
       toggle: function (feature, itemId) {
         return post('/api/likes', { feature: feature, item_id: String(itemId), uid: uid() });
       }
