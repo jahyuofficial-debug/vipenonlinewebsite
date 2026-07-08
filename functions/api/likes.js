@@ -63,22 +63,22 @@ export async function onRequest(context) {
     if (action === 'like') {
       // Idempotent add — only insert if not already liked
       if (!existing) {
-        await db.prepare('INSERT INTO likes (feature, item_id, uid, created_at) VALUES (?, ?, ?, ?)').bind(feature, itemId, uid, Date.now());
+        await db.prepare('INSERT INTO likes (feature, item_id, uid, created_at) VALUES (?, ?, ?, ?)').bind(feature, itemId, uid, Date.now()).run();
       }
       liked = true;
     } else if (action === 'unlike') {
       // Idempotent remove — only delete if currently liked
       if (existing) {
-        await db.prepare('DELETE FROM likes WHERE feature = ? AND item_id = ? AND uid = ?').bind(feature, itemId, uid);
+        await db.prepare('DELETE FROM likes WHERE feature = ? AND item_id = ? AND uid = ?').bind(feature, itemId, uid).run();
       }
       liked = false;
     } else {
       // Default: toggle
       if (existing) {
-        await db.prepare('DELETE FROM likes WHERE feature = ? AND item_id = ? AND uid = ?').bind(feature, itemId, uid);
+        await db.prepare('DELETE FROM likes WHERE feature = ? AND item_id = ? AND uid = ?').bind(feature, itemId, uid).run();
         liked = false;
       } else {
-        await db.prepare('INSERT INTO likes (feature, item_id, uid, created_at) VALUES (?, ?, ?, ?)').bind(feature, itemId, uid, Date.now());
+        await db.prepare('INSERT INTO likes (feature, item_id, uid, created_at) VALUES (?, ?, ?, ?)').bind(feature, itemId, uid, Date.now()).run();
         liked = true;
       }
     }
