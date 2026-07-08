@@ -1,6 +1,6 @@
 // Cloudflare Pages Function: /api/action/comment
 // POST { post_id, content, region, uid } -> { success, comment: { id, author, content, region, time } }
-import { json, handleOptions, getDb, ipHash, rateLimit, clamp, validUid } from '../../_lib.js';
+import { json, handleOptions, getDb, ipHash, rateLimit, clamp, validUid } from '../_lib.js';
 
 export async function onRequest(context) {
   const { request, env } = context;

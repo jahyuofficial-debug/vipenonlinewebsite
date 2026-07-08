@@ -1,6 +1,6 @@
 // Cloudflare Pages Function: /api/action/comments
 // GET /api/action/comments?post_ids=1,2,3  -> { "1": [{id,author,content,region,time}], "2": [...] }
-import { json, handleOptions, getDb, inClause } from '../../_lib.js';
+import { json, handleOptions, getDb, inClause } from '../_lib.js';
 
 const MAX_IDS = 60;
 
