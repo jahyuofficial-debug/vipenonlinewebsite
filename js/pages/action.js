@@ -32,6 +32,14 @@ function getMergedActionFeed() {
     feed.forEach(function(post) {
         if (likedPosts.indexOf(post.id) !== -1) post.isLiked = true;
     });
+    // Sort by publish time, newest first (最近 → 最远)
+    feed.sort(function(a, b) {
+        var ta = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+        var tb = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+        if (isNaN(ta)) ta = 0;
+        if (isNaN(tb)) tb = 0;
+        return tb - ta;
+    });
     return feed;
 }
 
