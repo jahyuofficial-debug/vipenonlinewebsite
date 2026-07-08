@@ -550,8 +550,19 @@ function buildMsgItem(item) {
 
 var MSG_BARRAGE_LANES = 8;
 
+function msgSig(m) {
+    return (m && m.content ? m.content : '') + '|' + (m && m.region ? m.region : '');
+}
+
 function buildMsgBarrage() {
-    var allMsgs = msgUserPosts.concat(msgBoardData);
+    // Cloud (msgBoardData) is authoritative. Skip local "pending" copies that the
+    // cloud already holds so a synced message is never shown twice.
+    var cloudSigs = {};
+    msgBoardData.forEach(function (m) { cloudSigs[msgSig(m)] = true; });
+    var local = msgUserPosts.filter(function (m) {
+        return !(m && m._pending && cloudSigs[msgSig(m)]);
+    });
+    var allMsgs = local.concat(msgBoardData);
     if (allMsgs.length === 0) {
         return '<div class="msg-barrage-empty">No messages yet</div>';
     }
@@ -618,6 +629,14 @@ function bindMsgInteractions() {
         Cloud.msg.list(200).then(function(msgs) {
             if (msgs && msgs.length) {
                 msgBoardData = msgs;
+                // Prune local fallback copies that have now synced to the cloud
+                var cloudSigs = {};
+                msgs.forEach(function (m) { cloudSigs[msgSig(m)] = true; });
+                var before = msgUserPosts.length;
+                msgUserPosts = msgUserPosts.filter(function (m) {
+                    return !(m && m._pending && cloudSigs[msgSig(m)]);
+                });
+                if (msgUserPosts.length !== before) saveMsgUserPosts();
                 var track = document.getElementById('msgBarrageTrack');
                 if (track) track.innerHTML = buildMsgBarrage();
             }
@@ -686,8 +705,12 @@ function bindMsgInteractions() {
         submitBtn.addEventListener('click', function() {
             var content = textarea.value.trim();
             if (!content) return;
-            // Optimistic: show immediately in the shared board
-            msgBoardData.unshift({ id: 'pending-' + Date.now(), content: content, region: msgUserRegion || '', time: Date.now() });
+            // Keep a local fallback copy so the message survives a refresh even if the
+            // cloud is momentarily unreachable. The cloud copy (loaded via msg.list)
+            // becomes the source of truth and de-duplicates this pending copy on render.
+            var pendingId = 'pending-' + Date.now();
+            msgUserPosts.unshift({ id: pendingId, content: content, region: msgUserRegion || '', time: Date.now(), _pending: true });
+            saveMsgUserPosts();
             textarea.value = '';
             textarea.style.height = 'auto';
             toggleMsgPlaceholder();
@@ -696,7 +719,8 @@ function bindMsgInteractions() {
             if (track) {
                 track.innerHTML = buildMsgBarrage();
             }
-            // Persist to cloud (D1). On failure the message still shows for this session.
+            // Persist to cloud (D1). Fail-soft: if this errors, the local copy remains
+            // visible for this browser and will re-sync on the next successful load.
             if (typeof Cloud !== 'undefined') {
                 Cloud.msg.save(content, msgUserRegion);
             }
