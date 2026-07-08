@@ -87,7 +87,7 @@
 
   /* ── 6. Smooth scroll for anchor links ── */
   function initSmoothScroll() {
-    document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+    document.querySelectorAll('a[href^="#"]:not([href^="#/"])').forEach(function(a) {
       a.addEventListener('click', function(e) {
         var target = document.querySelector(this.getAttribute('href'));
         if (target) {

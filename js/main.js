@@ -50,6 +50,8 @@ BannerPage.initBgVideo();
     var loadJSON = function(url) {
         return fetch(url).then(function(r) {
             if (!r.ok) throw new Error('HTTP ' + r.status);
+            var ct = r.headers.get('content-type') || '';
+            if (ct.indexOf('json') === -1) return null; // SPA fallback returns HTML — skip silently
             return r.json();
         }).catch(function(err) {
             console.warn('Failed to load ' + url + ': ' + err.message);
