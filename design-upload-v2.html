@@ -1593,12 +1593,41 @@ var actionCharacters = [];
 var actionCharEditingId = null;
 var actionCharTempAvatar = null;   // dataURL or https URL
 
-function loadCharacters(){
+var charR2Url = ACTION_R2 + '/action/characters.json';
+
+// Load characters: localStorage is the synchronous fallback (UI never blank),
+// R2 is the authoritative source once it responds. On first run (R2 empty but
+// localStorage has legacy chars) we push localStorage up to R2 so nothing is lost.
+function loadCharacters(callback){
     try { actionCharacters = JSON.parse(localStorage.getItem('action_characters') || '[]'); }
     catch(e) { actionCharacters = []; }
+    if (callback) callback();
+    fetch(charR2Url + '?' + Date.now())
+        .then(function(r){ if(!r.ok) throw new Error('no chars'); return r.json(); })
+        .then(function(d){
+            if (Array.isArray(d) && d.length){
+                actionCharacters = d;
+                try { localStorage.setItem('action_characters', JSON.stringify(d)); } catch(e){}
+                if (callback) callback();
+            }
+        })
+        .catch(function(){
+            // R2 empty/missing — migrate any existing localStorage characters up
+            if (actionCharacters.length) persistCharacters();
+        });
 }
+
+// Persist: always mirror to localStorage (offline cache) AND push to R2.
 function persistCharacters(){
     try { localStorage.setItem('action_characters', JSON.stringify(actionCharacters)); } catch(e) {}
+    try {
+        var fd = new FormData();
+        fd.append('json', JSON.stringify(actionCharacters));
+        fetch('/api/action/characters/save', { method: 'POST', body: fd })
+            .then(function(r){ return r.json(); })
+            .then(function(res){ if(!res.success) console.warn('[characters] R2 save failed:', res.error); })
+            .catch(function(){ /* offline — localStorage already updated */ });
+    } catch(e) {}
 }
 
 function dataURLtoFile(dataURL, filename){
@@ -1761,9 +1790,8 @@ document.getElementById('actionCharAvatarClear').addEventListener('click', funct
     updateCharAvatarPreview();
 });
 
-// Init characters
-loadCharacters();
-renderCharSelect();
+// Init characters (load from R2, fallback to localStorage, then render)
+loadCharacters(renderCharSelect);
 
 document.getElementById('actionLoadBtn').addEventListener('click', function(){
     fetch(ACTION_R2 + '/action/index.json?' + Date.now())
