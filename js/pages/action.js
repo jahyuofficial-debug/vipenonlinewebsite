@@ -37,6 +37,9 @@ function getMergedActionFeed() {
     feed.sort(function(a, b) {
         var ta = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
         var tb = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+        // Fallback: if no publishedAt, try parsing timeAgo string (e.g. "2026/07/05")
+        if (!ta && a.timeAgo) { var da = new Date(String(a.timeAgo).replace(/\//g, '-')); if (!isNaN(da)) ta = da.getTime(); }
+        if (!tb && b.timeAgo) { var db = new Date(String(b.timeAgo).replace(/\//g, '-')); if (!isNaN(db)) tb = db.getTime(); }
         if (isNaN(ta)) ta = 0;
         if (isNaN(tb)) tb = 0;
         return tb - ta;
