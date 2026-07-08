@@ -125,9 +125,6 @@ function buildActionPostItem(post) {
         '        </button>' +
         '      </div>' +
         ownerControls +
-        '      <button class="action-post-more-btn share-btn" data-post-id="' + post.id + '">' +
-        '      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>' +
-        '      </button>' +
         '    </div>' +
         commentsHtml +
         '    <div class="action-post-comment-input-area">' +
@@ -194,43 +191,6 @@ function navigateLightbox(dir) {
     var counter = document.getElementById('actionLightboxCounter');
     if (img) img.src = actionLightboxCurrentPost.images[actionLightboxCurrentIndex];
     if (counter) counter.textContent = (actionLightboxCurrentIndex + 1) + ' / ' + total;
-}
-
-function showCopiedToast() {
-    var toast = document.getElementById('copyToast');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'copyToast';
-        toast.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0.9);background:rgba(0,0,0,.75);color:#fff;font-size:.16rem;padding:.14rem .28rem;border-radius:.1rem;opacity:0;pointer-events:none;transition:all .25s ease;z-index:1000;font-weight:700;letter-spacing:.01rem;backdrop-filter:blur(8px);';
-        document.body.appendChild(toast);
-    }
-    toast.textContent = 'Copied';
-    toast.style.opacity = '0';
-    toast.style.transform = 'translate(-50%,-50%) scale(0.9)';
-    requestAnimationFrame(function() {
-        toast.style.opacity = '1';
-        toast.style.transform = 'translate(-50%,-50%) scale(1)';
-    });
-    setTimeout(function() {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translate(-50%,-50%) scale(0.9)';
-    }, 1000);
-}
-
-function fallbackCopyAndToast(text) {
-    var textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-        document.execCommand('copy');
-        showCopiedToast();
-    } catch (err) {
-        showCopiedToast();
-    }
-    document.body.removeChild(textarea);
 }
 
 // Pull cloud likes (counts + liked) and comments, then patch the DOM.
@@ -432,24 +392,6 @@ function bindActionInteractions() {
                 var postEl = document.querySelector('.action-post[data-post-id="' + postId + '"]');
                 var btn = postEl ? postEl.querySelector('.action-post-comment-submit') : null;
                 if (btn) btn.click();
-            }
-        });
-    });
-
-    var shareBtns = document.querySelectorAll('.action-post-more-btn.share-btn');
-    shareBtns.forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            var postId = parseInt(this.getAttribute('data-post-id'), 10);
-            var link = window.location.origin + window.location.pathname + '#/action/post/' + postId;
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(link).then(function() {
-                    showCopiedToast();
-                }).catch(function() {
-                    fallbackCopyAndToast(link);
-                });
-            } else {
-                fallbackCopyAndToast(link);
             }
         });
     });

@@ -48,11 +48,6 @@
 .action-post-action-btn.liked svg{fill:#ed4956;stroke:#ed4956}
 .action-post-action-count{font-size:.1rem;color:rgba(255,255,255,.3);margin-left:.02rem}
 
-/* ── Share button (more icon) ── */
-.action-post-more-btn{width:.28rem;height:.28rem;border-radius:50%;border:none;background:transparent;color:rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
-.action-post-more-btn:hover{color:rgba(255,255,255,.6);background:rgba(255,255,255,.05)}
-.action-post-more-btn svg{width:.16rem;height:.16rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-
 /* ── Like count (next to heart: gray = not liked, red = liked) ── */
 .action-post-like-count{font-size:.1rem;color:inherit;margin-left:.03rem;min-width:.08rem;text-align:left;line-height:1}
 .action-post-like-count:empty{display:none}
