@@ -869,6 +869,7 @@ function navigateTo(pageName) {
         discVisited = true;
         currentPage = 'disc-library';
     } else if (pageName === 'action') {
+        if (subPageContainer) { subPageContainer.remove(); subPageContainer = null; }
         if (herosTopBg) herosTopBg.classList.remove('hidden');
         banner.style.display = 'none';
     homeWrapper.style.display = 'none';

@@ -2,6 +2,7 @@ var ActionPage = (function() {
 
 var actionLightboxCurrentPost = null;
 var actionLightboxCurrentIndex = 0;
+var actionKeydownBound = false;
 
 function getMergedActionFeed() {
     var feed = (window.actionFeed || []).slice();
@@ -336,15 +337,18 @@ function bindActionInteractions() {
     var lightbox = document.getElementById('actionImageLightbox');
     if (lightbox) {
         lightbox.addEventListener('click', function(e) {
-            if (e.target === lightbox) closeActionLightbox();
+            if (e.target === lightbox || e.target.id === 'actionLightboxImg') closeActionLightbox();
         });
     }
 
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeActionLightbox();
-        if (e.key === 'ArrowLeft' && actionLightboxCurrentPost) navigateLightbox(-1);
-        if (e.key === 'ArrowRight' && actionLightboxCurrentPost) navigateLightbox(1);
-    });
+    if (!actionKeydownBound) {
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeActionLightbox();
+            if (e.key === 'ArrowLeft' && actionLightboxCurrentPost) navigateLightbox(-1);
+            if (e.key === 'ArrowRight' && actionLightboxCurrentPost) navigateLightbox(1);
+        });
+        actionKeydownBound = true;
+    }
 
     var commentBtns = document.querySelectorAll('.action-post-action-btn.comment-btn');
     commentBtns.forEach(function(btn) {
