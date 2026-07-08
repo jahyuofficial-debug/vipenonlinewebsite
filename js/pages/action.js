@@ -310,14 +310,19 @@ function bindActionInteractions() {
         });
     });
 
-    var imgWraps = document.querySelectorAll('.action-post-img-wrap');
-    imgWraps.forEach(function(wrap) {
-        wrap.addEventListener('click', function() {
-            var postId = parseInt(this.getAttribute('data-post-id'), 10);
-            var imgIndex = parseInt(this.getAttribute('data-img-index'), 10);
+    // Delegate image-wrap clicks on the stable #page-action container so the
+    // handler survives any feed re-render (cloud enrichment, comment patch, etc.)
+    var actionSection = document.getElementById('page-action');
+    if (actionSection && !actionSection.dataset.lbBound) {
+        actionSection.addEventListener('click', function(e) {
+            var wrap = e.target.closest ? e.target.closest('.action-post-img-wrap') : null;
+            if (!wrap) return;
+            var postId = parseInt(wrap.getAttribute('data-post-id'), 10);
+            var imgIndex = parseInt(wrap.getAttribute('data-img-index'), 10);
             openActionLightbox(postId, imgIndex);
         });
-    });
+        actionSection.dataset.lbBound = '1';
+    }
 
     var lightboxClose = document.getElementById('actionLightboxClose');
     if (lightboxClose) {
