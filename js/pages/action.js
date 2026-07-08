@@ -174,17 +174,28 @@ function buildActionPage() {
 }
 
 function openActionLightbox(postId, imgIndex) {
-    var mergedFeed = getMergedActionFeed();
-    var post = mergedFeed.find(function(p) { return p.id === postId; });
-    if (!post || !post.images || post.images.length === 0) return;
-    actionLightboxCurrentPost = post;
-    actionLightboxCurrentIndex = imgIndex;
+    // 优先从 DOM 直接读取图片 URL（最可靠，不依赖 feed 数据）
+    var images = [];
+    var postEl = document.querySelector('.action-post[data-post-id="' + postId + '"]');
+    if (postEl) {
+        var imgs = postEl.querySelectorAll('.action-post-img-wrap img');
+        imgs.forEach(function(im) { if (im.src) images.push(im.src); });
+    }
+    // DOM 读取失败时 fallback 到 feed 数据
+    if (images.length === 0) {
+        var mergedFeed = getMergedActionFeed();
+        var post = mergedFeed.find(function(p) { return p.id === postId; });
+        if (!post || !post.images || post.images.length === 0) return;
+        images = post.images;
+    }
+    actionLightboxCurrentPost = { id: postId, images: images };
+    actionLightboxCurrentIndex = imgIndex || 0;
     var lightbox = document.getElementById('actionImageLightbox');
     var img = document.getElementById('actionLightboxImg');
     var counter = document.getElementById('actionLightboxCounter');
     if (lightbox && img) {
-        img.src = post.images[imgIndex];
-        if (counter) counter.textContent = (imgIndex + 1) + ' / ' + post.images.length;
+        img.src = images[actionLightboxCurrentIndex];
+        if (counter) counter.textContent = (actionLightboxCurrentIndex + 1) + ' / ' + images.length;
         lightbox.classList.add('active');
     }
 }
@@ -192,6 +203,8 @@ function openActionLightbox(postId, imgIndex) {
 function closeActionLightbox() {
     var lightbox = document.getElementById('actionImageLightbox');
     if (lightbox) lightbox.classList.remove('active');
+    var img = document.getElementById('actionLightboxImg');
+    if (img) img.src = '';
     actionLightboxCurrentPost = null;
 }
 
@@ -313,18 +326,18 @@ function bindActionInteractions() {
         });
     });
 
-    // Delegate image-wrap clicks on the stable #page-action container so the
-    // handler survives any feed re-render (cloud enrichment, comment patch, etc.)
-    var actionSection = document.getElementById('page-action');
-    if (actionSection && !actionSection.dataset.lbBound) {
-        actionSection.addEventListener('click', function(e) {
+    // Global document-level delegation for image-wrap clicks (bound once, survives
+    // any feed re-render or page re-entry — no dependency on #page-action existing)
+    if (!window.__actionLbDelegated) {
+        window.__actionLbDelegated = true;
+        document.addEventListener('click', function(e) {
             var wrap = e.target.closest ? e.target.closest('.action-post-img-wrap') : null;
             if (!wrap) return;
+            if (!wrap.closest('#page-action')) return; // only act inside action page
             var postId = parseInt(wrap.getAttribute('data-post-id'), 10);
             var imgIndex = parseInt(wrap.getAttribute('data-img-index'), 10);
             openActionLightbox(postId, imgIndex);
         });
-        actionSection.dataset.lbBound = '1';
     }
 
     var lightboxClose = document.getElementById('actionLightboxClose');
@@ -345,7 +358,10 @@ function bindActionInteractions() {
     var lightbox = document.getElementById('actionImageLightbox');
     if (lightbox) {
         lightbox.addEventListener('click', function(e) {
-            if (e.target === lightbox || e.target.id === 'actionLightboxImg') closeActionLightbox();
+            if (e.target === lightbox || e.target.id === 'actionLightboxImg') {
+                closeActionLightbox();
+                e.stopPropagation();
+            }
         });
     }
 
